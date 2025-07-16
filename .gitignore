@@ -32,6 +32,28 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
+
+# NativeWind
+tailwind.config.js.timestamp-*
+
+# Ngrok (for tunnel mode)
+ngrok-*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Coverage
+coverage/
+
+# Build artifacts
+build/
+
+# AWS credentials (when we add them)
+aws-credentials.json

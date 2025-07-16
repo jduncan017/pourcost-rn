@@ -1,0 +1,57 @@
+/* NativeWind v4 + Tailwind v3 global styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS for PourCost app */
+/* This structure will make v4 migration easier */
+
+/* Base styles */
+@layer base {
+  /* Custom font loading (when we add Orator font) */
+  .font-display {
+    font-family: 'Orator', serif;
+  }
+}
+
+/* Component styles */
+@layer components {
+  /* PourCost specific component styles */
+  .card {
+    @apply bg-white rounded-xl shadow-lg p-6;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-600 px-8 py-4 rounded-xl text-white font-semibold;
+    @apply active:bg-primary-700 shadow-md;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-100 px-6 py-3 rounded-lg text-gray-700 font-medium;
+    @apply active:bg-gray-200;
+  }
+}
+
+/* Utilities */
+@layer utilities {
+  /* Custom utilities for PourCost */
+  .text-gradient {
+    background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* 
+  MIGRATION NOTES FOR v4:
+  When migrating to Tailwind v4, this will become:
+  
+  @import "tailwindcss";
+  
+  @theme {
+    --color-primary-*: oklch(...);
+    --font-family-display: "Orator", serif;
+    --spacing-18: 4.5rem;
+    --spacing-22: 5.5rem;
+  }
+*/
