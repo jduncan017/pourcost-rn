@@ -12,7 +12,7 @@ export function useNavigation() {
 
   // Get current route info
   const currentRoute = segments[segments.length - 1] || 'calculator';
-  const isDrawerRoute = segments.includes('(drawer)');
+  const isDrawerRoute = segments.some(segment => segment === '(drawer)');
 
   // Navigation helpers
   const navigateTo = useCallback((route: string, options?: { replace?: boolean }) => {

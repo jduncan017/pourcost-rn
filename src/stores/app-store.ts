@@ -8,6 +8,7 @@ interface AppState {
   isFirstLaunch: boolean;
   measurementSystem: 'US' | 'Metric';
   baseCurrency: string;
+  pourCostGoal: number; // Target pour cost percentage
   
   // App state
   isLoading: boolean;
@@ -16,6 +17,7 @@ interface AppState {
   setFirstLaunch: (isFirst: boolean) => void;
   setMeasurementSystem: (system: 'US' | 'Metric') => void;
   setBaseCurrency: (currency: string) => void;
+  setPourCostGoal: (goal: number) => void;
   setLoading: (loading: boolean) => void;
 }
 
@@ -31,12 +33,14 @@ export const useAppStore = create<AppState>()(
       isFirstLaunch: true,
       measurementSystem: 'US',
       baseCurrency: 'USD',
+      pourCostGoal: 20, // Default 20% pour cost goal
       isLoading: false,
       
       // Actions
       setFirstLaunch: (isFirst) => set({ isFirstLaunch: isFirst }),
       setMeasurementSystem: (system) => set({ measurementSystem: system }),
       setBaseCurrency: (currency) => set({ baseCurrency: currency }),
+      setPourCostGoal: (goal) => set({ pourCostGoal: goal }),
       setLoading: (loading) => set({ isLoading: loading }),
     }),
     {

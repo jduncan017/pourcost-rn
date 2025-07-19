@@ -54,13 +54,13 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
       className="bg-gray-50"
     >
       {/* Header with Logo */}
-      <View className="px-6 py-8 bg-white border-b border-gray-200">
+      <View className="px-6 py-8 pb-6 bg-white border-b border-gray-200">
         <Image 
           source={require('../../assets/images/PourCost-Logo-Black.png')}
           style={{ width: 140, height: 35 }}
           resizeMode="contain"
         />
-        <Text className="text-gray-600 text-sm mt-2">
+        <Text className="text-gray-600 text-sm mt-2 mb-2">
           Professional cocktail costing
         </Text>
       </View>

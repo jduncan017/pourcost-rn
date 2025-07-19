@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import SwipeableCard from './SwipeableCard';
-import CurrencyDisplay from './CurrencyDisplay';
+import CurrencyDisplay from './ui/CurrencyDisplay';
 
 interface CocktailIngredient {
   name: string;
@@ -17,6 +17,7 @@ interface CocktailListItemProps {
   suggestedPrice: number;
   profitMargin: number;
   currency: string;
+  sortBy?: 'cost' | 'profitMargin' | 'margin' | 'name' | 'created';
   onPress?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -29,6 +30,7 @@ export default function CocktailListItem({
   suggestedPrice,
   profitMargin,
   currency,
+  sortBy = 'created',
   onPress,
   onEdit,
   onDelete,
@@ -49,46 +51,33 @@ export default function CocktailListItem({
             <Text className="text-lg font-semibold text-gray-800 mb-1">
               {name}
             </Text>
-            <Text className="text-sm text-gray-600">
-              {ingredients.length} ingredients • {profitMargin.toFixed(0)}% margin
-            </Text>
           </View>
 
-          {/* Cost Summary */}
-          <View className="items-end">
-            <Text className="text-xs text-gray-500 mb-1">Total Cost</Text>
-            <CurrencyDisplay 
-              amount={totalCost} 
-              currency={currency} 
-              size="large" 
-              weight="bold"
-            />
-          </View>
-        </View>
-
-        {/* Pricing Info */}
-        <View className="bg-primary-50 p-3 rounded-lg mb-3 border border-primary-200">
-          <View className="flex-row justify-between items-center">
-            <View>
-              <Text className="text-xs text-primary-600 font-medium">Suggested Price</Text>
-              <CurrencyDisplay 
-                amount={suggestedPrice} 
-                currency={currency} 
-                size="xl" 
-                color="primary" 
-                weight="bold"
-              />
-            </View>
-            <View className="items-end">
-              <Text className="text-xs text-primary-600">Profit</Text>
-              <CurrencyDisplay 
-                amount={suggestedPrice - totalCost} 
-                currency={currency} 
-                size="large" 
-                color="primary" 
-                weight="semibold"
-              />
-            </View>
+          {/* Dynamic Highlight Box */}
+          <View className="bg-primary-50 px-3 py-2 rounded-lg border border-primary-200">
+            {sortBy === 'profitMargin' || sortBy === 'margin' ? (
+              <>
+                <Text className="text-xs text-primary-600 font-medium">Profit</Text>
+                <CurrencyDisplay 
+                  amount={suggestedPrice - totalCost} 
+                  currency={currency} 
+                  size="large" 
+                  color="primary" 
+                  weight="bold"
+                />
+              </>
+            ) : (
+              <>
+                <Text className="text-xs text-primary-600 font-medium">Total Cost</Text>
+                <CurrencyDisplay 
+                  amount={totalCost} 
+                  currency={currency} 
+                  size="large" 
+                  color="primary" 
+                  weight="bold"
+                />
+              </>
+            )}
           </View>
         </View>
 

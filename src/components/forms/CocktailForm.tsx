@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import TextInput from './TextInput';
-import NumberInput from './NumberInput';
-import CustomSlider from './CustomSlider';
-import CurrencyDisplay from './CurrencyDisplay';
-import { Cocktail, CocktailIngredient, SavedIngredient, PourSize } from '../types/models';
+import TextInput from '../ui/TextInput';
+import NumberInput from '../ui/NumberInput';
+import CustomSlider from '../ui/CustomSlider';
+import CurrencyDisplay from '../ui/CurrencyDisplay';
+import { Cocktail, CocktailIngredient, SavedIngredient, PourSize } from '../../types/models';
 
 interface CocktailFormProps {
   cocktail?: Cocktail;

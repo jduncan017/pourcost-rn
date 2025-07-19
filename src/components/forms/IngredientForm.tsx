@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import TextInput from './TextInput';
-import NumberInput from './NumberInput';
-import BottleSizeDropdown from './BottleSizeDropdown';
-import CurrencyDisplay from './CurrencyDisplay';
-import { SavedIngredient, Volume } from '../types/models';
+import TextInput from '../ui/TextInput';
+import NumberInput from '../ui/NumberInput';
+import BottleSizeDropdown from '../BottleSizeDropdown';
+import CurrencyDisplay from '../ui/CurrencyDisplay';
+import { SavedIngredient, Volume } from '../../types/models';
+import { ozToMl, mlToOz } from '../../utils/conversions';
 
 interface IngredientFormProps {
   ingredient?: SavedIngredient;
@@ -41,6 +42,21 @@ export default function IngredientForm({
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Helper function to convert Volume to ml
+  const volumeToMl = (volume: Volume): number => {
+    switch (volume.unit) {
+      case 'ml': return volume.value;
+      case 'oz': return ozToMl(volume.value);
+      case 'L': return volume.value * 1000;
+      default: return volume.value; // fallback
+    }
+  };
+
+  // Helper function to convert ml to Volume
+  const mlToVolume = (ml: number): Volume => {
+    return { value: ml, unit: 'ml' };
+  };
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -123,9 +139,9 @@ export default function IngredientForm({
               Bottle/Package Size <Text className="text-red-500">*</Text>
             </Text>
             <BottleSizeDropdown
-              value={formData.productSize}
-              onValueChange={(productSize) => setFormData({ ...formData, productSize })}
-              measurementSystem={measurementSystem}
+              value={volumeToMl(formData.productSize)}
+              onValueChange={(ml) => setFormData({ ...formData, productSize: mlToVolume(ml) })}
+              label="Bottle Size"
             />
           </View>
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
+import Card from '@/src/components/ui/Card';
 
 /**
  * About screen
@@ -84,7 +85,7 @@ export default function AboutScreen() {
         </View>
 
         {/* Support */}
-        <View className="card">
+        <Card>
           <Text className="text-lg font-semibold text-gray-700 mb-3">
             Support
           </Text>
@@ -92,7 +93,7 @@ export default function AboutScreen() {
             Need help? Have suggestions? We'd love to hear from you! 
             Contact us for support and feedback.
           </Text>
-        </View>
+        </Card>
       </View>
     </ScrollView>
   );

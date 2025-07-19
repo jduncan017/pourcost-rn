@@ -70,20 +70,25 @@ export default function SwipeableCard({
     translateX.value = withSpring(0);
   };
 
-  const gestureHandler = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
+  const gestureHandler = useAnimatedGestureHandler<PanGestureHandlerGestureEvent, { startX: number }>({
     onStart: (_, context) => {
       context.startX = translateX.value;
     },
     onActive: (event, context) => {
-      const newTranslateX = context.startX + event.translationX;
+      // Only activate horizontal swipe if the gesture is primarily horizontal
+      const isHorizontalGesture = Math.abs(event.translationX) > Math.abs(event.translationY * 1.5);
       
-      // Limit swipe distance
-      if (newTranslateX > 0) {
-        // Swiping right (revealing left action)
-        translateX.value = Math.min(newTranslateX, maxSwipe);
-      } else {
-        // Swiping left (revealing right action)
-        translateX.value = Math.max(newTranslateX, -maxSwipe);
+      if (isHorizontalGesture) {
+        const newTranslateX = context.startX + event.translationX;
+        
+        // Limit swipe distance
+        if (newTranslateX > 0) {
+          // Swiping right (revealing left action)
+          translateX.value = Math.min(newTranslateX, maxSwipe);
+        } else {
+          // Swiping left (revealing right action)
+          translateX.value = Math.max(newTranslateX, -maxSwipe);
+        }
       }
     },
     onEnd: (event) => {
@@ -213,7 +218,12 @@ export default function SwipeableCard({
       )}
 
       {/* Main Card Content */}
-      <PanGestureHandler onGestureEvent={gestureHandler}>
+      <PanGestureHandler 
+        onGestureEvent={gestureHandler}
+        activeOffsetX={[-10, 10]}
+        failOffsetY={[-15, 15]}
+        shouldCancelWhenOutside={true}
+      >
         <Animated.View style={cardStyle}>
           {children}
         </Animated.View>
