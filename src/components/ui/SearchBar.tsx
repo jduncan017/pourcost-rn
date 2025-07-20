@@ -23,11 +23,11 @@ export default function SearchBar({
   };
 
   return (
-    <View className="bg-white rounded-lg border border-gray-200 flex-row items-center px-4 py-3">
+    <View className="bg-n1/80 rounded-lg border border-g1/50 flex-row items-center px-4 py-3">
       <Ionicons name="search" size={20} color="#9CA3AF" />
       
       <TextInput
-        className="flex-1 ml-3 text-gray-800 text-base"
+        className="flex-1 ml-3 text-g4 text-base"
         placeholder={placeholder}
         placeholderTextColor="#9CA3AF"
         value={value}

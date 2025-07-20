@@ -59,16 +59,16 @@ export default function IngredientListItem({
     >
       <Pressable
         onPress={onPress}
-        className="bg-white p-4 rounded-lg border border-gray-200 active:bg-gray-50"
+        className="bg-n1/80 p-4 rounded-lg border border-g1/50 active:bg-n1"
       >
         {/* Main Content */}
         <View className="flex-row items-start justify-between">
           <View className="flex-1 mr-3">
-            <Text className="text-lg font-semibold text-gray-800 mb-1">
+            <Text className="text-lg font-semibold text-g4 mb-1">
               {name}
             </Text>
             <View className="flex-row items-center mb-1">
-              <Text className="text-sm text-gray-600">
+              <Text className="text-sm text-g3">
                 {formatVolume(bottleSize)} bottle • 
               </Text>
               <CurrencyDisplay 
@@ -81,10 +81,10 @@ export default function IngredientListItem({
           </View>
 
           {/* Dynamic Highlight Box */}
-          <View className="bg-primary-50 px-3 py-2 rounded-lg border border-primary-200">
+          <View className="bg-p1/20 px-3 py-2 rounded-lg border border-p1/40">
             {sortBy === 'cost' ? (
               <>
-                <Text className="text-xs text-primary-600 font-medium">Cost/Oz</Text>
+                <Text className="text-xs text-p2 font-medium">Cost/Oz</Text>
                 <CurrencyDisplay 
                   amount={costPerOz} 
                   currency={currency} 
@@ -95,14 +95,14 @@ export default function IngredientListItem({
               </>
             ) : sortBy === 'pourCost' ? (
               <>
-                <Text className="text-xs text-primary-600 font-medium">Pour Cost</Text>
-                <Text className="text-lg font-bold text-primary-600">
+                <Text className="text-xs text-p2 font-medium">Pour Cost</Text>
+                <Text className="text-lg font-bold text-p2">
                   {pourCostPercentage.toFixed(1)}%
                 </Text>
               </>
             ) : sortBy === 'margin' ? (
               <>
-                <Text className="text-xs text-primary-600 font-medium">Margin</Text>
+                <Text className="text-xs text-p2 font-medium">Margin</Text>
                 <CurrencyDisplay 
                   amount={pourCostMargin} 
                   currency={currency} 
@@ -113,7 +113,7 @@ export default function IngredientListItem({
               </>
             ) : (
               <>
-                <Text className="text-xs text-primary-600 font-medium">Cost/Pour</Text>
+                <Text className="text-xs text-p2 font-medium">Cost/Pour</Text>
                 <CurrencyDisplay 
                   amount={costPerPour} 
                   currency={currency} 

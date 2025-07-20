@@ -4,7 +4,6 @@ import { useAppStore } from '@/src/stores/app-store';
 import CocktailListItem from '@/src/components/CocktailListItem';
 import SearchBar from '@/src/components/ui/SearchBar';
 import EmptyState from '@/src/components/EmptyState';
-import CocktailDetailModal from '@/src/components/modals/CocktailDetailModal';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -56,10 +55,6 @@ export default function CocktailsScreen() {
   const [sortBy, setSortBy] = useState<
     'name' | 'cost' | 'created' | 'profitMargin' | 'margin'
   >('created');
-  const [selectedCocktail, setSelectedCocktail] = useState<Cocktail | null>(
-    null
-  );
-  const [showDetailModal, setShowDetailModal] = useState(false);
   const router = useRouter();
 
   // Category options
@@ -295,8 +290,10 @@ export default function CocktailsScreen() {
 
   // Handle cocktail selection
   const handleCocktailPress = (cocktail: Cocktail) => {
-    setSelectedCocktail(cocktail);
-    setShowDetailModal(true);
+    router.push({
+      pathname: '/cocktail-detail',
+      params: { id: cocktail.id }
+    });
   };
 
   // Handle add new cocktail
@@ -353,40 +350,40 @@ export default function CocktailsScreen() {
 
   // Get pour cost color
   const getPourCostColor = (pourCost: number) => {
-    if (pourCost <= 20) return 'text-green-600';
-    if (pourCost <= 25) return 'text-yellow-600';
-    return 'text-red-600';
+    if (pourCost <= 20) return 'text-s22';
+    if (pourCost <= 25) return 'text-s12';
+    return 'text-e3';
   };
 
   // Get difficulty color
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'Easy':
-        return 'text-green-600';
+        return 'text-s22';
       case 'Medium':
-        return 'text-yellow-600';
+        return 'text-s12';
       case 'Hard':
-        return 'text-red-600';
+        return 'text-e3';
       default:
-        return 'text-gray-600';
+        return 'text-g3';
     }
   };
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView className="flex-1 bg-n1">
       <View className="p-4">
         {/* Header */}
         <View className="mb-6">
           <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-2xl font-bold text-gray-800">Cocktails</Text>
+            <Text className="text-2xl font-bold text-g4">Cocktails</Text>
             <Pressable
               onPress={handleAddCocktail}
-              className="bg-primary-500 rounded-lg p-3 flex-row items-center gap-2"
+              className="bg-p1 rounded-lg p-3 flex-row items-center gap-2"
             >
               <Ionicons name="add" size={20} color="white" />
               <Text className="text-white font-medium">Create</Text>
             </Pressable>
           </View>
-          <Text className="text-gray-600">
+          <Text className="text-g3">
             Manage your cocktail recipes and cost calculations
           </Text>
         </View>
@@ -404,7 +401,7 @@ export default function CocktailsScreen() {
         <View className="mb-6">
           {/* Category Filter */}
           <View className="mb-4">
-            <Text className="text-sm font-medium text-gray-700 mb-3">
+            <Text className="text-sm font-medium text-g4 mb-3">
               Category
             </Text>
             <ScrollView
@@ -418,15 +415,15 @@ export default function CocktailsScreen() {
                     onPress={() => setSelectedCategory(category)}
                     className={`px-3 py-2 rounded-full border ${
                       selectedCategory === category
-                        ? 'bg-primary-500 border-primary-500'
-                        : 'bg-white border-gray-300'
+                        ? 'bg-p1 border-p1'
+                        : 'bg-n1/80 border-g2/50'
                     }`}
                   >
                     <Text
                       className={`text-sm font-medium ${
                         selectedCategory === category
                           ? 'text-white'
-                          : 'text-gray-700'
+                          : 'text-g4'
                       }`}
                     >
                       {category}
@@ -439,7 +436,7 @@ export default function CocktailsScreen() {
 
           {/* Sort Options */}
           <View className="flex-row items-center">
-            <Text className="text-sm font-medium text-gray-700 mr-3">Sort by:</Text>
+            <Text className="text-sm font-medium text-g4 mr-3">Sort by:</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -457,13 +454,13 @@ export default function CocktailsScreen() {
                     onPress={() => setSortBy(sort.key as any)}
                     className={`px-2 py-1 rounded border ${
                       sortBy === sort.key
-                        ? 'bg-gray-800 border-gray-800'
-                        : 'bg-gray-100 border-gray-300'
+                        ? 'bg-g4 border-g4'
+                        : 'bg-g1/60 border-g2/50'
                     }`}
                   >
                     <Text
                       className={`text-xs font-medium ${
-                        sortBy === sort.key ? 'text-white' : 'text-gray-600'
+                        sortBy === sort.key ? 'text-white' : 'text-g3'
                       }`}
                     >
                       {sort.label}
@@ -478,12 +475,12 @@ export default function CocktailsScreen() {
         {/* Cocktails List */}
         <View className="space-y-3">
           <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-lg font-semibold text-gray-700">
+            <Text className="text-lg font-semibold text-g4">
               Your Cocktails ({filteredCocktails.length})
             </Text>
             {searchQuery && (
               <Pressable onPress={() => setSearchQuery('')} className="p-1">
-                <Text className="text-primary-500 text-sm font-medium">
+                <Text className="text-p2 text-sm font-medium">
                   Clear
                 </Text>
               </Pressable>
@@ -531,19 +528,6 @@ export default function CocktailsScreen() {
           )}
         </View>
 
-        {/* Cocktail Detail Modal */}
-        <CocktailDetailModal
-          visible={showDetailModal}
-          cocktail={selectedCocktail}
-          onClose={() => {
-            setShowDetailModal(false);
-            setSelectedCocktail(null);
-          }}
-          onEdit={handleEditCocktail}
-          onDelete={handleDeleteCocktail}
-          onToggleFavorite={handleToggleFavorite}
-          baseCurrency={baseCurrency}
-        />
       </View>
     </ScrollView>
   );

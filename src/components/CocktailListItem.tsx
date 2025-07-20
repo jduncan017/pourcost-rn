@@ -43,21 +43,21 @@ export default function CocktailListItem({
     >
       <Pressable
         onPress={onPress}
-        className="bg-white p-4 rounded-lg border border-gray-200 active:bg-gray-50"
+        className="bg-n1/80 p-4 rounded-lg border border-g1/50 active:bg-n1"
       >
         {/* Header */}
         <View className="flex-row items-start justify-between mb-3">
           <View className="flex-1 mr-3">
-            <Text className="text-lg font-semibold text-gray-800 mb-1">
+            <Text className="text-lg font-semibold text-g4 mb-1">
               {name}
             </Text>
           </View>
 
           {/* Dynamic Highlight Box */}
-          <View className="bg-primary-50 px-3 py-2 rounded-lg border border-primary-200">
+          <View className="bg-p1/20 px-3 py-2 rounded-lg border border-p1/40">
             {sortBy === 'profitMargin' || sortBy === 'margin' ? (
               <>
-                <Text className="text-xs text-primary-600 font-medium">Profit</Text>
+                <Text className="text-xs text-p2 font-medium">Profit</Text>
                 <CurrencyDisplay 
                   amount={suggestedPrice - totalCost} 
                   currency={currency} 
@@ -68,7 +68,7 @@ export default function CocktailListItem({
               </>
             ) : (
               <>
-                <Text className="text-xs text-primary-600 font-medium">Total Cost</Text>
+                <Text className="text-xs text-p2 font-medium">Total Cost</Text>
                 <CurrencyDisplay 
                   amount={totalCost} 
                   currency={currency} 
@@ -83,8 +83,8 @@ export default function CocktailListItem({
 
         {/* Ingredients List */}
         <View>
-          <Text className="text-xs text-gray-500 font-medium mb-2">INGREDIENTS</Text>
-          <Text className="text-sm text-gray-600 leading-relaxed">
+          <Text className="text-xs text-g3 font-medium mb-2">INGREDIENTS</Text>
+          <Text className="text-sm text-g3 leading-relaxed">
             {ingredients.map(ing => ing.name).join(', ')}
           </Text>
         </View>

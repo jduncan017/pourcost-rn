@@ -4,7 +4,6 @@ import { useAppStore } from '@/src/stores/app-store';
 import IngredientListItem from '@/src/components/IngredientListItem';
 import SearchBar from '@/src/components/ui/SearchBar';
 import EmptyState from '@/src/components/EmptyState';
-import IngredientDetailModal from '@/src/components/modals/IngredientDetailModal';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -111,8 +110,6 @@ export default function IngredientsScreen() {
   // Additional filter states
   const [selectedType, setSelectedType] = useState<string>('All');
   const [sortBy, setSortBy] = useState<'name' | 'cost' | 'created' | 'pourCost' | 'margin'>('name');
-  const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
-  const [showDetailModal, setShowDetailModal] = useState(false);
   
   // Type options
   const types = ['All', 'Beer', 'Wine', 'Spirit', 'Liquor', 'Prepared', 'Garnish'];
@@ -143,8 +140,10 @@ export default function IngredientsScreen() {
   
   // Handle ingredient selection
   const handleIngredientPress = (ingredient: Ingredient) => {
-    setSelectedIngredient(ingredient);
-    setShowDetailModal(true);
+    router.push({
+      pathname: '/ingredient-detail',
+      params: { id: ingredient.id }
+    });
   };
   
   // Handle add new ingredient
@@ -196,23 +195,23 @@ export default function IngredientsScreen() {
     return 'text-red-600';
   };
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView className="flex-1 bg-n1">
       <View className="p-4">
         {/* Header */}
         <View className="mb-6">
           <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-2xl font-bold text-gray-800">
+            <Text className="text-2xl font-bold text-g4">
               Ingredients
             </Text>
             <Pressable
               onPress={handleAddIngredient}
-              className="bg-primary-500 rounded-lg p-3 flex-row items-center gap-2"
+              className="bg-p1 rounded-lg p-3 flex-row items-center gap-2"
             >
               <Ionicons name="add" size={20} color="white" />
               <Text className="text-white font-medium">Add</Text>
             </Pressable>
           </View>
-          <Text className="text-gray-600">
+          <Text className="text-g3">
             Manage your ingredient library and cost calculations
           </Text>
         </View>
@@ -230,7 +229,7 @@ export default function IngredientsScreen() {
         <View className="mb-6">
           {/* Type Filter */}
           <View className="mb-4">
-            <Text className="text-sm font-medium text-gray-700 mb-3">Type</Text>
+            <Text className="text-sm font-medium text-g4 mb-3">Type</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View className="flex-row" style={{gap: 8}}>
                 {types.map((type) => (
@@ -239,12 +238,12 @@ export default function IngredientsScreen() {
                     onPress={() => setSelectedType(type)}
                     className={`px-3 py-2 rounded-full border ${
                       selectedType === type
-                        ? 'bg-primary-500 border-primary-500'
+                        ? 'bg-p1 border-primary-500'
                         : 'bg-white border-gray-300'
                     }`}
                   >
                     <Text className={`text-sm font-medium ${
-                      selectedType === type ? 'text-white' : 'text-gray-700'
+                      selectedType === type ? 'text-white' : 'text-g4'
                     }`}>
                       {type}
                     </Text>
@@ -256,7 +255,7 @@ export default function IngredientsScreen() {
           
           {/* Sort Options */}
           <View className="flex-row items-center">
-            <Text className="text-sm font-medium text-gray-700 mr-3">Sort by:</Text>
+            <Text className="text-sm font-medium text-g4 mr-3">Sort by:</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View className="flex-row" style={{gap: 8}}>
                 {[{key: 'name', label: 'Name'}, {key: 'created', label: 'Recently Added'}, {key: 'cost', label: 'Cost/Oz'}, {key: 'pourCost', label: 'Pour Cost'}, {key: 'margin', label: 'Margin'}].map((sort) => (
@@ -270,7 +269,7 @@ export default function IngredientsScreen() {
                     }`}
                   >
                     <Text className={`text-xs font-medium ${
-                      sortBy === sort.key ? 'text-white' : 'text-gray-600'
+                      sortBy === sort.key ? 'text-white' : 'text-g3'
                     }`}>
                       {sort.label}
                     </Text>
@@ -284,7 +283,7 @@ export default function IngredientsScreen() {
         {/* Ingredients List */}
         <View className="space-y-3">
           <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-lg font-semibold text-gray-700">
+            <Text className="text-lg font-semibold text-g4">
               Your Ingredients ({filteredIngredients.length})
             </Text>
             {searchQuery && (
@@ -334,18 +333,6 @@ export default function IngredientsScreen() {
           )}
         </View>
         
-        {/* Ingredient Detail Modal */}
-        <IngredientDetailModal
-          visible={showDetailModal}
-          ingredient={selectedIngredient}
-          onClose={() => {
-            setShowDetailModal(false);
-            setSelectedIngredient(null);
-          }}
-          onEdit={handleEditIngredient}
-          onDelete={handleDeleteIngredient}
-          baseCurrency={baseCurrency}
-        />
       </View>
     </ScrollView>
   );

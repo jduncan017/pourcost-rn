@@ -79,7 +79,10 @@ module.exports = {
       },
       // Custom font family for PourCost
       fontFamily: {
-        'display': ['Orator', 'serif'],
+        'geist': ['Geist', 'system-ui', 'sans-serif'],
+        'geist-mono': ['GeistMono', 'ui-monospace', 'monospace'],
+        'sans': ['Geist', 'system-ui', 'sans-serif'],
+        'mono': ['GeistMono', 'ui-monospace', 'monospace'],
       },
       // Custom spacing for mobile-first design
       spacing: {

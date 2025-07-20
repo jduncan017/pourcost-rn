@@ -74,35 +74,35 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView className="flex-1 bg-n1">
       <View className="p-4">
         {/* Header */}
         <View className="mb-6">
-          <Text className="text-2xl font-bold text-gray-800 mb-2">
+          <Text className="text-2xl font-bold text-g4 mb-2">
             Settings
           </Text>
-          <Text className="text-gray-600">
+          <Text className="text-g3">
             Customize your PourCost experience
           </Text>
         </View>
 
         {/* Measurement System */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-3">
+          <Text className="text-lg font-semibold text-g4 mb-3">
             Measurement System
           </Text>
           <View className="flex-row items-center justify-between">
             <View>
-              <Text className="font-medium text-gray-800">
+              <Text className="font-medium text-g4">
                 Current: {measurementSystem}
               </Text>
-              <Text className="text-sm text-gray-600">
+              <Text className="text-sm text-g3">
                 {measurementSystem === 'US' ? 'Fluid ounces, cups, etc.' : 'Milliliters, liters, etc.'}
               </Text>
             </View>
             <Pressable
               onPress={toggleMeasurementSystem}
-              className="bg-primary-600 px-4 py-2 rounded-lg active:bg-primary-700"
+              className="bg-p2 px-4 py-2 rounded-lg active:bg-p3"
             >
               <Text className="text-white font-medium">
                 Switch to {measurementSystem === 'US' ? 'Metric' : 'US'}
@@ -113,7 +113,7 @@ export default function SettingsScreen() {
 
         {/* Business Settings */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-4">
             Business Settings
           </Text>
           
@@ -127,7 +127,7 @@ export default function SettingsScreen() {
               unit="%"
               step={0.5}
             />
-            <Text className="text-xs text-gray-500 mt-2">
+            <Text className="text-xs text-g3 mt-2">
               Target pour cost percentage for suggested retail pricing
             </Text>
           </View>
@@ -135,21 +135,21 @@ export default function SettingsScreen() {
         
         {/* Currency */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-3">
+          <Text className="text-lg font-semibold text-g4 mb-3">
             Currency
           </Text>
           <View className="flex-row items-center justify-between">
             <View>
-              <Text className="font-medium text-gray-800">
+              <Text className="font-medium text-g4">
                 Base Currency: {selectedCurrency}
               </Text>
-              <Text className="text-sm text-gray-600">
+              <Text className="text-sm text-g3">
                 All prices will be displayed in this currency
               </Text>
             </View>
             <Pressable 
               onPress={() => setShowCurrencyModal(true)}
-              className="bg-primary-500 px-4 py-2 rounded-lg active:bg-primary-600 flex-row items-center gap-2"
+              className="bg-p1 px-4 py-2 rounded-lg active:bg-p2 flex-row items-center gap-2"
             >
               <Ionicons name="globe" size={16} color="white" />
               <Text className="text-white font-medium">
@@ -161,15 +161,15 @@ export default function SettingsScreen() {
 
         {/* App Preferences */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-4">
             App Preferences
           </Text>
           
           <View style={{gap: 16}}>
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
-                <Text className="font-medium text-gray-800">Push Notifications</Text>
-                <Text className="text-sm text-gray-600">Receive updates and reminders</Text>
+                <Text className="font-medium text-g4">Push Notifications</Text>
+                <Text className="text-sm text-g3">Receive updates and reminders</Text>
               </View>
               <Switch
                 value={notifications}
@@ -181,8 +181,8 @@ export default function SettingsScreen() {
             
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
-                <Text className="font-medium text-gray-800">Dark Mode</Text>
-                <Text className="text-sm text-gray-600">Use dark theme throughout the app</Text>
+                <Text className="font-medium text-g4">Dark Mode</Text>
+                <Text className="text-sm text-g3">Use dark theme throughout the app</Text>
               </View>
               <Switch
                 value={isDarkMode}
@@ -196,52 +196,52 @@ export default function SettingsScreen() {
         
         {/* Data Management */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-4">
             Data Management
           </Text>
           
           <View style={{gap: 12}}>
             <Pressable 
               onPress={handleExportData}
-              className="bg-blue-50 p-4 rounded-lg active:bg-blue-100 flex-row items-center gap-3"
+              className="bg-p1/20 p-4 rounded-lg active:bg-p1/30 flex-row items-center gap-3"
             >
               <Ionicons name="download" size={20} color="#3B82F6" />
               <View className="flex-1">
-                <Text className="font-medium text-blue-800">Export Data</Text>
-                <Text className="text-sm text-blue-600">Save your ingredients and cocktails to file</Text>
+                <Text className="font-medium text-p4">Export Data</Text>
+                <Text className="text-sm text-p3">Save your ingredients and cocktails to file</Text>
               </View>
             </Pressable>
             
             <Pressable 
               onPress={handleImportData}
-              className="bg-green-50 p-4 rounded-lg active:bg-green-100 flex-row items-center gap-3"
+              className="bg-s21/20 p-4 rounded-lg active:bg-s21/30 flex-row items-center gap-3"
             >
               <Ionicons name="cloud-upload" size={20} color="#10B981" />
               <View className="flex-1">
-                <Text className="font-medium text-green-800">Import Data</Text>
-                <Text className="text-sm text-green-600">Load data from backup file</Text>
+                <Text className="font-medium text-s24">Import Data</Text>
+                <Text className="text-sm text-s23">Load data from backup file</Text>
               </View>
             </Pressable>
             
             <Pressable 
               onPress={handleBackupData}
-              className="bg-purple-50 p-4 rounded-lg active:bg-purple-100 flex-row items-center gap-3"
+              className="bg-s31/20 p-4 rounded-lg active:bg-s31/30 flex-row items-center gap-3"
             >
               <Ionicons name="cloud" size={20} color="#8B5CF6" />
               <View className="flex-1">
-                <Text className="font-medium text-purple-800">Cloud Backup</Text>
-                <Text className="text-sm text-purple-600">Backup data to cloud storage</Text>
+                <Text className="font-medium text-s34">Cloud Backup</Text>
+                <Text className="text-sm text-s33">Backup data to cloud storage</Text>
               </View>
             </Pressable>
             
             <Pressable 
               onPress={handleRestoreData}
-              className="bg-orange-50 p-4 rounded-lg active:bg-orange-100 flex-row items-center gap-3"
+              className="bg-n3/40 p-4 rounded-lg active:bg-n3/60 flex-row items-center gap-3"
             >
               <Ionicons name="refresh" size={20} color="#F59E0B" />
               <View className="flex-1">
-                <Text className="font-medium text-orange-800">Restore from Cloud</Text>
-                <Text className="text-sm text-orange-600">Restore data from cloud backup</Text>
+                <Text className="font-medium text-n4">Restore from Cloud</Text>
+                <Text className="text-sm text-n4">Restore data from cloud backup</Text>
               </View>
             </Pressable>
           </View>
@@ -249,23 +249,23 @@ export default function SettingsScreen() {
         
         {/* Account */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-3">
+          <Text className="text-lg font-semibold text-g4 mb-3">
             Account
           </Text>
           <View style={{gap: 12}}>
-            <Pressable className="bg-gray-50 p-4 rounded-lg active:bg-gray-100 flex-row items-center gap-3">
+            <Pressable className="bg-n1 p-4 rounded-lg active:bg-g1/60 flex-row items-center gap-3">
               <Ionicons name="person" size={20} color="#6B7280" />
               <View className="flex-1">
-                <Text className="font-medium text-gray-800">Sign In / Sign Up</Text>
-                <Text className="text-sm text-gray-600">Sync your data across devices</Text>
+                <Text className="font-medium text-g4">Sign In / Sign Up</Text>
+                <Text className="text-sm text-g3">Sync your data across devices</Text>
               </View>
             </Pressable>
             
-            <Pressable className="bg-gray-50 p-4 rounded-lg active:bg-gray-100 flex-row items-center gap-3">
+            <Pressable className="bg-n1 p-4 rounded-lg active:bg-g1/60 flex-row items-center gap-3">
               <Ionicons name="shield-checkmark" size={20} color="#6B7280" />
               <View className="flex-1">
-                <Text className="font-medium text-gray-800">Privacy & Security</Text>
-                <Text className="text-sm text-gray-600">Manage your privacy settings</Text>
+                <Text className="font-medium text-g4">Privacy & Security</Text>
+                <Text className="text-sm text-g3">Manage your privacy settings</Text>
               </View>
             </Pressable>
           </View>
@@ -273,56 +273,56 @@ export default function SettingsScreen() {
 
         {/* Danger Zone */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-red-700 mb-3">
+          <Text className="text-lg font-semibold text-e4 mb-3">
             Danger Zone
           </Text>
           <Pressable 
             onPress={handleResetApp}
-            className="bg-red-50 p-4 rounded-lg active:bg-red-100 border border-red-200 flex-row items-center gap-3"
+            className="bg-e1/20 p-4 rounded-lg active:bg-e1/30 border border-e2/50 flex-row items-center gap-3"
           >
             <Ionicons name="warning" size={20} color="#DC2626" />
             <View className="flex-1">
-              <Text className="font-medium text-red-800">Reset App Data</Text>
-              <Text className="text-sm text-red-600">Delete all ingredients, cocktails, and settings</Text>
+              <Text className="font-medium text-e4">Reset App Data</Text>
+              <Text className="text-sm text-e3">Delete all ingredients, cocktails, and settings</Text>
             </View>
           </Pressable>
         </Card>
         
         {/* About */}
         <Card>
-          <Text className="text-lg font-semibold text-gray-700 mb-3">
+          <Text className="text-lg font-semibold text-g4 mb-3">
             About
           </Text>
           <View style={{gap: 12}}>
-            <View className="bg-gray-50 p-4 rounded-lg flex-row items-center gap-3">
+            <View className="bg-n1 p-4 rounded-lg flex-row items-center gap-3">
               <Ionicons name="information-circle" size={20} color="#6B7280" />
               <View className="flex-1">
-                <Text className="font-medium text-gray-800 mb-1">Version</Text>
-                <Text className="text-sm text-gray-600">1.0.0 (React Native)</Text>
+                <Text className="font-medium text-g4 mb-1">Version</Text>
+                <Text className="text-sm text-g3">1.0.0 (React Native)</Text>
               </View>
             </View>
             
-            <Pressable className="bg-gray-50 p-4 rounded-lg active:bg-gray-100 flex-row items-center gap-3">
+            <Pressable className="bg-n1 p-4 rounded-lg active:bg-g1/60 flex-row items-center gap-3">
               <Ionicons name="help-circle" size={20} color="#6B7280" />
               <View className="flex-1">
-                <Text className="font-medium text-gray-800">Help & Support</Text>
-                <Text className="text-sm text-gray-600">Get help using PourCost</Text>
+                <Text className="font-medium text-g4">Help & Support</Text>
+                <Text className="text-sm text-g3">Get help using PourCost</Text>
               </View>
             </Pressable>
             
-            <Pressable className="bg-gray-50 p-4 rounded-lg active:bg-gray-100 flex-row items-center gap-3">
+            <Pressable className="bg-n1 p-4 rounded-lg active:bg-g1/60 flex-row items-center gap-3">
               <Ionicons name="star" size={20} color="#6B7280" />
               <View className="flex-1">
-                <Text className="font-medium text-gray-800">Rate PourCost</Text>
-                <Text className="text-sm text-gray-600">Share your feedback on the App Store</Text>
+                <Text className="font-medium text-g4">Rate PourCost</Text>
+                <Text className="text-sm text-g3">Share your feedback on the App Store</Text>
               </View>
             </Pressable>
             
-            <Pressable className="bg-gray-50 p-4 rounded-lg active:bg-gray-100 flex-row items-center gap-3">
+            <Pressable className="bg-n1 p-4 rounded-lg active:bg-g1/60 flex-row items-center gap-3">
               <Ionicons name="document-text" size={20} color="#6B7280" />
               <View className="flex-1">
-                <Text className="font-medium text-gray-800">Terms & Privacy</Text>
-                <Text className="text-sm text-gray-600">Read our terms of service and privacy policy</Text>
+                <Text className="font-medium text-g4">Terms & Privacy</Text>
+                <Text className="text-sm text-g3">Read our terms of service and privacy policy</Text>
               </View>
             </Pressable>
           </View>
@@ -341,16 +341,16 @@ export default function SettingsScreen() {
                 onPress={() => handleCurrencyChange(currency.code)}
                 className={`p-4 rounded-lg border ${
                   selectedCurrency === currency.code
-                    ? 'bg-primary-50 border-primary-500'
-                    : 'bg-white border-gray-200'
-                } active:bg-gray-50`}
+                    ? 'bg-p1/20 border-p1'
+                    : 'bg-n1 border-g2/40'
+                } active:bg-n1/80`}
               >
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-3">
                     <Text className="text-2xl">{currency.symbol}</Text>
                     <View>
-                      <Text className="font-medium text-gray-800">{currency.name}</Text>
-                      <Text className="text-sm text-gray-600">{currency.code}</Text>
+                      <Text className="font-medium text-g4">{currency.name}</Text>
+                      <Text className="text-sm text-g3">{currency.code}</Text>
                     </View>
                   </View>
                   {selectedCurrency === currency.code && (

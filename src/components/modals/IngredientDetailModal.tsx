@@ -40,9 +40,9 @@ export default function IngredientDetailModal({
 
   // Get pour cost color
   const getPourCostColor = (pourCost: number) => {
-    if (pourCost <= 15) return 'text-green-600';
-    if (pourCost <= 25) return 'text-yellow-600';
-    return 'text-red-600';
+    if (pourCost <= 15) return 'text-s22';
+    if (pourCost <= 25) return 'text-s12';
+    return 'text-e3';
   };
 
   const handleEdit = () => {
@@ -91,34 +91,34 @@ export default function IngredientDetailModal({
       <View className="p-4">
         {/* Header */}
         <View className="mb-6">
-          <Text className="text-xl font-bold text-gray-800 mb-1">
+          <Text className="text-xl font-bold text-g4 mb-1">
             {ingredient.name}
           </Text>
-          <Text className="text-gray-600">
+          <Text className="text-g3">
             {ingredient.type} • {ingredient.bottleSize}ml • Created {new Date(ingredient.createdAt).toLocaleDateString()}
           </Text>
         </View>
 
         {/* Basic Information */}
-        <View className="bg-gray-50 p-4 rounded-lg mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-3">
+        <View className="bg-n1 p-4 rounded-lg mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-3">
             Basic Information
           </Text>
           
           <View className="space-y-3">
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Type:</Text>
-              <Text className="font-medium text-gray-800">{ingredient.type}</Text>
+              <Text className="text-g3">Type:</Text>
+              <Text className="font-medium text-g4">{ingredient.type}</Text>
             </View>
             
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Bottle Size:</Text>
-              <Text className="font-medium text-gray-800">{ingredient.bottleSize}ml</Text>
+              <Text className="text-g3">Bottle Size:</Text>
+              <Text className="font-medium text-g4">{ingredient.bottleSize}ml</Text>
             </View>
             
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Bottle Price:</Text>
-              <Text className="font-medium text-gray-800">
+              <Text className="text-g3">Bottle Price:</Text>
+              <Text className="font-medium text-g4">
                 {currencySymbol}{ingredient.price.toFixed(2)}
               </Text>
             </View>
@@ -126,43 +126,43 @@ export default function IngredientDetailModal({
         </View>
 
         {/* Cost Analysis */}
-        <View className="bg-gray-50 p-4 rounded-lg mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-3">
+        <View className="bg-n1 p-4 rounded-lg mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-3">
             Cost Analysis
           </Text>
           
           <View className="space-y-3">
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Cost per Oz:</Text>
-              <Text className="font-medium text-gray-800">
+              <Text className="text-g3">Cost per Oz:</Text>
+              <Text className="font-medium text-g4">
                 {currencySymbol}{ingredient.costPerOz.toFixed(3)}
               </Text>
             </View>
             
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Retail Price (1.5oz):</Text>
-              <Text className="font-medium text-gray-800">
+              <Text className="text-g3">Retail Price (1.5oz):</Text>
+              <Text className="font-medium text-g4">
                 {currencySymbol}{ingredient.retailPrice.toFixed(2)}
               </Text>
             </View>
             
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Pour Cost:</Text>
+              <Text className="text-g3">Pour Cost:</Text>
               <Text className={`font-medium ${getPourCostColor(ingredient.pourCost)}`}>
                 {ingredient.pourCost.toFixed(1)}%
               </Text>
             </View>
             
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Suggested Retail (20% target):</Text>
-              <Text className="font-medium text-blue-600">
+              <Text className="text-g3">Suggested Retail (20% target):</Text>
+              <Text className="font-medium text-p2">
                 {currencySymbol}{ingredient.suggestedRetail.toFixed(2)}
               </Text>
             </View>
             
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Profit Margin:</Text>
-              <Text className="font-medium text-green-600">
+              <Text className="text-g3">Profit Margin:</Text>
+              <Text className="font-medium text-s22">
                 {currencySymbol}{ingredient.pourCostMargin.toFixed(2)}
               </Text>
             </View>
@@ -170,14 +170,14 @@ export default function IngredientDetailModal({
         </View>
 
         {/* Performance */}
-        <View className="bg-gray-50 p-4 rounded-lg mb-6">
-          <Text className="text-lg font-semibold text-gray-700 mb-3">
+        <View className="bg-n1 p-4 rounded-lg mb-6">
+          <Text className="text-lg font-semibold text-g4 mb-3">
             Performance
           </Text>
           
           <PourCostPerformanceBar pourCostPercentage={ingredient.pourCost} />
           
-          <Text className="text-xs text-gray-600 mt-3">
+          <Text className="text-xs text-g3 mt-3">
             Current retail price of {currencySymbol}{ingredient.retailPrice.toFixed(2)} generates a margin of {currencySymbol}{ingredient.pourCostMargin.toFixed(2)} per 1.5oz serve.
           </Text>
         </View>
@@ -186,7 +186,7 @@ export default function IngredientDetailModal({
         <View className="flex-row gap-3">
           <Pressable
             onPress={handleEdit}
-            className="flex-1 bg-blue-500 rounded-lg p-4 flex-row items-center justify-center gap-2"
+            className="flex-1 bg-p2 rounded-lg p-4 flex-row items-center justify-center gap-2"
           >
             <Ionicons name="pencil" size={18} color="white" />
             <Text className="text-white font-semibold">Edit</Text>
@@ -194,14 +194,14 @@ export default function IngredientDetailModal({
           
           <Pressable
             onPress={handleDelete}
-            className="flex-1 bg-red-500 rounded-lg p-4 flex-row items-center justify-center gap-2"
+            className="flex-1 bg-e2 rounded-lg p-4 flex-row items-center justify-center gap-2"
           >
             <Ionicons name="trash" size={18} color="white" />
             <Text className="text-white font-semibold">Delete</Text>
           </Pressable>
         </View>
         
-        <Text className="text-center text-gray-500 text-xs mt-4">
+        <Text className="text-center text-g3 text-xs mt-4">
           Last updated: {new Date(ingredient.updatedAt).toLocaleString()}
         </Text>
       </View>

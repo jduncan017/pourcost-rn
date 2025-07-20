@@ -20,13 +20,13 @@ export default function Card({
   const getVariantClass = (): string => {
     switch (variant) {
       case 'elevated':
-        return 'bg-white border border-gray-200 shadow-sm';
+        return 'bg-n1/80 backdrop-blur-sm border border-g1/50 shadow-sm';
       case 'outlined':
-        return 'bg-white border-2 border-gray-300';
+        return 'bg-n1/80 backdrop-blur-sm border-2 border-g2/50';
       case 'ghost':
         return 'bg-transparent';
       default:
-        return 'bg-white border border-gray-200';
+        return 'bg-g1/80 backdrop-blur-sm border border-g1/50';
     }
   };
 
@@ -67,14 +67,14 @@ export default function Card({
 }
 
 // Convenience components for common card types
-export const FeatureCard = ({ 
-  children, 
-  onPress, 
-  className = '' 
+export const FeatureCard = ({
+  children,
+  onPress,
+  className = '',
 }: Pick<CardProps, 'children' | 'onPress' | 'className'>) => (
-  <Card 
-    variant="elevated" 
-    padding="large" 
+  <Card
+    variant="elevated"
+    padding="large"
     onPress={onPress}
     className={className}
   >
@@ -82,14 +82,14 @@ export const FeatureCard = ({
   </Card>
 );
 
-export const ListCard = ({ 
-  children, 
-  onPress, 
-  className = '' 
+export const ListCard = ({
+  children,
+  onPress,
+  className = '',
 }: Pick<CardProps, 'children' | 'onPress' | 'className'>) => (
-  <Card 
-    variant="default" 
-    padding="medium" 
+  <Card
+    variant="default"
+    padding="medium"
     onPress={onPress}
     className={`mb-3 ${className}`}
   >
@@ -97,27 +97,27 @@ export const ListCard = ({
   </Card>
 );
 
-export const SummaryCard = ({ 
-  children, 
-  className = '' 
+export const SummaryCard = ({
+  children,
+  className = '',
 }: Pick<CardProps, 'children' | 'className'>) => (
-  <Card 
-    variant="outlined" 
-    padding="large" 
-    className={`bg-primary-50 border-primary-200 ${className}`}
+  <Card
+    variant="outlined"
+    padding="large"
+    className={`bg-p1/20 backdrop-blur-sm border-p1/40 ${className}`}
   >
     {children}
   </Card>
 );
 
-export const CompactCard = ({ 
-  children, 
-  onPress, 
-  className = '' 
+export const CompactCard = ({
+  children,
+  onPress,
+  className = '',
 }: Pick<CardProps, 'children' | 'onPress' | 'className'>) => (
-  <Card 
-    variant="default" 
-    padding="small" 
+  <Card
+    variant="default"
+    padding="small"
     onPress={onPress}
     className={className}
   >

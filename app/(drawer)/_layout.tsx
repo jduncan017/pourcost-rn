@@ -1,5 +1,12 @@
 import React from 'react';
-import { Platform, View, Text, Pressable, ScrollView, Image } from 'react-native';
+import {
+  Platform,
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  Image,
+} from 'react-native';
 import { Drawer } from 'expo-router/drawer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,8 +19,15 @@ import { Link } from 'expo-router';
  */
 function LogoHeader() {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-      <Image 
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1,
+      }}
+    >
+      <Image
         source={require('../../assets/images/PourCost-Logo-Black.png')}
         style={{ width: 120, height: 30 }}
         resizeMode="contain"

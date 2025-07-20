@@ -49,13 +49,13 @@ export default function CurrencyDisplay({
 
   const getColorClass = (): string => {
     switch (color) {
-      case 'primary': return 'text-primary-600';
-      case 'success': return 'text-green-600';
+      case 'primary': return 'text-p2';
+      case 'success': return 'text-s22';
       case 'warning': return 'text-amber-600';
-      case 'error': return 'text-red-600';
-      case 'gray': return 'text-gray-600';
+      case 'error': return 'text-e3';
+      case 'gray': return 'text-g3';
       case 'white': return 'text-white';
-      default: return 'text-gray-600';
+      default: return 'text-g3';
     }
   };
 

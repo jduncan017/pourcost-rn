@@ -182,28 +182,28 @@ export default function CocktailFormScreen() {
   
   // Get pour cost color
   const getPourCostColor = (pourCost: number) => {
-    if (pourCost <= 20) return 'text-green-600';
-    if (pourCost <= 25) return 'text-yellow-600';
-    return 'text-red-600';
+    if (pourCost <= 20) return 'text-s22';
+    if (pourCost <= 25) return 'text-s12';
+    return 'bg-e3';
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView className="flex-1 bg-n1">
       <View className="p-4">
         {/* Header */}
         <View className="flex-row items-center justify-between mb-6">
           <View className="flex-row items-center gap-3">
             <Pressable
               onPress={() => router.back()}
-              className="p-2 bg-gray-200 rounded-lg"
+              className="p-2 bg-g1/60 rounded-lg"
             >
               <Ionicons name="arrow-back" size={20} color="#374151" />
             </Pressable>
             <View>
-              <Text className="text-2xl font-bold text-gray-800">
+              <Text className="text-2xl font-bold text-g4">
                 {isEditing ? 'Edit Cocktail' : 'Create Cocktail'}
               </Text>
-              <Text className="text-gray-600">
+              <Text className="text-g3">
                 {isEditing ? 'Update cocktail recipe' : 'Build your cocktail recipe'}
               </Text>
             </View>
@@ -212,7 +212,7 @@ export default function CocktailFormScreen() {
         
         {/* Basic Information */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-4">
             Basic Information
           </Text>
           
@@ -233,7 +233,7 @@ export default function CocktailFormScreen() {
             />
             
             <View>
-              <Text className="text-sm font-medium text-gray-700 mb-2">Category</Text>
+              <Text className="text-sm font-medium text-g4 mb-2">Category</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2">
                 {COCKTAIL_CATEGORIES.map((cat) => (
                   <Pressable
@@ -241,12 +241,12 @@ export default function CocktailFormScreen() {
                     onPress={() => setCategory(cat)}
                     className={`px-3 py-2 rounded-lg border ${
                       category === cat
-                        ? 'bg-primary-500 border-primary-500'
-                        : 'bg-white border-gray-300'
+                        ? 'bg-p1 border-p1'
+                        : 'bg-n1/80 border-g2/50'
                     }`}
                   >
                     <Text className={`text-sm font-medium ${
-                      category === cat ? 'text-white' : 'text-gray-700'
+                      category === cat ? 'text-white' : 'text-g4'
                     }`}>
                       {cat}
                     </Text>
@@ -257,7 +257,7 @@ export default function CocktailFormScreen() {
             
             <View className="flex-row gap-4">
               <View className="flex-1">
-                <Text className="text-sm font-medium text-gray-700 mb-2">Difficulty</Text>
+                <Text className="text-sm font-medium text-g4 mb-2">Difficulty</Text>
                 <View className="flex-row gap-2">
                   {DIFFICULTY_LEVELS.map((level) => (
                     <Pressable
@@ -265,12 +265,12 @@ export default function CocktailFormScreen() {
                       onPress={() => setDifficulty(level)}
                       className={`flex-1 px-3 py-2 rounded-lg border ${
                         difficulty === level
-                          ? 'bg-primary-500 border-primary-500'
-                          : 'bg-white border-gray-300'
+                          ? 'bg-p1 border-p1'
+                          : 'bg-n1/80 border-g2/50'
                       }`}
                     >
                       <Text className={`text-sm font-medium text-center ${
-                        difficulty === level ? 'text-white' : 'text-gray-700'
+                        difficulty === level ? 'text-white' : 'text-g4'
                       }`}>
                         {level}
                       </Text>
@@ -297,12 +297,12 @@ export default function CocktailFormScreen() {
         {/* Ingredients */}
         <Card className="mb-4">
           <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-lg font-semibold text-gray-700">
+            <Text className="text-lg font-semibold text-g4">
               Ingredients ({ingredients.length})
             </Text>
             <Pressable
               onPress={() => setShowAddIngredientModal(true)}
-              className="bg-primary-500 rounded-lg p-2 flex-row items-center gap-1"
+              className="bg-p1 rounded-lg p-2 flex-row items-center gap-1"
             >
               <Ionicons name="add" size={16} color="white" />
               <Text className="text-white text-sm font-medium">Add</Text>
@@ -347,41 +347,41 @@ export default function CocktailFormScreen() {
         {/* Cost Analysis */}
         {ingredients.length > 0 && (
           <Card className="mb-4">
-            <Text className="text-lg font-semibold text-gray-700 mb-4">
+            <Text className="text-lg font-semibold text-g4 mb-4">
               Cost Analysis
             </Text>
             
             <View className="space-y-3">
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Total Cost:</Text>
-                <Text className="font-medium text-gray-800">
+                <Text className="text-g3">Total Cost:</Text>
+                <Text className="font-medium text-g4">
                   ${totalCost.toFixed(2)}
                 </Text>
               </View>
               
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Suggested Price:</Text>
-                <Text className="font-medium text-gray-800">
+                <Text className="text-g3">Suggested Price:</Text>
+                <Text className="font-medium text-g4">
                   ${suggestedPrice.toFixed(2)}
                 </Text>
               </View>
               
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Pour Cost:</Text>
+                <Text className="text-g3">Pour Cost:</Text>
                 <Text className={`font-medium ${getPourCostColor(pourCostPercentage)}`}>
                   {pourCostPercentage.toFixed(1)}%
                 </Text>
               </View>
               
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Profit Margin:</Text>
-                <Text className="font-medium text-green-600">
+                <Text className="text-g3">Profit Margin:</Text>
+                <Text className="font-medium text-s22">
                   ${profitMargin.toFixed(2)}
                 </Text>
               </View>
               
               {/* Performance Indicator */}
-              <View className="mt-4 pt-3 border-t border-gray-200">
+              <View className="mt-4 pt-3 border-t border-g2/40">
                 <PourCostPerformanceBar pourCostPercentage={pourCostPercentage} />
               </View>
             </View>
@@ -390,7 +390,7 @@ export default function CocktailFormScreen() {
         
         {/* Notes */}
         <Card className="mb-6">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-4">
             Notes & Instructions
           </Text>
           
@@ -409,7 +409,7 @@ export default function CocktailFormScreen() {
             onPress={handleSave}
             disabled={!isValid}
             className={`rounded-lg p-4 flex-row items-center justify-center gap-2 ${
-              isValid ? 'bg-green-500' : 'bg-gray-300'
+              isValid ? 'bg-s22' : 'bg-g2'
             }`}
           >
             <Ionicons name="checkmark" size={20} color="white" />
@@ -421,7 +421,7 @@ export default function CocktailFormScreen() {
           {isEditing && (
             <Pressable
               onPress={handleDelete}
-              className="bg-red-500 rounded-lg p-4 flex-row items-center justify-center gap-2"
+              className="bg-e2 rounded-lg p-4 flex-row items-center justify-center gap-2"
             >
               <Ionicons name="trash" size={20} color="white" />
               <Text className="text-white font-semibold text-lg">Delete Cocktail</Text>
@@ -430,14 +430,14 @@ export default function CocktailFormScreen() {
           
           <Pressable
             onPress={() => router.back()}
-            className="bg-gray-400 rounded-lg p-4 flex-row items-center justify-center gap-2"
+            className="bg-g3 rounded-lg p-4 flex-row items-center justify-center gap-2"
           >
             <Ionicons name="close" size={20} color="white" />
             <Text className="text-white font-semibold text-lg">Cancel</Text>
           </Pressable>
         </View>
         
-        <Text className="text-center text-gray-500 text-xs mt-4">
+        <Text className="text-center text-g3 text-xs mt-4">
           * Required fields
         </Text>
       </View>
@@ -458,7 +458,7 @@ export default function CocktailFormScreen() {
           />
           
           <View>
-            <Text className="text-sm font-medium text-gray-700 mb-2">Type</Text>
+            <Text className="text-sm font-medium text-g4 mb-2">Type</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2">
               {INGREDIENT_TYPES.map((type) => (
                 <Pressable
@@ -466,12 +466,12 @@ export default function CocktailFormScreen() {
                   onPress={() => setNewIngredientType(type)}
                   className={`px-3 py-2 rounded-lg border ${
                     newIngredientType === type
-                      ? 'bg-primary-500 border-primary-500'
-                      : 'bg-white border-gray-300'
+                      ? 'bg-p1 border-p1'
+                      : 'bg-n1/80 border-g2/50'
                   }`}
                 >
                   <Text className={`text-sm font-medium ${
-                    newIngredientType === type ? 'text-white' : 'text-gray-700'
+                    newIngredientType === type ? 'text-white' : 'text-g4'
                   }`}>
                     {type}
                   </Text>
@@ -509,14 +509,14 @@ export default function CocktailFormScreen() {
           <View className="flex-row gap-3 mt-6">
             <Pressable
               onPress={() => setShowAddIngredientModal(false)}
-              className="flex-1 bg-gray-400 rounded-lg p-3 flex-row items-center justify-center gap-2"
+              className="flex-1 bg-g3 rounded-lg p-3 flex-row items-center justify-center gap-2"
             >
               <Text className="text-white font-medium">Cancel</Text>
             </Pressable>
             
             <Pressable
               onPress={addIngredient}
-              className="flex-1 bg-green-500 rounded-lg p-3 flex-row items-center justify-center gap-2"
+              className="flex-1 bg-s22 rounded-lg p-3 flex-row items-center justify-center gap-2"
             >
               <Ionicons name="add" size={16} color="white" />
               <Text className="text-white font-medium">Add Ingredient</Text>

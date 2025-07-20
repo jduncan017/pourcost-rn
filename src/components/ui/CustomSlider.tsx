@@ -165,10 +165,10 @@ export default function CustomSlider({
     <View className="py-4">
       {/* Label and Value */}
       <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-base font-medium text-gray-700">
+        <Text className="text-base font-medium text-g4">
           {label}
         </Text>
-        <Text className="text-base font-semibold text-primary-600">
+        <Text className="text-base font-semibold text-p2">
           {value.toFixed(2)}{unit}
         </Text>
       </View>
@@ -182,20 +182,20 @@ export default function CustomSlider({
           >
             {/* Track */}
             <View 
-              className="absolute top-6 bg-gray-300 rounded-full"
+              className="absolute top-6 bg-g2 rounded-full"
               style={{ width: sliderWidth, height: 4 }}
             />
             
             {/* Active Track */}
             <Animated.View 
-              className="absolute top-6 bg-primary-600 rounded-full"
+              className="absolute top-6 bg-p2 rounded-full"
               style={[{ height: 4 }, activeTrackStyle]}
             />
 
             {/* Thumb */}
             <Animated.View
               className={`absolute top-2 w-8 h-8 rounded-full border-2 border-white ${
-                isActive ? 'bg-primary-700' : 'bg-primary-600'
+                isActive ? 'bg-primary-700' : 'bg-p2'
               }`}
               style={[
                 thumbStyle,

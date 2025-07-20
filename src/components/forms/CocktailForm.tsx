@@ -149,23 +149,23 @@ export default function CocktailForm({
   );
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView className="flex-1 bg-n1">
       <View className="p-4">
         {/* Header */}
         <View className="flex-row items-center justify-between mb-6">
-          <Text className="text-2xl font-bold text-gray-800">
+          <Text className="text-2xl font-bold text-g4">
             {cocktail ? 'Edit Cocktail' : 'New Cocktail'}
           </Text>
           <Pressable
             onPress={onCancel}
-            className="p-2 rounded-full bg-gray-200 active:bg-gray-300"
+            className="p-2 rounded-full bg-g1/80 active:bg-g2"
           >
             <Ionicons name="close" size={24} color="#374151" />
           </Pressable>
         </View>
 
         {/* Basic Info */}
-        <View className="bg-white rounded-lg p-4 mb-4">
+        <View className="bg-n1/80 rounded-lg p-4 mb-4">
           <TextInput
             label="Cocktail Name"
             value={formData.name}
@@ -177,7 +177,7 @@ export default function CocktailForm({
           />
 
           <View className="mb-4">
-            <Text className="text-base font-medium text-gray-700 mb-3">
+            <Text className="text-base font-medium text-g4 mb-3">
               Profit Margin: {formData.profitMargin.toFixed(1)}%
             </Text>
             <CustomSlider
@@ -194,14 +194,14 @@ export default function CocktailForm({
         </View>
 
         {/* Ingredients Section */}
-        <View className="bg-white rounded-lg p-4 mb-4">
+        <View className="bg-n1/80 rounded-lg p-4 mb-4">
           <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-lg font-semibold text-gray-800">
-              Ingredients {errors.ingredients && <Text className="text-red-500 text-sm">*</Text>}
+            <Text className="text-lg font-semibold text-g4">
+              Ingredients {errors.ingredients && <Text className="text-e3 text-sm">*</Text>}
             </Text>
             <Pressable
               onPress={() => setShowIngredientPicker(true)}
-              className="bg-primary-600 px-4 py-2 rounded-lg active:bg-primary-700"
+              className="bg-p2 px-4 py-2 rounded-lg active:bg-p3"
               disabled={availableToAdd.length === 0}
             >
               <Text className="text-white font-medium">Add Ingredient</Text>
@@ -209,18 +209,18 @@ export default function CocktailForm({
           </View>
 
           {errors.ingredients && (
-            <Text className="text-red-600 text-sm mb-3">{errors.ingredients}</Text>
+            <Text className="text-e3 text-sm mb-3">{errors.ingredients}</Text>
           )}
 
           {formData.ingredients.map((ingredient, index) => (
-            <View key={ingredient.id} className="border border-gray-200 rounded-lg p-3 mb-3">
+            <View key={ingredient.id} className="border border-g1/50 rounded-lg p-3 mb-3">
               <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-base font-medium text-gray-800 flex-1">
+                <Text className="text-base font-medium text-g4 flex-1">
                   {ingredient.name}
                 </Text>
                 <Pressable
                   onPress={() => removeIngredient(index)}
-                  className="p-1 rounded bg-red-50 active:bg-red-100"
+                  className="p-1 rounded bg-e1/20 active:bg-e1/30"
                 >
                   <Ionicons name="close" size={16} color="#DC2626" />
                 </Pressable>
@@ -245,19 +245,19 @@ export default function CocktailForm({
           {formData.ingredients.length === 0 && (
             <View className="py-8 items-center">
               <Ionicons name="wine-outline" size={48} color="#9CA3AF" />
-              <Text className="text-gray-500 mt-2">No ingredients added yet</Text>
+              <Text className="text-g3 mt-2">No ingredients added yet</Text>
             </View>
           )}
         </View>
 
         {/* Cost Summary */}
         {formData.ingredients.length > 0 && (
-          <View className="bg-white rounded-lg p-4 mb-4">
-            <Text className="text-lg font-semibold text-gray-800 mb-3">Cost Summary</Text>
+          <View className="bg-n1/80 rounded-lg p-4 mb-4">
+            <Text className="text-lg font-semibold text-g4 mb-3">Cost Summary</Text>
             
             <View className="space-y-2">
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Total Cost:</Text>
+                <Text className="text-g3">Total Cost:</Text>
                 <CurrencyDisplay 
                   amount={calculateTotalCost()} 
                   currency={currency} 
@@ -265,13 +265,13 @@ export default function CocktailForm({
                 />
               </View>
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Profit Margin:</Text>
-                <Text className="font-semibold text-gray-800">
+                <Text className="text-g3">Profit Margin:</Text>
+                <Text className="font-semibold text-g4">
                   {formData.profitMargin.toFixed(1)}%
                 </Text>
               </View>
-              <View className="flex-row justify-between pt-2 border-t border-gray-200">
-                <Text className="text-primary-600 font-semibold">Suggested Price:</Text>
+              <View className="flex-row justify-between pt-2 border-t border-g1/50">
+                <Text className="text-p2 font-semibold">Suggested Price:</Text>
                 <CurrencyDisplay 
                   amount={getSuggestedPrice()} 
                   currency={currency} 
@@ -285,7 +285,7 @@ export default function CocktailForm({
         )}
 
         {/* Notes */}
-        <View className="bg-white rounded-lg p-4 mb-4">
+        <View className="bg-n1/80 rounded-lg p-4 mb-4">
           <TextInput
             label="Notes (Optional)"
             value={formData.notes}
@@ -301,9 +301,9 @@ export default function CocktailForm({
         <View className="flex-row space-x-3">
           <Pressable
             onPress={onCancel}
-            className="flex-1 py-4 bg-gray-200 rounded-lg active:bg-gray-300"
+            className="flex-1 py-4 bg-g1/80 rounded-lg active:bg-g2"
           >
-            <Text className="text-center text-gray-700 font-semibold">Cancel</Text>
+            <Text className="text-center text-g4 font-semibold">Cancel</Text>
           </Pressable>
           
           <Pressable
@@ -311,8 +311,8 @@ export default function CocktailForm({
             disabled={isSubmitting}
             className={`flex-1 py-4 rounded-lg ${
               isSubmitting 
-                ? 'bg-gray-400' 
-                : 'bg-primary-600 active:bg-primary-700'
+                ? 'bg-g3' 
+                : 'bg-p2 active:bg-p3'
             }`}
           >
             <Text className="text-center text-white font-semibold">
@@ -330,8 +330,8 @@ export default function CocktailForm({
       {/* Ingredient Picker Modal */}
       {showIngredientPicker && (
         <View className="absolute inset-0 bg-black/50 justify-center items-center">
-          <View className="bg-white m-4 rounded-lg max-h-96 w-full max-w-md">
-            <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
+          <View className="bg-n1/80 m-4 rounded-lg max-h-96 w-full max-w-md">
+            <View className="flex-row items-center justify-between p-4 border-b border-g1/50">
               <Text className="text-lg font-semibold">Add Ingredient</Text>
               <Pressable
                 onPress={() => setShowIngredientPicker(false)}
@@ -346,13 +346,13 @@ export default function CocktailForm({
                 <Pressable
                   key={ingredient.id}
                   onPress={() => addIngredient(ingredient)}
-                  className="p-4 border-b border-gray-100 active:bg-gray-50"
+                  className="p-4 border-b border-g1/40 active:bg-n1"
                 >
-                  <Text className="text-base font-medium text-gray-800">
+                  <Text className="text-base font-medium text-g4">
                     {ingredient.name}
                   </Text>
                   <View className="flex-row items-center">
-                    <Text className="text-sm text-gray-600">
+                    <Text className="text-sm text-g3">
                       {formatVolume(ingredient.productSize.value, ingredient.productSize.unit)} • 
                     </Text>
                     <CurrencyDisplay 
@@ -367,8 +367,8 @@ export default function CocktailForm({
               
               {availableToAdd.length === 0 && (
                 <View className="p-4 items-center">
-                  <Text className="text-gray-500">No more ingredients available</Text>
-                  <Text className="text-gray-400 text-sm mt-1">
+                  <Text className="text-g3">No more ingredients available</Text>
+                  <Text className="text-g3 text-sm mt-1">
                     Create ingredients first to add them to cocktails
                   </Text>
                 </View>

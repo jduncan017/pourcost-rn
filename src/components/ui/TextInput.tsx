@@ -23,14 +23,14 @@ export default function TextInput({
   return (
     <View className={`mb-4 ${containerClassName}`}>
       {/* Label */}
-      <Text className="text-base font-medium text-gray-700 mb-2">
+      <Text className="text-base font-medium text-g4 mb-2">
         {label}
-        {required && <Text className="text-red-500 ml-1">*</Text>}
+        {required && <Text className="text-e3 ml-1">*</Text>}
       </Text>
 
       {/* Input Container */}
       <View className={`flex-row items-center border rounded-lg px-3 py-3 ${
-        error ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'
+        error ? 'border-e2/50 bg-e1/20' : 'border-g2/50 bg-n1/80'
       }`}>
         {icon && (
           <Ionicons 
@@ -42,7 +42,7 @@ export default function TextInput({
         )}
         
         <RNTextInput
-          className={`flex-1 text-base text-gray-800 ${inputClassName}`}
+          className={`flex-1 text-base text-g4 ${inputClassName}`}
           placeholderTextColor="#9CA3AF"
           {...textInputProps}
         />
@@ -50,7 +50,7 @@ export default function TextInput({
 
       {/* Error Message */}
       {error && (
-        <Text className="text-red-600 text-sm mt-1">
+        <Text className="text-e3 text-sm mt-1">
           {error}
         </Text>
       )}

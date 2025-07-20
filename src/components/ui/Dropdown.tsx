@@ -41,11 +41,11 @@ export default function Dropdown<T = any>({
     <View className={`py-4 ${className}`}>
       {/* Label and Value */}
       <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-base font-medium text-gray-700">
+        <Text className="text-base font-medium text-g4">
           {label}
         </Text>
         {selectedOption && (
-          <Text className="text-base font-semibold text-primary-600">
+          <Text className="text-base font-semibold text-p2">
             {selectedOption.sublabel || selectedOption.label}
           </Text>
         )}
@@ -55,12 +55,12 @@ export default function Dropdown<T = any>({
       <Pressable
         onPress={() => !disabled && setIsOpen(true)}
         disabled={disabled}
-        className={`bg-white border border-gray-300 rounded-lg p-4 flex-row justify-between items-center ${
-          disabled ? 'bg-gray-100 opacity-50' : 'active:bg-gray-50'
+        className={`bg-n1/80 border border-g2/50 rounded-lg p-4 flex-row justify-between items-center ${
+          disabled ? 'bg-g1/60 opacity-50' : 'active:bg-n1'
         }`}
       >
         <Text className={`font-medium ${
-          selectedOption ? 'text-gray-800' : 'text-gray-500'
+          selectedOption ? 'text-g4' : 'text-g3'
         }`}>
           {displayValue}
         </Text>
@@ -82,9 +82,9 @@ export default function Dropdown<T = any>({
           className="flex-1 bg-black bg-opacity-50 justify-center items-center"
           onPress={() => setIsOpen(false)}
         >
-          <View className="bg-white rounded-xl mx-4 max-h-96 w-80">
-            <View className="p-4 border-b border-gray-200">
-              <Text className="text-lg font-semibold text-gray-800 text-center">
+          <View className="bg-n1/80 rounded-xl mx-4 max-h-96 w-80">
+            <View className="p-4 border-b border-g1/50">
+              <Text className="text-lg font-semibold text-g4 text-center">
                 {label}
               </Text>
             </View>
@@ -94,19 +94,19 @@ export default function Dropdown<T = any>({
                 <Pressable
                   key={`${option.value}-${index}`}
                   onPress={() => handleSelect(option.value)}
-                  className={`p-4 flex-row justify-between items-center border-b border-gray-100 ${
-                    option.value === value ? 'bg-primary-50' : 'active:bg-gray-50'
+                  className={`p-4 flex-row justify-between items-center border-b border-g1/40 ${
+                    option.value === value ? 'bg-p1/20' : 'active:bg-n1'
                   }`}
                 >
                   <View className="flex-1">
                     <Text className={`font-medium ${
-                      option.value === value ? 'text-primary-800' : 'text-gray-800'
+                      option.value === value ? 'text-p3' : 'text-g4'
                     }`}>
                       {option.label}
                     </Text>
                     {option.sublabel && (
                       <Text className={`text-sm mt-1 ${
-                        option.value === value ? 'text-primary-600' : 'text-gray-600'
+                        option.value === value ? 'text-p2' : 'text-g3'
                       }`}>
                         {option.sublabel}
                       </Text>

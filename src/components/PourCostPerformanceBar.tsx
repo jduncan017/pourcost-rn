@@ -52,16 +52,16 @@ export default function PourCostPerformanceBar({
   // Get color based on performance relative to goal
   const getPerformanceColor = (value: number) => {
     const deviation = Math.abs(value - goal);
-    if (deviation <= 3) return 'bg-green-500'; // Within 3% of goal
-    if (deviation <= 7) return 'bg-yellow-500'; // Within 7% of goal  
-    return 'bg-red-500'; // More than 7% away from goal
+    if (deviation <= 3) return 'bg-s22'; // Within 3% of goal
+    if (deviation <= 7) return 'bg-s12'; // Within 7% of goal  
+    return 'bg-e2'; // More than 7% away from goal
   };
   
   const getPerformanceTextColor = (value: number) => {
     const deviation = Math.abs(value - goal);
-    if (deviation <= 3) return 'text-green-600';
-    if (deviation <= 7) return 'text-yellow-600';
-    return 'text-red-600';
+    if (deviation <= 3) return 'text-s22';
+    if (deviation <= 7) return 'text-s12';
+    return 'text-e3';
   };
   
   // Generate feedback message
@@ -83,14 +83,14 @@ export default function PourCostPerformanceBar({
       <View className="mb-3">
         {showLabels && (
           <View className="flex-row justify-between mb-2">
-            <Text className="text-sm text-gray-600">Pour Cost Performance</Text>
+            <Text className="text-sm text-g3">Pour Cost Performance</Text>
             <Text className={`text-sm font-medium ${getPerformanceTextColor(pourCostPercentage)}`}>
               {pourCostPercentage.toFixed(1)}% vs {goal}% goal
             </Text>
           </View>
         )}
         
-        <View className="h-3 bg-gray-200 rounded-full overflow-hidden">
+        <View className="h-3 bg-g1/80 rounded-full overflow-hidden">
           <View 
             className={`h-full rounded-full ${getPerformanceColor(pourCostPercentage)}`}
             style={{ width: `${barPosition}%` }}
@@ -100,12 +100,12 @@ export default function PourCostPerformanceBar({
         {showLabels && (
           <>
             <View className="flex-row justify-between mt-1">
-              <Text className="text-xs text-gray-500">{minValue.toFixed(0)}%</Text>
-              <Text className="text-xs text-gray-500">{goal}% (goal)</Text>
-              <Text className="text-xs text-gray-500">{maxValue.toFixed(0)}%</Text>
+              <Text className="text-xs text-g3">{minValue.toFixed(0)}%</Text>
+              <Text className="text-xs text-g3">{goal}% (goal)</Text>
+              <Text className="text-xs text-g3">{maxValue.toFixed(0)}%</Text>
             </View>
             
-            <Text className="text-xs text-gray-600 mt-2">
+            <Text className="text-xs text-g3 mt-2">
               {getFeedbackMessage(pourCostPercentage)}
             </Text>
           </>

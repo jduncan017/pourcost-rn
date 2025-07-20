@@ -28,6 +28,9 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
+    // Geist variable font (supports all weights)
+    'Geist': require('../assets/fonts/Geist-VariableFont_wght.ttf'),
+    // Keep existing fonts for compatibility
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
@@ -64,7 +67,8 @@ function RootLayoutNav() {
           <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
           <Stack.Screen name="cocktail-form" options={{ presentation: 'modal', title: 'Cocktail Form' }} />
           <Stack.Screen name="ingredient-form" options={{ presentation: 'modal', title: 'Ingredient Form' }} />
-          <Stack.Screen name="ingredient-detail" options={{ presentation: 'modal', title: 'Ingredient Details' }} />
+          <Stack.Screen name="ingredient-detail" options={{ headerShown: false }} />
+          <Stack.Screen name="cocktail-detail" options={{ headerShown: false }} />
         </Stack>
       </NavigationThemeProvider>
     </GestureHandlerRootView>

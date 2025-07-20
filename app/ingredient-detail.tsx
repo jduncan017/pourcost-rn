@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAppStore } from '@/src/stores/app-store';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,6 +33,7 @@ interface Ingredient {
  * Shows comprehensive ingredient data and allows editing
  */
 export default function IngredientDetailScreen() {
+  const insets = useSafeAreaInsets();
   const { baseCurrency } = useAppStore();
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -130,9 +132,9 @@ export default function IngredientDetailScreen() {
   
   // Get pour cost color
   const getPourCostColor = (pourCost: number) => {
-    if (pourCost <= 15) return 'text-green-600';
-    if (pourCost <= 25) return 'text-yellow-600';
-    return 'text-red-600';
+    if (pourCost <= 15) return 'text-s22';
+    if (pourCost <= 25) return 'text-s12';
+    return 'text-e3';
   };
   
   // Dynamic step functions
@@ -148,22 +150,22 @@ export default function IngredientDetailScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView className="flex-1 bg-n1" style={{ paddingTop: insets.top }}>
       <View className="p-4">
         {/* Header */}
         <View className="flex-row items-center justify-between mb-6">
           <View className="flex-row items-center gap-3">
             <Pressable
               onPress={() => router.back()}
-              className="p-2 bg-gray-200 rounded-lg"
+              className="p-2 bg-g1/60 rounded-lg"
             >
               <Ionicons name="arrow-back" size={20} color="#374151" />
             </Pressable>
             <View>
-              <Text className="text-2xl font-bold text-gray-800">
+              <Text className="text-2xl text-g4" style={{fontFamily: 'Geist', fontWeight: '700'}}>
                 {isEditing ? 'Edit Ingredient' : 'Ingredient Details'}
               </Text>
-              <Text className="text-gray-600">
+              <Text className="text-g3" style={{fontFamily: 'Geist'}}>
                 {ingredient.type} • Created {new Date(ingredient.createdAt).toLocaleDateString()}
               </Text>
             </View>
@@ -174,15 +176,15 @@ export default function IngredientDetailScreen() {
               <>
                 <Pressable
                   onPress={() => setIsEditing(true)}
-                  className="bg-blue-500 rounded-lg p-3 flex-row items-center gap-2"
+                  className="bg-p2 rounded-lg p-3 flex-row items-center gap-2"
                 >
                   <Ionicons name="pencil" size={16} color="white" />
-                  <Text className="text-white font-medium">Edit</Text>
+                  <Text className="text-white" style={{fontFamily: 'Geist', fontWeight: '500'}}>Edit</Text>
                 </Pressable>
                 
                 <Pressable
                   onPress={handleDelete}
-                  className="bg-red-500 rounded-lg p-3"
+                  className="bg-e2 rounded-lg p-3"
                 >
                   <Ionicons name="trash" size={16} color="white" />
                 </Pressable>
@@ -191,17 +193,17 @@ export default function IngredientDetailScreen() {
               <>
                 <Pressable
                   onPress={() => setIsEditing(false)}
-                  className="bg-gray-500 rounded-lg p-3"
+                  className="bg-g3 rounded-lg p-3"
                 >
-                  <Text className="text-white font-medium">Cancel</Text>
+                  <Text className="text-white" style={{fontFamily: 'Geist', fontWeight: '500'}}>Cancel</Text>
                 </Pressable>
                 
                 <Pressable
                   onPress={handleSave}
-                  className="bg-green-500 rounded-lg p-3 flex-row items-center gap-2"
+                  className="bg-s22 rounded-lg p-3 flex-row items-center gap-2"
                 >
                   <Ionicons name="checkmark" size={16} color="white" />
-                  <Text className="text-white font-medium">Save</Text>
+                  <Text className="text-white" style={{fontFamily: 'Geist', fontWeight: '500'}}>Save</Text>
                 </Pressable>
               </>
             )}
@@ -210,7 +212,7 @@ export default function IngredientDetailScreen() {
         
         {/* Basic Information */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg text-g4 mb-4" style={{fontFamily: 'Geist', fontWeight: '600'}}>
             Basic Information
           </Text>
           
@@ -224,7 +226,7 @@ export default function IngredientDetailScreen() {
               />
               
               <View>
-                <Text className="text-sm font-medium text-gray-700 mb-2">Type</Text>
+                <Text className="text-sm text-g4 mb-2" style={{fontFamily: 'Geist', fontWeight: '500'}}>Type</Text>
                 <View className="flex-row flex-wrap gap-2">
                   {INGREDIENT_TYPES.map((type) => (
                     <Pressable
@@ -232,13 +234,13 @@ export default function IngredientDetailScreen() {
                       onPress={() => handleUpdate('type', type)}
                       className={`px-3 py-2 rounded-lg border ${
                         ingredient.type === type
-                          ? 'bg-primary-500 border-primary-500'
-                          : 'bg-white border-gray-300'
+                          ? 'bg-p1 border-p1'
+                          : 'bg-n1/80 border-g2/50'
                       }`}
                     >
-                      <Text className={`text-sm font-medium ${
-                        ingredient.type === type ? 'text-white' : 'text-gray-700'
-                      }`}>
+                      <Text className={`text-sm ${
+                        ingredient.type === type ? 'text-white' : 'text-g4'
+                      }`} style={{fontFamily: 'Geist', fontWeight: '500'}}>
                         {type}
                       </Text>
                     </Pressable>
@@ -255,18 +257,18 @@ export default function IngredientDetailScreen() {
           ) : (
             <View className="space-y-3">
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Name:</Text>
-                <Text className="font-medium text-gray-800">{ingredient.name}</Text>
+                <Text className="text-g3" style={{fontFamily: 'Geist'}}>Name:</Text>
+                <Text className="text-g4" style={{fontFamily: 'Geist', fontWeight: '500'}}>{ingredient.name}</Text>
               </View>
               
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Type:</Text>
-                <Text className="font-medium text-gray-800">{ingredient.type}</Text>
+                <Text className="text-g3" style={{fontFamily: 'Geist'}}>Type:</Text>
+                <Text className="text-g4" style={{fontFamily: 'Geist', fontWeight: '500'}}>{ingredient.type}</Text>
               </View>
               
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Bottle Size:</Text>
-                <Text className="font-medium text-gray-800">{ingredient.bottleSize}ml</Text>
+                <Text className="text-g3" style={{fontFamily: 'Geist'}}>Bottle Size:</Text>
+                <Text className="text-g4" style={{fontFamily: 'Geist', fontWeight: '500'}}>{ingredient.bottleSize}ml</Text>
               </View>
             </View>
           )}
@@ -274,7 +276,7 @@ export default function IngredientDetailScreen() {
         
         {/* Pricing Information */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg text-g4 mb-4" style={{fontFamily: 'Geist', fontWeight: '600'}}>
             Pricing & Costs
           </Text>
           
@@ -304,15 +306,15 @@ export default function IngredientDetailScreen() {
           ) : (
             <View className="space-y-3">
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Bottle Price:</Text>
-                <Text className="font-medium text-gray-800">
+                <Text className="text-g3" style={{fontFamily: 'Geist'}}>Bottle Price:</Text>
+                <Text className="text-g4" style={{fontFamily: 'Geist', fontWeight: '500'}}>
                   ${ingredient.price.toFixed(2)}
                 </Text>
               </View>
               
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Retail Price (1.5oz):</Text>
-                <Text className="font-medium text-gray-800">
+                <Text className="text-g3" style={{fontFamily: 'Geist'}}>Retail Price (1.5oz):</Text>
+                <Text className="text-g4" style={{fontFamily: 'Geist', fontWeight: '500'}}>
                   ${ingredient.retailPrice.toFixed(2)}
                 </Text>
               </View>
@@ -322,35 +324,35 @@ export default function IngredientDetailScreen() {
         
         {/* Calculated Values */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg text-g4 mb-4" style={{fontFamily: 'Geist', fontWeight: '600'}}>
             Calculated Values
           </Text>
           
           <View className="space-y-3">
             <View className="flex-row justify-between items-center">
-              <Text className="text-gray-600">Cost per Oz:</Text>
-              <Text className="font-medium text-gray-800">
+              <Text className="text-g3" style={{fontFamily: 'Geist'}}>Cost per Oz:</Text>
+              <Text className="text-g4" style={{fontFamily: 'Geist', fontWeight: '500'}}>
                 ${ingredient.costPerOz.toFixed(3)}
               </Text>
             </View>
             
             <View className="flex-row justify-between items-center">
-              <Text className="text-gray-600">Pour Cost:</Text>
-              <Text className={`font-medium ${getPourCostColor(ingredient.pourCost)}`}>
+              <Text className="text-g3" style={{fontFamily: 'Geist'}}>Pour Cost:</Text>
+              <Text className={`font-geist ${getPourCostColor(ingredient.pourCost)}`} style={{fontFamily: 'Geist', fontWeight: '500'}}>
                 {ingredient.pourCost.toFixed(1)}%
               </Text>
             </View>
             
             <View className="flex-row justify-between items-center">
-              <Text className="text-gray-600">Suggested Retail ({globalPourCostGoal}% target):</Text>
-              <Text className="font-medium text-blue-600">
+              <Text className="text-g3" style={{fontFamily: 'Geist'}}>Suggested Retail ({globalPourCostGoal}% target):</Text>
+              <Text className="text-p2" style={{fontFamily: 'Geist', fontWeight: '500'}}>
                 ${ingredient.suggestedRetail.toFixed(2)}
               </Text>
             </View>
             
             <View className="flex-row justify-between items-center">
-              <Text className="text-gray-600">Pour Cost Margin:</Text>
-              <Text className="font-medium text-green-600">
+              <Text className="text-g3" style={{fontFamily: 'Geist'}}>Pour Cost Margin:</Text>
+              <Text className="text-s22" style={{fontFamily: 'Geist', fontWeight: '500'}}>
                 ${ingredient.pourCostMargin.toFixed(2)}
               </Text>
             </View>
@@ -359,7 +361,7 @@ export default function IngredientDetailScreen() {
         
         {/* Performance Metrics */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg text-g4 mb-4" style={{fontFamily: 'Geist', fontWeight: '600'}}>
             Performance Metrics
           </Text>
           
@@ -367,16 +369,16 @@ export default function IngredientDetailScreen() {
             {/* Pour Cost Indicator */}
             <View>
               <View className="flex-row justify-between mb-2">
-                <Text className="text-sm text-gray-600">Pour Cost Performance</Text>
-                <Text className={`text-sm font-medium ${getPourCostColor(ingredient.pourCost)}`}>
+                <Text className="text-sm text-g3" style={{fontFamily: 'Geist'}}>Pour Cost Performance</Text>
+                <Text className={`text-sm ${getPourCostColor(ingredient.pourCost)}`} style={{fontFamily: 'Geist', fontWeight: '500'}}>
                   {ingredient.pourCost.toFixed(1)}% of {globalPourCostGoal}% target
                 </Text>
               </View>
-              <View className="h-3 bg-gray-200 rounded-full overflow-hidden">
+              <View className="h-3 bg-g1/80 rounded-full overflow-hidden">
                 <View 
                   className={`h-full rounded-full ${
-                    ingredient.pourCost <= 15 ? 'bg-green-500' :
-                    ingredient.pourCost <= 25 ? 'bg-yellow-500' : 'bg-red-500'
+                    ingredient.pourCost <= 15 ? 'bg-s22' :
+                    ingredient.pourCost <= 25 ? 'bg-s12' : 'bg-e2'
                   }`}
                   style={{ width: `${Math.min((ingredient.pourCost / globalPourCostGoal) * 100, 100)}%` }}
                 />
@@ -384,9 +386,9 @@ export default function IngredientDetailScreen() {
             </View>
             
             {/* Profit Analysis */}
-            <View className="bg-gray-50 p-3 rounded-lg">
-              <Text className="text-sm font-medium text-gray-700 mb-2">Profit Analysis</Text>
-              <Text className="text-xs text-gray-600">
+            <View className="bg-n1 p-3 rounded-lg">
+              <Text className="text-sm text-g4 mb-2" style={{fontFamily: 'Geist', fontWeight: '500'}}>Profit Analysis</Text>
+              <Text className="text-xs text-g3" style={{fontFamily: 'Geist'}}>
                 Current retail price of ${ingredient.retailPrice.toFixed(2)} generates a margin of ${ingredient.pourCostMargin.toFixed(2)} per 1.5oz serve.
                 {ingredient.pourCost > globalPourCostGoal ? 
                   ` Consider raising price to $${ingredient.suggestedRetail.toFixed(2)} to meet ${globalPourCostGoal}% target.` :
@@ -399,7 +401,7 @@ export default function IngredientDetailScreen() {
         
         {/* Last Updated */}
         <Card>
-          <Text className="text-sm text-gray-500 text-center">
+          <Text className="text-sm text-g3 text-center" style={{fontFamily: 'Geist'}}>
             Last updated: {new Date(ingredient.updatedAt).toLocaleString()}
           </Text>
         </Card>

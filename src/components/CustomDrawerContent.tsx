@@ -51,16 +51,16 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
     <DrawerContentScrollView 
       {...props} 
       contentContainerStyle={{ flex: 1 }}
-      className="bg-gray-50"
+      className="bg-n1"
     >
       {/* Header with Logo */}
-      <View className="px-6 py-8 pb-6 bg-white border-b border-gray-200">
+      <View className="px-6 py-8 pb-6 bg-n1/80 border-b border-g1/50">
         <Image 
           source={require('../../assets/images/PourCost-Logo-Black.png')}
           style={{ width: 140, height: 35 }}
           resizeMode="contain"
         />
-        <Text className="text-gray-600 text-sm mt-2 mb-2">
+        <Text className="text-g3 text-sm mt-2 mb-2">
           Professional cocktail costing
         </Text>
       </View>
@@ -76,13 +76,13 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
               onPress={() => handleNavigation(item.name)}
               className={`mx-3 mb-2 px-4 py-4 rounded-lg ${
                 isActive 
-                  ? 'bg-primary-100 border border-primary-200' 
-                  : 'bg-transparent active:bg-gray-100'
+                  ? 'bg-p1/30 border border-p1/40' 
+                  : 'bg-transparent active:bg-g1/60'
               }`}
             >
               <View className="flex-row items-center">
                 <View className={`w-10 h-10 rounded-lg items-center justify-center mr-3 ${
-                  isActive ? 'bg-primary-600' : 'bg-gray-200'
+                  isActive ? 'bg-p2' : 'bg-g1/80'
                 }`}>
                   <Ionicons 
                     name={item.icon} 
@@ -93,19 +93,19 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
                 
                 <View className="flex-1">
                   <Text className={`text-base font-semibold ${
-                    isActive ? 'text-primary-800' : 'text-gray-800'
+                    isActive ? 'text-p3' : 'text-g4'
                   }`}>
                     {item.label}
                   </Text>
                   <Text className={`text-sm ${
-                    isActive ? 'text-primary-600' : 'text-gray-500'
+                    isActive ? 'text-p2' : 'text-g3'
                   }`}>
                     {item.description}
                   </Text>
                 </View>
 
                 {isActive && (
-                  <View className="w-1 h-6 bg-primary-600 rounded-full ml-2" />
+                  <View className="w-1 h-6 bg-p2 rounded-full ml-2" />
                 )}
               </View>
             </Pressable>
@@ -114,11 +114,11 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
       </View>
 
       {/* Footer */}
-      <View className="px-6 py-4 border-t border-gray-200">
-        <Text className="text-gray-400 text-xs text-center">
+      <View className="px-6 py-4 border-t border-g1/50">
+        <Text className="text-g3 text-xs text-center">
           PourCost v2.0
         </Text>
-        <Text className="text-gray-400 text-xs text-center mt-1">
+        <Text className="text-g3 text-xs text-center mt-1">
           Built with React Native & Expo
         </Text>
       </View>

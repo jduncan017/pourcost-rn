@@ -181,11 +181,11 @@ export default function CalculatorScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView className="flex-1 bg-n1">
       <View className="p-4">
         {/* Quick Calculator */}
-        <Card className="mb-6">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+        <Card className="mb-6 bg-n1/80 backdrop-blur-sm border border-g1/50">
+          <Text className="text-lg font-semibold text-g4 mb-4">
             Quick Calculator
           </Text>
 
@@ -228,40 +228,40 @@ export default function CalculatorScreen() {
           />
 
           {/* Cost Display */}
-          <View className="mt-6 p-4 bg-gray-100 rounded-lg border border-gray-300">
-            <Text className="text-center text-lg font-semibold text-gray-700 mb-2">
+          <View className="mt-6 p-4 bg-g1/60 rounded-lg border border-g2/40">
+            <Text className="text-center text-lg font-semibold text-g4 mb-2">
               Cost Per Pour
             </Text>
-            <Text className="text-center text-3xl font-bold text-gray-900">
+            <Text className="text-center text-3xl font-bold text-g4">
               {`${baseCurrency === 'USD' ? '$' : ''}${costPerPour.toFixed(2)}`}
             </Text>
           </View>
 
           {/* Charge Display */}
-          <View className="mt-4 p-4 bg-primary-50 rounded-lg border-2 border-primary-200">
-            <Text className="text-center text-lg font-semibold text-primary-800 mb-2">
+          <View className="mt-4 p-4 bg-p1/10 rounded-lg border-2 border-p1/30">
+            <Text className="text-center text-lg font-semibold text-p3 mb-2">
               Suggested Charge
             </Text>
-            <Text className="text-center text-3xl font-bold text-primary-900">
+            <Text className="text-center text-3xl font-bold text-p4">
               {`${baseCurrency === 'USD' ? '$' : ''}${suggestedCharge.toFixed(2)}`}
             </Text>
-            <Text className="text-center text-sm text-primary-600 mt-2">
+            <Text className="text-center text-sm text-p2 mt-2">
               {pourCostPercentage}% pour cost • {pourSize.toFixed(2)}oz pour
             </Text>
           </View>
           
           {/* Additional Calculations */}
-          <View className="mt-4 space-y-2">
-            <View className="flex-row justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <Text className="text-gray-600 font-medium">Cost per Oz:</Text>
-              <Text className="text-gray-900 font-semibold">
+          <View className="mt-4" style={{gap: 8}}>
+            <View className="flex-row justify-between items-center p-3 bg-n2/60 rounded-lg">
+              <Text className="text-g3 font-medium">Cost per Oz:</Text>
+              <Text className="text-g4 font-semibold">
                 {`${baseCurrency === 'USD' ? '$' : ''}${costPerOz.toFixed(2)}`}
               </Text>
             </View>
             
-            <View className="flex-row justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <Text className="text-gray-600 font-medium">Pour Cost Margin:</Text>
-              <Text className="text-green-600 font-semibold">
+            <View className="flex-row justify-between items-center p-3 bg-n2/60 rounded-lg">
+              <Text className="text-g3 font-medium">Pour Cost Margin:</Text>
+              <Text className="text-s22 font-semibold">
                 {`${baseCurrency === 'USD' ? '$' : ''}${pourCostMargin.toFixed(2)}`}
               </Text>
             </View>
@@ -271,34 +271,34 @@ export default function CalculatorScreen() {
           {/* Action Buttons */}
           <Pressable
             onPress={handleSaveIngredient}
-            className="bg-primary-600 rounded-lg p-4 flex-row items-center justify-center gap-2 mt-6"
+            className="bg-s22 rounded-lg p-4 flex-row items-center justify-center gap-2 mt-6"
           >
             <Ionicons name="bookmark" size={20} color="white" />
             <Text className="text-white font-semibold">Save as Ingredient</Text>
           </Pressable>
           
-          <Text className="text-center text-gray-500 text-sm mt-2">
+          <Text className="text-center text-g3 text-sm mt-2">
             Save your calculated ingredient for use in cocktail recipes
           </Text>
         </Card>
         
         {/* Cocktail Mode */}
         {mode === 'cocktail' && (
-          <Card className="mt-6">
+          <Card className="mt-6 bg-n1/80 backdrop-blur-sm border border-g1/50">
             <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-lg font-semibold text-gray-700">
+              <Text className="text-lg font-semibold text-g4">
                 Cocktail Builder
               </Text>
               <View className="flex-row gap-2">
                 <Pressable
                   onPress={clearCocktail}
-                  className="bg-red-500 rounded-lg p-2"
+                  className="bg-e2 rounded-lg p-2"
                 >
                   <Ionicons name="trash" size={16} color="white" />
                 </Pressable>
                 <Pressable
                   onPress={() => setMode('single')}
-                  className="bg-gray-500 rounded-lg p-2"
+                  className="bg-g3 rounded-lg p-2"
                 >
                   <Ionicons name="calculator" size={16} color="white" />
                 </Pressable>
@@ -315,7 +315,7 @@ export default function CalculatorScreen() {
             
             {/* Ingredients List */}
             <View className="mt-4">
-              <Text className="text-sm font-medium text-gray-700 mb-3">
+              <Text className="text-sm font-medium text-g4 mb-3">
                 Ingredients ({cocktailIngredients.length})
               </Text>
               
@@ -358,26 +358,26 @@ export default function CalculatorScreen() {
             
             {/* Cocktail Totals */}
             {cocktailIngredients.length > 0 && (
-              <View className="mt-6 space-y-4">
+              <View className="mt-6" style={{gap: 16}}>
                 {/* Total Cost */}
-                <View className="p-4 bg-gray-100 rounded-lg border border-gray-300">
-                  <Text className="text-center text-lg font-semibold text-gray-700 mb-2">
+                <View className="p-4 bg-g1/60 rounded-lg border border-g2/40">
+                  <Text className="text-center text-lg font-semibold text-g4 mb-2">
                     Total Cost
                   </Text>
-                  <Text className="text-center text-3xl font-bold text-gray-900">
+                  <Text className="text-center text-3xl font-bold text-g4">
                     {`${baseCurrency === 'USD' ? '$' : ''}${totalCocktailCost.toFixed(2)}`}
                   </Text>
                 </View>
 
                 {/* Suggested Price */}
-                <View className="p-4 bg-primary-50 rounded-lg border-2 border-primary-200">
-                  <Text className="text-center text-lg font-semibold text-primary-800 mb-2">
+                <View className="p-4 bg-p1/10 rounded-lg border-2 border-p1/30">
+                  <Text className="text-center text-lg font-semibold text-p3 mb-2">
                     Suggested Price
                   </Text>
-                  <Text className="text-center text-3xl font-bold text-primary-900">
+                  <Text className="text-center text-3xl font-bold text-p4">
                     {`${baseCurrency === 'USD' ? '$' : ''}${totalSuggestedCharge.toFixed(2)}`}
                   </Text>
-                  <Text className="text-center text-sm text-primary-600 mt-2">
+                  <Text className="text-center text-sm text-p2 mt-2">
                     {averagePourCostPercentage.toFixed(1)}% avg pour cost • ${totalMargin.toFixed(2)} profit
                   </Text>
                 </View>
@@ -385,7 +385,7 @@ export default function CalculatorScreen() {
                 {/* Save Cocktail Button */}
                 <Pressable
                   onPress={saveCocktail}
-                  className="bg-green-500 rounded-lg p-4 flex-row items-center justify-center gap-2"
+                  className="bg-s22 rounded-lg p-4 flex-row items-center justify-center gap-2"
                 >
                   <Ionicons name="checkmark" size={20} color="white" />
                   <Text className="text-white font-semibold text-lg">Save Cocktail</Text>

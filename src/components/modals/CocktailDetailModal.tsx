@@ -62,22 +62,22 @@ export default function CocktailDetailModal({
 
   // Get pour cost color
   const getPourCostColor = (pourCost: number) => {
-    if (pourCost <= 20) return 'text-green-600';
-    if (pourCost <= 25) return 'text-yellow-600';
-    return 'text-red-600';
+    if (pourCost <= 20) return 'text-s22';
+    if (pourCost <= 25) return 'text-s12';
+    return 'text-e3';
   };
 
   // Get difficulty color
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'Easy':
-        return 'text-green-600';
+        return 'text-s22';
       case 'Medium':
-        return 'text-yellow-600';
+        return 'text-s12';
       case 'Hard':
-        return 'text-red-600';
+        return 'text-e3';
       default:
-        return 'text-gray-600';
+        return 'text-g3';
     }
   };
 
@@ -132,16 +132,16 @@ export default function CocktailDetailModal({
         {/* Header */}
         <View className="mb-6">
           <View className="flex-row items-center gap-2 mb-2">
-            <Text className="text-xl font-bold text-gray-800">
+            <Text className="text-xl font-bold text-g4">
               {cocktail.name}
             </Text>
             {cocktail.favorited && (
               <Ionicons name="heart" size={20} color="#EF4444" />
             )}
           </View>
-          <Text className="text-gray-600 mb-2">{cocktail.description}</Text>
+          <Text className="text-g3 mb-2">{cocktail.description}</Text>
           <View className="flex-row items-center gap-4">
-            <Text className="text-sm text-gray-500">
+            <Text className="text-sm text-g3">
               {cocktail.category} • {cocktail.ingredients.length} ingredients
             </Text>
             <Text
@@ -149,15 +149,15 @@ export default function CocktailDetailModal({
             >
               {cocktail.difficulty}
             </Text>
-            <Text className="text-sm text-gray-500">
+            <Text className="text-sm text-g3">
               {cocktail.prepTime} min prep
             </Text>
           </View>
         </View>
 
         {/* Ingredients */}
-        <View className="bg-gray-50 p-4 rounded-lg mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-3">
+        <View className="bg-n1 p-4 rounded-lg mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-3">
             Ingredients
           </Text>
 
@@ -168,18 +168,18 @@ export default function CocktailDetailModal({
                 className="flex-row justify-between items-center"
               >
                 <View className="flex-1">
-                  <Text className="font-medium text-gray-800">
+                  <Text className="font-medium text-g4">
                     {ingredient.name}
                   </Text>
-                  <Text className="text-sm text-gray-600">
+                  <Text className="text-sm text-g3">
                     {ingredient.type}
                   </Text>
                 </View>
                 <View className="text-right">
-                  <Text className="font-medium text-gray-800">
+                  <Text className="font-medium text-g4">
                     {ingredient.amount}oz
                   </Text>
-                  <Text className="text-sm text-gray-600">
+                  <Text className="text-sm text-g3">
                     {currencySymbol}{ingredient.cost.toFixed(2)}
                   </Text>
                 </View>
@@ -189,28 +189,28 @@ export default function CocktailDetailModal({
         </View>
 
         {/* Cost Breakdown */}
-        <View className="bg-gray-50 p-4 rounded-lg mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-3">
+        <View className="bg-n1 p-4 rounded-lg mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-3">
             Cost Analysis
           </Text>
 
           <View className="space-y-3">
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Total Cost:</Text>
-              <Text className="font-medium text-gray-800">
+              <Text className="text-g3">Total Cost:</Text>
+              <Text className="font-medium text-g4">
                 {currencySymbol}{cocktail.totalCost.toFixed(2)}
               </Text>
             </View>
 
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Suggested Price:</Text>
-              <Text className="font-medium text-gray-800">
+              <Text className="text-g3">Suggested Price:</Text>
+              <Text className="font-medium text-g4">
                 {currencySymbol}{cocktail.suggestedPrice.toFixed(2)}
               </Text>
             </View>
 
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Pour Cost:</Text>
+              <Text className="text-g3">Pour Cost:</Text>
               <Text
                 className={`font-medium ${getPourCostColor(cocktail.pourCostPercentage)}`}
               >
@@ -219,8 +219,8 @@ export default function CocktailDetailModal({
             </View>
 
             <View className="flex-row justify-between">
-              <Text className="text-gray-600">Profit Margin:</Text>
-              <Text className="font-medium text-green-600">
+              <Text className="text-g3">Profit Margin:</Text>
+              <Text className="font-medium text-s22">
                 {currencySymbol}{cocktail.profitMargin.toFixed(2)}
               </Text>
             </View>
@@ -228,14 +228,14 @@ export default function CocktailDetailModal({
         </View>
 
         {/* Performance */}
-        <View className="bg-gray-50 p-4 rounded-lg mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-3">
+        <View className="bg-n1 p-4 rounded-lg mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-3">
             Performance
           </Text>
 
           <PourCostPerformanceBar pourCostPercentage={cocktail.pourCostPercentage} />
 
-          <Text className="text-xs text-gray-600 mt-3">
+          <Text className="text-xs text-g3 mt-3">
             This cocktail generates a profit of {currencySymbol}
             {cocktail.profitMargin.toFixed(2)} at the suggested price of {currencySymbol}
             {cocktail.suggestedPrice.toFixed(2)}.
@@ -244,11 +244,11 @@ export default function CocktailDetailModal({
 
         {/* Notes */}
         {cocktail.notes && (
-          <View className="bg-gray-50 p-4 rounded-lg mb-6">
-            <Text className="text-lg font-semibold text-gray-700 mb-2">
+          <View className="bg-n1 p-4 rounded-lg mb-6">
+            <Text className="text-lg font-semibold text-g4 mb-2">
               Notes
             </Text>
-            <Text className="text-gray-700">{cocktail.notes}</Text>
+            <Text className="text-g4">{cocktail.notes}</Text>
           </View>
         )}
 
@@ -257,7 +257,7 @@ export default function CocktailDetailModal({
           <Pressable
             onPress={handleToggleFavorite}
             className={`flex-1 rounded-lg p-3 flex-row items-center justify-center gap-2 ${
-              cocktail.favorited ? 'bg-red-500' : 'bg-gray-500'
+              cocktail.favorited ? 'bg-e2' : 'bg-n10'
             }`}
           >
             <Ionicons
@@ -272,7 +272,7 @@ export default function CocktailDetailModal({
 
           <Pressable
             onPress={handleEdit}
-            className="flex-1 bg-blue-500 rounded-lg p-3 flex-row items-center justify-center gap-2"
+            className="flex-1 bg-p2 rounded-lg p-3 flex-row items-center justify-center gap-2"
           >
             <Ionicons name="pencil" size={16} color="white" />
             <Text className="text-white font-medium text-sm">Edit</Text>
@@ -280,14 +280,14 @@ export default function CocktailDetailModal({
 
           <Pressable
             onPress={handleDelete}
-            className="flex-1 bg-red-500 rounded-lg p-3 flex-row items-center justify-center gap-2"
+            className="flex-1 bg-e2 rounded-lg p-3 flex-row items-center justify-center gap-2"
           >
             <Ionicons name="trash" size={16} color="white" />
             <Text className="text-white font-medium text-sm">Delete</Text>
           </Pressable>
         </View>
 
-        <Text className="text-center text-gray-500 text-xs">
+        <Text className="text-center text-g3 text-xs">
           Created: {new Date(cocktail.createdAt).toLocaleDateString()} • Last
           updated: {new Date(cocktail.updatedAt).toLocaleDateString()}
         </Text>

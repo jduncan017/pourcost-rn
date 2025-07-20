@@ -106,23 +106,23 @@ export default function IngredientForm({
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView className="flex-1 bg-n1">
       <View className="p-4">
         {/* Header */}
         <View className="flex-row items-center justify-between mb-6">
-          <Text className="text-2xl font-bold text-gray-800">
+          <Text className="text-2xl font-bold text-g4">
             {ingredient ? 'Edit Ingredient' : 'New Ingredient'}
           </Text>
           <Pressable
             onPress={onCancel}
-            className="p-2 rounded-full bg-gray-200 active:bg-gray-300"
+            className="p-2 rounded-full bg-g1/80 active:bg-g2"
           >
             <Ionicons name="close" size={24} color="#374151" />
           </Pressable>
         </View>
 
         {/* Form */}
-        <View className="bg-white rounded-lg p-4 mb-4">
+        <View className="bg-n1/80 rounded-lg p-4 mb-4">
           <TextInput
             label="Ingredient Name"
             value={formData.name}
@@ -135,8 +135,8 @@ export default function IngredientForm({
 
           {/* Product Size */}
           <View className="mb-4">
-            <Text className="text-base font-medium text-gray-700 mb-2">
-              Bottle/Package Size <Text className="text-red-500">*</Text>
+            <Text className="text-base font-medium text-g4 mb-2">
+              Bottle/Package Size <Text className="text-e3">*</Text>
             </Text>
             <BottleSizeDropdown
               value={volumeToMl(formData.productSize)}
@@ -161,12 +161,12 @@ export default function IngredientForm({
 
           {/* Cost Per Pour Preview */}
           {formData.productCost > 0 && (
-            <View className="bg-primary-50 p-4 rounded-lg border border-primary-200 mb-4">
-              <Text className="text-sm font-medium text-primary-800 mb-2">
+            <View className="bg-p1/20 p-4 rounded-lg border border-p1/40 mb-4">
+              <Text className="text-sm font-medium text-p3 mb-2">
                 Cost Preview (1 oz / 30ml pour)
               </Text>
               <View className="flex-row justify-between items-center">
-                <Text className="text-primary-600">
+                <Text className="text-p2">
                   {formatVolumeDisplay(formData.productSize)} bottle
                 </Text>
                 <CurrencyDisplay 
@@ -176,7 +176,7 @@ export default function IngredientForm({
                 />
               </View>
               <View className="flex-row justify-between items-center mt-1">
-                <Text className="text-primary-600">Cost per pour:</Text>
+                <Text className="text-p2">Cost per pour:</Text>
                 <CurrencyDisplay 
                   amount={formData.productCost / (formData.productSize.value / 30)} 
                   currency={currency} 
@@ -193,9 +193,9 @@ export default function IngredientForm({
         <View className="flex-row space-x-3">
           <Pressable
             onPress={onCancel}
-            className="flex-1 py-4 bg-gray-200 rounded-lg active:bg-gray-300"
+            className="flex-1 py-4 bg-g1/80 rounded-lg active:bg-g2"
           >
-            <Text className="text-center text-gray-700 font-semibold">Cancel</Text>
+            <Text className="text-center text-g4 font-semibold">Cancel</Text>
           </Pressable>
           
           <Pressable
@@ -203,8 +203,8 @@ export default function IngredientForm({
             disabled={isSubmitting}
             className={`flex-1 py-4 rounded-lg ${
               isSubmitting 
-                ? 'bg-gray-400' 
-                : 'bg-primary-600 active:bg-primary-700'
+                ? 'bg-g3' 
+                : 'bg-p2 active:bg-p3'
             }`}
           >
             <Text className="text-center text-white font-semibold">

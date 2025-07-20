@@ -12,7 +12,7 @@ export default function Layout({
   children,
   scrollable = true,
   padding = true,
-  backgroundColor = 'bg-gray-50',
+  backgroundColor = 'bg-n1',
 }: LayoutProps) {
   const Container = scrollable ? ScrollView : View;
   const containerProps = scrollable 

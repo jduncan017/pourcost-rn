@@ -22,17 +22,17 @@ export default function EmptyState({
   return (
     <View className={`items-center justify-center py-12 px-6 ${className}`}>
       {/* Icon */}
-      <View className="w-20 h-20 bg-gray-100 rounded-full items-center justify-center mb-4">
+      <View className="w-20 h-20 bg-g1/60 rounded-full items-center justify-center mb-4">
         <Ionicons name={icon} size={40} color="#9CA3AF" />
       </View>
 
       {/* Title */}
-      <Text className="text-xl font-semibold text-gray-800 mb-2 text-center">
+      <Text className="text-xl font-semibold text-g4 mb-2 text-center">
         {title}
       </Text>
 
       {/* Description */}
-      <Text className="text-gray-600 text-center mb-6 leading-relaxed">
+      <Text className="text-g3 text-center mb-6 leading-relaxed">
         {description}
       </Text>
 
@@ -40,7 +40,7 @@ export default function EmptyState({
       {actionLabel && onAction && (
         <Pressable
           onPress={onAction}
-          className="bg-primary-600 px-6 py-3 rounded-lg active:bg-primary-700"
+          className="bg-p2 px-6 py-3 rounded-lg active:bg-p3"
         >
           <Text className="text-white font-semibold text-base">
             {actionLabel}

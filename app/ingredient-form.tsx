@@ -120,7 +120,7 @@ export default function IngredientFormScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView className="flex-1 bg-n1">
       <View className="p-4">
         {/* Header */}
         <View className="flex-row items-center justify-between mb-6">
@@ -132,10 +132,10 @@ export default function IngredientFormScreen() {
               <Ionicons name="arrow-back" size={20} color="#374151" />
             </Pressable>
             <View>
-              <Text className="text-2xl font-bold text-gray-800">
+              <Text className="text-2xl font-bold text-g4">
                 {isEditing ? 'Edit Ingredient' : 'Create Ingredient'}
               </Text>
-              <Text className="text-gray-600">
+              <Text className="text-g3">
                 {isEditing ? 'Update ingredient details' : 'Add a new ingredient to your library'}
               </Text>
             </View>
@@ -144,7 +144,7 @@ export default function IngredientFormScreen() {
         
         {/* Basic Information */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-4">
             Basic Information
           </Text>
           
@@ -157,7 +157,7 @@ export default function IngredientFormScreen() {
             />
             
             <View>
-              <Text className="text-sm font-medium text-gray-700 mb-2">Type *</Text>
+              <Text className="text-sm font-medium text-g4 mb-2">Type *</Text>
               <View className="flex-row flex-wrap gap-2">
                 {INGREDIENT_TYPES.map((ingredientType) => (
                   <Pressable
@@ -165,12 +165,12 @@ export default function IngredientFormScreen() {
                     onPress={() => setType(ingredientType)}
                     className={`px-3 py-2 rounded-lg border ${
                       type === ingredientType
-                        ? 'bg-primary-500 border-primary-500'
+                        ? 'bg-p1 border-primary-500'
                         : 'bg-white border-gray-300'
                     }`}
                   >
                     <Text className={`text-sm font-medium ${
-                      type === ingredientType ? 'text-white' : 'text-gray-700'
+                      type === ingredientType ? 'text-white' : 'text-g4'
                     }`}>
                       {ingredientType}
                     </Text>
@@ -189,7 +189,7 @@ export default function IngredientFormScreen() {
         
         {/* Pricing Information */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-4">
             Pricing Information
           </Text>
           
@@ -219,41 +219,41 @@ export default function IngredientFormScreen() {
         
         {/* Calculated Values */}
         <Card className="mb-4">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-4">
             Calculated Values
           </Text>
           
           <View className="space-y-3">
             <View className="flex-row justify-between items-center">
-              <Text className="text-gray-600">Cost per Oz:</Text>
-              <Text className="font-medium text-gray-800">
+              <Text className="text-g3">Cost per Oz:</Text>
+              <Text className="font-medium text-g4">
                 ${costPerOz.toFixed(3)}
               </Text>
             </View>
             
             <View className="flex-row justify-between items-center">
-              <Text className="text-gray-600">Cost for 1.5oz:</Text>
-              <Text className="font-medium text-gray-800">
+              <Text className="text-g3">Cost for 1.5oz:</Text>
+              <Text className="font-medium text-g4">
                 ${costFor15oz.toFixed(2)}
               </Text>
             </View>
             
             <View className="flex-row justify-between items-center">
-              <Text className="text-gray-600">Pour Cost:</Text>
+              <Text className="text-g3">Pour Cost:</Text>
               <Text className={`font-medium ${getPourCostColor(pourCostPercentage)}`}>
                 {pourCostPercentage.toFixed(1)}%
               </Text>
             </View>
             
             <View className="flex-row justify-between items-center">
-              <Text className="text-gray-600">Suggested Retail (20% target):</Text>
+              <Text className="text-g3">Suggested Retail (20% target):</Text>
               <Text className="font-medium text-blue-600">
                 ${suggestedRetail.toFixed(2)}
               </Text>
             </View>
             
             <View className="flex-row justify-between items-center">
-              <Text className="text-gray-600">Profit Margin:</Text>
+              <Text className="text-g3">Profit Margin:</Text>
               <Text className="font-medium text-green-600">
                 ${pourCostMargin.toFixed(2)}
               </Text>
@@ -263,7 +263,7 @@ export default function IngredientFormScreen() {
         
         {/* Performance Indicator */}
         <Card className="mb-6">
-          <Text className="text-lg font-semibold text-gray-700 mb-4">
+          <Text className="text-lg font-semibold text-g4 mb-4">
             Performance Preview
           </Text>
           
@@ -276,7 +276,7 @@ export default function IngredientFormScreen() {
             onPress={handleSave}
             disabled={!isValid}
             className={`rounded-lg p-4 flex-row items-center justify-center gap-2 ${
-              isValid ? 'bg-green-500' : 'bg-gray-300'
+              isValid ? 'bg-s22' : 'bg-gray-300'
             }`}
           >
             <Ionicons name="checkmark" size={20} color="white" />

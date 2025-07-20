@@ -50,17 +50,17 @@ export default function Modal({
   const sizeStyles = getSizeStyles();
 
   const ModalContent = () => (
-    <View className={`bg-white rounded-lg overflow-hidden ${className}`} style={sizeStyles}>
+    <View className={`bg-n1/80 rounded-lg overflow-hidden ${className}`} style={sizeStyles}>
       {/* Header */}
       {(title || showCloseButton) && (
-        <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
-          <Text className="text-lg font-semibold text-gray-800 flex-1">
+        <View className="flex-row items-center justify-between px-4 py-3 border-b border-g1/50 bg-n1">
+          <Text className="text-lg font-semibold text-g4 flex-1">
             {title || ''}
           </Text>
           {showCloseButton && (
             <Pressable
               onPress={onClose}
-              className="p-1 rounded-full bg-gray-200 active:bg-gray-300"
+              className="p-1 rounded-full bg-g1/80 active:bg-g2"
             >
               <Ionicons name="close" size={20} color="#374151" />
             </Pressable>
@@ -131,16 +131,16 @@ export const ConfirmModal = ({
     scrollable={false}
   >
     <View className="p-6">
-      <Text className="text-gray-700 text-base leading-relaxed mb-6">
+      <Text className="text-g4 text-base leading-relaxed mb-6">
         {message}
       </Text>
       
       <View className="flex-row space-x-3">
         <Pressable
           onPress={onClose}
-          className="flex-1 py-3 bg-gray-200 rounded-lg active:bg-gray-300"
+          className="flex-1 py-3 bg-g1/80 rounded-lg active:bg-g2"
         >
-          <Text className="text-center text-gray-700 font-semibold">
+          <Text className="text-center text-g4 font-semibold">
             {cancelText}
           </Text>
         </Pressable>
@@ -149,8 +149,8 @@ export const ConfirmModal = ({
           onPress={onConfirm}
           className={`flex-1 py-3 rounded-lg ${
             destructive 
-              ? 'bg-red-600 active:bg-red-700' 
-              : 'bg-primary-600 active:bg-primary-700'
+              ? 'bg-red-600 active:bg-e3' 
+              : 'bg-p2 active:bg-p3'
           }`}
         >
           <Text className="text-center text-white font-semibold">
@@ -183,13 +183,13 @@ export const InfoModal = ({
     scrollable={false}
   >
     <View className="p-6">
-      <Text className="text-gray-700 text-base leading-relaxed mb-6">
+      <Text className="text-g4 text-base leading-relaxed mb-6">
         {message}
       </Text>
       
       <Pressable
         onPress={onClose}
-        className="py-3 bg-primary-600 rounded-lg active:bg-primary-700"
+        className="py-3 bg-p2 rounded-lg active:bg-p3"
       >
         <Text className="text-center text-white font-semibold">
           {buttonText}

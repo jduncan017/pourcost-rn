@@ -20,7 +20,7 @@ export default function LoadingSpinner({
     <View className={`items-center justify-center ${className}`}>
       <ActivityIndicator size={size} color={color} />
       {message && (
-        <Text className="text-gray-600 text-base mt-3 text-center">
+        <Text className="text-g3 text-base mt-3 text-center">
           {message}
         </Text>
       )}
@@ -29,7 +29,7 @@ export default function LoadingSpinner({
 
   if (overlay) {
     return (
-      <View className="absolute inset-0 bg-white/80 items-center justify-center z-50">
+      <View className="absolute inset-0 bg-n1/80/80 items-center justify-center z-50">
         {content}
       </View>
     );
@@ -40,7 +40,7 @@ export default function LoadingSpinner({
 
 // Convenience components for common use cases
 export const FullScreenLoader = ({ message = 'Loading...' }: { message?: string }) => (
-  <View className="flex-1 items-center justify-center bg-gray-50">
+  <View className="flex-1 items-center justify-center bg-n1">
     <LoadingSpinner message={message} />
   </View>
 );
