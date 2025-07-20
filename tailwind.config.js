@@ -16,32 +16,56 @@ module.exports = {
   important: true,
   theme: {
     extend: {
-      // PourCost brand colors (structured for v4 migration)
+      // PourCost brand colors based on design guide
       colors: {
+        // Primary colors
+        p1: '#3262C2',
+        p2: '#2C3E63', 
+        p3: '#1D273C',
+        p4: '#03080F',
+
+        // Neutral colors
+        n1: '#FFFFFF',
+        n2: '#FCF9ED',
+        n3: '#ECE7D1', 
+        n4: '#CEC59D',
+
+        // Grey colors
+        g1: '#EEEEEE',
+        g2: '#AFAFAF',
+        g3: '#585858',
+        g4: '#282829',
+
+        // Secondary yellows
+        s11: '#FBE09D',
+        s12: '#DCB962',
+        s13: '#AF8827', 
+        s14: '#694920',
+
+        // Secondary teals
+        s21: '#51CCAE',
+        s22: '#439883',
+        s23: '#286052',
+        s24: '#062920',
+
+        // Secondary purples
+        s31: '#7663E7',
+        s32: '#594DA5', 
+        s33: '#382E78',
+        s34: '#251C5F',
+
+        // Legacy primary mapping (for backward compatibility)
         primary: {
           50: '#EFF6FF',
           100: '#DBEAFE',
           200: '#BFDBFE',
           300: '#93C5FD',
           400: '#60A5FA',
-          500: '#3B82F6',
-          600: '#2563EB',
-          700: '#1D4ED8',
+          500: '#3262C2', // Maps to p1
+          600: '#2C3E63', // Maps to p2
+          700: '#1D273C', // Maps to p3
           800: '#1E40AF',
-          900: '#1E3A8A',
-        },
-        // Additional PourCost colors
-        accent: {
-          50: '#F0FDF4',
-          100: '#DCFCE7',
-          200: '#BBF7D0',
-          300: '#86EFAC',
-          400: '#4ADE80',
-          500: '#22C55E',
-          600: '#16A34A',
-          700: '#15803D',
-          800: '#166534',
-          900: '#14532D',
+          900: '#03080F', // Maps to p4
         },
       },
       // Custom font family for PourCost
