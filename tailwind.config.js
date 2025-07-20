@@ -11,6 +11,9 @@ module.exports = {
   ],
   presets: [require("nativewind/preset")],
   
+  // Enable dark mode with class strategy
+  darkMode: 'class',
+  
   // Ensure proper web support
   mode: 'jit',
   important: true,
@@ -53,6 +56,12 @@ module.exports = {
         s32: '#594DA5', 
         s33: '#382E78',
         s34: '#251C5F',
+
+        // Error/caution colors (reds)
+        e1: '#E08A8F', // Light red/pink
+        e2: '#AB545A', // Base color (provided)
+        e3: '#7A3E42', // Dark red
+        e4: '#4A252A', // Very dark red
 
         // Legacy primary mapping (for backward compatibility)
         primary: {

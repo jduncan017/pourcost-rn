@@ -2,7 +2,7 @@
 import '../global.css';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -11,6 +11,7 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -46,20 +47,26 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <ThemeProvider>
+      <RootLayoutNav />
+    </ThemeProvider>
+  );
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  const { isDarkMode } = useTheme();
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <NavigationThemeProvider value={isDarkMode ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="cocktail-form" options={{ presentation: 'modal', title: 'Cocktail Form' }} />
+          <Stack.Screen name="ingredient-form" options={{ presentation: 'modal', title: 'Ingredient Form' }} />
+          <Stack.Screen name="ingredient-detail" options={{ presentation: 'modal', title: 'Ingredient Details' }} />
         </Stack>
-      </ThemeProvider>
+      </NavigationThemeProvider>
     </GestureHandlerRootView>
   );
 }

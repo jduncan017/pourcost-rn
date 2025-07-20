@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, Alert, Switch } from 'react-native';
 import { useAppStore } from '@/src/stores/app-store';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import CustomSlider from '@/src/components/ui/CustomSlider';
 import Modal from '@/src/components/ui/Modal';
@@ -12,11 +13,11 @@ import Card from '@/src/components/ui/Card';
  */
 export default function SettingsScreen() {
   const { measurementSystem, setMeasurementSystem, baseCurrency } = useAppStore();
+  const { isDarkMode, toggleTheme } = useTheme();
   
   // Local state for various settings
   const [globalPourCostGoal, setGlobalPourCostGoal] = useState(20); // Default 20%
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState(baseCurrency);
   
@@ -116,21 +117,19 @@ export default function SettingsScreen() {
             Business Settings
           </Text>
           
-          <View className="space-y-4">
-            <View>
-              <CustomSlider
-                label="Global Pour Cost Goal"
-                minValue={10}
-                maxValue={40}
-                value={globalPourCostGoal}
-                onValueChange={setGlobalPourCostGoal}
-                unit="%"
-                step={0.5}
-              />
-              <Text className="text-xs text-gray-500 mt-1">
-                Target pour cost percentage for suggested retail pricing
-              </Text>
-            </View>
+          <View>
+            <CustomSlider
+              label="Global Pour Cost Goal"
+              minValue={10}
+              maxValue={40}
+              value={globalPourCostGoal}
+              onValueChange={setGlobalPourCostGoal}
+              unit="%"
+              step={0.5}
+            />
+            <Text className="text-xs text-gray-500 mt-2">
+              Target pour cost percentage for suggested retail pricing
+            </Text>
           </View>
         </Card>
         
@@ -166,7 +165,7 @@ export default function SettingsScreen() {
             App Preferences
           </Text>
           
-          <View className="space-y-4">
+          <View style={{gap: 16}}>
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
                 <Text className="font-medium text-gray-800">Push Notifications</Text>
@@ -186,10 +185,10 @@ export default function SettingsScreen() {
                 <Text className="text-sm text-gray-600">Use dark theme throughout the app</Text>
               </View>
               <Switch
-                value={darkMode}
-                onValueChange={setDarkMode}
+                value={isDarkMode}
+                onValueChange={toggleTheme}
                 trackColor={{ false: '#E5E7EB', true: '#3B82F6' }}
-                thumbColor={darkMode ? '#FFFFFF' : '#9CA3AF'}
+                thumbColor={isDarkMode ? '#FFFFFF' : '#9CA3AF'}
               />
             </View>
           </View>
@@ -201,7 +200,7 @@ export default function SettingsScreen() {
             Data Management
           </Text>
           
-          <View className="space-y-3">
+          <View style={{gap: 12}}>
             <Pressable 
               onPress={handleExportData}
               className="bg-blue-50 p-4 rounded-lg active:bg-blue-100 flex-row items-center gap-3"
@@ -253,7 +252,7 @@ export default function SettingsScreen() {
           <Text className="text-lg font-semibold text-gray-700 mb-3">
             Account
           </Text>
-          <View className="space-y-3">
+          <View style={{gap: 12}}>
             <Pressable className="bg-gray-50 p-4 rounded-lg active:bg-gray-100 flex-row items-center gap-3">
               <Ionicons name="person" size={20} color="#6B7280" />
               <View className="flex-1">
@@ -294,7 +293,7 @@ export default function SettingsScreen() {
           <Text className="text-lg font-semibold text-gray-700 mb-3">
             About
           </Text>
-          <View className="space-y-3">
+          <View style={{gap: 12}}>
             <View className="bg-gray-50 p-4 rounded-lg flex-row items-center gap-3">
               <Ionicons name="information-circle" size={20} color="#6B7280" />
               <View className="flex-1">
@@ -335,7 +334,7 @@ export default function SettingsScreen() {
           onClose={() => setShowCurrencyModal(false)}
           title="Select Currency"
         >
-          <View className="space-y-2">
+          <View style={{gap: 8}}>
             {currencies.map((currency) => (
               <Pressable
                 key={currency.code}
