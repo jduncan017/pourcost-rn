@@ -3,17 +3,17 @@ module.exports = {
   // NativeWind v4 + Tailwind v3 configuration
   // Structured for easy migration to v5 + v4 when stable
   content: [
-    "./App.{js,jsx,ts,tsx}",
-    "./app/**/*.{js,jsx,ts,tsx}",
-    "./components/**/*.{js,jsx,ts,tsx}",
-    "./constants/**/*.{js,jsx,ts,tsx}",
-    "./src/**/*.{js,jsx,ts,tsx}",
+    './App.{js,jsx,ts,tsx}',
+    './app/**/*.{js,jsx,ts,tsx}',
+    './components/**/*.{js,jsx,ts,tsx}',
+    './constants/**/*.{js,jsx,ts,tsx}',
+    './src/**/*.{js,jsx,ts,tsx}',
   ],
-  presets: [require("nativewind/preset")],
-  
+  presets: [require('nativewind/preset')],
+
   // Enable dark mode with class strategy
   darkMode: 'class',
-  
+
   // Ensure proper web support
   mode: 'jit',
   important: true,
@@ -23,26 +23,26 @@ module.exports = {
       colors: {
         // Primary colors
         p1: '#3262C2',
-        p2: '#2C3E63', 
+        p2: '#2C3E63',
         p3: '#1D273C',
-        p4: '#03080F',
+        p4: '#041021',
 
         // Neutral colors
         n1: '#FFFFFF',
         n2: '#FCF9ED',
-        n3: '#ECE7D1', 
+        n3: '#ECE7D1',
         n4: '#CEC59D',
 
         // Grey colors
         g1: '#EEEEEE',
         g2: '#AFAFAF',
         g3: '#585858',
-        g4: '#282829',
+        g4: '#111111',
 
         // Secondary yellows
         s11: '#FBE09D',
         s12: '#DCB962',
-        s13: '#AF8827', 
+        s13: '#AF8827',
         s14: '#694920',
 
         // Secondary teals
@@ -53,46 +53,30 @@ module.exports = {
 
         // Secondary purples
         s31: '#7663E7',
-        s32: '#594DA5', 
+        s32: '#594DA5',
         s33: '#382E78',
         s34: '#251C5F',
 
         // Error/caution colors (reds)
-        e1: '#E08A8F', // Light red/pink
-        e2: '#AB545A', // Base color (provided)
-        e3: '#7A3E42', // Dark red
-        e4: '#4A252A', // Very dark red
-
-        // Legacy primary mapping (for backward compatibility)
-        primary: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          300: '#93C5FD',
-          400: '#60A5FA',
-          500: '#3262C2', // Maps to p1
-          600: '#2C3E63', // Maps to p2
-          700: '#1D273C', // Maps to p3
-          800: '#1E40AF',
-          900: '#03080F', // Maps to p4
-        },
+        e1: '#D63663', // Light red/pink
+        e2: '#B0244B', // Base color (provided)
+        e3: '#780A29', // Dark red
+        e4: '#4C0015', // Very dark red
       },
       // Custom font family for PourCost
       fontFamily: {
-        'geist': ['Geist', 'system-ui', 'sans-serif'],
-        'geist-mono': ['GeistMono', 'ui-monospace', 'monospace'],
-        'sans': ['Geist', 'system-ui', 'sans-serif'],
-        'mono': ['GeistMono', 'ui-monospace', 'monospace'],
+        geist: ['Geist', 'system-ui', 'sans-serif'],
+        sans: ['Geist', 'system-ui', 'sans-serif'], // Default to Geist
       },
       // Custom spacing for mobile-first design
       spacing: {
-        '18': '4.5rem',
-        '22': '5.5rem',
+        18: '4.5rem',
+        22: '5.5rem',
       },
     },
   },
   plugins: [],
-  
+
   // Future v4 migration notes:
   // When migrating to v4, this config will become CSS-based:
   // - Colors will move to @theme in global.css

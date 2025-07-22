@@ -1,6 +1,9 @@
 import React from 'react';
 import { View, Text, Pressable, Dimensions } from 'react-native';
-import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
+import {
+  PanGestureHandler,
+  PanGestureHandlerGestureEvent,
+} from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedGestureHandler,
   useAnimatedStyle,
@@ -11,6 +14,7 @@ import Animated, {
   interpolateColor,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import Card from './ui/Card';
 
 interface SwipeableCardProps {
   children: React.ReactNode;
@@ -65,22 +69,26 @@ export default function SwipeableCard({
     } else if (direction === 'right' && onSwipeRight) {
       onSwipeRight();
     }
-    
+
     // Reset position
     translateX.value = withSpring(0);
   };
 
-  const gestureHandler = useAnimatedGestureHandler<PanGestureHandlerGestureEvent, { startX: number }>({
+  const gestureHandler = useAnimatedGestureHandler<
+    PanGestureHandlerGestureEvent,
+    { startX: number }
+  >({
     onStart: (_, context) => {
       context.startX = translateX.value;
     },
     onActive: (event, context) => {
       // Only activate horizontal swipe if the gesture is primarily horizontal
-      const isHorizontalGesture = Math.abs(event.translationX) > Math.abs(event.translationY * 1.5);
-      
+      const isHorizontalGesture =
+        Math.abs(event.translationX) > Math.abs(event.translationY * 1.5);
+
       if (isHorizontalGesture) {
         const newTranslateX = context.startX + event.translationX;
-        
+
         // Limit swipe distance
         if (newTranslateX > 0) {
           // Swiping right (revealing left action)
@@ -93,7 +101,7 @@ export default function SwipeableCard({
     },
     onEnd: (event) => {
       const shouldTrigger = Math.abs(translateX.value) > threshold;
-      
+
       if (shouldTrigger) {
         if (translateX.value > 0) {
           runOnJS(triggerAction)('left');
@@ -120,7 +128,7 @@ export default function SwipeableCard({
       [0, 1],
       'clamp'
     );
-    
+
     return {
       opacity,
       transform: [
@@ -143,7 +151,7 @@ export default function SwipeableCard({
       [1, 0],
       'clamp'
     );
-    
+
     return {
       opacity,
       transform: [
@@ -160,13 +168,13 @@ export default function SwipeableCard({
   });
 
   return (
-    <View className={`relative overflow-hidden ${className}`}>
+    <Card className={`relative overflow-hidden ${className}`}>
       {/* Left Action (Edit) */}
       {onSwipeLeft && (
-        <Animated.View 
+        <Animated.View
           className="absolute left-0 top-0 bottom-0 flex-row items-center justify-center px-6"
           style={[
-            { 
+            {
               backgroundColor: leftAction.backgroundColor,
               width: maxSwipe,
             },
@@ -174,12 +182,12 @@ export default function SwipeableCard({
           ]}
         >
           <View className="items-center">
-            <Ionicons 
-              name={leftAction.icon} 
-              size={24} 
-              color={leftAction.color} 
+            <Ionicons
+              name={leftAction.icon}
+              size={24}
+              color={leftAction.color}
             />
-            <Text 
+            <Text
               className="text-sm font-medium mt-1"
               style={{ color: leftAction.color }}
             >
@@ -191,10 +199,10 @@ export default function SwipeableCard({
 
       {/* Right Action (Delete) */}
       {onSwipeRight && (
-        <Animated.View 
+        <Animated.View
           className="absolute right-0 top-0 bottom-0 flex-row items-center justify-center px-6"
           style={[
-            { 
+            {
               backgroundColor: rightAction.backgroundColor,
               width: maxSwipe,
             },
@@ -202,12 +210,12 @@ export default function SwipeableCard({
           ]}
         >
           <View className="items-center">
-            <Ionicons 
-              name={rightAction.icon} 
-              size={24} 
-              color={rightAction.color} 
+            <Ionicons
+              name={rightAction.icon}
+              size={24}
+              color={rightAction.color}
             />
-            <Text 
+            <Text
               className="text-sm font-medium mt-1"
               style={{ color: rightAction.color }}
             >
@@ -218,16 +226,14 @@ export default function SwipeableCard({
       )}
 
       {/* Main Card Content */}
-      <PanGestureHandler 
+      <PanGestureHandler
         onGestureEvent={gestureHandler}
         activeOffsetX={[-10, 10]}
         failOffsetY={[-15, 15]}
         shouldCancelWhenOutside={true}
       >
-        <Animated.View style={cardStyle}>
-          {children}
-        </Animated.View>
+        <Animated.View style={cardStyle}>{children}</Animated.View>
       </PanGestureHandler>
-    </View>
+    </Card>
   );
 }

@@ -3,6 +3,7 @@ import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import SwipeableCard from './SwipeableCard';
 import CurrencyDisplay from './ui/CurrencyDisplay';
+import HighlightBox from './ui/HighlightBox';
 
 interface CocktailIngredient {
   name: string;
@@ -41,51 +42,40 @@ export default function CocktailListItem({
       onSwipeRight={onDelete}
       className="mb-3"
     >
-      <Pressable
-        onPress={onPress}
-        className="bg-n1/80 p-4 rounded-lg border border-g1/50 active:bg-n1"
-      >
+      <Pressable onPress={onPress} className="">
         {/* Header */}
         <View className="flex-row items-start justify-between mb-3">
           <View className="flex-1 mr-3">
-            <Text className="text-lg font-semibold text-g4 mb-1">
+            <Text className="text-lg font-semibold text-g4 dark:text-n1 mb-1">
               {name}
             </Text>
           </View>
 
           {/* Dynamic Highlight Box */}
-          <View className="bg-p1/20 px-3 py-2 rounded-lg border border-p1/40">
-            {sortBy === 'profitMargin' || sortBy === 'margin' ? (
-              <>
-                <Text className="text-xs text-p2 font-medium">Profit</Text>
-                <CurrencyDisplay 
-                  amount={suggestedPrice - totalCost} 
-                  currency={currency} 
-                  size="large" 
-                  color="primary" 
-                  weight="bold"
-                />
-              </>
-            ) : (
-              <>
-                <Text className="text-xs text-p2 font-medium">Total Cost</Text>
-                <CurrencyDisplay 
-                  amount={totalCost} 
-                  currency={currency} 
-                  size="large" 
-                  color="primary" 
-                  weight="bold"
-                />
-              </>
-            )}
-          </View>
+          {sortBy === 'profitMargin' || sortBy === 'margin' ? (
+            <HighlightBox
+              label="Profit"
+              value={suggestedPrice - totalCost}
+              currency={currency}
+              type="currency"
+            />
+          ) : (
+            <HighlightBox
+              label="Total Cost"
+              value={totalCost}
+              currency={currency}
+              type="currency"
+            />
+          )}
         </View>
 
         {/* Ingredients List */}
         <View>
-          <Text className="text-xs text-g3 font-medium mb-2">INGREDIENTS</Text>
-          <Text className="text-sm text-g3 leading-relaxed">
-            {ingredients.map(ing => ing.name).join(', ')}
+          <Text className="text-xs text-g3 dark:text-n1 font-medium mb-2">
+            INGREDIENTS
+          </Text>
+          <Text className="text-sm text-g3 dark:text-n1 leading-relaxed">
+            {ingredients.map((ing) => ing.name).join(', ')}
           </Text>
         </View>
       </Pressable>

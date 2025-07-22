@@ -3,6 +3,7 @@ import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import SwipeableCard from './SwipeableCard';
 import CurrencyDisplay from './ui/CurrencyDisplay';
+import HighlightBox from './ui/HighlightBox';
 
 interface IngredientListItemProps {
   name: string;
@@ -57,73 +58,55 @@ export default function IngredientListItem({
       onSwipeRight={onDelete}
       className="mb-3"
     >
-      <Pressable
-        onPress={onPress}
-        className="bg-n1/80 p-4 rounded-lg border border-g1/50 active:bg-n1"
-      >
+      <Pressable onPress={onPress} className="">
         {/* Main Content */}
         <View className="flex-row items-start justify-between">
           <View className="flex-1 mr-3">
-            <Text className="text-lg font-semibold text-g4 mb-1">
+            <Text className="text-lg font-semibold text-g4 dark:text-n1 mb-1">
               {name}
             </Text>
             <View className="flex-row items-center mb-1">
-              <Text className="text-sm text-g3">
-                {formatVolume(bottleSize)} bottle • 
+              <Text className="text-sm text-g3 dark:text-n1">
+                {formatVolume(bottleSize)} bottle •
               </Text>
-              <CurrencyDisplay 
-                amount={bottlePrice} 
-                currency={currency} 
-                size="small" 
+              <CurrencyDisplay
+                amount={bottlePrice}
+                currency={currency}
+                size="small"
                 className="ml-1"
               />
             </View>
           </View>
 
           {/* Dynamic Highlight Box */}
-          <View className="bg-p1/20 px-3 py-2 rounded-lg border border-p1/40">
-            {sortBy === 'cost' ? (
-              <>
-                <Text className="text-xs text-p2 font-medium">Cost/Oz</Text>
-                <CurrencyDisplay 
-                  amount={costPerOz} 
-                  currency={currency} 
-                  size="large" 
-                  color="primary" 
-                  weight="bold"
-                />
-              </>
-            ) : sortBy === 'pourCost' ? (
-              <>
-                <Text className="text-xs text-p2 font-medium">Pour Cost</Text>
-                <Text className="text-lg font-bold text-p2">
-                  {pourCostPercentage.toFixed(1)}%
-                </Text>
-              </>
-            ) : sortBy === 'margin' ? (
-              <>
-                <Text className="text-xs text-p2 font-medium">Margin</Text>
-                <CurrencyDisplay 
-                  amount={pourCostMargin} 
-                  currency={currency} 
-                  size="large" 
-                  color="primary" 
-                  weight="bold"
-                />
-              </>
-            ) : (
-              <>
-                <Text className="text-xs text-p2 font-medium">Cost/Pour</Text>
-                <CurrencyDisplay 
-                  amount={costPerPour} 
-                  currency={currency} 
-                  size="large" 
-                  color="primary" 
-                  weight="bold"
-                />
-              </>
-            )}
-          </View>
+          {sortBy === 'cost' ? (
+            <HighlightBox
+              label="Cost/Oz"
+              value={costPerOz}
+              currency={currency}
+              type="currency"
+            />
+          ) : sortBy === 'pourCost' ? (
+            <HighlightBox
+              label="Pour Cost"
+              value={pourCostPercentage}
+              type="percentage"
+            />
+          ) : sortBy === 'margin' ? (
+            <HighlightBox
+              label="Margin"
+              value={pourCostMargin}
+              currency={currency}
+              type="currency"
+            />
+          ) : (
+            <HighlightBox
+              label="Cost/Pour"
+              value={costPerPour}
+              currency={currency}
+              type="currency"
+            />
+          )}
         </View>
       </Pressable>
     </SwipeableCard>

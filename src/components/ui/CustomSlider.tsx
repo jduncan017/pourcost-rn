@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, Platform } from 'react-native';
-import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
+import {
+  PanGestureHandler,
+  PanGestureHandlerGestureEvent,
+} from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedGestureHandler,
   useAnimatedStyle,
@@ -49,31 +52,31 @@ export default function CustomSlider({
       // Custom scale that heavily favors 10-25% range
       if (val <= 5) {
         // 0.25% to 5% gets first 15% of slider
-        return (val - minValue) / (5 - minValue) * 0.15;
+        return ((val - minValue) / (5 - minValue)) * 0.15;
       } else if (val <= 10) {
         // 5% to 10% gets next 15% of slider (15% to 30%)
-        return 0.15 + (val - 5) / (10 - 5) * 0.15;
+        return 0.15 + ((val - 5) / (10 - 5)) * 0.15;
       } else if (val <= 25) {
         // 10% to 25% gets 50% of slider space (30% to 80%)
-        return 0.30 + (val - 10) / (25 - 10) * 0.50;
+        return 0.3 + ((val - 10) / (25 - 10)) * 0.5;
       } else if (val <= 50) {
         // 25% to 50% gets next 15% of slider (80% to 95%)
-        return 0.80 + (val - 25) / (50 - 25) * 0.15;
+        return 0.8 + ((val - 25) / (50 - 25)) * 0.15;
       } else {
         // 50% to 100% gets final 5% of slider (95% to 100%)
-        return 0.95 + (val - 50) / (maxValue - 50) * 0.05;
+        return 0.95 + ((val - 50) / (maxValue - 50)) * 0.05;
       }
     }
-    
+
     if (!logarithmic) {
       return (val - minValue) / (maxValue - minValue);
     }
-    
+
     // Logarithmic scale: compress higher values
     const logMin = Math.log10(Math.max(minValue, 1));
     const logMax = Math.log10(maxValue);
     const logVal = Math.log10(Math.max(val, 1));
-    
+
     return (logVal - logMin) / (logMax - logMin);
   };
 
@@ -83,30 +86,30 @@ export default function CustomSlider({
       if (position <= 0.15) {
         // First 15% of slider: 0.25% to 5%
         return minValue + (position / 0.15) * (5 - minValue);
-      } else if (position <= 0.30) {
+      } else if (position <= 0.3) {
         // Next 15% of slider: 5% to 10%
         return 5 + ((position - 0.15) / 0.15) * (10 - 5);
-      } else if (position <= 0.80) {
+      } else if (position <= 0.8) {
         // Middle 50% of slider: 10% to 25%
-        return 10 + ((position - 0.30) / 0.50) * (25 - 10);
+        return 10 + ((position - 0.3) / 0.5) * (25 - 10);
       } else if (position <= 0.95) {
         // Next 15% of slider: 25% to 50%
-        return 25 + ((position - 0.80) / 0.15) * (50 - 25);
+        return 25 + ((position - 0.8) / 0.15) * (50 - 25);
       } else {
         // Final 5% of slider: 50% to 100%
         return 50 + ((position - 0.95) / 0.05) * (maxValue - 50);
       }
     }
-    
+
     if (!logarithmic) {
       return minValue + position * (maxValue - minValue);
     }
-    
+
     // Convert back from logarithmic scale
     const logMin = Math.log10(Math.max(minValue, 1));
     const logMax = Math.log10(maxValue);
     const logVal = logMin + position * (logMax - logMin);
-    
+
     return Math.pow(10, logVal);
   };
 
@@ -119,35 +122,36 @@ export default function CustomSlider({
     const clampedX = Math.max(0, Math.min(maxTranslateX, newTranslateX));
     const position = clampedX / maxTranslateX;
     const rawValue = positionToValue(position);
-    
+
     const currentStep = dynamicStep ? dynamicStep(rawValue) : step;
     const steppedValue = Math.round(rawValue / currentStep) * currentStep;
     onValueChange(Math.max(minValue, Math.min(maxValue, steppedValue)));
   };
 
-  const gestureHandler = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
-    onStart: (event) => {
-      // Jump thumb to finger position immediately on press
-      const fingerX = event.x - thumbWidth / 2;
-      const clampedX = Math.max(0, Math.min(maxTranslateX, fingerX));
-      translateX.value = clampedX;
-      
-      // Update value immediately - use runOnJS to call updateValue
-      runOnJS(updateValue)(clampedX);
-      runOnJS(setIsActive)(true);
-    },
-    onActive: (event) => {
-      // Continue using absolute position, not relative translation
-      const fingerX = event.x - thumbWidth / 2;
-      const clampedX = Math.max(0, Math.min(maxTranslateX, fingerX));
-      translateX.value = clampedX;
-      
-      runOnJS(updateValue)(clampedX);
-    },
-    onEnd: () => {
-      runOnJS(setIsActive)(false);
-    },
-  });
+  const gestureHandler =
+    useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
+      onStart: (event) => {
+        // Jump thumb to finger position immediately on press
+        const fingerX = event.x - thumbWidth / 2;
+        const clampedX = Math.max(0, Math.min(maxTranslateX, fingerX));
+        translateX.value = clampedX;
+
+        // Update value immediately - use runOnJS to call updateValue
+        runOnJS(updateValue)(clampedX);
+        runOnJS(setIsActive)(true);
+      },
+      onActive: (event) => {
+        // Continue using absolute position, not relative translation
+        const fingerX = event.x - thumbWidth / 2;
+        const clampedX = Math.max(0, Math.min(maxTranslateX, fingerX));
+        translateX.value = clampedX;
+
+        runOnJS(updateValue)(clampedX);
+      },
+      onEnd: () => {
+        runOnJS(setIsActive)(false);
+      },
+    });
 
   const thumbStyle = useAnimatedStyle(() => {
     return {
@@ -162,47 +166,54 @@ export default function CustomSlider({
   });
 
   return (
-    <View className="py-4">
+    <View className="">
       {/* Label and Value */}
       <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-base font-medium text-g4">
+        <Text className="text-base font-medium text-g4 dark:text-n1">
           {label}
         </Text>
-        <Text className="text-base font-semibold text-p2">
-          {value.toFixed(2)}{unit}
+        <Text className="text-base font-semibold text-p2 dark:text-n1">
+          {value.toFixed(2)}
+          {unit}
         </Text>
       </View>
 
       {/* Slider Container */}
       <View className="items-center">
         <PanGestureHandler onGestureEvent={gestureHandler}>
-          <Animated.View 
-            className="relative" 
+          <Animated.View
+            className="relative"
             style={{ width: sliderWidth, height: 50 }}
           >
             {/* Track */}
-            <View 
-              className="absolute top-6 bg-g2 rounded-full"
-              style={{ width: sliderWidth, height: 4 }}
+            <View
+              className="absolute top-6 bg-g2 dark:bg-g1 rounded-full"
+              style={{ width: sliderWidth, height: 3 }}
             />
-            
+
             {/* Active Track */}
-            <Animated.View 
-              className="absolute top-6 bg-p2 rounded-full"
-              style={[{ height: 4 }, activeTrackStyle]}
+            <Animated.View
+              className="absolute top-6 bg-p1 rounded-full"
+              style={[{ height: 3 }, activeTrackStyle]}
             />
 
             {/* Thumb */}
             <Animated.View
-              className={`absolute top-2 w-8 h-8 rounded-full border-2 border-white ${
-                isActive ? 'bg-primary-700' : 'bg-p2'
+              className={`absolute top-3 w-6 h-6 rounded-full border border-n1 ${
+                isActive ? 'bg-s31' : 'bg-p1'
               }`}
               style={[
                 thumbStyle,
-                Platform.OS === 'web' ? { boxShadow: '0 2px 4px rgba(0,0,0,0.2)' } : { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4 }
+                Platform.OS === 'web'
+                  ? { boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }
+                  : {
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 4,
+                    },
               ]}
             />
-
           </Animated.View>
         </PanGestureHandler>
       </View>

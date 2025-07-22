@@ -8,6 +8,7 @@ import {
   Dimensions 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
 
 interface ModalProps {
   visible: boolean;
@@ -30,6 +31,7 @@ export default function Modal({
   scrollable = true,
   className = '',
 }: ModalProps) {
+  const colors = useThemeColors();
   const screenHeight = Dimensions.get('window').height;
 
   const getSizeStyles = () => {
@@ -50,19 +52,43 @@ export default function Modal({
   const sizeStyles = getSizeStyles();
 
   const ModalContent = () => (
-    <View className={`bg-n1/80 rounded-lg overflow-hidden ${className}`} style={sizeStyles}>
+    <View 
+      className={`rounded-xl overflow-hidden ${className}`} 
+      style={{
+        ...sizeStyles,
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+      }}
+    >
       {/* Header */}
       {(title || showCloseButton) && (
-        <View className="flex-row items-center justify-between px-4 py-3 border-b border-g1/50 bg-n1">
-          <Text className="text-lg font-semibold text-g4 flex-1">
+        <View 
+          className="flex-row items-center justify-between px-4 py-3"
+          style={{
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border,
+            backgroundColor: colors.surface,
+          }}
+        >
+          <Text 
+            className="text-lg font-semibold flex-1"
+            style={{ 
+              fontFamily: 'Geist',
+              color: colors.text,
+            }}
+          >
             {title || ''}
           </Text>
           {showCloseButton && (
             <Pressable
               onPress={onClose}
-              className="p-1 rounded-full bg-g1/80 active:bg-g2"
+              className="p-2 rounded-lg"
+              style={{
+                backgroundColor: colors.accent + '20',
+              }}
             >
-              <Ionicons name="close" size={20} color="#374151" />
+              <Ionicons name="close" size={20} color={colors.textSecondary} />
             </Pressable>
           )}
         </View>
@@ -74,11 +100,14 @@ export default function Modal({
           className="flex-1"
           showsVerticalScrollIndicator={false}
           bounces={false}
+          style={{ backgroundColor: colors.surface }}
         >
-          {children}
+          <View className="p-4">
+            {children}
+          </View>
         </ScrollView>
       ) : (
-        <View className="flex-1">
+        <View className="flex-1 p-4" style={{ backgroundColor: colors.surface }}>
           {children}
         </View>
       )}
@@ -92,7 +121,7 @@ export default function Modal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center">
+      <View className="flex-1 justify-center items-center px-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}>
         <Pressable 
           className="absolute inset-0" 
           onPress={onClose}
@@ -122,45 +151,68 @@ export const ConfirmModal = ({
   confirmText?: string;
   cancelText?: string;
   destructive?: boolean;
-}) => (
-  <Modal
-    visible={visible}
-    onClose={onClose}
-    title={title}
-    size="small"
-    scrollable={false}
-  >
-    <View className="p-6">
-      <Text className="text-g4 text-base leading-relaxed mb-6">
-        {message}
-      </Text>
-      
-      <View className="flex-row space-x-3">
-        <Pressable
-          onPress={onClose}
-          className="flex-1 py-3 bg-g1/80 rounded-lg active:bg-g2"
+}) => {
+  const colors = useThemeColors();
+  
+  return (
+    <Modal
+      visible={visible}
+      onClose={onClose}
+      title={title}
+      size="small"
+      scrollable={false}
+    >
+      <View>
+        <Text 
+          className="text-base leading-relaxed mb-6"
+          style={{ 
+            fontFamily: 'Geist',
+            color: colors.text,
+          }}
         >
-          <Text className="text-center text-g4 font-semibold">
-            {cancelText}
-          </Text>
-        </Pressable>
+          {message}
+        </Text>
         
-        <Pressable
-          onPress={onConfirm}
-          className={`flex-1 py-3 rounded-lg ${
-            destructive 
-              ? 'bg-red-600 active:bg-e3' 
-              : 'bg-p2 active:bg-p3'
-          }`}
-        >
-          <Text className="text-center text-white font-semibold">
-            {confirmText}
-          </Text>
-        </Pressable>
+        <View className="flex-row gap-3">
+          <Pressable
+            onPress={onClose}
+            className="flex-1 py-3 rounded-lg"
+            style={{
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.border,
+            }}
+          >
+            <Text 
+              className="text-center font-semibold"
+              style={{ 
+                fontFamily: 'Geist',
+                color: colors.text,
+              }}
+            >
+              {cancelText}
+            </Text>
+          </Pressable>
+          
+          <Pressable
+            onPress={onConfirm}
+            className="flex-1 py-3 rounded-lg"
+            style={{
+              backgroundColor: destructive ? '#DC2626' : colors.accent,
+            }}
+          >
+            <Text 
+              className="text-center font-semibold text-white"
+              style={{ fontFamily: 'Geist' }}
+            >
+              {confirmText}
+            </Text>
+          </Pressable>
+        </View>
       </View>
-    </View>
-  </Modal>
-);
+    </Modal>
+  );
+};
 
 export const InfoModal = ({
   visible,
@@ -174,27 +226,43 @@ export const InfoModal = ({
   title: string;
   message: string;
   buttonText?: string;
-}) => (
-  <Modal
-    visible={visible}
-    onClose={onClose}
-    title={title}
-    size="small"
-    scrollable={false}
-  >
-    <View className="p-6">
-      <Text className="text-g4 text-base leading-relaxed mb-6">
-        {message}
-      </Text>
-      
-      <Pressable
-        onPress={onClose}
-        className="py-3 bg-p2 rounded-lg active:bg-p3"
-      >
-        <Text className="text-center text-white font-semibold">
-          {buttonText}
+}) => {
+  const colors = useThemeColors();
+  
+  return (
+    <Modal
+      visible={visible}
+      onClose={onClose}
+      title={title}
+      size="small"
+      scrollable={false}
+    >
+      <View>
+        <Text 
+          className="text-base leading-relaxed mb-6"
+          style={{ 
+            fontFamily: 'Geist',
+            color: colors.text,
+          }}
+        >
+          {message}
         </Text>
-      </Pressable>
-    </View>
-  </Modal>
-);
+        
+        <Pressable
+          onPress={onClose}
+          className="py-3 rounded-lg"
+          style={{
+            backgroundColor: colors.accent,
+          }}
+        >
+          <Text 
+            className="text-center font-semibold text-white"
+            style={{ fontFamily: 'Geist' }}
+          >
+            {buttonText}
+          </Text>
+        </Pressable>
+      </View>
+    </Modal>
+  );
+};

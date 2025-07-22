@@ -1,127 +1,81 @@
-import React from 'react';
-import { View, Text, Pressable, ScrollView, Image } from 'react-native';
-import { DrawerContentScrollView, DrawerContentComponentProps } from '@react-navigation/drawer';
+import { View, Text, Pressable, Alert, Image } from 'react-native';
+import { DrawerContentScrollView, DrawerItemList, DrawerContentComponentProps } from '@react-navigation/drawer';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useSegments } from 'expo-router';
-
-// Navigation items configuration
-const navigationItems = [
-  {
-    name: 'calculator',
-    label: 'Quick Calculator',
-    icon: 'calculator' as const,
-    description: 'Calculate ingredient costs',
-  },
-  {
-    name: 'ingredients',
-    label: 'Ingredients',
-    icon: 'flask' as const,
-    description: 'Manage your inventory',
-  },
-  {
-    name: 'cocktails',
-    label: 'Cocktails',
-    icon: 'wine' as const,
-    description: 'Recipe cost analysis',
-  },
-  {
-    name: 'settings',
-    label: 'Settings',
-    icon: 'settings' as const,
-    description: 'App preferences',
-  },
-  {
-    name: 'about',
-    label: 'About',
-    icon: 'information-circle' as const,
-    description: 'App information',
-  },
-];
+import { useThemeColors, useTheme } from '@/src/contexts/ThemeContext';
 
 export default function CustomDrawerContent(props: DrawerContentComponentProps) {
-  const router = useRouter();
-  const segments = useSegments();
-  const currentRoute = segments[segments.length - 1] || 'calculator';
+  const colors = useThemeColors();
+  const { isDarkMode } = useTheme();
+  const insets = useSafeAreaInsets();
 
-  const handleNavigation = (routeName: string) => {
-    router.push(`/(drawer)/${routeName}` as any);
+  const handleSignIn = () => {
+    Alert.alert('Sign In', 'Sign in functionality would be implemented here');
   };
 
   return (
-    <DrawerContentScrollView 
-      {...props} 
-      contentContainerStyle={{ flex: 1 }}
-      className="bg-n1"
-    >
-      {/* Header with Logo */}
-      <View className="px-6 py-8 pb-6 bg-n1/80 border-b border-g1/50">
-        <Image 
-          source={require('../../assets/images/PourCost-Logo-Black.png')}
+    <View style={{ flex: 1, backgroundColor: colors.surface, paddingTop: insets.top }}>
+      {/* Logo Section */}
+      <View style={{ 
+        alignItems: 'center', 
+        paddingVertical: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border 
+      }}>
+        <Image
+          source={
+            isDarkMode
+              ? require('../../assets/images/PC-Logo-Silver.png')
+              : require('../../assets/images/PC-Logo-Dark-Gradient.png')
+          }
           style={{ width: 140, height: 35 }}
           resizeMode="contain"
         />
-        <Text className="text-g3 text-sm mt-2 mb-2">
-          Professional cocktail costing
-        </Text>
       </View>
 
-      {/* Navigation Items */}
-      <View className="flex-1 py-4">
-        {navigationItems.map((item) => {
-          const isActive = currentRoute === item.name;
-          
-          return (
-            <Pressable
-              key={item.name}
-              onPress={() => handleNavigation(item.name)}
-              className={`mx-3 mb-2 px-4 py-4 rounded-lg ${
-                isActive 
-                  ? 'bg-p1/30 border border-p1/40' 
-                  : 'bg-transparent active:bg-g1/60'
-              }`}
+      {/* Standard drawer items */}
+      <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
+        <DrawerItemList {...props} />
+      </DrawerContentScrollView>
+
+      {/* Sign In/Sign Up button at bottom */}
+      <View style={{ padding: 16, borderTopWidth: 1, borderTopColor: colors.border }}>
+        <Pressable
+          onPress={handleSignIn}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: 12,
+            backgroundColor: colors.accent + '20',
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: colors.accent + '40',
+          }}
+        >
+          <Ionicons name="person" size={20} color={colors.accent} style={{ marginRight: 12 }} />
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                fontFamily: 'Geist',
+                fontWeight: '500',
+                color: colors.text,
+                fontSize: 16,
+              }}
             >
-              <View className="flex-row items-center">
-                <View className={`w-10 h-10 rounded-lg items-center justify-center mr-3 ${
-                  isActive ? 'bg-p2' : 'bg-g1/80'
-                }`}>
-                  <Ionicons 
-                    name={item.icon} 
-                    size={20} 
-                    color={isActive ? '#ffffff' : '#6B7280'} 
-                  />
-                </View>
-                
-                <View className="flex-1">
-                  <Text className={`text-base font-semibold ${
-                    isActive ? 'text-p3' : 'text-g4'
-                  }`}>
-                    {item.label}
-                  </Text>
-                  <Text className={`text-sm ${
-                    isActive ? 'text-p2' : 'text-g3'
-                  }`}>
-                    {item.description}
-                  </Text>
-                </View>
-
-                {isActive && (
-                  <View className="w-1 h-6 bg-p2 rounded-full ml-2" />
-                )}
-              </View>
-            </Pressable>
-          );
-        })}
+              Sign In / Sign Up
+            </Text>
+            <Text
+              style={{
+                fontFamily: 'Geist',
+                color: colors.textSecondary,
+                fontSize: 12,
+              }}
+            >
+              Sync your data across devices
+            </Text>
+          </View>
+        </Pressable>
       </View>
-
-      {/* Footer */}
-      <View className="px-6 py-4 border-t border-g1/50">
-        <Text className="text-g3 text-xs text-center">
-          PourCost v2.0
-        </Text>
-        <Text className="text-g3 text-xs text-center mt-1">
-          Built with React Native & Expo
-        </Text>
-      </View>
-    </DrawerContentScrollView>
+    </View>
   );
 }

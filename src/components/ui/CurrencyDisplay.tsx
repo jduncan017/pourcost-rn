@@ -13,7 +13,6 @@ interface CurrencyDisplayProps extends Omit<TextProps, 'children'> {
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
 }
 
-
 export default function CurrencyDisplay({
   amount,
   currency,
@@ -39,33 +38,50 @@ export default function CurrencyDisplay({
 
   const getSizeClass = (): string => {
     switch (size) {
-      case 'small': return 'text-sm';
-      case 'medium': return 'text-base';
-      case 'large': return 'text-lg';
-      case 'xl': return 'text-xl';
-      default: return 'text-base';
+      case 'small':
+        return 'text-sm';
+      case 'medium':
+        return 'text-base';
+      case 'large':
+        return 'text-lg';
+      case 'xl':
+        return 'text-xl';
+      default:
+        return 'text-base';
     }
   };
 
   const getColorClass = (): string => {
     switch (color) {
-      case 'primary': return 'text-p2';
-      case 'success': return 'text-s22';
-      case 'warning': return 'text-amber-600';
-      case 'error': return 'text-e3';
-      case 'gray': return 'text-g3';
-      case 'white': return 'text-white';
-      default: return 'text-g3';
+      case 'primary':
+        return 'text-p2 dark:text-n1';
+      case 'success':
+        return 'text-s22 dark:text-s21';
+      case 'warning':
+        return 'text-s23 dark:text-s22';
+      case 'error':
+        return 'text-e3 dark:text-e2';
+      case 'gray':
+        return 'text-g3';
+      case 'white':
+        return 'text-white';
+      default:
+        return 'text-g3';
     }
   };
 
   const getWeightClass = (): string => {
     switch (weight) {
-      case 'normal': return 'font-normal';
-      case 'medium': return 'font-medium';
-      case 'semibold': return 'font-semibold';
-      case 'bold': return 'font-bold';
-      default: return 'font-normal';
+      case 'normal':
+        return 'font-normal';
+      case 'medium':
+        return 'font-medium';
+      case 'semibold':
+        return 'font-semibold';
+      case 'bold':
+        return 'font-bold';
+      default:
+        return 'font-normal';
     }
   };
 

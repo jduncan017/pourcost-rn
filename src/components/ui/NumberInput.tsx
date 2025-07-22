@@ -79,7 +79,7 @@ export default function NumberInput({
   };
 
   return (
-    <View className={`mb-4 ${containerClassName}`}>
+    <View className={containerClassName}>
       {/* Label */}
       <Text className="text-base font-medium text-g4 mb-2">
         {label}

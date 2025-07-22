@@ -22,17 +22,17 @@ export default function EmptyState({
   return (
     <View className={`items-center justify-center py-12 px-6 ${className}`}>
       {/* Icon */}
-      <View className="w-20 h-20 bg-g1/60 rounded-full items-center justify-center mb-4">
+      <View className="w-20 h-20 bg-g1/6 dark:bg-n1/90 rounded-full items-center justify-center mb-4">
         <Ionicons name={icon} size={40} color="#9CA3AF" />
       </View>
 
       {/* Title */}
-      <Text className="text-xl font-semibold text-g4 mb-2 text-center">
+      <Text className="text-xl font-semibold text-g4 dark:text-g1 mb-2 text-center">
         {title}
       </Text>
 
       {/* Description */}
-      <Text className="text-g3 text-center mb-6 leading-relaxed">
+      <Text className="text-g3 dark:text-g2 text-center mb-6 leading-relaxed">
         {description}
       </Text>
 

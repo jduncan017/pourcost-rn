@@ -27,7 +27,7 @@ export default function SearchBar({
       <Ionicons name="search" size={20} color="#9CA3AF" />
       
       <TextInput
-        className="flex-1 ml-3 text-g4 text-base"
+        className="flex-1 ml-3 text-g4 dark:text-n1 text-base"
         placeholder={placeholder}
         placeholderTextColor="#9CA3AF"
         value={value}

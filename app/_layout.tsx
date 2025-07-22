@@ -1,8 +1,11 @@
 // Import global CSS for NativeWind FIRST
 import '../global.css';
 
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider as NavigationThemeProvider,
+} from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -10,7 +13,6 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { useColorScheme } from '@/components/useColorScheme';
 import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
 
 export {
@@ -29,10 +31,7 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     // Geist variable font (supports all weights)
-    'Geist': require('../assets/fonts/Geist-VariableFont_wght.ttf'),
-    // Keep existing fonts for compatibility
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
+    Geist: require('../assets/fonts/Geist-VariableFont_wght.ttf'),
   });
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -65,10 +64,22 @@ function RootLayoutNav() {
       <NavigationThemeProvider value={isDarkMode ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-          <Stack.Screen name="cocktail-form" options={{ presentation: 'modal', title: 'Cocktail Form' }} />
-          <Stack.Screen name="ingredient-form" options={{ presentation: 'modal', title: 'Ingredient Form' }} />
-          <Stack.Screen name="ingredient-detail" options={{ headerShown: false }} />
-          <Stack.Screen name="cocktail-detail" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="cocktail-form"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ingredient-form"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ingredient-detail"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="cocktail-detail"
+            options={{ headerShown: false }}
+          />
         </Stack>
       </NavigationThemeProvider>
     </GestureHandlerRootView>

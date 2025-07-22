@@ -6,6 +6,7 @@ import SearchBar from '@/src/components/ui/SearchBar';
 import EmptyState from '@/src/components/EmptyState';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import GradientBackground from '@/src/components/ui/GradientBackground';
 
 // Enhanced cocktail interface
 interface CocktailIngredient {
@@ -35,8 +36,6 @@ interface Cocktail {
   suggestedPrice: number;
   pourCostPercentage: number;
   profitMargin: number;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  prepTime: number; // minutes
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -99,8 +98,6 @@ export default function CocktailsScreen() {
       suggestedPrice: 12.0,
       pourCostPercentage: 20.4,
       profitMargin: 9.55,
-      difficulty: 'Easy',
-      prepTime: 2,
       notes: 'Serve in salt-rimmed glass with lime wheel',
       createdAt: '2025-01-15T10:30:00Z',
       updatedAt: '2025-01-15T10:30:00Z',
@@ -139,8 +136,6 @@ export default function CocktailsScreen() {
       suggestedPrice: 14.0,
       pourCostPercentage: 22.9,
       profitMargin: 10.8,
-      difficulty: 'Medium',
-      prepTime: 3,
       notes: 'Express orange oils over drink, garnish with peel',
       createdAt: '2025-01-14T16:45:00Z',
       updatedAt: '2025-01-14T16:45:00Z',
@@ -153,8 +148,20 @@ export default function CocktailsScreen() {
       category: 'Rum',
       ingredients: [
         { id: '8', name: 'White Rum', amount: 2.0, cost: 1.2, type: 'Spirit' },
-        { id: '9', name: 'Fresh Mint', amount: 0.5, cost: 0.25, type: 'Garnish' },
-        { id: '10', name: 'Lime Juice', amount: 0.5, cost: 0.1, type: 'Prepared' },
+        {
+          id: '9',
+          name: 'Fresh Mint',
+          amount: 0.5,
+          cost: 0.25,
+          type: 'Garnish',
+        },
+        {
+          id: '10',
+          name: 'Lime Juice',
+          amount: 0.5,
+          cost: 0.1,
+          type: 'Prepared',
+        },
         {
           id: '11',
           name: 'Simple Syrup',
@@ -174,8 +181,6 @@ export default function CocktailsScreen() {
       suggestedPrice: 10.0,
       pourCostPercentage: 18.5,
       profitMargin: 8.15,
-      difficulty: 'Easy',
-      prepTime: 3,
       notes: 'Muddle mint gently, top with soda water',
       createdAt: '2025-01-13T14:20:00Z',
       updatedAt: '2025-01-13T14:20:00Z',
@@ -207,8 +212,6 @@ export default function CocktailsScreen() {
       suggestedPrice: 15.0,
       pourCostPercentage: 21.4,
       profitMargin: 11.79,
-      difficulty: 'Medium',
-      prepTime: 4,
       notes: 'Shake vigorously for proper foam, garnish with coffee beans',
       createdAt: '2025-01-12T19:30:00Z',
       updatedAt: '2025-01-12T19:30:00Z',
@@ -247,8 +250,6 @@ export default function CocktailsScreen() {
       suggestedPrice: 11.0,
       pourCostPercentage: 20.0,
       profitMargin: 8.8,
-      difficulty: 'Easy',
-      prepTime: 2,
       notes: 'Blend with ice, garnish with pineapple and cherry',
       createdAt: '2025-01-11T12:15:00Z',
       updatedAt: '2025-01-11T12:15:00Z',
@@ -292,7 +293,7 @@ export default function CocktailsScreen() {
   const handleCocktailPress = (cocktail: Cocktail) => {
     router.push({
       pathname: '/cocktail-detail',
-      params: { id: cocktail.id }
+      params: { id: cocktail.id },
     });
   };
 
@@ -310,8 +311,6 @@ export default function CocktailsScreen() {
         name: cocktail.name,
         description: cocktail.description,
         category: cocktail.category,
-        difficulty: cocktail.difficulty,
-        prepTime: cocktail.prepTime.toString(),
         notes: cocktail.notes,
         createdAt: cocktail.createdAt,
         favorited: cocktail.favorited.toString(),
@@ -355,180 +354,168 @@ export default function CocktailsScreen() {
     return 'text-e3';
   };
 
-  // Get difficulty color
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Easy':
-        return 'text-s22';
-      case 'Medium':
-        return 'text-s12';
-      case 'Hard':
-        return 'text-e3';
-      default:
-        return 'text-g3';
-    }
-  };
   return (
-    <ScrollView className="flex-1 bg-n1">
-      <View className="p-4">
-        {/* Header */}
-        <View className="mb-6">
-          <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-2xl font-bold text-g4">Cocktails</Text>
-            <Pressable
-              onPress={handleAddCocktail}
-              className="bg-p1 rounded-lg p-3 flex-row items-center gap-2"
-            >
-              <Ionicons name="add" size={20} color="white" />
-              <Text className="text-white font-medium">Create</Text>
-            </Pressable>
-          </View>
-          <Text className="text-g3">
-            Manage your cocktail recipes and cost calculations
-          </Text>
-        </View>
-
-        {/* Search Bar */}
-        <View className="mb-4">
-          <SearchBar
-            placeholder="Search cocktails, ingredients, or descriptions..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-
-        {/* Filters */}
-        <View className="mb-6">
-          {/* Category Filter */}
-          <View className="mb-4">
-            <Text className="text-sm font-medium text-g4 mb-3">
-              Category
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-            >
-              <View className="flex-row" style={{gap: 8}}>
-                {categories.map((category) => (
-                  <Pressable
-                    key={category}
-                    onPress={() => setSelectedCategory(category)}
-                    className={`px-3 py-2 rounded-full border ${
-                      selectedCategory === category
-                        ? 'bg-p1 border-p1'
-                        : 'bg-n1/80 border-g2/50'
-                    }`}
-                  >
-                    <Text
-                      className={`text-sm font-medium ${
-                        selectedCategory === category
-                          ? 'text-white'
-                          : 'text-g4'
-                      }`}
-                    >
-                      {category}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </ScrollView>
-          </View>
-
-          {/* Sort Options */}
-          <View className="flex-row items-center">
-            <Text className="text-sm font-medium text-g4 mr-3">Sort by:</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-            >
-              <View className="flex-row" style={{gap: 8}}>
-                {[
-                  { key: 'created', label: 'Recently Added' },
-                  { key: 'name', label: 'Name' },
-                  { key: 'cost', label: 'Cost' },
-                  { key: 'profitMargin', label: 'Profit' },
-                  { key: 'margin', label: 'Margin' },
-                ].map((sort) => (
-                  <Pressable
-                    key={sort.key}
-                    onPress={() => setSortBy(sort.key as any)}
-                    className={`px-2 py-1 rounded border ${
-                      sortBy === sort.key
-                        ? 'bg-g4 border-g4'
-                        : 'bg-g1/60 border-g2/50'
-                    }`}
-                  >
-                    <Text
-                      className={`text-xs font-medium ${
-                        sortBy === sort.key ? 'text-white' : 'text-g3'
-                      }`}
-                    >
-                      {sort.label}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-
-        {/* Cocktails List */}
-        <View className="space-y-3">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-lg font-semibold text-g4">
-              Your Cocktails ({filteredCocktails.length})
-            </Text>
-            {searchQuery && (
-              <Pressable onPress={() => setSearchQuery('')} className="p-1">
-                <Text className="text-p2 text-sm font-medium">
-                  Clear
-                </Text>
+    <GradientBackground>
+      <ScrollView className="flex-1">
+        <View className="p-4">
+          {/* Header */}
+          <View className="mb-6">
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-2xl font-medium tracking-wider text-g4 dark:text-n1">
+                COCKTAILS
+              </Text>
+              <Pressable
+                onPress={handleAddCocktail}
+                className="bg-p1 rounded-lg p-3 flex-row items-center gap-2"
+              >
+                <Ionicons name="add" size={20} color="white" />
+                <Text className="text-white font-medium">Create</Text>
               </Pressable>
+            </View>
+            <Text className="text-g3 dark:text-n1">
+              Manage your cocktail recipes and cost calculations
+            </Text>
+          </View>
+
+          {/* Search Bar */}
+          <View className="mb-4">
+            <SearchBar
+              placeholder="Search cocktails, ingredients, or descriptions..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          {/* Filters */}
+          <View className="mb-6">
+            {/* Category Filter */}
+            <View className="mb-4">
+              <Text className="text-sm font-medium text-g4 dark:text-n1 mb-3">
+                Category
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View className="flex-row" style={{ gap: 8 }}>
+                  {categories.map((category) => (
+                    <Pressable
+                      key={category}
+                      onPress={() => setSelectedCategory(category)}
+                      className={`px-3 py-2 rounded-full border ${
+                        selectedCategory === category
+                          ? 'bg-p1 border-p1'
+                          : 'bg-n1/80 dark:bg-n1/10 border-g1/50 dark:border-n1/20'
+                      }`}
+                    >
+                      <Text
+                        className={`text-sm font-medium ${
+                          selectedCategory === category
+                            ? 'text-white'
+                            : 'text-g4 dark:text-n1'
+                        }`}
+                      >
+                        {category}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+
+            {/* Sort Options */}
+            <View className="flex-row items-center">
+              <Text className="text-sm font-medium text-g4 dark:text-n1 mr-3">
+                Sort by:
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View className="flex-row" style={{ gap: 8 }}>
+                  {[
+                    { key: 'created', label: 'Recently Added' },
+                    { key: 'name', label: 'Name' },
+                    { key: 'cost', label: 'Cost' },
+                    { key: 'profitMargin', label: 'Profit' },
+                    { key: 'margin', label: 'Margin' },
+                  ].map((sort) => (
+                    <Pressable
+                      key={sort.key}
+                      onPress={() => setSortBy(sort.key as any)}
+                      className={`px-2 py-1 rounded border ${
+                        sortBy === sort.key
+                          ? 'bg-p2 dark:bg-p1 border-p2 dark:border-p1'
+                          : 'bg-g1/80 dark:bg-n1/10 border-g1/50 dark:border-n1/20'
+                      }`}
+                    >
+                      <Text
+                        className={`text-xs font-medium ${
+                          sortBy === sort.key
+                            ? 'text-white'
+                            : 'text-g3 dark:text-n1'
+                        }`}
+                      >
+                        {sort.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+
+          {/* Cocktails List */}
+          <View className="space-y-3">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-lg font-semibold text-g4 dark:text-n1">
+                Your Cocktails ({filteredCocktails.length})
+              </Text>
+              {searchQuery && (
+                <Pressable onPress={() => setSearchQuery('')} className="p-1">
+                  <Text className="text-p2 dark:text-s22 text-sm font-medium">
+                    Clear
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+
+            {filteredCocktails.length === 0 ? (
+              <EmptyState
+                icon="wine"
+                title={
+                  searchQuery || selectedCategory !== 'All'
+                    ? 'No cocktails found'
+                    : 'No cocktails yet'
+                }
+                description={
+                  searchQuery
+                    ? `No cocktails match "${searchQuery}"${selectedCategory !== 'All' ? ` in ${selectedCategory}` : ''}`
+                    : selectedCategory !== 'All'
+                      ? `No cocktails in ${selectedCategory} category`
+                      : 'Create your first cocktail recipe to get started'
+                }
+                actionLabel="Create Cocktail"
+                onAction={handleAddCocktail}
+              />
+            ) : (
+              filteredCocktails.map((cocktail) => (
+                <CocktailListItem
+                  key={cocktail.id}
+                  name={cocktail.name}
+                  ingredients={cocktail.ingredients.map((ing) => ({
+                    name: ing.name,
+                    amount: ing.amount,
+                    cost: ing.cost,
+                  }))}
+                  totalCost={cocktail.totalCost}
+                  suggestedPrice={cocktail.suggestedPrice}
+                  profitMargin={cocktail.profitMargin}
+                  currency={baseCurrency}
+                  sortBy={sortBy}
+                  onPress={() => handleCocktailPress(cocktail)}
+                  onEdit={() => handleEditCocktail(cocktail)}
+                  onDelete={() => handleDeleteCocktail(cocktail)}
+                />
+              ))
             )}
           </View>
-
-          {filteredCocktails.length === 0 ? (
-            <EmptyState
-              icon="wine"
-              title={
-                searchQuery || selectedCategory !== 'All'
-                  ? 'No cocktails found'
-                  : 'No cocktails yet'
-              }
-              description={
-                searchQuery
-                  ? `No cocktails match "${searchQuery}"${selectedCategory !== 'All' ? ` in ${selectedCategory}` : ''}`
-                  : selectedCategory !== 'All'
-                    ? `No cocktails in ${selectedCategory} category`
-                    : 'Create your first cocktail recipe to get started'
-              }
-              actionLabel="Create Cocktail"
-              onAction={handleAddCocktail}
-            />
-          ) : (
-            filteredCocktails.map((cocktail) => (
-              <CocktailListItem
-                key={cocktail.id}
-                name={cocktail.name}
-                ingredients={cocktail.ingredients.map((ing) => ({
-                  name: ing.name,
-                  amount: ing.amount,
-                  cost: ing.cost,
-                }))}
-                totalCost={cocktail.totalCost}
-                suggestedPrice={cocktail.suggestedPrice}
-                profitMargin={cocktail.profitMargin}
-                currency={baseCurrency}
-                sortBy={sortBy}
-                onPress={() => handleCocktailPress(cocktail)}
-                onEdit={() => handleEditCocktail(cocktail)}
-                onDelete={() => handleDeleteCocktail(cocktail)}
-              />
-            ))
-          )}
         </View>
-
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </GradientBackground>
   );
 }

@@ -20,13 +20,13 @@ export default function Card({
   const getVariantClass = (): string => {
     switch (variant) {
       case 'elevated':
-        return 'bg-n1/80 backdrop-blur-sm border border-g1/50 shadow-sm';
+        return 'bg-g2/15 dark:bg-p1/15 backdrop-blur-sm border border-g1/50 dark:border-p3/40 shadow-sm';
       case 'outlined':
-        return 'bg-n1/80 backdrop-blur-sm border-2 border-g2/50';
+        return 'bg-g2/15 dark:bg-p1/15 backdrop-blur-sm border-2 border-g2/50 dark:border-p3/40';
       case 'ghost':
-        return 'bg-transparent';
+        return 'bg-transparent dark:bg-transparent';
       default:
-        return 'bg-g1/80 backdrop-blur-sm border border-g1/50';
+        return 'bg-g2/15 dark:bg-p1/15 backdrop-blur-sm border border-g1/50 dark:border-p3/40';
     }
   };
 
@@ -104,7 +104,7 @@ export const SummaryCard = ({
   <Card
     variant="outlined"
     padding="large"
-    className={`bg-p1/20 backdrop-blur-sm border-p1/40 ${className}`}
+    className={`bg-p1/20 dark:bg-n1/15 backdrop-blur-sm border-p1/40 dark:border-n1/30 ${className}`}
   >
     {children}
   </Card>
