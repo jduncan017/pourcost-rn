@@ -31,7 +31,6 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
       ({ colorScheme: systemColorScheme }) => {
         // Only update if user hasn't manually set a preference
         // This could be enhanced to have an "auto" mode in the future
-        console.log('System color scheme changed to:', systemColorScheme);
       }
     );
 

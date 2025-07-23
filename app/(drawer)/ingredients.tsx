@@ -215,10 +215,19 @@ export default function IngredientsScreen() {
         <View className="p-4">
           {/* Header */}
           <View className="mb-6">
-            <View className="flex-row items-center justify-between mb-2">
-              <Text className="text-2xl font-medium tracking-wide text-g4 dark:text-n1">
-                INGREDIENTS
-              </Text>
+            <Text className="text-g3 dark:text-g1 text-xl w-full pb-4 border-b border-g2 mb-4">
+              Manage your ingredient library and cost calculations
+            </Text>
+
+            {/* Search Bar + Add Button */}
+            <View className="flex-row items-center gap-3">
+              <View className="flex-1">
+                <SearchBar
+                  placeholder="Search by name or type..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </View>
               <Pressable
                 onPress={handleAddIngredient}
                 className="bg-p1 rounded-lg p-3 flex-row items-center gap-2"
@@ -227,18 +236,6 @@ export default function IngredientsScreen() {
                 <Text className="text-white font-medium">Add</Text>
               </Pressable>
             </View>
-            <Text className="text-g3 dark:text-n1">
-              Manage your ingredient library and cost calculations
-            </Text>
-          </View>
-
-          {/* Search Bar */}
-          <View className="mb-4">
-            <SearchBar
-              placeholder="Search by name or type..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
           </View>
 
           {/* Filters */}

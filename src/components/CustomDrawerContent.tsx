@@ -1,10 +1,16 @@
-import { View, Text, Pressable, Alert, Image } from 'react-native';
-import { DrawerContentScrollView, DrawerItemList, DrawerContentComponentProps } from '@react-navigation/drawer';
+import { View, Alert, Image } from 'react-native';
+import {
+  DrawerContentScrollView,
+  DrawerItemList,
+  DrawerContentComponentProps,
+} from '@react-navigation/drawer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors, useTheme } from '@/src/contexts/ThemeContext';
+import SettingsCard from '@/src/components/ui/SettingsCard';
 
-export default function CustomDrawerContent(props: DrawerContentComponentProps) {
+export default function CustomDrawerContent(
+  props: DrawerContentComponentProps
+) {
   const colors = useThemeColors();
   const { isDarkMode } = useTheme();
   const insets = useSafeAreaInsets();
@@ -14,12 +20,12 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
   };
 
   return (
-    <View 
+    <View
       className="DrawerContainer flex-1"
       style={{ backgroundColor: colors.surface, paddingTop: insets.top }}
     >
       {/* Logo Section */}
-      <View 
+      <View
         className="LogoSection items-center py-5 border-b"
         style={{ borderBottomColor: colors.border }}
       >
@@ -35,37 +41,30 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
       </View>
 
       {/* Standard drawer items */}
-      <DrawerContentScrollView 
-        {...props} 
+      <DrawerContentScrollView
+        {...props}
         className="DrawerScroll"
-        contentContainerStyle={{ paddingTop: 0 }}
+        contentContainerStyle={{ paddingTop: 16 }}
       >
         <DrawerItemList {...props} />
       </DrawerContentScrollView>
 
       {/* Sign In/Sign Up button at bottom */}
-      <View 
-        className="SignInSection p-4 border-t"
-        style={{ borderTopColor: colors.border }}
+      <View
+        className="SignInSection p-4 pb-16 border-t"
+        style={{
+          borderTopColor: colors.border,
+          paddingBottom: insets.bottom + 16,
+        }}
       >
-        <Pressable
+        <SettingsCard
+          title="Sign In / Sign Up"
+          description="Sync your data across devices"
+          iconName="person"
+          iconColor={colors.accent}
           onPress={handleSignIn}
-          className="SignInButton flex-row items-center p-3 rounded-lg border"
-          style={{
-            backgroundColor: colors.accent + '20',
-            borderColor: colors.accent + '40',
-          }}
-        >
-          <Ionicons name="person" size={20} color={colors.accent} className="mr-3" />
-          <View className="SignInTextContainer flex-1">
-            <Text className="SignInTitle text-base font-medium text-g4 dark:text-n1">
-              Sign In / Sign Up
-            </Text>
-            <Text className="SignInSubtitle text-xs text-g3 dark:text-n1">
-              Sync your data across devices
-            </Text>
-          </View>
-        </Pressable>
+          variant="accent"
+        />
       </View>
     </View>
   );

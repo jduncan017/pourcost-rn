@@ -87,10 +87,7 @@ export default function SettingsScreen() {
         <View className="p-4">
           {/* Header */}
           <View className="mb-6">
-            <Text className="text-2xl font-bold text-g4 dark:text-n1 mb-2">
-              Settings
-            </Text>
-            <Text className="text-g3 dark:text-n1">
+            <Text className="text-g3 dark:text-g1 text-xl w-full pb-4 border-b border-g2">
               Customize your PourCost experience
             </Text>
           </View>
@@ -252,7 +249,6 @@ export default function SettingsScreen() {
             </View>
           </Card>
 
-
           {/* Danger Zone */}
           <Card className="mb-4">
             <Text className="text-lg font-semibold text-e1 mb-3">
@@ -268,7 +264,6 @@ export default function SettingsScreen() {
             />
           </Card>
 
-
           {/* Currency Selection Modal */}
           <Modal
             visible={showCurrencyModal}
@@ -283,17 +278,19 @@ export default function SettingsScreen() {
                   onPress={() => handleCurrencyChange(currency.code)}
                   className="CurrencyOption p-4 rounded-xl border"
                   style={{
-                    backgroundColor: selectedCurrency === currency.code 
-                      ? colors.accent + '20' 
-                      : colors.surface,
-                    borderColor: selectedCurrency === currency.code 
-                      ? colors.accent 
-                      : colors.border,
+                    backgroundColor:
+                      selectedCurrency === currency.code
+                        ? colors.accent + '20'
+                        : colors.surface,
+                    borderColor:
+                      selectedCurrency === currency.code
+                        ? colors.accent
+                        : colors.border,
                   }}
                 >
                   <View className="CurrencyContent flex-row items-center justify-between">
                     <View className="CurrencyInfo flex-row items-center gap-4">
-                      <View 
+                      <View
                         className="CurrencySymbolBadge w-12 h-12 rounded-full items-center justify-center"
                         style={{ backgroundColor: colors.accent + '20' }}
                       >

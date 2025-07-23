@@ -1,8 +1,5 @@
-import React from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import SwipeableCard from './SwipeableCard';
-import CurrencyDisplay from './ui/CurrencyDisplay';
 import HighlightBox from './ui/HighlightBox';
 
 interface CocktailIngredient {

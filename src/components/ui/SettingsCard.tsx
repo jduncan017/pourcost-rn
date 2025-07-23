@@ -8,7 +8,7 @@ interface SettingsCardProps {
   iconName: keyof typeof Ionicons.glyphMap;
   iconColor?: string;
   onPress?: () => void;
-  variant?: 'default' | 'danger';
+  variant?: 'default' | 'danger' | 'accent';
   disabled?: boolean;
   className?: string;
 }
@@ -31,6 +31,9 @@ export default function SettingsCard({
     if (variant === 'danger') {
       return 'bg-e1/40 dark:bg-e2/40 border border-e1/50 dark:border-e3/40';
     }
+    if (variant === 'accent') {
+      return 'bg-s11/20 dark:bg-s12/20 border border-s11/40 dark:border-s12/40';
+    }
     return 'bg-n1/90 dark:bg-p3/80 border border-g2/30 dark:border-p2/50';
   };
 
@@ -38,12 +41,18 @@ export default function SettingsCard({
     if (variant === 'danger') {
       return 'text-e3 dark:text-n1';
     }
+    if (variant === 'accent') {
+      return 'text-g4 dark:text-n1';
+    }
     return 'text-g4 dark:text-n1';
   };
 
   const getDescriptionStyle = () => {
     if (variant === 'danger') {
       return 'text-e3 dark:text-n1';
+    }
+    if (variant === 'accent') {
+      return 'text-g3 dark:text-n1';
     }
     return 'text-g3 dark:text-n1';
   };

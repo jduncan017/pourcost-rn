@@ -360,10 +360,19 @@ export default function CocktailsScreen() {
         <View className="p-4">
           {/* Header */}
           <View className="mb-6">
-            <View className="flex-row items-center justify-between mb-2">
-              <Text className="text-2xl font-medium tracking-wider text-g4 dark:text-n1">
-                COCKTAILS
-              </Text>
+            <Text className="text-g3 dark:text-g1 text-xl w-full pb-4 border-b border-g2 mb-4">
+              Manage your cocktail recipes and cost calculations
+            </Text>
+
+            {/* Search Bar + Create Button */}
+            <View className="flex-row items-center gap-3">
+              <View className="flex-1">
+                <SearchBar
+                  placeholder="Search cocktails, ingredients, or descriptions..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </View>
               <Pressable
                 onPress={handleAddCocktail}
                 className="bg-p1 rounded-lg p-3 flex-row items-center gap-2"
@@ -372,18 +381,6 @@ export default function CocktailsScreen() {
                 <Text className="text-white font-medium">Create</Text>
               </Pressable>
             </View>
-            <Text className="text-g3 dark:text-n1">
-              Manage your cocktail recipes and cost calculations
-            </Text>
-          </View>
-
-          {/* Search Bar */}
-          <View className="mb-4">
-            <SearchBar
-              placeholder="Search cocktails, ingredients, or descriptions..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
           </View>
 
           {/* Filters */}

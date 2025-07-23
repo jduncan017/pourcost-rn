@@ -64,10 +64,7 @@ function RootLayoutNav() {
       <NavigationThemeProvider value={isDarkMode ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="cocktail-form"
-            options={{ headerShown: false }}
-          />
+          <Stack.Screen name="cocktail-form" options={{ headerShown: false }} />
           <Stack.Screen
             name="ingredient-form"
             options={{ headerShown: false }}

@@ -6,7 +6,6 @@ import BottleSizeDropdown from '@/src/components/BottleSizeDropdown';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '@/src/components/ui/Card';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import ScreenTitle from '@/src/components/ui/ScreenTitle';
 
 // Calculator ingredient interface
 interface CalculatorIngredient {
@@ -198,12 +197,10 @@ export default function CalculatorScreen() {
     <GradientBackground>
       <ScrollView className="flex-1">
         <View className="p-4">
-          {/* Quick Calculator */}
-          <ScreenTitle
-            title="QUICK CALCULATOR"
-            variant="page"
-            className="mb-4"
-          />
+          {/* Description */}
+          <Text className="text-g3 dark:text-g1 text-xl w-full pb-4 border-b border-g2 mb-4">
+            Quickly calculate the cost and pricing for a single spirit
+          </Text>
           <Card className="flex flex-col gap-4" padding="large">
             <BottleSizeDropdown
               label="Bottle Size"

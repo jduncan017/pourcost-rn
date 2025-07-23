@@ -16,11 +16,8 @@ export default function GradientBackground({
 }: GradientBackgroundProps) {
   const { isDarkMode } = useTheme();
 
-  console.log('GradientBackground - isDarkMode:', isDarkMode); // Debug log
-
   if (!isDarkMode) {
     // Light mode - use regular white background
-    console.log('Using light mode background');
     return (
       <LinearGradient
         colors={['#FFFFFF', '#EEEEEE']} // p3 to p4
@@ -34,7 +31,6 @@ export default function GradientBackground({
   }
 
   // Dark mode - use gradient from p3 to p4
-  console.log('Using dark mode gradient');
   return (
     <LinearGradient
       colors={['#1D273C', '#03080F']} // p3 to p4

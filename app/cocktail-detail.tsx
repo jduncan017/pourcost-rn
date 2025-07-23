@@ -9,6 +9,7 @@ import Card from '@/src/components/ui/Card';
 import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { getCurrencySymbol } from '@/src/utils/currency';
+import BackButton from '@/src/components/ui/BackButton';
 
 // Enhanced cocktail interface
 interface CocktailIngredient {
@@ -153,7 +154,7 @@ export default function CocktailDetailScreen() {
         </Pressable>
 
         {/* Page Title - Centered */}
-        <View className="TitleContainer absolute inset-x-0 items-center">
+        <View className="TitleContainer items-center">
           <Text className="PageTitle text-lg font-semibold text-p1 dark:text-s11">
             Recipe
           </Text>
