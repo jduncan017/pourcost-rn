@@ -1,11 +1,11 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  Pressable, 
-  Modal as RNModal, 
+import {
+  View,
+  Text,
+  Pressable,
+  Modal as RNModal,
   ScrollView,
-  Dimensions 
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
@@ -52,8 +52,8 @@ export default function Modal({
   const sizeStyles = getSizeStyles();
 
   const ModalContent = () => (
-    <View 
-      className={`ModalContent rounded-xl overflow-hidden border ${className}`} 
+    <View
+      className={`ModalContent rounded-xl overflow-hidden border ${className}`}
       style={{
         ...sizeStyles,
         backgroundColor: colors.surface,
@@ -62,7 +62,7 @@ export default function Modal({
     >
       {/* Header */}
       {(title || showCloseButton) && (
-        <View 
+        <View
           className="ModalHeader flex-row items-center justify-between px-4 py-3 border-b"
           style={{
             borderBottomColor: colors.border,
@@ -86,19 +86,17 @@ export default function Modal({
 
       {/* Content */}
       {scrollable ? (
-        <ScrollView 
+        <ScrollView
           className="ModalScroll flex-1"
           showsVerticalScrollIndicator={false}
           bounces={false}
           style={{ backgroundColor: colors.surface }}
         >
-          <View className="ModalScrollContent p-4">
-            {children}
-          </View>
+          <View className="ModalScrollContent p-4">{children}</View>
         </ScrollView>
       ) : (
-        <View 
-          className="ModalFixedContent flex-1 p-4" 
+        <View
+          className="ModalFixedContent flex-1 p-4"
           style={{ backgroundColor: colors.surface }}
         >
           {children}
@@ -114,11 +112,11 @@ export default function Modal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View className="flex-1 justify-center items-center px-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}>
-        <Pressable 
-          className="absolute inset-0" 
-          onPress={onClose}
-        />
+      <View
+        className="flex-1 justify-center items-center px-4"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+      >
+        <Pressable className="absolute inset-0" onPress={onClose} />
         <ModalContent />
       </View>
     </RNModal>
@@ -146,7 +144,7 @@ export const ConfirmModal = ({
   destructive?: boolean;
 }) => {
   const colors = useThemeColors();
-  
+
   return (
     <Modal
       visible={visible}
@@ -156,15 +154,15 @@ export const ConfirmModal = ({
       scrollable={false}
     >
       <View>
-        <Text 
+        <Text
           className="text-base leading-relaxed mb-6"
-          style={{ 
+          style={{
             color: colors.text,
           }}
         >
           {message}
         </Text>
-        
+
         <View className="flex-row gap-3">
           <Pressable
             onPress={onClose}
@@ -175,16 +173,16 @@ export const ConfirmModal = ({
               borderColor: colors.border,
             }}
           >
-            <Text 
+            <Text
               className="text-center font-semibold"
-              style={{ 
+              style={{
                 color: colors.text,
               }}
             >
               {cancelText}
             </Text>
           </Pressable>
-          
+
           <Pressable
             onPress={onConfirm}
             className="flex-1 py-3 rounded-lg"
@@ -216,7 +214,7 @@ export const InfoModal = ({
   buttonText?: string;
 }) => {
   const colors = useThemeColors();
-  
+
   return (
     <Modal
       visible={visible}
@@ -226,15 +224,15 @@ export const InfoModal = ({
       scrollable={false}
     >
       <View>
-        <Text 
+        <Text
           className="text-base leading-relaxed mb-6"
-          style={{ 
+          style={{
             color: colors.text,
           }}
         >
           {message}
         </Text>
-        
+
         <Pressable
           onPress={onClose}
           className="py-3 rounded-lg"

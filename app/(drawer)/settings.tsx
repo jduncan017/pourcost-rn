@@ -276,7 +276,7 @@ export default function SettingsScreen() {
                 <Pressable
                   key={currency.code}
                   onPress={() => handleCurrencyChange(currency.code)}
-                  className="CurrencyOption p-4 rounded-xl border"
+                  className="CurrencyOption p-4 rounded-xl border w-[75vw]"
                   style={{
                     backgroundColor:
                       selectedCurrency === currency.code
