@@ -39,22 +39,33 @@ export default function CocktailListItem({
       onSwipeRight={onDelete}
       className="mb-3"
     >
-      <Pressable onPress={onPress} className="">
-        {/* Header */}
-        <View className="flex-row items-start justify-between mb-3">
-          <View className="flex-1 mr-3">
-            <Text className="text-lg font-semibold text-g4 dark:text-n1 mb-1">
-              {name}
+      <Pressable onPress={onPress} className="flex-row items-start gap-3">
+        {/* Left Column - Title & Description */}
+        <View className="flex-1">
+          <Text className="text-lg font-semibold text-g4 dark:text-n1 mb-2">
+            {name}
+          </Text>
+
+          {/* Ingredients List */}
+          <View>
+            <Text className="text-xs text-g3 dark:text-n1 font-medium mb-1">
+              INGREDIENTS
+            </Text>
+            <Text className="text-sm text-g3 dark:text-g1 leading-relaxed">
+              {ingredients.map((ing) => ing.name).join(', ')}
             </Text>
           </View>
+        </View>
 
-          {/* Dynamic Highlight Box */}
+        {/* Right Column - Highlight Box */}
+        <View className="w-20">
           {sortBy === 'profitMargin' || sortBy === 'margin' ? (
             <HighlightBox
               label="Profit"
               value={suggestedPrice - totalCost}
               currency={currency}
               type="currency"
+              size="small"
             />
           ) : (
             <HighlightBox
@@ -62,18 +73,9 @@ export default function CocktailListItem({
               value={totalCost}
               currency={currency}
               type="currency"
+              size="small"
             />
           )}
-        </View>
-
-        {/* Ingredients List */}
-        <View>
-          <Text className="text-xs text-g3 dark:text-n1 font-medium mb-2">
-            INGREDIENTS
-          </Text>
-          <Text className="text-sm text-g3 dark:text-n1 leading-relaxed">
-            {ingredients.map((ing) => ing.name).join(', ')}
-          </Text>
         </View>
       </Pressable>
     </SwipeableCard>
