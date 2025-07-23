@@ -59,7 +59,7 @@ npm run type-check        # Run TypeScript type checking
 - **Design System**: Custom color palette and typography system
 - **Cross-Platform**: Single codebase targeting multiple platforms
 - **UI-Layout**: Never use margins outside of components and always control spacing with parent flex containers and gap spacing
-- **Styling**: Always use tailwind classNames instead of inline styles where possible
+- **Styling**: Always use Tailwind classNames instead of inline styles. Use PascalCase naming for the first className (e.g., `className="HeaderContainer flex-row items-center"`). Only use inline styles for dynamic values like theme colors or safe area insets. Font family is set globally to Geist in global.css, so never add `style={{ fontFamily: 'Geist' }}`.
 
 ### Core Components
 

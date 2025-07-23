@@ -33,10 +33,7 @@ export default function AboutScreen() {
               variant="main"
               className="mb-2"
             />
-            <Text
-              className="text-g3 dark:text-n1"
-              style={{ fontFamily: 'Geist' }}
-            >
+            <Text className="text-g3 dark:text-n1">
               Your professional cocktail cost calculator
             </Text>
           </View>

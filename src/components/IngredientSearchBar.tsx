@@ -171,7 +171,7 @@ export default function IngredientSearchBar({
           placeholder={placeholder}
           placeholderTextColor="#9CA3AF"
           className="bg-n1/80 dark:bg-p3/80 border border-g2/50 dark:border-p2/50 rounded-lg px-4 py-3 pr-10 text-g4 dark:text-n1"
-          style={{ fontFamily: 'Geist' }}
+          style={{}}
           onFocus={() => setShowDropdown(searchQuery.length > 0)}
           onBlur={() => {
             // Delay hiding to allow for selection
@@ -205,20 +205,20 @@ export default function IngredientSearchBar({
                   <View className="flex-1">
                     <Text
                       className="text-g4 dark:text-n1"
-                      style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                      style={{ fontWeight: '500' }}
                     >
                       {item.name}
                     </Text>
                     <Text
                       className="text-sm text-g3 dark:text-n1"
-                      style={{ fontFamily: 'Geist' }}
+                      style={{}}
                     >
                       {item.type} • {item.bottleSize}ml
                     </Text>
                   </View>
                   <Text
                     className="text-g4 dark:text-n1"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     ${item.costPerOz.toFixed(2)}/oz
                   </Text>
@@ -238,13 +238,13 @@ export default function IngredientSearchBar({
               <Ionicons name="search" size={32} color="#9CA3AF" />
               <Text
                 className="text-g3 dark:text-n1 text-center mt-2"
-                style={{ fontFamily: 'Geist' }}
+                style={{}}
               >
                 No ingredients found
               </Text>
               <Text
                 className="text-sm text-g3 dark:text-n1 text-center mt-1"
-                style={{ fontFamily: 'Geist' }}
+                style={{}}
               >
                 Try a different search term
               </Text>

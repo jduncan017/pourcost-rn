@@ -174,7 +174,7 @@ export default function SettingsScreen() {
               App Preferences
             </Text>
 
-            <View style={{ gap: 16 }}>
+            <View className="PreferencesContainer gap-4">
               <View className="flex-row items-center justify-between">
                 <View className="flex-1">
                   <Text className="font-medium text-g4 dark:text-n1">
@@ -281,52 +281,31 @@ export default function SettingsScreen() {
                 <Pressable
                   key={currency.code}
                   onPress={() => handleCurrencyChange(currency.code)}
-                  className="p-4 rounded-xl"
+                  className="CurrencyOption p-4 rounded-xl border"
                   style={{
                     backgroundColor: selectedCurrency === currency.code 
                       ? colors.accent + '20' 
                       : colors.surface,
-                    borderWidth: 1,
                     borderColor: selectedCurrency === currency.code 
                       ? colors.accent 
                       : colors.border,
                   }}
                 >
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center gap-4">
+                  <View className="CurrencyContent flex-row items-center justify-between">
+                    <View className="CurrencyInfo flex-row items-center gap-4">
                       <View 
-                        className="w-12 h-12 rounded-full items-center justify-center"
-                        style={{
-                          backgroundColor: colors.accent + '20',
-                        }}
+                        className="CurrencySymbolBadge w-12 h-12 rounded-full items-center justify-center"
+                        style={{ backgroundColor: colors.accent + '20' }}
                       >
-                        <Text 
-                          className="text-xl font-semibold"
-                          style={{ 
-                            fontFamily: 'Geist',
-                            color: colors.accent,
-                          }}
-                        >
+                        <Text className="CurrencySymbol text-xl font-semibold text-p1 dark:text-s11">
                           {currency.symbol}
                         </Text>
                       </View>
-                      <View>
-                        <Text 
-                          className="font-semibold text-base"
-                          style={{ 
-                            fontFamily: 'Geist',
-                            color: colors.text,
-                          }}
-                        >
+                      <View className="CurrencyDetails">
+                        <Text className="CurrencyName font-semibold text-base text-g4 dark:text-n1">
                           {currency.name}
                         </Text>
-                        <Text 
-                          className="text-sm"
-                          style={{ 
-                            fontFamily: 'Geist',
-                            color: colors.textSecondary,
-                          }}
-                        >
+                        <Text className="CurrencyCode text-sm text-g3 dark:text-n1">
                           {currency.code}
                         </Text>
                       </View>

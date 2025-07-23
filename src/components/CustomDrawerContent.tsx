@@ -14,63 +14,54 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.surface, paddingTop: insets.top }}>
+    <View 
+      className="DrawerContainer flex-1"
+      style={{ backgroundColor: colors.surface, paddingTop: insets.top }}
+    >
       {/* Logo Section */}
-      <View style={{ 
-        alignItems: 'center', 
-        paddingVertical: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border 
-      }}>
+      <View 
+        className="LogoSection items-center py-5 border-b"
+        style={{ borderBottomColor: colors.border }}
+      >
         <Image
           source={
             isDarkMode
               ? require('../../assets/images/PC-Logo-Silver.png')
               : require('../../assets/images/PC-Logo-Dark-Gradient.png')
           }
-          style={{ width: 140, height: 35 }}
+          className="DrawerLogo w-[140px] h-[35px]"
           resizeMode="contain"
         />
       </View>
 
       {/* Standard drawer items */}
-      <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
+      <DrawerContentScrollView 
+        {...props} 
+        className="DrawerScroll"
+        contentContainerStyle={{ paddingTop: 0 }}
+      >
         <DrawerItemList {...props} />
       </DrawerContentScrollView>
 
       {/* Sign In/Sign Up button at bottom */}
-      <View style={{ padding: 16, borderTopWidth: 1, borderTopColor: colors.border }}>
+      <View 
+        className="SignInSection p-4 border-t"
+        style={{ borderTopColor: colors.border }}
+      >
         <Pressable
           onPress={handleSignIn}
+          className="SignInButton flex-row items-center p-3 rounded-lg border"
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            padding: 12,
             backgroundColor: colors.accent + '20',
-            borderRadius: 8,
-            borderWidth: 1,
             borderColor: colors.accent + '40',
           }}
         >
-          <Ionicons name="person" size={20} color={colors.accent} style={{ marginRight: 12 }} />
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{
-                fontFamily: 'Geist',
-                fontWeight: '500',
-                color: colors.text,
-                fontSize: 16,
-              }}
-            >
+          <Ionicons name="person" size={20} color={colors.accent} className="mr-3" />
+          <View className="SignInTextContainer flex-1">
+            <Text className="SignInTitle text-base font-medium text-g4 dark:text-n1">
               Sign In / Sign Up
             </Text>
-            <Text
-              style={{
-                fontFamily: 'Geist',
-                color: colors.textSecondary,
-                fontSize: 12,
-              }}
-            >
+            <Text className="SignInSubtitle text-xs text-g3 dark:text-n1">
               Sync your data across devices
             </Text>
           </View>

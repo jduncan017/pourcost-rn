@@ -132,7 +132,6 @@ export default function SearchScreen() {
               <ScreenTitle title="Search" variant="main" />
               <Text
                 className="text-g3 dark:text-n1"
-                style={{ fontFamily: 'Geist' }}
               >
                 Find ingredients and cocktails
               </Text>
@@ -167,7 +166,6 @@ export default function SearchScreen() {
                       <Ionicons name="time" size={16} color="#6B7280" />
                       <Text
                         className="flex-1 text-g4 dark:text-n1"
-                        style={{ fontFamily: 'Geist' }}
                       >
                         {search}
                       </Text>
@@ -182,7 +180,6 @@ export default function SearchScreen() {
               ) : (
                 <Text
                   className="text-g3 dark:text-n1 text-center py-4"
-                  style={{ fontFamily: 'Geist' }}
                 >
                   No recent searches
                 </Text>
@@ -204,13 +201,12 @@ export default function SearchScreen() {
                   <Ionicons name="search" size={48} color="#9CA3AF" />
                   <Text
                     className="text-g3 dark:text-n1 text-center mt-3"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     No results found
                   </Text>
                   <Text
                     className="text-sm text-g3 dark:text-n1 text-center mt-1"
-                    style={{ fontFamily: 'Geist' }}
                   >
                     Try a different search term
                   </Text>
@@ -222,7 +218,7 @@ export default function SearchScreen() {
                     <View>
                       <Text
                         className="text-g4 dark:text-n1 mb-2"
-                        style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                        style={{ fontWeight: '500' }}
                       >
                         Ingredients ({searchResults.ingredients.length})
                       </Text>
@@ -243,7 +239,6 @@ export default function SearchScreen() {
                                 <Text
                                   className="text-g4 dark:text-n1"
                                   style={{
-                                    fontFamily: 'Geist',
                                     fontWeight: '500',
                                   }}
                                 >
@@ -251,7 +246,6 @@ export default function SearchScreen() {
                                 </Text>
                                 <Text
                                   className="text-sm text-g3 dark:text-n1"
-                                  style={{ fontFamily: 'Geist' }}
                                 >
                                   {item.category} • ${item.costPerOz.toFixed(2)}
                                   /oz
@@ -274,7 +268,7 @@ export default function SearchScreen() {
                     <View>
                       <Text
                         className="text-g4 dark:text-n1 mb-2"
-                        style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                        style={{ fontWeight: '500' }}
                       >
                         Cocktails ({searchResults.cocktails.length})
                       </Text>
@@ -291,7 +285,6 @@ export default function SearchScreen() {
                                 <Text
                                   className="text-g4 dark:text-n1"
                                   style={{
-                                    fontFamily: 'Geist',
                                     fontWeight: '500',
                                   }}
                                 >
@@ -299,7 +292,6 @@ export default function SearchScreen() {
                                 </Text>
                                 <Text
                                   className="text-sm text-g3 dark:text-n1"
-                                  style={{ fontFamily: 'Geist' }}
                                 >
                                   {item.ingredients} ingredients • $
                                   {item.totalCost.toFixed(2)} cost
@@ -334,7 +326,7 @@ export default function SearchScreen() {
                 <View>
                   <Text
                     className="text-g4 dark:text-n1 mb-2"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     Cocktails
                   </Text>
@@ -350,13 +342,12 @@ export default function SearchScreen() {
                           <View>
                             <Text
                               className="text-g4 dark:text-n1"
-                              style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                              style={{ fontWeight: '500' }}
                             >
                               {item.name}
                             </Text>
                             <Text
                               className="text-sm text-g3 dark:text-n1"
-                              style={{ fontFamily: 'Geist' }}
                             >
                               Total cost: ${item.totalCost.toFixed(2)}
                             </Text>
@@ -376,7 +367,7 @@ export default function SearchScreen() {
                 <View>
                   <Text
                     className="text-g4 dark:text-n1 mb-2"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     Ingredients
                   </Text>
@@ -392,13 +383,12 @@ export default function SearchScreen() {
                           <View>
                             <Text
                               className="text-g4 dark:text-n1"
-                              style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                              style={{ fontWeight: '500' }}
                             >
                               {item.name}
                             </Text>
                             <Text
                               className="text-sm text-g3 dark:text-n1"
-                              style={{ fontFamily: 'Geist' }}
                             >
                               ${item.costPerOz.toFixed(2)}/oz
                             </Text>

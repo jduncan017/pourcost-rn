@@ -53,40 +53,30 @@ export default function Modal({
 
   const ModalContent = () => (
     <View 
-      className={`rounded-xl overflow-hidden ${className}`} 
+      className={`ModalContent rounded-xl overflow-hidden border ${className}`} 
       style={{
         ...sizeStyles,
         backgroundColor: colors.surface,
-        borderWidth: 1,
         borderColor: colors.border,
       }}
     >
       {/* Header */}
       {(title || showCloseButton) && (
         <View 
-          className="flex-row items-center justify-between px-4 py-3"
+          className="ModalHeader flex-row items-center justify-between px-4 py-3 border-b"
           style={{
-            borderBottomWidth: 1,
             borderBottomColor: colors.border,
             backgroundColor: colors.surface,
           }}
         >
-          <Text 
-            className="text-lg font-semibold flex-1"
-            style={{ 
-              fontFamily: 'Geist',
-              color: colors.text,
-            }}
-          >
+          <Text className="ModalTitle text-lg font-semibold flex-1 text-g4 dark:text-n1">
             {title || ''}
           </Text>
           {showCloseButton && (
             <Pressable
               onPress={onClose}
-              className="p-2 rounded-lg"
-              style={{
-                backgroundColor: colors.accent + '20',
-              }}
+              className="CloseButton p-2 rounded-lg"
+              style={{ backgroundColor: colors.accent + '20' }}
             >
               <Ionicons name="close" size={20} color={colors.textSecondary} />
             </Pressable>
@@ -97,17 +87,20 @@ export default function Modal({
       {/* Content */}
       {scrollable ? (
         <ScrollView 
-          className="flex-1"
+          className="ModalScroll flex-1"
           showsVerticalScrollIndicator={false}
           bounces={false}
           style={{ backgroundColor: colors.surface }}
         >
-          <View className="p-4">
+          <View className="ModalScrollContent p-4">
             {children}
           </View>
         </ScrollView>
       ) : (
-        <View className="flex-1 p-4" style={{ backgroundColor: colors.surface }}>
+        <View 
+          className="ModalFixedContent flex-1 p-4" 
+          style={{ backgroundColor: colors.surface }}
+        >
           {children}
         </View>
       )}
@@ -166,7 +159,6 @@ export const ConfirmModal = ({
         <Text 
           className="text-base leading-relaxed mb-6"
           style={{ 
-            fontFamily: 'Geist',
             color: colors.text,
           }}
         >
@@ -186,7 +178,6 @@ export const ConfirmModal = ({
             <Text 
               className="text-center font-semibold"
               style={{ 
-                fontFamily: 'Geist',
                 color: colors.text,
               }}
             >
@@ -201,10 +192,7 @@ export const ConfirmModal = ({
               backgroundColor: destructive ? '#DC2626' : colors.accent,
             }}
           >
-            <Text 
-              className="text-center font-semibold text-white"
-              style={{ fontFamily: 'Geist' }}
-            >
+            <Text className="text-center font-semibold text-white">
               {confirmText}
             </Text>
           </Pressable>
@@ -241,7 +229,6 @@ export const InfoModal = ({
         <Text 
           className="text-base leading-relaxed mb-6"
           style={{ 
-            fontFamily: 'Geist',
             color: colors.text,
           }}
         >
@@ -255,10 +242,7 @@ export const InfoModal = ({
             backgroundColor: colors.accent,
           }}
         >
-          <Text 
-            className="text-center font-semibold text-white"
-            style={{ fontFamily: 'Geist' }}
-          >
+          <Text className="text-center font-semibold text-white">
             {buttonText}
           </Text>
         </Pressable>

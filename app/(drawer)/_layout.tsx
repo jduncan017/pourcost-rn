@@ -46,29 +46,15 @@ function DynamicHeader() {
 
   return (
     <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flex: 1,
-        paddingHorizontal: 16,
-        backgroundColor: colors.headerBackground,
-        position: 'relative',
-      }}
+      className="HeaderContainer flex-row items-center justify-between flex-1 px-4 relative"
+      style={{ backgroundColor: colors.headerBackground }}
     >
       {/* Left side - keeps space for hamburger menu */}
-      <View style={{ width: 40 }} />
+      <View className="LeftSpacer w-10" />
 
       {/* Absolutely Centered Title */}
-      <View>
-        <Text
-          style={{
-            fontFamily: 'Geist',
-            fontSize: 18,
-            fontWeight: '600',
-            color: colors.text,
-          }}
-        >
+      <View className="TitleContainer absolute inset-x-0 items-center">
+        <Text className="HeaderTitle text-lg font-semibold text-p1 dark:text-s11">
           {getPageTitle()}
         </Text>
       </View>
@@ -77,17 +63,12 @@ function DynamicHeader() {
       {showSearchIcon ? (
         <Pressable
           onPress={handleSearchPress}
-          style={{
-            padding: 8,
-            borderRadius: 8,
-            position: 'relative',
-            right: 0,
-          }}
+          className="SearchButton p-2 rounded-lg bg-p1/20 dark:bg-s11/20"
         >
-          <Ionicons name="search" size={20} color={colors.text} />
+          <Ionicons name="search" size={20} color={colors.accent} />
         </Pressable>
       ) : (
-        <View style={{ width: 40 }} />
+        <View className="RightSpacer w-10" />
       )}
     </View>
   );

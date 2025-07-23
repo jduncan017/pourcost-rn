@@ -175,7 +175,7 @@ export default function IngredientDetailScreen() {
                 />
                 <Text
                   className="text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   {ingredient.type} • Created{' '}
                   {new Date(ingredient.createdAt).toLocaleDateString()}
@@ -193,7 +193,7 @@ export default function IngredientDetailScreen() {
                     <Ionicons name="pencil" size={16} color="white" />
                     <Text
                       className="text-white"
-                      style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                      style={{ fontWeight: '500' }}
                     >
                       Edit
                     </Text>
@@ -214,7 +214,7 @@ export default function IngredientDetailScreen() {
                   >
                     <Text
                       className="text-white"
-                      style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                      style={{ fontWeight: '500' }}
                     >
                       Cancel
                     </Text>
@@ -227,7 +227,7 @@ export default function IngredientDetailScreen() {
                     <Ionicons name="checkmark" size={16} color="white" />
                     <Text
                       className="text-white"
-                      style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                      style={{ fontWeight: '500' }}
                     >
                       Save
                     </Text>
@@ -257,7 +257,7 @@ export default function IngredientDetailScreen() {
                 <View>
                   <Text
                     className="text-sm text-g4 dark:text-n1 mb-2"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     Type
                   </Text>
@@ -278,7 +278,7 @@ export default function IngredientDetailScreen() {
                               ? 'text-white'
                               : 'text-g4 dark:text-n1'
                           }`}
-                          style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                          style={{ fontWeight: '500' }}
                         >
                           {type}
                         </Text>
@@ -298,13 +298,13 @@ export default function IngredientDetailScreen() {
                 <View className="flex-row justify-between">
                   <Text
                     className="text-g3 dark:text-n1"
-                    style={{ fontFamily: 'Geist' }}
+                    style={{}}
                   >
                     Name:
                   </Text>
                   <Text
                     className="text-g4 dark:text-n1"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     {ingredient.name}
                   </Text>
@@ -313,13 +313,13 @@ export default function IngredientDetailScreen() {
                 <View className="flex-row justify-between">
                   <Text
                     className="text-g3 dark:text-n1"
-                    style={{ fontFamily: 'Geist' }}
+                    style={{}}
                   >
                     Type:
                   </Text>
                   <Text
                     className="text-g4 dark:text-n1"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     {ingredient.type}
                   </Text>
@@ -328,13 +328,13 @@ export default function IngredientDetailScreen() {
                 <View className="flex-row justify-between">
                   <Text
                     className="text-g3 dark:text-n1"
-                    style={{ fontFamily: 'Geist' }}
+                    style={{}}
                   >
                     Bottle Size:
                   </Text>
                   <Text
                     className="text-g4 dark:text-n1"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     {ingredient.bottleSize}ml
                   </Text>
@@ -379,13 +379,13 @@ export default function IngredientDetailScreen() {
                 <View className="flex-row justify-between">
                   <Text
                     className="text-g3 dark:text-n1"
-                    style={{ fontFamily: 'Geist' }}
+                    style={{}}
                   >
                     Bottle Price:
                   </Text>
                   <Text
                     className="text-g4 dark:text-n1"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     ${ingredient.price.toFixed(2)}
                   </Text>
@@ -394,13 +394,13 @@ export default function IngredientDetailScreen() {
                 <View className="flex-row justify-between">
                   <Text
                     className="text-g3 dark:text-n1"
-                    style={{ fontFamily: 'Geist' }}
+                    style={{}}
                   >
                     Retail Price (1.5oz):
                   </Text>
                   <Text
                     className="text-g4 dark:text-n1"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     ${ingredient.retailPrice.toFixed(2)}
                   </Text>
@@ -421,13 +421,13 @@ export default function IngredientDetailScreen() {
               <View className="flex-row justify-between items-center">
                 <Text
                   className="text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   Cost per Oz:
                 </Text>
                 <Text
                   className="text-g4 dark:text-n1"
-                  style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                  style={{ fontWeight: '500' }}
                 >
                   ${ingredient.costPerOz.toFixed(3)}
                 </Text>
@@ -436,13 +436,13 @@ export default function IngredientDetailScreen() {
               <View className="flex-row justify-between items-center">
                 <Text
                   className="text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   Pour Cost:
                 </Text>
                 <Text
                   className={`font-geist ${getPourCostColor(ingredient.pourCost)}`}
-                  style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                  style={{ fontWeight: '500' }}
                 >
                   {ingredient.pourCost.toFixed(1)}%
                 </Text>
@@ -451,13 +451,13 @@ export default function IngredientDetailScreen() {
               <View className="flex-row justify-between items-center">
                 <Text
                   className="text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   Suggested Retail ({globalPourCostGoal}% target):
                 </Text>
                 <Text
                   className="text-p2 dark:text-p1"
-                  style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                  style={{ fontWeight: '500' }}
                 >
                   ${ingredient.suggestedRetail.toFixed(2)}
                 </Text>
@@ -466,13 +466,13 @@ export default function IngredientDetailScreen() {
               <View className="flex-row justify-between items-center">
                 <Text
                   className="text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   Pour Cost Margin:
                 </Text>
                 <Text
                   className="text-s22 dark:text-s21"
-                  style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                  style={{ fontWeight: '500' }}
                 >
                   ${ingredient.pourCostMargin.toFixed(2)}
                 </Text>
@@ -494,13 +494,13 @@ export default function IngredientDetailScreen() {
                 <View className="flex-row justify-between mb-2">
                   <Text
                     className="text-sm text-g3 dark:text-n1"
-                    style={{ fontFamily: 'Geist' }}
+                    style={{}}
                   >
                     Pour Cost Performance
                   </Text>
                   <Text
                     className={`text-sm ${getPourCostColor(ingredient.pourCost)}`}
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     {ingredient.pourCost.toFixed(1)}% of {globalPourCostGoal}%
                     target
@@ -526,13 +526,13 @@ export default function IngredientDetailScreen() {
               <View className="bg-n1 dark:bg-p3/80 p-3 rounded-lg">
                 <Text
                   className="text-sm text-g4 dark:text-n1 mb-2"
-                  style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                  style={{ fontWeight: '500' }}
                 >
                   Profit Analysis
                 </Text>
                 <Text
                   className="text-xs text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   Current retail price of ${ingredient.retailPrice.toFixed(2)}{' '}
                   generates a margin of ${ingredient.pourCostMargin.toFixed(2)}{' '}
@@ -549,7 +549,7 @@ export default function IngredientDetailScreen() {
           <Card>
             <Text
               className="text-sm text-g3 dark:text-n1 text-center"
-              style={{ fontFamily: 'Geist' }}
+              style={{}}
             >
               Last updated: {new Date(ingredient.updatedAt).toLocaleString()}
             </Text>

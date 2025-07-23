@@ -49,7 +49,7 @@ export default function InfoCard({
           {title && (
             <Text
               className={`text-xl text-g4 dark:text-n1 ${centered ? 'text-center' : ''}`}
-              style={{ fontFamily: 'Geist', fontWeight: '700' }}
+              style={{ fontWeight: '700' }}
             >
               {title}
             </Text>
@@ -57,7 +57,7 @@ export default function InfoCard({
           {subtitle && (
             <Text
               className={`text-g3 dark:text-n1 ${centered ? 'text-center' : ''}`}
-              style={{ fontFamily: 'Geist' }}
+              style={{}}
             >
               {subtitle}
             </Text>
@@ -74,7 +74,7 @@ export default function InfoCard({
       {description && (
         <Text
           className={`text-g4 dark:text-n1 leading-relaxed ${centered ? 'text-center' : ''}`}
-          style={{ fontFamily: 'Geist' }}
+          style={{}}
         >
           {description}
         </Text>
@@ -87,7 +87,7 @@ export default function InfoCard({
             <Text
               key={index}
               className="text-g4 dark:text-n1"
-              style={{ fontFamily: 'Geist' }}
+              style={{}}
             >
               • {feature}
             </Text>
@@ -102,13 +102,13 @@ export default function InfoCard({
             <View key={index} className="bg-n1/80 dark:bg-p3/80 p-4 rounded-lg">
               <Text
                 className="text-g4 dark:text-n1 mb-1"
-                style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                style={{ fontWeight: '500' }}
               >
                 {step.title}
               </Text>
               <Text
                 className="text-sm text-g3 dark:text-n1"
-                style={{ fontFamily: 'Geist' }}
+                style={{}}
               >
                 {step.description}
               </Text>

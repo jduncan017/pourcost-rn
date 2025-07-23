@@ -8,6 +8,11 @@
 
 /* Base styles */
 @layer base {
+  /* Global font family - Geist for all text */
+  * {
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+  
   /* Custom font loading (when we add Orator font) */
   .font-display {
     font-family: 'Orator', serif;
@@ -37,6 +42,7 @@
   /* Custom utilities for PourCost */
   .text-gradient {
     background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }

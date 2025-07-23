@@ -56,13 +56,13 @@ export default function SettingsCard({
         <View className="flex-1">
           <Text
             className={`font-medium ${getTextStyle()}`}
-            style={{ fontFamily: 'Geist', fontWeight: '500' }}
+            style={{ fontWeight: '500' }}
           >
             {title}
           </Text>
           <Text
             className={`text-sm ${getDescriptionStyle()}`}
-            style={{ fontFamily: 'Geist' }}
+            style={{}}
           >
             {description}
           </Text>
@@ -84,13 +84,13 @@ export default function SettingsCard({
       <View className="flex-1">
         <Text
           className={`font-medium ${getTextStyle()}`}
-          style={{ fontFamily: 'Geist', fontWeight: '500' }}
+          style={{ fontWeight: '500' }}
         >
           {title}
         </Text>
         <Text
           className={`text-sm ${getDescriptionStyle()}`}
-          style={{ fontFamily: 'Geist' }}
+          style={{}}
         >
           {description}
         </Text>

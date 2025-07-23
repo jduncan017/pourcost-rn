@@ -138,7 +138,10 @@ export default function CocktailFormScreen() {
 
   return (
     <GradientBackground>
-      <ScrollView className="flex-1" style={{ paddingTop: insets.top }}>
+      <ScrollView 
+        className="FormScroll flex-1"
+        style={{ paddingTop: insets.top }}
+      >
         <View className="p-4">
           {/* Header */}
           <View className="flex-row items-center justify-between mb-6">
@@ -151,7 +154,7 @@ export default function CocktailFormScreen() {
                 />
                 <Text
                   className="text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   {isEditing
                     ? 'Update cocktail recipe'
@@ -188,7 +191,7 @@ export default function CocktailFormScreen() {
               <View>
                 <Text
                   className="text-sm text-g4 dark:text-n1 mb-2"
-                  style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                  style={{ fontWeight: '500' }}
                 >
                   Category
                 </Text>
@@ -213,7 +216,7 @@ export default function CocktailFormScreen() {
                             ? 'text-white'
                             : 'text-g4 dark:text-n1'
                         }`}
-                        style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                        style={{ fontWeight: '500' }}
                       >
                         {cat}
                       </Text>
@@ -256,13 +259,13 @@ export default function CocktailFormScreen() {
                         <View className="flex-1">
                           <Text
                             className="text-n1 text-lg"
-                            style={{ fontFamily: 'Geist', fontWeight: '600' }}
+                            style={{ fontWeight: '600' }}
                           >
                             {ingredient.name}
                           </Text>
                           <Text
                             className="text-n1/80 text-sm"
-                            style={{ fontFamily: 'Geist' }}
+                            style={{}}
                           >
                             {ingredient.type}
                           </Text>
@@ -272,7 +275,7 @@ export default function CocktailFormScreen() {
                           {/* Amount */}
                           <Text
                             className="text-n1"
-                            style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                            style={{ fontWeight: '500' }}
                           >
                             {ingredient.amount}
                             {ingredient.unit}
@@ -281,7 +284,7 @@ export default function CocktailFormScreen() {
                           {/* ABV placeholder */}
                           <Text
                             className="text-n1/80"
-                            style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                            style={{ fontWeight: '500' }}
                           >
                             40% ABV
                           </Text>
@@ -289,7 +292,7 @@ export default function CocktailFormScreen() {
                           {/* Cost per unit */}
                           <Text
                             className="text-n1"
-                            style={{ fontFamily: 'Geist', fontWeight: '600' }}
+                            style={{ fontWeight: '600' }}
                           >
                             ${ingredient.costPerOz.toFixed(2)}/{ingredient.unit}
                           </Text>
@@ -297,7 +300,7 @@ export default function CocktailFormScreen() {
                           {/* Total cost */}
                           <Text
                             className="text-s12 dark:text-s11"
-                            style={{ fontFamily: 'Geist', fontWeight: '700' }}
+                            style={{ fontWeight: '700' }}
                           >
                             Total: ${ingredient.cost.toFixed(2)}
                           </Text>
@@ -335,13 +338,13 @@ export default function CocktailFormScreen() {
                 <View className="flex-row justify-between">
                   <Text
                     className="text-g3 dark:text-n1"
-                    style={{ fontFamily: 'Geist' }}
+                    style={{}}
                   >
                     Total Cost:
                   </Text>
                   <Text
                     className="text-g4 dark:text-n1"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     ${totalCost.toFixed(2)}
                   </Text>
@@ -350,13 +353,13 @@ export default function CocktailFormScreen() {
                 <View className="flex-row justify-between">
                   <Text
                     className="text-g3 dark:text-n1"
-                    style={{ fontFamily: 'Geist' }}
+                    style={{}}
                   >
                     Suggested Price:
                   </Text>
                   <Text
                     className="text-g4 dark:text-n1"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     ${suggestedPrice.toFixed(2)}
                   </Text>
@@ -365,13 +368,13 @@ export default function CocktailFormScreen() {
                 <View className="flex-row justify-between">
                   <Text
                     className="text-g3 dark:text-n1"
-                    style={{ fontFamily: 'Geist' }}
+                    style={{}}
                   >
                     Pour Cost:
                   </Text>
                   <Text
                     className={`${getPourCostColor(pourCostPercentage)}`}
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     {pourCostPercentage.toFixed(1)}%
                   </Text>
@@ -380,13 +383,13 @@ export default function CocktailFormScreen() {
                 <View className="flex-row justify-between">
                   <Text
                     className="text-g3 dark:text-n1"
-                    style={{ fontFamily: 'Geist' }}
+                    style={{}}
                   >
                     Profit Margin:
                   </Text>
                   <Text
                     className="text-s22 dark:text-s21"
-                    style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                    style={{ fontWeight: '500' }}
                   >
                     ${profitMargin.toFixed(2)}
                   </Text>
@@ -431,7 +434,7 @@ export default function CocktailFormScreen() {
               <Ionicons name="checkmark" size={20} color="white" />
               <Text
                 className="text-white"
-                style={{ fontFamily: 'Geist', fontWeight: '600' }}
+                style={{ fontWeight: '600' }}
               >
                 {isEditing ? 'Update Cocktail' : 'Save Cocktail'}
               </Text>
@@ -445,7 +448,7 @@ export default function CocktailFormScreen() {
                 <Ionicons name="trash" size={20} color="white" />
                 <Text
                   className="text-white"
-                  style={{ fontFamily: 'Geist', fontWeight: '600' }}
+                  style={{ fontWeight: '600' }}
                 >
                   Delete Cocktail
                 </Text>
@@ -455,7 +458,7 @@ export default function CocktailFormScreen() {
 
           <Text
             className="text-center text-g3 dark:text-n1 text-xs my-4"
-            style={{ fontFamily: 'Geist' }}
+            style={{}}
           >
             * Required fields
           </Text>

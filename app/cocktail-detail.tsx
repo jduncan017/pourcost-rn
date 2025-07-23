@@ -135,59 +135,37 @@ export default function CocktailDetailScreen() {
     <GradientBackground>
       {/* Fixed Header - Outside ScrollView */}
       <View
-        className="flex-row items-center justify-between"
+        className="CocktailHeader flex-row items-center justify-between px-4 pb-4"
         style={{
           backgroundColor: colors.headerBackground,
           paddingTop: insets.top + 16,
-          paddingHorizontal: 16,
-          paddingBottom: 16,
         }}
       >
         {/* Back Navigation */}
         <Pressable
           onPress={() => router.back()}
-          className="flex-row items-center gap-2 py-2"
+          className="BackButton flex-row items-center gap-2 py-2"
         >
           <Ionicons name="chevron-back" size={20} color={colors.accent} />
-          <Text
-            className="text-base text-s11"
-            style={{
-              fontFamily: 'Geist',
-              fontWeight: '500',
-            }}
-          >
+          <Text className="BackText text-base font-medium text-p1 dark:text-s11">
             Cocktails
           </Text>
         </Pressable>
 
         {/* Page Title - Centered */}
-        <View>
-          <Text
-            style={{
-              fontFamily: 'Geist',
-              fontWeight: '600',
-              color: colors.text,
-              fontSize: 18,
-            }}
-          >
+        <View className="TitleContainer absolute inset-x-0 items-center">
+          <Text className="PageTitle text-lg font-semibold text-p1 dark:text-s11">
             Recipe
           </Text>
         </View>
 
         {/* Action Menu */}
-        <View style={{ position: 'relative' }}>
+        <View className="MenuContainer relative">
           <Pressable
             onPress={() => setShowActions(!showActions)}
-            className="py-2 px-3"
+            className="MenuButton py-2 px-3"
           >
-            <Text
-              className="text-lg"
-              style={{
-                fontFamily: 'Geist',
-                fontWeight: '600',
-                color: colors.accent,
-              }}
-            >
+            <Text className="MenuDots text-lg font-semibold text-p1 dark:text-s11">
               •••
             </Text>
           </Pressable>
@@ -195,15 +173,10 @@ export default function CocktailDetailScreen() {
           {/* Absolutely Positioned Dropdown */}
           {showActions && (
             <View
+              className="Dropdown absolute top-full right-0 min-w-[120px] rounded-xl border shadow-lg"
               style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
                 zIndex: 1000,
-                minWidth: 120,
                 backgroundColor: colors.surface,
-                borderRadius: 12,
-                borderWidth: 1,
                 borderColor: colors.border,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
@@ -217,26 +190,16 @@ export default function CocktailDetailScreen() {
                   setShowActions(false);
                   handleEdit();
                 }}
-                className="p-3"
+                className="EditOption p-3"
               >
-                <Text
-                  className="text-base"
-                  style={{
-                    fontFamily: 'Geist',
-                    fontWeight: '500',
-                    color: colors.text,
-                  }}
-                >
+                <Text className="EditText text-base font-medium text-g4 dark:text-n1">
                   Edit
                 </Text>
               </Pressable>
 
               <View
-                style={{
-                  height: 1,
-                  backgroundColor: colors.border,
-                  marginHorizontal: 12,
-                }}
+                className="Divider h-px mx-3"
+                style={{ backgroundColor: colors.border }}
               />
 
               <Pressable
@@ -244,16 +207,9 @@ export default function CocktailDetailScreen() {
                   setShowActions(false);
                   handleDelete();
                 }}
-                className="p-3"
+                className="DeleteOption p-3"
               >
-                <Text
-                  className="text-base"
-                  style={{
-                    fontFamily: 'Geist',
-                    fontWeight: '500',
-                    color: '#DC2626',
-                  }}
-                >
+                <Text className="DeleteText text-base font-medium text-red-600 dark:text-red-400">
                   Delete
                 </Text>
               </Pressable>
@@ -265,33 +221,21 @@ export default function CocktailDetailScreen() {
       {/* Overlay to close dropdown when tapping outside */}
       {showActions && (
         <Pressable
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 999,
-          }}
+          className="DropdownOverlay absolute inset-0"
+          style={{ zIndex: 999 }}
           onPress={() => setShowActions(false)}
         />
       )}
 
       {/* Scrollable Content */}
-      <ScrollView className="flex-1">
-        <View className="p-4">
+      <ScrollView className="ContentScroll flex-1">
+        <View className="ContentContainer p-4">
           {/* Cocktail Name and Description */}
-          <View className="mb-6">
-            <Text
-              className="text-2xl text-g4 dark:text-n1 mb-2"
-              style={{ fontFamily: 'Geist', fontWeight: '700' }}
-            >
+          <View className="CocktailInfo mb-6">
+            <Text className="CocktailName text-2xl font-bold text-g4 dark:text-n1 mb-2">
               {cocktail.name}
             </Text>
-            <Text
-              className="text-g3 dark:text-n1"
-              style={{ fontFamily: 'Geist' }}
-            >
+            <Text className="CocktailDescription text-g3 dark:text-n1">
               {cocktail.description}
             </Text>
           </View>
@@ -394,10 +338,7 @@ export default function CocktailDetailScreen() {
               <Text className="text-sm text-p3 dark:text-s11 mb-2 font-medium">
                 Profit Analysis
               </Text>
-              <Text
-                className="text-xs text-p2 dark:text-g1 leading-relaxed"
-                style={{ fontFamily: 'Geist' }}
-              >
+              <Text className="text-xs text-p2 dark:text-g1 leading-relaxed">
                 This cocktail generates a profit of {currencySymbol}
                 {cocktail.profitMargin.toFixed(2)} at the suggested price of{' '}
                 {currencySymbol}
@@ -415,14 +356,11 @@ export default function CocktailDetailScreen() {
             <Card className="mb-4">
               <Text
                 className="text-lg text-g4 dark:text-n1 mb-3"
-                style={{ fontFamily: 'Geist', fontWeight: '600' }}
+                style={{ fontWeight: '600' }}
               >
                 Recipe Notes
               </Text>
-              <Text
-                className="text-g4 dark:text-n1 leading-relaxed"
-                style={{ fontFamily: 'Geist' }}
-              >
+              <Text className="text-g4 dark:text-n1 leading-relaxed">
                 {cocktail.notes}
               </Text>
             </Card>
@@ -430,10 +368,7 @@ export default function CocktailDetailScreen() {
 
           {/* Metadata */}
           <Card>
-            <Text
-              className="text-center text-g3 dark:text-n1 text-sm"
-              style={{ fontFamily: 'Geist' }}
-            >
+            <Text className="text-center text-g3 dark:text-n1 text-sm">
               Created: {new Date(cocktail.createdAt).toLocaleDateString()} •
               Last updated: {new Date(cocktail.updatedAt).toLocaleDateString()}
             </Text>

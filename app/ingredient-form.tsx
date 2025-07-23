@@ -151,7 +151,10 @@ export default function IngredientFormScreen() {
 
   return (
     <GradientBackground>
-      <ScrollView className="flex-1" style={{ paddingTop: insets.top }}>
+      <ScrollView 
+        className="FormScroll flex-1"
+        style={{ paddingTop: insets.top }}
+      >
         <View className="p-4">
           {/* Header */}
           <View className="flex-row items-center justify-between mb-6">
@@ -164,7 +167,7 @@ export default function IngredientFormScreen() {
                 />
                 <Text
                   className="text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   {isEditing
                     ? 'Update ingredient details'
@@ -193,7 +196,7 @@ export default function IngredientFormScreen() {
               <View>
                 <Text
                   className="text-sm text-g4 dark:text-n1 mb-2"
-                  style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                  style={{ fontWeight: '500' }}
                 >
                   Type *
                 </Text>
@@ -214,7 +217,7 @@ export default function IngredientFormScreen() {
                             ? 'text-white'
                             : 'text-g4 dark:text-n1'
                         }`}
-                        style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                        style={{ fontWeight: '500' }}
                       >
                         {ingredientType}
                       </Text>
@@ -275,13 +278,13 @@ export default function IngredientFormScreen() {
               <View className="flex-row justify-between items-center">
                 <Text
                   className="text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   Cost per Oz:
                 </Text>
                 <Text
                   className="text-g4 dark:text-n1"
-                  style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                  style={{ fontWeight: '500' }}
                 >
                   ${costPerOz.toFixed(3)}
                 </Text>
@@ -290,13 +293,13 @@ export default function IngredientFormScreen() {
               <View className="flex-row justify-between items-center">
                 <Text
                   className="text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   Cost for 1.5oz:
                 </Text>
                 <Text
                   className="text-g4 dark:text-n1"
-                  style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                  style={{ fontWeight: '500' }}
                 >
                   ${costFor15oz.toFixed(2)}
                 </Text>
@@ -305,13 +308,13 @@ export default function IngredientFormScreen() {
               <View className="flex-row justify-between items-center">
                 <Text
                   className="text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   Pour Cost:
                 </Text>
                 <Text
                   className={`${getPourCostColor(pourCostPercentage)}`}
-                  style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                  style={{ fontWeight: '500' }}
                 >
                   {pourCostPercentage.toFixed(1)}%
                 </Text>
@@ -320,13 +323,13 @@ export default function IngredientFormScreen() {
               <View className="flex-row justify-between items-center">
                 <Text
                   className="text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   Suggested Retail (20% target):
                 </Text>
                 <Text
                   className="text-p2 dark:text-p1"
-                  style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                  style={{ fontWeight: '500' }}
                 >
                   ${suggestedRetail.toFixed(2)}
                 </Text>
@@ -335,13 +338,13 @@ export default function IngredientFormScreen() {
               <View className="flex-row justify-between items-center">
                 <Text
                   className="text-g3 dark:text-n1"
-                  style={{ fontFamily: 'Geist' }}
+                  style={{}}
                 >
                   Profit Margin:
                 </Text>
                 <Text
                   className="text-s22 dark:text-s21"
-                  style={{ fontFamily: 'Geist', fontWeight: '500' }}
+                  style={{ fontWeight: '500' }}
                 >
                   ${pourCostMargin.toFixed(2)}
                 </Text>
@@ -372,7 +375,7 @@ export default function IngredientFormScreen() {
               <Ionicons name="checkmark" size={20} color="white" />
               <Text
                 className="text-white"
-                style={{ fontFamily: 'Geist', fontWeight: '600' }}
+                style={{ fontWeight: '600' }}
               >
                 {isEditing ? 'Update Ingredient' : 'Save Ingredient'}
               </Text>
@@ -386,7 +389,7 @@ export default function IngredientFormScreen() {
                 <Ionicons name="trash" size={20} color="white" />
                 <Text
                   className="text-white"
-                  style={{ fontFamily: 'Geist', fontWeight: '600' }}
+                  style={{ fontWeight: '600' }}
                 >
                   Delete Ingredient
                 </Text>
@@ -396,7 +399,7 @@ export default function IngredientFormScreen() {
 
           <Text
             className="text-center text-g3 dark:text-n1 text-xs my-4"
-            style={{ fontFamily: 'Geist' }}
+            style={{}}
           >
             * Required fields
           </Text>

@@ -45,7 +45,6 @@ export default function ScreenTitle({
     <Text
       className={`${textClassName} ${className}`}
       style={{
-        fontFamily: 'Geist',
         fontWeight,
         ...style,
       }}
