@@ -2,13 +2,14 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import CurrencyDisplay from './CurrencyDisplay';
 
-interface HighlightBoxProps {
+export interface HighlightBoxProps {
   label: string;
   value: number | string;
   currency?: string;
   type?: 'currency' | 'percentage' | 'text';
   size?: 'small' | 'medium' | 'large';
   className?: string;
+  color?: 'success' | 'warning' | 'danger' | 'neutral';
 }
 
 export default function HighlightBox({

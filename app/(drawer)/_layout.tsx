@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native';
+import { Pressable } from 'react-native';
 import { Drawer } from 'expo-router/drawer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
@@ -57,12 +57,12 @@ export default function DrawerLayout() {
         }}
       >
         <Drawer.Screen
-          name="calculator"
+          name="cocktails"
           options={{
-            title: 'Quick Calculator',
-            drawerLabel: 'Quick Calculator',
+            title: 'Cocktails',
+            drawerLabel: 'Cocktails',
             drawerIcon: ({ color, size }) => (
-              <Ionicons name="calculator" size={size} color={color} />
+              <Ionicons name="wine" size={size} color={color} />
             ),
           }}
         />
@@ -77,12 +77,12 @@ export default function DrawerLayout() {
           }}
         />
         <Drawer.Screen
-          name="cocktails"
+          name="calculator"
           options={{
-            title: 'Cocktails',
-            drawerLabel: 'Cocktails',
+            title: 'Quick Calculator',
+            drawerLabel: 'Quick Calculator',
             drawerIcon: ({ color, size }) => (
-              <Ionicons name="wine" size={size} color={color} />
+              <Ionicons name="calculator" size={size} color={color} />
             ),
           }}
         />

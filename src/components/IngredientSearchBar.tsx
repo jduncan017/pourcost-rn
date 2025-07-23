@@ -8,110 +8,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Card from './ui/Card';
-
-// Mock saved ingredient interface (would come from store)
-interface SavedIngredient {
-  id: string;
-  name: string;
-  type: string;
-  bottleSize: number;
-  bottlePrice: number;
-  costPerOz: number;
-  createdAt: string;
-}
-
-interface CocktailIngredient {
-  id: string;
-  name: string;
-  amount: number;
-  unit: 'oz' | 'ml' | 'drops' | 'splash';
-  bottleSize: number;
-  bottlePrice: number;
-  type: string;
-  costPerOz: number;
-  cost: number;
-}
+import { SavedIngredient, CocktailIngredient } from '@/src/types/models';
+import { searchIngredients, createCocktailIngredient, calculateCostPerOz } from '@/src/services/mock-data';
 
 interface IngredientSearchBarProps {
   onAddIngredient: (ingredient: CocktailIngredient) => void;
   placeholder?: string;
 }
-
-// Mock saved ingredients (would come from ingredients store)
-const MOCK_SAVED_INGREDIENTS: SavedIngredient[] = [
-  {
-    id: '1',
-    name: 'Remy Martin V.S.O.P.',
-    type: 'Cognac',
-    bottleSize: 750,
-    bottlePrice: 45.99,
-    costPerOz: 1.81,
-    createdAt: '2025-01-15T10:30:00Z',
-  },
-  {
-    id: '2',
-    name: 'Vodka (Premium)',
-    type: 'Liquor',
-    bottleSize: 750,
-    bottlePrice: 24.99,
-    costPerOz: 0.98,
-    createdAt: '2025-01-15T10:30:00Z',
-  },
-  {
-    id: '3',
-    name: 'Simple Syrup',
-    type: 'Syrup',
-    bottleSize: 500,
-    bottlePrice: 8.99,
-    costPerOz: 0.53,
-    createdAt: '2025-01-15T10:30:00Z',
-  },
-  {
-    id: '4',
-    name: 'Fresh Lime Juice',
-    type: 'Mixer',
-    bottleSize: 1000,
-    bottlePrice: 4.99,
-    costPerOz: 0.15,
-    createdAt: '2025-01-15T10:30:00Z',
-  },
-  {
-    id: '5',
-    name: 'Triple Sec',
-    type: 'Liquor',
-    bottleSize: 750,
-    bottlePrice: 18.99,
-    costPerOz: 0.75,
-    createdAt: '2025-01-15T10:30:00Z',
-  },
-  {
-    id: '6',
-    name: 'Tequila Blanco',
-    type: 'Spirit',
-    bottleSize: 750,
-    bottlePrice: 35.99,
-    costPerOz: 1.42,
-    createdAt: '2025-01-15T10:30:00Z',
-  },
-  {
-    id: '7',
-    name: 'Gin (London Dry)',
-    type: 'Spirit',
-    bottleSize: 750,
-    bottlePrice: 28.99,
-    costPerOz: 1.14,
-    createdAt: '2025-01-15T10:30:00Z',
-  },
-  {
-    id: '8',
-    name: 'Bourbon Whiskey',
-    type: 'Whiskey',
-    bottleSize: 750,
-    bottlePrice: 42.99,
-    costPerOz: 1.69,
-    createdAt: '2025-01-15T10:30:00Z',
-  },
-];
 
 export default function IngredientSearchBar({
   onAddIngredient,
@@ -122,33 +25,12 @@ export default function IngredientSearchBar({
 
   // Filter ingredients based on search
   const filteredIngredients = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-
-    const query = searchQuery.toLowerCase();
-    return MOCK_SAVED_INGREDIENTS.filter(
-      (ingredient) =>
-        ingredient.name.toLowerCase().includes(query) ||
-        ingredient.type.toLowerCase().includes(query)
-    ).slice(0, 5); // Show max 5 results
+    return searchIngredients(searchQuery);
   }, [searchQuery]);
 
   const handleSelectIngredient = (ingredient: SavedIngredient) => {
-    // Default to 1.5oz amount when adding from search
-    const defaultAmount = 1.5;
-    const cost = ingredient.costPerOz * defaultAmount;
-
-    const cocktailIngredient: CocktailIngredient = {
-      id: `${ingredient.id}-${Date.now()}`,
-      name: ingredient.name,
-      amount: defaultAmount,
-      unit: 'oz',
-      bottleSize: ingredient.bottleSize,
-      bottlePrice: ingredient.bottlePrice,
-      type: ingredient.type,
-      costPerOz: ingredient.costPerOz,
-      cost,
-    };
-
+    // Create cocktail ingredient using service function
+    const cocktailIngredient = createCocktailIngredient(ingredient, 1.5, 'oz');
     onAddIngredient(cocktailIngredient);
 
     // Clear search
@@ -220,7 +102,7 @@ export default function IngredientSearchBar({
                     className="text-g4 dark:text-n1"
                     style={{ fontWeight: '500' }}
                   >
-                    ${item.costPerOz.toFixed(2)}/oz
+                    ${calculateCostPerOz(item.bottleSize, item.bottlePrice).toFixed(2)}/oz
                   </Text>
                 </View>
               </Pressable>

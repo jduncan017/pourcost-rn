@@ -1,46 +1,18 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import { useEffect } from 'react';
+import { View, Text, ScrollView, Alert } from 'react-native';
 import { useAppStore } from '@/src/stores/app-store';
-import CocktailListItem from '@/src/components/CocktailListItem';
+import { useCocktailsStore } from '@/src/stores/cocktails-store';
+import { CocktailListItem } from '@/src/components/ui/GenericListItem';
 import SearchBar from '@/src/components/ui/SearchBar';
 import EmptyState from '@/src/components/EmptyState';
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-
-// Enhanced cocktail interface
-interface CocktailIngredient {
-  id: string;
-  name: string;
-  amount: number; // oz
-  cost: number; // cost for this amount
-  type: 'Beer' | 'Wine' | 'Spirit' | 'Liquor' | 'Prepared' | 'Garnish';
-}
-
-interface Cocktail {
-  id: string;
-  name: string;
-  description?: string;
-  category:
-    | 'Classic'
-    | 'Modern'
-    | 'Tropical'
-    | 'Whiskey'
-    | 'Vodka'
-    | 'Rum'
-    | 'Gin'
-    | 'Tequila'
-    | 'Other';
-  ingredients: CocktailIngredient[];
-  totalCost: number;
-  suggestedPrice: number;
-  pourCostPercentage: number;
-  profitMargin: number;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-  favorited: boolean;
-}
+import { CocktailWithCalculations } from '@/src/types/models';
+import Button from '@/src/components/ui/Button';
+import {
+  CocktailCategorySelector,
+  SortSelector,
+} from '@/src/components/ui/ChipSelector';
 
 /**
  * Cocktails management screen
@@ -48,249 +20,53 @@ interface Cocktail {
  * Includes filtering, categorization, and detailed cocktail management
  */
 export default function CocktailsScreen() {
-  const { baseCurrency } = useAppStore();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [sortBy, setSortBy] = useState<
-    'name' | 'cost' | 'created' | 'profitMargin' | 'margin'
-  >('created');
+  const { } = useAppStore();
   const router = useRouter();
+  
+  // Use Zustand store for state management
+  const {
+    // Data
+    isLoading,
+    error,
+    
+    // UI State
+    searchQuery,
+    selectedCategory,
+    sortBy,
+    
+    // Actions
+    loadCocktails,
+    deleteCocktail,
+    setSearchQuery,
+    setSelectedCategory,
+    setSortBy,
+    
+    // Computed state
+    getFilteredCocktails,
+    
+    // Utilities
+    clearError,
+  } = useCocktailsStore();
 
-  // Category options
-  const categories = [
-    'All',
-    'Classic',
-    'Modern',
-    'Tropical',
-    'Whiskey',
-    'Vodka',
-    'Rum',
-    'Gin',
-    'Tequila',
-    'Other',
-  ];
+  // Get filtered cocktails from store
+  const filteredCocktails = getFilteredCocktails();
 
-  // Enhanced mock cocktails with comprehensive data
-  const mockCocktails: Cocktail[] = [
-    {
-      id: '1',
-      name: 'Classic Margarita',
-      description: 'The perfect balance of tequila, lime, and orange liqueur',
-      category: 'Tequila',
-      ingredients: [
-        {
-          id: '1',
-          name: 'Tequila Blanco',
-          amount: 2.0,
-          cost: 1.6,
-          type: 'Spirit',
-        },
-        {
-          id: '2',
-          name: 'Fresh Lime Juice',
-          amount: 1.0,
-          cost: 0.15,
-          type: 'Prepared',
-        },
-        { id: '3', name: 'Triple Sec', amount: 1.0, cost: 0.7, type: 'Liquor' },
-      ],
-      totalCost: 2.45,
-      suggestedPrice: 12.0,
-      pourCostPercentage: 20.4,
-      profitMargin: 9.55,
-      notes: 'Serve in salt-rimmed glass with lime wheel',
-      createdAt: '2025-01-15T10:30:00Z',
-      updatedAt: '2025-01-15T10:30:00Z',
-      favorited: true,
-    },
-    {
-      id: '2',
-      name: 'Old Fashioned',
-      description: 'Classic whiskey cocktail with muddled sugar and bitters',
-      category: 'Whiskey',
-      ingredients: [
-        {
-          id: '4',
-          name: 'Bourbon Whiskey',
-          amount: 2.0,
-          cost: 2.4,
-          type: 'Spirit',
-        },
-        {
-          id: '5',
-          name: 'Simple Syrup',
-          amount: 0.25,
-          cost: 0.05,
-          type: 'Prepared',
-        },
-        {
-          id: '6',
-          name: 'Angostura Bitters',
-          amount: 0.125,
-          cost: 0.15,
-          type: 'Garnish',
-        },
-        { id: '7', name: 'Orange Peel', amount: 1, cost: 0.6, type: 'Garnish' },
-      ],
-      totalCost: 3.2,
-      suggestedPrice: 14.0,
-      pourCostPercentage: 22.9,
-      profitMargin: 10.8,
-      notes: 'Express orange oils over drink, garnish with peel',
-      createdAt: '2025-01-14T16:45:00Z',
-      updatedAt: '2025-01-14T16:45:00Z',
-      favorited: false,
-    },
-    {
-      id: '3',
-      name: 'Mojito',
-      description: 'Refreshing Cuban cocktail with mint, lime, and rum',
-      category: 'Rum',
-      ingredients: [
-        { id: '8', name: 'White Rum', amount: 2.0, cost: 1.2, type: 'Spirit' },
-        {
-          id: '9',
-          name: 'Fresh Mint',
-          amount: 0.5,
-          cost: 0.25,
-          type: 'Garnish',
-        },
-        {
-          id: '10',
-          name: 'Lime Juice',
-          amount: 0.5,
-          cost: 0.1,
-          type: 'Prepared',
-        },
-        {
-          id: '11',
-          name: 'Simple Syrup',
-          amount: 0.25,
-          cost: 0.05,
-          type: 'Prepared',
-        },
-        {
-          id: '12',
-          name: 'Soda Water',
-          amount: 4.0,
-          cost: 0.25,
-          type: 'Liquor',
-        },
-      ],
-      totalCost: 1.85,
-      suggestedPrice: 10.0,
-      pourCostPercentage: 18.5,
-      profitMargin: 8.15,
-      notes: 'Muddle mint gently, top with soda water',
-      createdAt: '2025-01-13T14:20:00Z',
-      updatedAt: '2025-01-13T14:20:00Z',
-      favorited: true,
-    },
-    {
-      id: '4',
-      name: 'Espresso Martini',
-      description: 'Modern coffee cocktail with vodka and coffee liqueur',
-      category: 'Modern',
-      ingredients: [
-        { id: '13', name: 'Vodka', amount: 2.0, cost: 1.96, type: 'Spirit' },
-        {
-          id: '14',
-          name: 'Coffee Liqueur',
-          amount: 1.0,
-          cost: 0.9,
-          type: 'Liquor',
-        },
-        {
-          id: '15',
-          name: 'Fresh Espresso',
-          amount: 1.0,
-          cost: 0.35,
-          type: 'Garnish',
-        },
-      ],
-      totalCost: 3.21,
-      suggestedPrice: 15.0,
-      pourCostPercentage: 21.4,
-      profitMargin: 11.79,
-      notes: 'Shake vigorously for proper foam, garnish with coffee beans',
-      createdAt: '2025-01-12T19:30:00Z',
-      updatedAt: '2025-01-12T19:30:00Z',
-      favorited: false,
-    },
-    {
-      id: '5',
-      name: 'Pina Colada',
-      description: 'Tropical rum cocktail with coconut and pineapple',
-      category: 'Tropical',
-      ingredients: [
-        { id: '16', name: 'White Rum', amount: 1.5, cost: 0.9, type: 'Spirit' },
-        {
-          id: '17',
-          name: 'Coconut Rum',
-          amount: 0.5,
-          cost: 0.45,
-          type: 'Spirit',
-        },
-        {
-          id: '18',
-          name: 'Coconut Cream',
-          amount: 1.0,
-          cost: 0.4,
-          type: 'Liquor',
-        },
-        {
-          id: '19',
-          name: 'Pineapple Juice',
-          amount: 3.0,
-          cost: 0.45,
-          type: 'Prepared',
-        },
-      ],
-      totalCost: 2.2,
-      suggestedPrice: 11.0,
-      pourCostPercentage: 20.0,
-      profitMargin: 8.8,
-      notes: 'Blend with ice, garnish with pineapple and cherry',
-      createdAt: '2025-01-11T12:15:00Z',
-      updatedAt: '2025-01-11T12:15:00Z',
-      favorited: true,
-    },
-  ];
+  // Load cocktails on mount
+  useEffect(() => {
+    loadCocktails();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Filter and sort cocktails
-  const filteredCocktails = mockCocktails
-    .filter((cocktail) => {
-      const matchesSearch =
-        cocktail.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        cocktail.description
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        cocktail.ingredients.some((ing) =>
-          ing.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      const matchesCategory =
-        selectedCategory === 'All' || cocktail.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'cost':
-          return a.totalCost - b.totalCost;
-        case 'profitMargin':
-        case 'margin':
-          return b.profitMargin - a.profitMargin;
-        case 'created':
-        default:
-          return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-      }
-    });
+  // Error handling
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Error', error, [
+        { text: 'OK', onPress: clearError }
+      ]);
+    }
+  }, [error, clearError]);
 
   // Handle cocktail selection
-  const handleCocktailPress = (cocktail: Cocktail) => {
+  const handleCocktailPress = (cocktail: CocktailWithCalculations) => {
     router.push({
       pathname: '/cocktail-detail',
       params: { id: cocktail.id },
@@ -303,7 +79,7 @@ export default function CocktailsScreen() {
   };
 
   // Handle cocktail editing
-  const handleEditCocktail = (cocktail: Cocktail) => {
+  const handleEditCocktail = (cocktail: CocktailWithCalculations) => {
     router.push({
       pathname: '/cocktail-form',
       params: {
@@ -312,14 +88,14 @@ export default function CocktailsScreen() {
         description: cocktail.description,
         category: cocktail.category,
         notes: cocktail.notes,
-        createdAt: cocktail.createdAt,
-        favorited: cocktail.favorited.toString(),
+        createdAt: cocktail.createdAt.toISOString(),
+        favorited: (cocktail.favorited || false).toString(),
       },
     });
   };
 
   // Handle cocktail deletion
-  const handleDeleteCocktail = (cocktail: Cocktail) => {
+  const handleDeleteCocktail = (cocktail: CocktailWithCalculations) => {
     Alert.alert(
       'Delete Cocktail',
       `Are you sure you want to delete "${cocktail.name}"?`,
@@ -331,27 +107,16 @@ export default function CocktailsScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            Alert.alert('Deleted', `"${cocktail.name}" has been deleted.`);
+          onPress: async () => {
+            try {
+              await deleteCocktail(cocktail.id);
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete cocktail');
+            }
           },
         },
       ]
     );
-  };
-
-  // Handle favorite toggle
-  const handleToggleFavorite = (cocktail: Cocktail) => {
-    Alert.alert(
-      'Favorite',
-      `"${cocktail.name}" ${cocktail.favorited ? 'removed from' : 'added to'} favorites`
-    );
-  };
-
-  // Get pour cost color
-  const getPourCostColor = (pourCost: number) => {
-    if (pourCost <= 20) return 'text-s22';
-    if (pourCost <= 25) return 'text-s12';
-    return 'text-e3';
   };
 
   return (
@@ -373,13 +138,14 @@ export default function CocktailsScreen() {
                   onChangeText={setSearchQuery}
                 />
               </View>
-              <Pressable
+              <Button
                 onPress={handleAddCocktail}
-                className="bg-p1 rounded-lg p-3 flex-row items-center gap-2"
+                variant="primary"
+                icon="add"
+                size="medium"
               >
-                <Ionicons name="add" size={20} color="white" />
-                <Text className="text-white font-medium">Create</Text>
-              </Pressable>
+                Create
+              </Button>
             </View>
           </View>
 
@@ -387,91 +153,50 @@ export default function CocktailsScreen() {
           <View className="mb-6">
             {/* Category Filter */}
             <View className="mb-4">
-              <Text className="text-sm font-medium text-g4 dark:text-n1 mb-3">
-                Category
-              </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View className="flex-row" style={{ gap: 8 }}>
-                  {categories.map((category) => (
-                    <Pressable
-                      key={category}
-                      onPress={() => setSelectedCategory(category)}
-                      className={`px-3 py-2 rounded-full border ${
-                        selectedCategory === category
-                          ? 'bg-p1 border-p1'
-                          : 'bg-n1/80 dark:bg-n1/10 border-g1/50 dark:border-n1/20'
-                      }`}
-                    >
-                      <Text
-                        className={`text-sm font-medium ${
-                          selectedCategory === category
-                            ? 'text-white'
-                            : 'text-g4 dark:text-n1'
-                        }`}
-                      >
-                        {category}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </ScrollView>
+              <CocktailCategorySelector
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+              />
             </View>
 
             {/* Sort Options */}
-            <View className="flex-row items-center">
-              <Text className="text-sm font-medium text-g4 dark:text-n1 mr-3">
-                Sort by:
-              </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View className="flex-row" style={{ gap: 8 }}>
-                  {[
-                    { key: 'created', label: 'Recently Added' },
-                    { key: 'name', label: 'Name' },
-                    { key: 'cost', label: 'Cost' },
-                    { key: 'profitMargin', label: 'Profit' },
-                    { key: 'margin', label: 'Margin' },
-                  ].map((sort) => (
-                    <Pressable
-                      key={sort.key}
-                      onPress={() => setSortBy(sort.key as any)}
-                      className={`px-2 py-1 rounded border ${
-                        sortBy === sort.key
-                          ? 'bg-p2 dark:bg-p1 border-p2 dark:border-p1'
-                          : 'bg-g1/80 dark:bg-n1/10 border-g1/50 dark:border-n1/20'
-                      }`}
-                    >
-                      <Text
-                        className={`text-xs font-medium ${
-                          sortBy === sort.key
-                            ? 'text-white'
-                            : 'text-g3 dark:text-n1'
-                        }`}
-                      >
-                        {sort.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </ScrollView>
-            </View>
+            <SortSelector
+              sortOptions={[
+                { key: 'created', label: 'Recently Added' },
+                { key: 'name', label: 'Name' },
+                { key: 'cost', label: 'Cost' },
+                { key: 'costPercent', label: 'Cost %' },
+                { key: 'profitMargin', label: 'Profit' },
+              ]}
+              selectedSort={sortBy}
+              onSortChange={(sortKey) => setSortBy(sortKey as any)}
+              showLabel={false}
+              className="flex-row items-center"
+            />
           </View>
 
           {/* Cocktails List */}
-          <View className="space-y-3">
-            <View className="flex-row items-center justify-between mb-3">
+          <View className="flex flex-col gap-3">
+            <View className="flex-row items-center justify-between">
               <Text className="text-lg font-semibold text-g4 dark:text-n1">
                 Your Cocktails ({filteredCocktails.length})
               </Text>
               {searchQuery && (
-                <Pressable onPress={() => setSearchQuery('')} className="p-1">
-                  <Text className="text-p2 dark:text-s22 text-sm font-medium">
-                    Clear
-                  </Text>
-                </Pressable>
+                <Button
+                  onPress={() => setSearchQuery('')}
+                  variant="ghost"
+                  size="small"
+                >
+                  Clear
+                </Button>
               )}
             </View>
 
-            {filteredCocktails.length === 0 ? (
+            {isLoading ? (
+              <View className="p-8 items-center">
+                <Text className="text-g3 dark:text-g1">Loading cocktails...</Text>
+              </View>
+            ) : filteredCocktails.length === 0 ? (
               <EmptyState
                 icon="wine"
                 title={
@@ -493,16 +218,7 @@ export default function CocktailsScreen() {
               filteredCocktails.map((cocktail) => (
                 <CocktailListItem
                   key={cocktail.id}
-                  name={cocktail.name}
-                  ingredients={cocktail.ingredients.map((ing) => ({
-                    name: ing.name,
-                    amount: ing.amount,
-                    cost: ing.cost,
-                  }))}
-                  totalCost={cocktail.totalCost}
-                  suggestedPrice={cocktail.suggestedPrice}
-                  profitMargin={cocktail.profitMargin}
-                  currency={baseCurrency}
+                  cocktail={cocktail}
                   sortBy={sortBy}
                   onPress={() => handleCocktailPress(cocktail)}
                   onEdit={() => handleEditCocktail(cocktail)}

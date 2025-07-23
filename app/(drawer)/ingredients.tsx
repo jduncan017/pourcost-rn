@@ -1,28 +1,18 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import { useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, Alert } from 'react-native';
 import { useAppStore } from '@/src/stores/app-store';
-import IngredientListItem from '@/src/components/IngredientListItem';
+import { useIngredientsStore } from '@/src/stores/ingredients-store';
+import { IngredientListItem } from '@/src/components/ui/GenericListItem';
 import SearchBar from '@/src/components/ui/SearchBar';
 import EmptyState from '@/src/components/EmptyState';
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-
-// Enhanced ingredient interface with all required fields
-interface Ingredient {
-  id: string;
-  name: string;
-  bottleSize: number; // ml
-  type: 'Beer' | 'Wine' | 'Spirit' | 'Liquor' | 'Prepared' | 'Garnish';
-  price: number; // bottle price
-  costPerOz: number;
-  retailPrice: number; // price for 1.5oz serving
-  pourCost: number; // percentage
-  suggestedRetail: number;
-  pourCostMargin: number; // profit margin
-  createdAt: string;
-  updatedAt: string;
-}
+import { IngredientWithCalculations } from '@/src/types/models';
+import Button from '@/src/components/ui/Button';
+import {
+  IngredientTypeSelector,
+  SortSelector,
+} from '@/src/components/ui/ChipSelector';
 
 /**
  * Ingredients management screen
@@ -30,131 +20,53 @@ interface Ingredient {
  * Includes add functionality and navigation to detail views
  */
 export default function IngredientsScreen() {
-  const { measurementSystem, baseCurrency } = useAppStore();
-  const [searchQuery, setSearchQuery] = useState('');
+  const { } = useAppStore();
   const router = useRouter();
+  
+  // Use Zustand store for state management
+  const {
+    // Data
+    isLoading,
+    error,
+    
+    // UI State
+    searchQuery,
+    selectedType,
+    sortBy,
+    
+    // Actions
+    loadIngredients,
+    deleteIngredient,
+    setSearchQuery,
+    setSelectedType,
+    setSortBy,
+    
+    // Computed state
+    getFilteredIngredients,
+    
+    // Utilities
+    clearError,
+  } = useIngredientsStore();
 
-  // Mock ingredients with enhanced data structure
-  const mockIngredients: Ingredient[] = [
-    {
-      id: '1',
-      name: 'Vodka (Premium)',
-      bottleSize: 750,
-      type: 'Spirit',
-      price: 24.99,
-      costPerOz: 0.98,
-      retailPrice: 8.0,
-      pourCost: 18.3, // (0.98 * 1.5) / 8.00 * 100
-      suggestedRetail: 7.35, // based on 20% target pour cost
-      pourCostMargin: 6.53, // 8.00 - (0.98 * 1.5)
-      createdAt: '2025-01-15T10:30:00Z',
-      updatedAt: '2025-01-15T10:30:00Z',
-    },
-    {
-      id: '2',
-      name: 'Simple Syrup',
-      bottleSize: 473,
-      type: 'Prepared',
-      price: 3.99,
-      costPerOz: 0.26,
-      retailPrice: 2.0,
-      pourCost: 19.5, // (0.26 * 1.5) / 2.00 * 100
-      suggestedRetail: 1.95, // based on 20% target pour cost
-      pourCostMargin: 1.61, // 2.00 - (0.26 * 1.5)
-      createdAt: '2025-01-14T14:20:00Z',
-      updatedAt: '2025-01-14T14:20:00Z',
-    },
-    {
-      id: '3',
-      name: 'Fresh Lime Juice',
-      bottleSize: 946,
-      type: 'Prepared',
-      price: 4.5,
-      costPerOz: 0.15,
-      retailPrice: 1.5,
-      pourCost: 15.0, // (0.15 * 1.5) / 1.50 * 100
-      suggestedRetail: 1.13, // based on 20% target pour cost
-      pourCostMargin: 1.28, // 1.50 - (0.15 * 1.5)
-      createdAt: '2025-01-13T09:15:00Z',
-      updatedAt: '2025-01-13T09:15:00Z',
-    },
-    {
-      id: '4',
-      name: 'Craft Beer IPA',
-      bottleSize: 355,
-      type: 'Beer',
-      price: 2.5,
-      costPerOz: 0.21,
-      retailPrice: 6.0,
-      pourCost: 5.3, // (0.21 * 1.5) / 6.00 * 100
-      suggestedRetail: 1.58, // based on 20% target pour cost
-      pourCostMargin: 5.68, // 6.00 - (0.21 * 1.5)
-      createdAt: '2025-01-12T16:45:00Z',
-      updatedAt: '2025-01-12T16:45:00Z',
-    },
-    {
-      id: '5',
-      name: 'House Red Wine',
-      bottleSize: 750,
-      type: 'Wine',
-      price: 18.0,
-      costPerOz: 0.72,
-      retailPrice: 9.0,
-      pourCost: 12.0, // (0.72 * 1.5) / 9.00 * 100
-      suggestedRetail: 5.4, // based on 20% target pour cost
-      pourCostMargin: 7.92, // 9.00 - (0.72 * 1.5)
-      createdAt: '2025-01-11T11:30:00Z',
-      updatedAt: '2025-01-11T11:30:00Z',
-    },
-  ];
+  // Get filtered ingredients from store
+  const filteredIngredients = getFilteredIngredients();
 
-  // Additional filter states
-  const [selectedType, setSelectedType] = useState<string>('All');
-  const [sortBy, setSortBy] = useState<
-    'name' | 'cost' | 'created' | 'pourCost' | 'margin'
-  >('name');
+  // Load ingredients on mount
+  useEffect(() => {
+    loadIngredients();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Type options
-  const types = [
-    'All',
-    'Beer',
-    'Wine',
-    'Spirit',
-    'Liquor',
-    'Prepared',
-    'Garnish',
-  ];
-
-  // Filter and sort ingredients
-  const filteredIngredients = mockIngredients
-    .filter((ingredient) => {
-      const matchesSearch =
-        ingredient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ingredient.type.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesType =
-        selectedType === 'All' || ingredient.type === selectedType;
-      return matchesSearch && matchesType;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'cost':
-          return a.costPerOz - b.costPerOz;
-        case 'pourCost':
-          return a.pourCost - b.pourCost;
-        case 'margin':
-          return b.pourCostMargin - a.pourCostMargin;
-        case 'created':
-        default:
-          return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-      }
-    });
+  // Error handling
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Error', error, [
+        { text: 'OK', onPress: clearError }
+      ]);
+    }
+  }, [error, clearError]);
 
   // Handle ingredient selection
-  const handleIngredientPress = (ingredient: Ingredient) => {
+  const handleIngredientPress = (ingredient: IngredientWithCalculations) => {
     router.push({
       pathname: '/ingredient-detail',
       params: { id: ingredient.id },
@@ -167,7 +79,7 @@ export default function IngredientsScreen() {
   };
 
   // Handle ingredient editing
-  const handleEditIngredient = (ingredient: Ingredient) => {
+  const handleEditIngredient = (ingredient: IngredientWithCalculations) => {
     router.push({
       pathname: '/ingredient-form',
       params: {
@@ -175,15 +87,14 @@ export default function IngredientsScreen() {
         name: ingredient.name,
         type: ingredient.type,
         bottleSize: ingredient.bottleSize.toString(),
-        bottlePrice: ingredient.price.toString(),
-        retailPrice: ingredient.retailPrice.toString(),
-        createdAt: ingredient.createdAt,
+        bottlePrice: ingredient.bottlePrice.toString(),
+        createdAt: ingredient.createdAt.toISOString(),
       },
     });
   };
 
   // Handle ingredient deletion
-  const handleDeleteIngredient = (ingredient: Ingredient) => {
+  const handleDeleteIngredient = (ingredient: IngredientWithCalculations) => {
     Alert.alert(
       'Delete Ingredient',
       `Are you sure you want to delete "${ingredient.name}"?`,
@@ -195,20 +106,18 @@ export default function IngredientsScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            Alert.alert('Deleted', `"${ingredient.name}" has been deleted.`);
+          onPress: async () => {
+            try {
+              await deleteIngredient(ingredient.id);
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete ingredient');
+            }
           },
         },
       ]
     );
   };
 
-  // Get pour cost color based on percentage
-  const getPourCostColor = (pourCost: number) => {
-    if (pourCost <= 15) return 'text-green-600';
-    if (pourCost <= 25) return 'text-yellow-600';
-    return 'text-red-600';
-  };
   return (
     <GradientBackground>
       <ScrollView className="flex-1">
@@ -228,13 +137,14 @@ export default function IngredientsScreen() {
                   onChangeText={setSearchQuery}
                 />
               </View>
-              <Pressable
+              <Button
                 onPress={handleAddIngredient}
-                className="bg-p1 rounded-lg p-3 flex-row items-center gap-2"
+                variant="primary"
+                icon="add"
+                size="medium"
               >
-                <Ionicons name="add" size={20} color="white" />
-                <Text className="text-white font-medium">Add</Text>
-              </Pressable>
+                Add
+              </Button>
             </View>
           </View>
 
@@ -242,89 +152,50 @@ export default function IngredientsScreen() {
           <View className="mb-6">
             {/* Type Filter */}
             <View className="mb-4">
-              <Text className="text-sm font-medium text-g4 dark:text-n1 mb-3">
-                Type
-              </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View className="flex-row" style={{ gap: 8 }}>
-                  {types.map((type) => (
-                    <Pressable
-                      key={type}
-                      onPress={() => setSelectedType(type)}
-                      className={`px-3 py-2 rounded-full border ${
-                        selectedType === type
-                          ? 'bg-p1 border-p1'
-                          : 'bg-n1/80 dark:bg-n1/10 border-g1/50 dark:border-n1/20'
-                      }`}
-                    >
-                      <Text
-                        className={`text-sm font-medium ${
-                          selectedType === type
-                            ? 'text-white'
-                            : 'text-g4 dark:text-n1'
-                        }`}
-                      >
-                        {type}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </ScrollView>
+              <IngredientTypeSelector
+                selectedType={selectedType}
+                onTypeChange={setSelectedType}
+              />
             </View>
 
             {/* Sort Options */}
-            <View className="flex-row items-center">
-              <Text className="text-sm font-medium text-g4 dark:text-n1 mr-3">
-                Sort by:
-              </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View className="flex-row" style={{ gap: 8 }}>
-                  {[
-                    { key: 'name', label: 'Name' },
-                    { key: 'created', label: 'Recently Added' },
-                    { key: 'cost', label: 'Cost/Oz' },
-                    { key: 'pourCost', label: 'Pour Cost' },
-                    { key: 'margin', label: 'Margin' },
-                  ].map((sort) => (
-                    <Pressable
-                      key={sort.key}
-                      onPress={() => setSortBy(sort.key as any)}
-                      className={`px-2 py-1 rounded border ${
-                        sortBy === sort.key
-                          ? 'bg-p2 dark:bg-p1 border-p2 dark:border-p1'
-                          : 'bg-g1/80 dark:bg-n1/10 border-g1/50 dark:border-n1/20'
-                      }`}
-                    >
-                      <Text
-                        className={`text-xs font-medium ${
-                          sortBy === sort.key
-                            ? 'text-white'
-                            : 'text-g3 dark:text-n1'
-                        }`}
-                      >
-                        {sort.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </ScrollView>
-            </View>
+            <SortSelector
+              sortOptions={[
+                { key: 'name', label: 'Name' },
+                { key: 'created', label: 'Recently Added' },
+                { key: 'cost', label: 'Cost/Oz' },
+                { key: 'pourCost', label: 'Pour Cost' },
+                { key: 'margin', label: 'Margin' },
+              ]}
+              selectedSort={sortBy}
+              onSortChange={(sortKey) => setSortBy(sortKey as any)}
+              showLabel={false}
+              className="flex-row items-center"
+            />
           </View>
 
           {/* Ingredients List */}
-          <View className="space-y-3">
-            <View className="flex-row items-center justify-between mb-3">
+          <View className="flex flex-col gap-3">
+            <View className="flex-row items-center justify-between">
               <Text className="text-lg font-semibold text-g4 dark:text-n1">
                 Your Ingredients ({filteredIngredients.length})
               </Text>
               {searchQuery && (
-                <Pressable onPress={() => setSearchQuery('')} className="p-1">
-                  <Text className="text-p1 text-sm font-medium">Clear</Text>
-                </Pressable>
+                <Button
+                  onPress={() => setSearchQuery('')}
+                  variant="ghost"
+                  size="small"
+                >
+                  Clear
+                </Button>
               )}
             </View>
 
-            {filteredIngredients.length === 0 ? (
+            {isLoading ? (
+              <View className="p-8 items-center">
+                <Text className="text-g3 dark:text-g1">Loading ingredients...</Text>
+              </View>
+            ) : filteredIngredients.length === 0 ? (
               <EmptyState
                 icon="flask"
                 title={
@@ -346,16 +217,7 @@ export default function IngredientsScreen() {
               filteredIngredients.map((ingredient) => (
                 <IngredientListItem
                   key={ingredient.id}
-                  name={ingredient.name}
-                  bottleSize={ingredient.bottleSize}
-                  bottlePrice={ingredient.price}
-                  pourSize={1.5}
-                  costPerPour={ingredient.costPerOz * 1.5}
-                  costPerOz={ingredient.costPerOz}
-                  pourCostMargin={ingredient.pourCostMargin}
-                  pourCostPercentage={ingredient.pourCost}
-                  currency={baseCurrency}
-                  measurementSystem={measurementSystem}
+                  ingredient={ingredient}
                   sortBy={sortBy}
                   onPress={() => handleIngredientPress(ingredient)}
                   onEdit={() => handleEditIngredient(ingredient)}

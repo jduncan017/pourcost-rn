@@ -11,6 +11,8 @@ import Card from '@/src/components/ui/Card';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import BackButton from '@/src/components/ui/BackButton';
+import { IngredientWithCalculations } from '@/src/types/models';
+import { getIngredientsWithCalculations } from '@/src/services/mock-data';
 
 // Ingredient type options
 const INGREDIENT_TYPES = [
@@ -24,20 +26,7 @@ const INGREDIENT_TYPES = [
 ] as const;
 type IngredientType = (typeof INGREDIENT_TYPES)[number];
 
-interface Ingredient {
-  id: string;
-  name: string;
-  bottleSize: number; // ml
-  type: IngredientType;
-  price: number; // bottle price
-  costPerOz: number;
-  retailPrice: number; // price for 1.5oz serving
-  pourCost: number; // percentage
-  suggestedRetail: number;
-  pourCostMargin: number; // profit margin
-  createdAt: string;
-  updatedAt: string;
-}
+// Use IngredientWithCalculations from models.ts instead of local interface
 
 /**
  * Ingredient detail and edit screen
@@ -53,7 +42,7 @@ export default function IngredientDetailScreen() {
   const [isEditing, setIsEditing] = useState(false);
 
   // Mock ingredient data (would be fetched by ID in real app)
-  const [ingredient, setIngredient] = useState<Ingredient>({
+  const [ingredient, setIngredient] = useState<IngredientWithCalculations>({
     id: (params.id as string) || '1',
     name: 'Vodka (Premium)',
     bottleSize: 750,
@@ -72,7 +61,7 @@ export default function IngredientDetailScreen() {
   const globalPourCostGoal = 20; // 20%
 
   // Calculate derived values when core values change
-  const calculateDerivedValues = (updatedIngredient: Partial<Ingredient>) => {
+  const calculateDerivedValues = (updatedIngredient: Partial<IngredientWithCalculations>) => {
     const updated = { ...ingredient, ...updatedIngredient };
 
     // Calculate cost per oz from bottle price and size
@@ -100,7 +89,7 @@ export default function IngredientDetailScreen() {
   };
 
   // Handle ingredient updates
-  const handleUpdate = (field: keyof Ingredient, value: any) => {
+  const handleUpdate = (field: keyof IngredientWithCalculations, value: any) => {
     const updatedIngredient = calculateDerivedValues({ [field]: value });
     setIngredient(updatedIngredient);
   };

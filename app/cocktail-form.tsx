@@ -26,7 +26,8 @@ const COCKTAIL_CATEGORIES = [
 ] as const;
 type CocktailCategory = (typeof COCKTAIL_CATEGORIES)[number];
 
-interface CocktailIngredient {
+// Temporary local interface - will be replaced with canonical types in Phase 3.2
+interface LocalCocktailIngredient {
   id: string;
   name: string;
   amount: number;
@@ -59,7 +60,7 @@ export default function CocktailFormScreen() {
     (params.category as CocktailCategory) || 'Classic'
   );
   const [notes, setNotes] = useState((params.notes as string) || '');
-  const [ingredients, setIngredients] = useState<CocktailIngredient[]>([]);
+  const [ingredients, setIngredients] = useState<LocalCocktailIngredient[]>([]);
 
   // Calculate totals
   const totalCost = ingredients.reduce((sum, ing) => sum + ing.cost, 0);
@@ -72,9 +73,25 @@ export default function CocktailFormScreen() {
   // Validation
   const isValid = name.trim().length > 0 && ingredients.length > 0;
 
-  // Add ingredient to cocktail
-  const addIngredient = (ingredient: CocktailIngredient) => {
-    setIngredients([...ingredients, ingredient]);
+  // Add ingredient to cocktail (adapter for canonical CocktailIngredient)
+  const addIngredient = (canonicalIngredient: any) => {
+    // Convert canonical to local format
+    const bottleSizeOz = canonicalIngredient.bottleSize / 29.5735;
+    const costPerOz = canonicalIngredient.bottlePrice / bottleSizeOz;
+    
+    const localIngredient: LocalCocktailIngredient = {
+      id: canonicalIngredient.id,
+      name: canonicalIngredient.name,
+      amount: canonicalIngredient.amount,
+      unit: canonicalIngredient.unit,
+      bottleSize: canonicalIngredient.bottleSize,
+      bottlePrice: canonicalIngredient.bottlePrice,
+      type: canonicalIngredient.type || 'Unknown',
+      costPerOz,
+      cost: canonicalIngredient.cost,
+    };
+    
+    setIngredients([...ingredients, localIngredient]);
   };
 
   // Remove ingredient
