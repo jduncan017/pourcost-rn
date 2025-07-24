@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text } from 'react-native';
 import SwipeableCard from '../SwipeableCard';
 import HighlightBox, { HighlightBoxProps } from './HighlightBox';
 
@@ -52,7 +52,6 @@ export default function GenericListItem<T>({
   onDelete,
   className = '',
 }: GenericListItemProps<T>) {
-  
   // Return null if item is not defined or invalid
   if (!item || item === null || item === undefined) {
     return null;
@@ -63,44 +62,35 @@ export default function GenericListItem<T>({
 
   return (
     <SwipeableCard
+      onPress={onPress}
       onSwipeLeft={onEdit}
       onSwipeRight={onDelete}
       className={className}
     >
       <View style={{ minHeight: 60, justifyContent: 'center' }}>
-        <Pressable
-          onPress={onPress}
-          className="flex-1"
-          style={({ pressed }) => ({
-            opacity: pressed ? 0.8 : 1,
-          })}
-        >
-          <View className="flex-row items-center">
-            {/* Left Column - Title & Description */}
-            <View className="flex-1 mr-3">
-              {/* Title */}
-              <Text 
-                className="text-g4 dark:text-n1 text-base font-medium mb-1"
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {renderTitle(item)}
-              </Text>
-              
-              {/* Subtitle/Description */}
-              {renderSubtitle && (
-                <View className="mb-1">
-                  {renderSubtitle(item)}
-                </View>
-              )}
-            </View>
-            
-            {/* Right Column - Highlight Box */}
-            <View className="flex-shrink-0">
-              <HighlightBox {...highlightProps} />
-            </View>
+        <View className="flex-row items-center gap-4">
+          {/* Left Column - Title & Description */}
+          <View className="flex-1 mr-3">
+            {/* Title */}
+            <Text
+              className="text-g4 dark:text-n1 text-base font-medium mb-1"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {renderTitle(item)}
+            </Text>
+
+            {/* Subtitle/Description */}
+            {renderSubtitle && (
+              <View className="mb-1">{renderSubtitle(item)}</View>
+            )}
           </View>
-        </Pressable>
+
+          {/* Right Column - Highlight Box */}
+          <View className="flex-shrink-0">
+            <HighlightBox {...highlightProps} />
+          </View>
+        </View>
       </View>
     </SwipeableCard>
   );
@@ -223,7 +213,7 @@ export const CocktailListItem = ({
       sortBy={sortBy}
       renderTitle={(item) => item?.name || 'Unknown Cocktail'}
       renderSubtitle={(item) => (
-        <Text className="text-sm text-g3 dark:text-g2" numberOfLines={1}>
+        <Text className="text-sm text-g3 dark:text-g1" numberOfLines={1}>
           {item?.ingredients
             ?.map((ing) => ing?.name)
             .filter(Boolean)

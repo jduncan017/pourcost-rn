@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, Platform } from 'react-native';
-import {
-  PanGestureHandler,
-  PanGestureHandlerGestureEvent,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-  useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   runOnJS,
 } from 'react-native-reanimated';
 
@@ -44,7 +39,6 @@ export default function CustomSlider({
 
   // Calculate position based on value
   const translateX = useSharedValue(0);
-  const startX = useSharedValue(0);
 
   // Conversion functions for non-linear sliders
   const valueToPosition = (val: number): number => {
@@ -128,29 +122,27 @@ export default function CustomSlider({
     onValueChange(Math.max(minValue, Math.min(maxValue, steppedValue)));
   };
 
-  const gestureHandler =
-    useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
-      onStart: (event) => {
-        // Jump thumb to finger position immediately on press
-        const fingerX = event.x - thumbWidth / 2;
-        const clampedX = Math.max(0, Math.min(maxTranslateX, fingerX));
-        translateX.value = clampedX;
+  const panGesture = Gesture.Pan()
+    .onStart((event) => {
+      // Jump thumb to finger position immediately on press
+      const fingerX = event.x - thumbWidth / 2;
+      const clampedX = Math.max(0, Math.min(maxTranslateX, fingerX));
+      translateX.value = clampedX;
 
-        // Update value immediately - use runOnJS to call updateValue
-        runOnJS(updateValue)(clampedX);
-        runOnJS(setIsActive)(true);
-      },
-      onActive: (event) => {
-        // Continue using absolute position, not relative translation
-        const fingerX = event.x - thumbWidth / 2;
-        const clampedX = Math.max(0, Math.min(maxTranslateX, fingerX));
-        translateX.value = clampedX;
+      // Update value immediately - use runOnJS to call updateValue
+      runOnJS(updateValue)(clampedX);
+      runOnJS(setIsActive)(true);
+    })
+    .onUpdate((event) => {
+      // Continue using absolute position, not relative translation
+      const fingerX = event.x - thumbWidth / 2;
+      const clampedX = Math.max(0, Math.min(maxTranslateX, fingerX));
+      translateX.value = clampedX;
 
-        runOnJS(updateValue)(clampedX);
-      },
-      onEnd: () => {
-        runOnJS(setIsActive)(false);
-      },
+      runOnJS(updateValue)(clampedX);
+    })
+    .onEnd(() => {
+      runOnJS(setIsActive)(false);
     });
 
   const thumbStyle = useAnimatedStyle(() => {
@@ -180,7 +172,7 @@ export default function CustomSlider({
 
       {/* Slider Container */}
       <View className="items-center">
-        <PanGestureHandler onGestureEvent={gestureHandler}>
+        <GestureDetector gesture={panGesture}>
           <Animated.View
             className="relative"
             style={{ width: sliderWidth, height: 50 }}
@@ -215,7 +207,7 @@ export default function CustomSlider({
               ]}
             />
           </Animated.View>
-        </PanGestureHandler>
+        </GestureDetector>
       </View>
     </View>
   );
