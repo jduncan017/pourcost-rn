@@ -14,6 +14,7 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { ThemeProvider, useTheme } from '@/src/contexts/ThemeContext';
+import { ToastContainer } from '@/src/components/ui/Toast';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -78,6 +79,8 @@ function RootLayoutNav() {
             options={{ headerShown: false }}
           />
         </Stack>
+        {/* Global Toast Container */}
+        <ToastContainer />
       </NavigationThemeProvider>
     </GestureHandlerRootView>
   );

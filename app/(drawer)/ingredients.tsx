@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, Alert } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { useAppStore } from '@/src/stores/app-store';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { IngredientListItem } from '@/src/components/ui/GenericListItem';
@@ -13,6 +13,9 @@ import {
   IngredientTypeSelector,
   SortSelector,
 } from '@/src/components/ui/ChipSelector';
+import { useToast } from '@/src/components/ui/Toast';
+import { FeedbackService } from '@/src/services/feedback-service';
+import { HapticService } from '@/src/services/haptic-service';
 
 /**
  * Ingredients management screen
@@ -20,30 +23,32 @@ import {
  * Includes add functionality and navigation to detail views
  */
 export default function IngredientsScreen() {
-  const { } = useAppStore();
+  const {} = useAppStore();
   const router = useRouter();
-  
+  const toast = useToast();
+
   // Use Zustand store for state management
   const {
     // Data
+    ingredients,
     isLoading,
     error,
-    
+
     // UI State
     searchQuery,
     selectedType,
     sortBy,
-    
+
     // Actions
     loadIngredients,
     deleteIngredient,
     setSearchQuery,
     setSelectedType,
     setSortBy,
-    
+
     // Computed state
     getFilteredIngredients,
-    
+
     // Utilities
     clearError,
   } = useIngredientsStore();
@@ -51,22 +56,22 @@ export default function IngredientsScreen() {
   // Get filtered ingredients from store
   const filteredIngredients = getFilteredIngredients();
 
-  // Load ingredients on mount
+  // Load ingredients on mount - always call loadIngredients, let the store handle the logic
   useEffect(() => {
     loadIngredients();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Error handling
+  // Error handling with toast
   useEffect(() => {
     if (error) {
-      Alert.alert('Error', error, [
-        { text: 'OK', onPress: clearError }
-      ]);
+      toast.showError('Error', error);
+      clearError();
     }
-  }, [error, clearError]);
+  }, [error, clearError, toast]);
 
   // Handle ingredient selection
   const handleIngredientPress = (ingredient: IngredientWithCalculations) => {
+    HapticService.navigation();
     router.push({
       pathname: '/ingredient-detail',
       params: { id: ingredient.id },
@@ -93,28 +98,14 @@ export default function IngredientsScreen() {
     });
   };
 
-  // Handle ingredient deletion
+  // Handle ingredient deletion with confirmation
   const handleDeleteIngredient = (ingredient: IngredientWithCalculations) => {
-    Alert.alert(
-      'Delete Ingredient',
-      `Are you sure you want to delete "${ingredient.name}"?`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteIngredient(ingredient.id);
-            } catch (error) {
-              Alert.alert('Error', 'Failed to delete ingredient');
-            }
-          },
-        },
-      ]
+    FeedbackService.showDeleteConfirmation(
+      ingredient.name,
+      async () => {
+        await deleteIngredient(ingredient.id);
+      },
+      'ingredient'
     );
   };
 
@@ -193,7 +184,9 @@ export default function IngredientsScreen() {
 
             {isLoading ? (
               <View className="p-8 items-center">
-                <Text className="text-g3 dark:text-g1">Loading ingredients...</Text>
+                <Text className="text-g3 dark:text-g1">
+                  Loading ingredients...
+                </Text>
               </View>
             ) : filteredIngredients.length === 0 ? (
               <EmptyState

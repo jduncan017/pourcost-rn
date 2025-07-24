@@ -9,6 +9,10 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SavedIngredient, IngredientWithCalculations } from '@/src/types/models';
 import { IngredientService, CreateIngredientData, UpdateIngredientData } from '@/src/services/ingredient-service';
+import { ValidationService } from '@/src/services/validation-service';
+import { CurrencyService } from '@/src/services/currency-service';
+import { MeasurementService } from '@/src/services/measurement-service';
+import { FeedbackService } from '@/src/services/feedback-service';
 import { getSavedIngredients, getIngredientsWithCalculations } from '@/src/services/mock-data';
 
 export interface IngredientsState {
@@ -16,6 +20,7 @@ export interface IngredientsState {
   ingredients: SavedIngredient[];
   isLoading: boolean;
   error: string | null;
+  validationErrors: Record<string, string[]>; // Ingredient ID -> errors
   
   // UI State
   searchQuery: string;
@@ -27,6 +32,8 @@ export interface IngredientsState {
   addIngredient: (data: CreateIngredientData) => Promise<SavedIngredient>;
   updateIngredient: (data: UpdateIngredientData) => Promise<SavedIngredient>;
   deleteIngredient: (id: string) => Promise<void>;
+  bulkDeleteIngredients: (ids: string[]) => Promise<void>;
+  duplicateIngredient: (id: string, newName?: string) => Promise<SavedIngredient>;
   
   // Actions - UI State
   setSearchQuery: (query: string) => void;
@@ -36,10 +43,21 @@ export interface IngredientsState {
   // Computed/Derived State
   getFilteredIngredients: () => IngredientWithCalculations[];
   getIngredientById: (id: string) => SavedIngredient | undefined;
+  getIngredientTypes: () => string[];
+  getIngredientStatistics: () => Promise<any>;
+  
+  // Validation
+  validateIngredient: (data: Partial<CreateIngredientData>) => ReturnType<typeof ValidationService.validateIngredient>;
+  validateAllIngredients: () => Promise<void>;
+  
+  // Business Logic Integration
+  calculateIngredientMetrics: (ingredient: SavedIngredient, retailPrice?: number) => IngredientWithCalculations;
+  getPerformanceAnalysis: (ingredient: IngredientWithCalculations) => any;
   
   // Utility Actions
   clearError: () => void;
   reset: () => void;
+  searchIngredients: (query: string, limit?: number) => Promise<SavedIngredient[]>;
 }
 
 /**
@@ -50,14 +68,22 @@ export const useIngredientsStore = create<IngredientsState>()(
     (set, get) => ({
       // Initial state
       ingredients: [],
-      isLoading: false,
+      isLoading: true, // Start with loading true until data is loaded
       error: null,
+      validationErrors: {},
       searchQuery: '',
       selectedType: 'All',
       sortBy: 'name',
       
       // Data management actions
       loadIngredients: async () => {
+        const currentState = get();
+        
+        // Don't reload if already loaded and not loading
+        if (currentState.ingredients.length > 0 && !currentState.isLoading) {
+          return;
+        }
+        
         set({ isLoading: true, error: null });
         try {
           // In Phase 4, we're still using mock data
@@ -66,9 +92,11 @@ export const useIngredientsStore = create<IngredientsState>()(
           const ingredients = getSavedIngredients();
           set({ ingredients, isLoading: false });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Failed to load ingredients',
-            isLoading: false 
+          const errorMessage = error instanceof Error ? error.message : 'Failed to load ingredients';
+          set({ error: errorMessage, isLoading: false });
+          FeedbackService.handleError(error instanceof Error ? error : errorMessage, {
+            screen: 'ingredients',
+            action: 'loadIngredients'
           });
         }
       },
@@ -84,10 +112,17 @@ export const useIngredientsStore = create<IngredientsState>()(
             isLoading: false 
           });
           
+          // Show success feedback
+          FeedbackService.showOperationSuccess('create', newIngredient.name);
+          
           return newIngredient;
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Failed to add ingredient';
           set({ error: errorMessage, isLoading: false });
+          FeedbackService.handleError(error instanceof Error ? error : errorMessage, {
+            screen: 'ingredients',
+            action: 'addIngredient'
+          });
           throw error;
         }
       },
@@ -107,10 +142,17 @@ export const useIngredientsStore = create<IngredientsState>()(
             isLoading: false 
           });
           
+          // Show success feedback
+          FeedbackService.showOperationSuccess('update', updatedIngredient.name);
+          
           return updatedIngredient;
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Failed to update ingredient';
           set({ error: errorMessage, isLoading: false });
+          FeedbackService.handleError(error instanceof Error ? error : errorMessage, {
+            screen: 'ingredients',
+            action: 'updateIngredient'
+          });
           throw error;
         }
       },
@@ -118,6 +160,9 @@ export const useIngredientsStore = create<IngredientsState>()(
       deleteIngredient: async (id: string) => {
         set({ isLoading: true, error: null });
         try {
+          const ingredient = get().ingredients.find(ing => ing.id === id);
+          const ingredientName = ingredient?.name || 'ingredient';
+          
           await IngredientService.deleteIngredient(id);
           const currentIngredients = get().ingredients;
           
@@ -129,9 +174,16 @@ export const useIngredientsStore = create<IngredientsState>()(
             ingredients: filteredIngredients,
             isLoading: false 
           });
+          
+          // Show success feedback
+          FeedbackService.showOperationSuccess('delete', ingredientName);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Failed to delete ingredient';
           set({ error: errorMessage, isLoading: false });
+          FeedbackService.handleError(error instanceof Error ? error : errorMessage, {
+            screen: 'ingredients',
+            action: 'deleteIngredient'
+          });
           throw error;
         }
       },
@@ -144,6 +196,11 @@ export const useIngredientsStore = create<IngredientsState>()(
       // Computed state
       getFilteredIngredients: () => {
         const { ingredients, searchQuery, selectedType, sortBy } = get();
+        
+        // Return empty array if no ingredients loaded yet
+        if (ingredients.length === 0) {
+          return [];
+        }
         
         // Ensure all ingredients have valid dates
         const validIngredients = ingredients.map(ingredient => ({
@@ -184,12 +241,119 @@ export const useIngredientsStore = create<IngredientsState>()(
         return get().ingredients.find(ingredient => ingredient.id === id);
       },
       
+      // New enhanced functionality
+      bulkDeleteIngredients: async (ids: string[]) => {
+        set({ isLoading: true, error: null });
+        try {
+          // Delete all ingredients
+          await Promise.all(ids.map(id => IngredientService.deleteIngredient(id)));
+          
+          const currentIngredients = get().ingredients;
+          const filteredIngredients = currentIngredients.filter(
+            ingredient => !ids.includes(ingredient.id)
+          );
+          
+          set({ 
+            ingredients: filteredIngredients,
+            isLoading: false 
+          });
+          
+          // Show success feedback
+          FeedbackService.showSuccess(
+            'Ingredients Deleted',
+            `Successfully deleted ${ids.length} ingredient${ids.length === 1 ? '' : 's'}`
+          );
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to delete ingredients';
+          set({ error: errorMessage, isLoading: false });
+          FeedbackService.handleError(error instanceof Error ? error : errorMessage, {
+            screen: 'ingredients',
+            action: 'bulkDeleteIngredients'
+          });
+          throw error;
+        }
+      },
+      
+      duplicateIngredient: async (id: string, newName?: string) => {
+        const ingredient = get().getIngredientById(id);
+        if (!ingredient) {
+          throw new Error('Ingredient not found');
+        }
+        
+        const duplicateData: CreateIngredientData = {
+          name: newName || `${ingredient.name} (Copy)`,
+          bottleSize: ingredient.bottleSize,
+          bottlePrice: ingredient.bottlePrice,
+          type: ingredient.type,
+        };
+        
+        return get().addIngredient(duplicateData);
+      },
+      
+      getIngredientTypes: () => {
+        const ingredients = get().ingredients;
+        const types = new Set<string>();
+        
+        ingredients.forEach(ingredient => {
+          if (ingredient.type) {
+            types.add(ingredient.type);
+          }
+        });
+        
+        return Array.from(types).sort();
+      },
+      
+      getIngredientStatistics: async () => {
+        return IngredientService.getCostStatistics();
+      },
+      
+      validateIngredient: (data: Partial<CreateIngredientData>) => {
+        // Get app settings for validation context
+        const measurementSystem = 'US'; // TODO: Get from app store
+        const currency = 'USD'; // TODO: Get from app store
+        
+        return ValidationService.validateIngredient(data, measurementSystem, currency);
+      },
+      
+      validateAllIngredients: async () => {
+        const ingredients = get().ingredients;
+        const validationErrors: Record<string, string[]> = {};
+        
+        ingredients.forEach(ingredient => {
+          const validation = get().validateIngredient(ingredient);
+          if (!validation.isValid) {
+            validationErrors[ingredient.id] = validation.errors;
+          }
+        });
+        
+        set({ validationErrors });
+      },
+      
+      calculateIngredientMetrics: (ingredient: SavedIngredient, retailPrice = 8.0) => {
+        return IngredientService.calculateIngredientMetrics(
+          ingredient,
+          1.5, // Default pour size
+          retailPrice,
+          'USD', // TODO: Get from app store
+          'US' // TODO: Get from app store
+        );
+      },
+      
+      getPerformanceAnalysis: (ingredient: IngredientWithCalculations) => {
+        return IngredientService.getIngredientPerformanceAnalysis(ingredient);
+      },
+      
+      searchIngredients: async (query: string, limit = 10) => {
+        return IngredientService.searchIngredients(query, undefined, limit);
+      },
+      
       // Utility actions
-      clearError: () => set({ error: null }),
+      clearError: () => set({ error: null, validationErrors: {} }),
       reset: () => set({
         ingredients: [],
         isLoading: false,
         error: null,
+        validationErrors: {},
         searchQuery: '',
         selectedType: 'All',
         sortBy: 'name',
@@ -204,9 +368,14 @@ export const useIngredientsStore = create<IngredientsState>()(
       }),
       // Load data after rehydration
       onRehydrateStorage: () => (state) => {
-        if (state && state.ingredients.length === 0) {
-          // Load mock data if no persisted data exists
-          state.loadIngredients();
+        if (state) {
+          if (state.ingredients.length === 0) {
+            // Load mock data if no persisted data exists
+            state.loadIngredients();
+          } else {
+            // Data was rehydrated, set loading to false
+            state.isLoading = false;
+          }
         }
       },
     }

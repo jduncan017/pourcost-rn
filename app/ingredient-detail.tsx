@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAppStore } from '@/src/stores/app-store';
+import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { Ionicons } from '@expo/vector-icons';
 import CustomSlider from '@/src/components/ui/CustomSlider';
 import BottleSizeDropdown from '@/src/components/BottleSizeDropdown';
@@ -12,6 +13,8 @@ import GradientBackground from '@/src/components/ui/GradientBackground';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import BackButton from '@/src/components/ui/BackButton';
 import { IngredientWithCalculations } from '@/src/types/models';
+import { FeedbackService } from '@/src/services/feedback-service';
+import { IngredientService } from '@/src/services/ingredient-service';
 import { getIngredientsWithCalculations } from '@/src/services/mock-data';
 
 // Ingredient type options
@@ -37,28 +40,73 @@ export default function IngredientDetailScreen() {
   const { baseCurrency } = useAppStore();
   const router = useRouter();
   const params = useLocalSearchParams();
-
+  
+  // Get ingredient store
+  const { ingredients, loadIngredients, deleteIngredient, updateIngredient } = useIngredientsStore();
+  
+  // Get ingredient ID from params
+  const ingredientId = params.id as string;
+  
   // Parse ingredient data from params (in real app, would fetch by ID)
   const [isEditing, setIsEditing] = useState(false);
 
-  // Mock ingredient data (would be fetched by ID in real app)
-  const [ingredient, setIngredient] = useState<IngredientWithCalculations>({
-    id: (params.id as string) || '1',
-    name: 'Vodka (Premium)',
-    bottleSize: 750,
-    type: 'Liquor',
-    price: 24.99,
-    costPerOz: 0.98,
-    retailPrice: 8.0,
-    pourCost: 18.3,
-    suggestedRetail: 7.35,
-    pourCostMargin: 6.53,
-    createdAt: '2025-01-15T10:30:00Z',
-    updatedAt: '2025-01-15T10:30:00Z',
-  });
+  // Find the ingredient from the store
+  const storeIngredient = ingredients.find(ing => ing.id === ingredientId);
+  
+  // Load ingredients if not already loaded
+  useEffect(() => {
+    if (!storeIngredient && ingredients.length === 0) {
+      loadIngredients();
+    }
+  }, [ingredientId, ingredients.length]); // Use ingredientId and ingredients.length as stable deps
+
+  // Show loading if ingredient not found
+  if (!storeIngredient) {
+    return (
+      <GradientBackground>
+        <View style={{ paddingTop: insets.top }} className="flex-1 items-center justify-center">
+          <Text className="text-n1 text-lg">Loading ingredient...</Text>
+        </View>
+      </GradientBackground>
+    );
+  }
+
+  // State for ingredient with calculations
+  const [ingredient, setIngredient] = useState<IngredientWithCalculations | null>(null);
+  
+  // Separate state for retail price (not stored in ingredient model)
+  const [retailPrice, setRetailPrice] = useState(8.0);
+  
+  // Convert SavedIngredient to IngredientWithCalculations when store ingredient changes
+  useEffect(() => {
+    if (storeIngredient) {
+      const pourSize = 1.5; // Default pour size in oz
+      const ingredientWithCalcs = IngredientService.calculateIngredientMetrics(
+        storeIngredient, 
+        pourSize, 
+        retailPrice, 
+        baseCurrency
+      );
+      setIngredient(ingredientWithCalcs);
+    }
+  }, [storeIngredient, retailPrice, baseCurrency]);
 
   // Global pour cost goal (would come from settings store)
   const globalPourCostGoal = 20; // 20%
+
+  // Show loading if ingredient state not ready
+  if (!ingredient) {
+    return (
+      <GradientBackground>
+        <View style={{ paddingTop: insets.top }} className="flex-1 items-center justify-center">
+          <Text className="text-n1 text-lg">Loading ingredient...</Text>
+        </View>
+      </GradientBackground>
+    );
+  }
+  
+  // Calculate suggested retail price to meet pour cost goal (after null check)
+  const suggestedRetailPrice = ingredient.costPerPour / (globalPourCostGoal / 100);
 
   // Calculate derived values when core values change
   const calculateDerivedValues = (updatedIngredient: Partial<IngredientWithCalculations>) => {
@@ -66,25 +114,25 @@ export default function IngredientDetailScreen() {
 
     // Calculate cost per oz from bottle price and size
     const bottleSizeOz = updated.bottleSize / 29.5735;
-    const costPerOz = updated.price / bottleSizeOz;
+    const costPerOz = updated.bottlePrice / bottleSizeOz;
 
     // Calculate pour cost percentage (cost for 1.5oz / retail price)
     const costFor15oz = costPerOz * 1.5;
-    const pourCost = (costFor15oz / updated.retailPrice) * 100;
+    const pourCost = (costFor15oz / retailPrice) * 100;
 
     // Calculate suggested retail based on global pour cost goal
     const suggestedRetail = costFor15oz / (globalPourCostGoal / 100);
 
     // Calculate pour cost margin
-    const pourCostMargin = updated.retailPrice - costFor15oz;
+    const pourCostMargin = retailPrice - costFor15oz;
 
     return {
       ...updated,
       costPerOz,
-      pourCost,
-      suggestedRetail,
+      pourCostPercentage: pourCost,
+      costPerPour: costFor15oz,
       pourCostMargin,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(),
     };
   };
 
@@ -95,38 +143,30 @@ export default function IngredientDetailScreen() {
   };
 
   // Handle save
-  const handleSave = () => {
-    Alert.alert(
-      'Ingredient Saved',
-      `\"${ingredient.name}\" has been updated successfully.`,
-      [
-        {
-          text: 'OK',
-          onPress: () => setIsEditing(false),
-        },
-      ]
-    );
+  const handleSave = async () => {
+    try {
+      await updateIngredient({
+        id: ingredient.id,
+        name: ingredient.name,
+        bottlePrice: ingredient.bottlePrice,
+        type: ingredient.type,
+        bottleSize: ingredient.bottleSize,
+      });
+      setIsEditing(false);
+    } catch (error) {
+      // Error will be handled by the feedback service
+    }
   };
 
   // Handle delete
   const handleDelete = () => {
-    Alert.alert(
-      'Delete Ingredient',
-      `Are you sure you want to delete \"${ingredient.name}\"? This action cannot be undone.`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert('Deleted', `\"${ingredient.name}\" has been deleted.`);
-            router.back();
-          },
-        },
-      ]
+    FeedbackService.showDeleteConfirmation(
+      ingredient.name,
+      async () => {
+        await deleteIngredient(ingredient.id);
+        router.back();
+      },
+      'ingredient'
     );
   };
 
@@ -159,7 +199,7 @@ export default function IngredientDetailScreen() {
               <BackButton />
               <View>
                 <ScreenTitle
-                  title={isEditing ? 'Edit Ingredient' : 'Ingredient Details'}
+                  title={isEditing ? `Edit ${ingredient.name}` : ingredient.name}
                   variant="main"
                 />
                 <Text
@@ -346,8 +386,8 @@ export default function IngredientDetailScreen() {
                   label="Bottle Price"
                   minValue={1}
                   maxValue={500}
-                  value={ingredient.price}
-                  onValueChange={(value) => handleUpdate('price', value)}
+                  value={ingredient.bottlePrice}
+                  onValueChange={(value) => handleUpdate('bottlePrice', value)}
                   unit={` ${baseCurrency} `}
                   dynamicStep={getPriceStep}
                   logarithmic={true}
@@ -357,8 +397,8 @@ export default function IngredientDetailScreen() {
                   label="Retail Price (1.5oz)"
                   minValue={0.5}
                   maxValue={50}
-                  value={ingredient.retailPrice}
-                  onValueChange={(value) => handleUpdate('retailPrice', value)}
+                  value={retailPrice}
+                  onValueChange={(value) => setRetailPrice(value)}
                   unit={` ${baseCurrency} `}
                   step={0.25}
                 />
@@ -376,7 +416,7 @@ export default function IngredientDetailScreen() {
                     className="text-g4 dark:text-n1"
                     style={{ fontWeight: '500' }}
                   >
-                    ${ingredient.price.toFixed(2)}
+                    ${(ingredient.bottlePrice || 0).toFixed(2)}
                   </Text>
                 </View>
 
@@ -391,7 +431,7 @@ export default function IngredientDetailScreen() {
                     className="text-g4 dark:text-n1"
                     style={{ fontWeight: '500' }}
                   >
-                    ${ingredient.retailPrice.toFixed(2)}
+                    ${retailPrice.toFixed(2)}
                   </Text>
                 </View>
               </View>
@@ -418,7 +458,7 @@ export default function IngredientDetailScreen() {
                   className="text-g4 dark:text-n1"
                   style={{ fontWeight: '500' }}
                 >
-                  ${ingredient.costPerOz.toFixed(3)}
+                  ${(ingredient.costPerOz || 0).toFixed(3)}
                 </Text>
               </View>
 
@@ -430,10 +470,10 @@ export default function IngredientDetailScreen() {
                   Pour Cost:
                 </Text>
                 <Text
-                  className={`font-geist ${getPourCostColor(ingredient.pourCost)}`}
+                  className={`font-geist ${getPourCostColor(ingredient.pourCostPercentage)}`}
                   style={{ fontWeight: '500' }}
                 >
-                  {ingredient.pourCost.toFixed(1)}%
+                  {(ingredient.pourCostPercentage || 0).toFixed(1)}%
                 </Text>
               </View>
 
@@ -448,7 +488,7 @@ export default function IngredientDetailScreen() {
                   className="text-p2 dark:text-p1"
                   style={{ fontWeight: '500' }}
                 >
-                  ${ingredient.suggestedRetail.toFixed(2)}
+                  ${(suggestedRetailPrice || 0).toFixed(2)}
                 </Text>
               </View>
 
@@ -463,7 +503,7 @@ export default function IngredientDetailScreen() {
                   className="text-s22 dark:text-s21"
                   style={{ fontWeight: '500' }}
                 >
-                  ${ingredient.pourCostMargin.toFixed(2)}
+                  ${(ingredient.pourCostMargin || 0).toFixed(2)}
                 </Text>
               </View>
             </View>
@@ -488,24 +528,24 @@ export default function IngredientDetailScreen() {
                     Pour Cost Performance
                   </Text>
                   <Text
-                    className={`text-sm ${getPourCostColor(ingredient.pourCost)}`}
+                    className={`text-sm ${getPourCostColor(ingredient.pourCostPercentage)}`}
                     style={{ fontWeight: '500' }}
                   >
-                    {ingredient.pourCost.toFixed(1)}% of {globalPourCostGoal}%
+                    {(ingredient.pourCostPercentage || 0).toFixed(1)}% of {globalPourCostGoal}%
                     target
                   </Text>
                 </View>
                 <View className="h-3 bg-g1/80 rounded-full overflow-hidden">
                   <View
                     className={`h-full rounded-full ${
-                      ingredient.pourCost <= 15
+                      ingredient.pourCostPercentage <= 15
                         ? 'bg-s22'
-                        : ingredient.pourCost <= 25
+                        : ingredient.pourCostPercentage <= 25
                           ? 'bg-s12'
                           : 'bg-e2'
                     }`}
                     style={{
-                      width: `${Math.min((ingredient.pourCost / globalPourCostGoal) * 100, 100)}%`,
+                      width: `${Math.min((ingredient.pourCostPercentage / globalPourCostGoal) * 100, 100)}%`,
                     }}
                   />
                 </View>
@@ -523,12 +563,12 @@ export default function IngredientDetailScreen() {
                   className="text-xs text-g3 dark:text-n1"
                   style={{}}
                 >
-                  Current retail price of ${ingredient.retailPrice.toFixed(2)}{' '}
-                  generates a margin of ${ingredient.pourCostMargin.toFixed(2)}{' '}
+                  Current retail price of ${(retailPrice || 0).toFixed(2)}{' '}
+                  generates a margin of ${(ingredient.pourCostMargin || 0).toFixed(2)}{' '}
                   per 1.5oz serve.
-                  {ingredient.pourCost > globalPourCostGoal
-                    ? ` Consider raising price to $${ingredient.suggestedRetail.toFixed(2)} to meet ${globalPourCostGoal}% target.`
-                    : ` You're ${(globalPourCostGoal - ingredient.pourCost).toFixed(1)}% below target - good performance!`}
+                  {ingredient.pourCostPercentage > globalPourCostGoal
+                    ? ` Consider raising price to $${(suggestedRetailPrice || 0).toFixed(2)} to meet ${globalPourCostGoal}% target.`
+                    : ` You're ${(globalPourCostGoal - (ingredient.pourCostPercentage || 0)).toFixed(1)}% below target - good performance!`}
                 </Text>
               </View>
             </View>

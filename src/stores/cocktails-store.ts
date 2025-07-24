@@ -9,6 +9,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Cocktail, CocktailWithCalculations, SavedIngredient } from '@/src/types/models';
 import { CocktailService, CreateCocktailData, UpdateCocktailData } from '@/src/services/cocktail-service';
+import { ValidationService } from '@/src/services/validation-service';
+import { FeedbackService } from '@/src/services/feedback-service';
 import { getCocktailsWithCalculations } from '@/src/services/mock-data';
 
 export interface CocktailsState {
@@ -16,6 +18,7 @@ export interface CocktailsState {
   cocktails: CocktailWithCalculations[];
   isLoading: boolean;
   error: string | null;
+  validationErrors: Record<string, string[]>; // Cocktail ID -> errors
   
   // UI State
   searchQuery: string;
@@ -27,6 +30,7 @@ export interface CocktailsState {
   addCocktail: (data: CreateCocktailData) => Promise<Cocktail>;
   updateCocktail: (data: UpdateCocktailData) => Promise<Cocktail>;
   deleteCocktail: (id: string) => Promise<void>;
+  bulkDeleteCocktails: (ids: string[]) => Promise<void>;
   duplicateCocktail: (id: string, newName?: string) => Promise<Cocktail>;
   toggleFavorite: (id: string) => Promise<void>;
   
@@ -34,6 +38,7 @@ export interface CocktailsState {
   addIngredientToCocktail: (cocktailId: string, ingredient: SavedIngredient, amount?: number) => Promise<Cocktail>;
   removeIngredientFromCocktail: (cocktailId: string, ingredientId: string) => Promise<Cocktail>;
   updateIngredientAmount: (cocktailId: string, ingredientId: string, newAmount: number) => Promise<Cocktail>;
+  reorderIngredients: (cocktailId: string, ingredientIds: string[]) => Promise<Cocktail>;
   
   // Actions - UI State
   setSearchQuery: (query: string) => void;
@@ -44,6 +49,19 @@ export interface CocktailsState {
   getFilteredCocktails: () => CocktailWithCalculations[];
   getCocktailById: (id: string) => CocktailWithCalculations | undefined;
   getFavoriteCocktails: () => CocktailWithCalculations[];
+  getCocktailsByCategory: (category: string) => CocktailWithCalculations[];
+  getCocktailCategories: () => string[];
+  getCocktailStatistics: () => Promise<any>;
+  
+  // Validation & Business Logic
+  validateCocktail: (data: Partial<CreateCocktailData>) => ReturnType<typeof ValidationService.validateCocktail>;
+  validateAllCocktails: () => Promise<void>;
+  calculateCocktailMetrics: (cocktail: Cocktail) => ReturnType<typeof CocktailService.calculateCocktailMetrics>;
+  getBusinessRuleAnalysis: (cocktail: CocktailWithCalculations) => any;
+  
+  // Advanced Features
+  searchCocktails: (query: string, limit?: number) => Promise<CocktailWithCalculations[]>;
+  suggestSimilarCocktails: (cocktailId: string) => CocktailWithCalculations[];
   
   // Utility Actions
   clearError: () => void;
@@ -58,25 +76,39 @@ export const useCocktailsStore = create<CocktailsState>()(
     (set, get) => ({
       // Initial state
       cocktails: [],
-      isLoading: false,
+      isLoading: true, // Start with loading true until data is loaded
       error: null,
+      validationErrors: {},
       searchQuery: '',
       selectedCategory: 'All',
       sortBy: 'created',
       
       // Data management actions
       loadCocktails: async () => {
+        const currentState = get();
+        
+        // Always load if no cocktails exist, regardless of loading state
+        if (currentState.cocktails.length > 0) {
+          console.log('Cocktails already loaded, skipping reload');
+          return;
+        }
+        
+        console.log('Loading cocktails...');
         set({ isLoading: true, error: null });
         try {
           // In Phase 4, we're still using mock data
           // In Phase 5, this will connect to local storage
           // In Phase 6, this will sync with cloud storage
           const cocktails = getCocktailsWithCalculations();
+          console.log('Loaded cocktails:', cocktails.length);
           set({ cocktails, isLoading: false });
         } catch (error) {
-          set({ 
-            error: error instanceof Error ? error.message : 'Failed to load cocktails',
-            isLoading: false 
+          const errorMessage = error instanceof Error ? error.message : 'Failed to load cocktails';
+          console.error('Error loading cocktails:', error);
+          set({ error: errorMessage, isLoading: false });
+          FeedbackService.handleError(error instanceof Error ? error : errorMessage, {
+            screen: 'cocktails',
+            action: 'loadCocktails'
           });
         }
       },
@@ -100,10 +132,17 @@ export const useCocktailsStore = create<CocktailsState>()(
             isLoading: false 
           });
           
+          // Show success feedback
+          FeedbackService.showOperationSuccess('create', newCocktail.name);
+          
           return newCocktail;
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Failed to add cocktail';
           set({ error: errorMessage, isLoading: false });
+          FeedbackService.handleError(error instanceof Error ? error : errorMessage, {
+            screen: 'cocktails',
+            action: 'addCocktail'
+          });
           throw error;
         }
       },
@@ -341,6 +380,11 @@ export const useCocktailsStore = create<CocktailsState>()(
       getFilteredCocktails: () => {
         const { cocktails, searchQuery, selectedCategory, sortBy } = get();
         
+        // Return empty array if no cocktails loaded yet
+        if (cocktails.length === 0) {
+          return [];
+        }
+        
         // Ensure all cocktails have valid dates
         const validCocktails = cocktails.map(cocktail => ({
           ...cocktail,
@@ -376,12 +420,136 @@ export const useCocktailsStore = create<CocktailsState>()(
         return get().cocktails.filter(cocktail => cocktail.favorited);
       },
       
+      // Missing required methods
+      bulkDeleteCocktails: async (ids: string[]) => {
+        set({ isLoading: true, error: null });
+        try {
+          // Delete all cocktails
+          await Promise.all(ids.map(id => CocktailService.deleteCocktail(id)));
+          
+          const currentCocktails = get().cocktails;
+          const filteredCocktails = currentCocktails.filter(
+            cocktail => !ids.includes(cocktail.id)
+          );
+          
+          set({ 
+            cocktails: filteredCocktails,
+            isLoading: false 
+          });
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to delete cocktails';
+          set({ error: errorMessage, isLoading: false });
+          throw error;
+        }
+      },
+      
+      reorderIngredients: async (cocktailId: string, ingredientIds: string[]) => {
+        const cocktail = get().getCocktailById(cocktailId);
+        if (!cocktail) {
+          throw new Error('Cocktail not found');
+        }
+        
+        // Reorder ingredients based on provided IDs
+        const reorderedIngredients = ingredientIds.map((id, index) => {
+          const ingredient = cocktail.ingredients.find(ing => ing.id === id);
+          if (!ingredient) throw new Error(`Ingredient ${id} not found`);
+          return { ...ingredient, order: index };
+        });
+        
+        return get().updateCocktail({
+          id: cocktailId,
+          ingredients: reorderedIngredients,
+        });
+      },
+      
+      getCocktailsByCategory: (category: string) => {
+        return get().cocktails.filter(cocktail => cocktail.category === category);
+      },
+      
+      getCocktailCategories: () => {
+        const cocktails = get().cocktails;
+        const categories = new Set<string>();
+        
+        cocktails.forEach(cocktail => {
+          if (cocktail.category) {
+            categories.add(cocktail.category);
+          }
+        });
+        
+        return Array.from(categories).sort();
+      },
+      
+      getCocktailStatistics: async () => {
+        return CocktailService.getCostStatistics();
+      },
+      
+      validateCocktail: (data: Partial<CreateCocktailData>) => {
+        return ValidationService.validateCocktail(data);
+      },
+      
+      validateAllCocktails: async () => {
+        const cocktails = get().cocktails;
+        const validationErrors: Record<string, string[]> = {};
+        
+        cocktails.forEach(cocktail => {
+          const validation = get().validateCocktail(cocktail);
+          if (!validation.isValid) {
+            validationErrors[cocktail.id] = validation.errors;
+          }
+        });
+        
+        set({ validationErrors });
+      },
+      
+      calculateCocktailMetrics: (cocktail: Cocktail) => {
+        return CocktailService.calculateCocktailMetrics(cocktail);
+      },
+      
+      getBusinessRuleAnalysis: (cocktail: CocktailWithCalculations) => {
+        return ValidationService.validateCocktailBusinessRules({
+          name: cocktail.name,
+          totalCost: cocktail.totalCost,
+          suggestedPrice: cocktail.suggestedPrice,
+          pourCostPercentage: cocktail.pourCostPercentage,
+          profitMargin: cocktail.profitMargin,
+          ingredients: cocktail.ingredients.map(ing => ({ cost: ing.cost, name: ing.name })),
+        });
+      },
+      
+      searchCocktails: async (query: string, limit = 10) => {
+        return CocktailService.searchCocktails(query, undefined, limit);
+      },
+      
+      suggestSimilarCocktails: (cocktailId: string) => {
+        const cocktail = get().getCocktailById(cocktailId);
+        if (!cocktail) return [];
+        
+        const allCocktails = get().cocktails;
+        
+        // Simple similarity based on shared ingredients
+        const cocktailIngredientNames = cocktail.ingredients.map(ing => ing.name.toLowerCase());
+        
+        return allCocktails
+          .filter(c => c.id !== cocktailId)
+          .map(c => ({
+            ...c,
+            similarity: c.ingredients.filter(ing => 
+              cocktailIngredientNames.includes(ing.name.toLowerCase())
+            ).length
+          }))
+          .filter(c => c.similarity > 0)
+          .sort((a, b) => b.similarity - a.similarity)
+          .slice(0, 5)
+          .map(({ similarity, ...cocktail }) => cocktail);
+      },
+      
       // Utility actions
-      clearError: () => set({ error: null }),
+      clearError: () => set({ error: null, validationErrors: {} }),
       reset: () => set({
         cocktails: [],
         isLoading: false,
         error: null,
+        validationErrors: {},
         searchQuery: '',
         selectedCategory: 'All',
         sortBy: 'created',
@@ -396,9 +564,18 @@ export const useCocktailsStore = create<CocktailsState>()(
       }),
       // Load data after rehydration
       onRehydrateStorage: () => (state) => {
-        if (state && state.cocktails.length === 0) {
-          // Load mock data if no persisted data exists
-          state.loadCocktails();
+        console.log('Rehydrating cocktails store:', state?.cocktails?.length || 0, 'cocktails');
+        if (state) {
+          // Always ensure loading is false after rehydration
+          state.isLoading = false;
+          
+          if (state.cocktails.length === 0) {
+            console.log('No persisted cocktails found, loading mock data');
+            // Load mock data if no persisted data exists
+            state.loadCocktails();
+          } else {
+            console.log('Rehydrated', state.cocktails.length, 'cocktails from storage');
+          }
         }
       },
     }

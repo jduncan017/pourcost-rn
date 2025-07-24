@@ -12,28 +12,28 @@ import HighlightBox, { HighlightBoxProps } from './HighlightBox';
 export interface GenericListItemProps<T> {
   /** The data item to display */
   item: T;
-  
+
   /** How the list is currently sorted (affects highlight display) */
   sortBy?: string;
-  
+
   /** Function to render the main title */
   renderTitle: (item: T) => string;
-  
+
   /** Function to render subtitle/description (optional) */
   renderSubtitle?: (item: T) => React.ReactNode;
-  
+
   /** Function to render the highlight box content */
   renderHighlight: (item: T, sortBy?: string) => HighlightBoxProps;
-  
+
   /** Press handler for the main item */
   onPress?: () => void;
-  
+
   /** Edit action handler */
   onEdit?: () => void;
-  
+
   /** Delete action handler */
   onDelete?: () => void;
-  
+
   /** Additional styles */
   className?: string;
 }
@@ -53,48 +53,55 @@ export default function GenericListItem<T>({
   className = '',
 }: GenericListItemProps<T>) {
   
+  // Return null if item is not defined or invalid
+  if (!item || item === null || item === undefined) {
+    return null;
+  }
+
   // Get highlight box props from render function
   const highlightProps = renderHighlight(item, sortBy);
-  
+
   return (
     <SwipeableCard
       onSwipeLeft={onEdit}
       onSwipeRight={onDelete}
       className={className}
     >
-      <Pressable
-        onPress={onPress}
-        className="flex-1"
-        style={({ pressed }) => ({
-          opacity: pressed ? 0.8 : 1,
-        })}
-      >
-        <View className="flex-row items-center">
-          {/* Left Column - Title & Description */}
-          <View className="flex-1 mr-3">
-            {/* Title */}
-            <Text 
-              className="text-g4 dark:text-n1 text-base font-medium mb-1"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {renderTitle(item)}
-            </Text>
+      <View style={{ minHeight: 60, justifyContent: 'center' }}>
+        <Pressable
+          onPress={onPress}
+          className="flex-1"
+          style={({ pressed }) => ({
+            opacity: pressed ? 0.8 : 1,
+          })}
+        >
+          <View className="flex-row items-center">
+            {/* Left Column - Title & Description */}
+            <View className="flex-1 mr-3">
+              {/* Title */}
+              <Text 
+                className="text-g4 dark:text-n1 text-base font-medium mb-1"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {renderTitle(item)}
+              </Text>
+              
+              {/* Subtitle/Description */}
+              {renderSubtitle && (
+                <View className="mb-1">
+                  {renderSubtitle(item)}
+                </View>
+              )}
+            </View>
             
-            {/* Subtitle/Description */}
-            {renderSubtitle && (
-              <View className="mb-1">
-                {renderSubtitle(item)}
-              </View>
-            )}
+            {/* Right Column - Highlight Box */}
+            <View className="flex-shrink-0">
+              <HighlightBox {...highlightProps} />
+            </View>
           </View>
-          
-          {/* Right Column - Highlight Box */}
-          <View className="flex-shrink-0">
-            <HighlightBox {...highlightProps} />
-          </View>
-        </View>
-      </Pressable>
+        </Pressable>
+      </View>
     </SwipeableCard>
   );
 }
@@ -134,38 +141,45 @@ export const IngredientListItem = ({
     <GenericListItem
       item={ingredient}
       sortBy={sortBy}
-      renderTitle={(item) => item.name}
+      renderTitle={(item) => item?.name || 'Unknown Ingredient'}
       renderSubtitle={(item) => (
         <Text className="text-sm text-g3 dark:text-g2">
-          {item.type} • {item.bottleSize}ml • ${item.bottlePrice.toFixed(2)}
+          {item?.type || 'Unknown'} • {item?.bottleSize || 0}ml • $
+          {(item?.bottlePrice || 0).toFixed(2)}
         </Text>
       )}
       renderHighlight={(item, currentSortBy) => {
+        if (!item) return { label: '', value: '', color: 'neutral' };
+
         switch (currentSortBy) {
           case 'cost':
             return {
               label: 'Cost/Oz',
-              value: `$${item.costPerOz.toFixed(2)}`,
+              value: `$${(item.costPerOz || 0).toFixed(2)}`,
               color: 'neutral',
             };
           case 'pourCost':
             return {
               label: 'Pour Cost',
-              value: `${item.pourCostPercentage.toFixed(1)}%`,
-              color: item.pourCostPercentage <= 20 ? 'success' : 
-                     item.pourCostPercentage <= 25 ? 'warning' : 'danger',
+              value: `${(item.pourCostPercentage || 0).toFixed(1)}%`,
+              color:
+                (item.pourCostPercentage || 0) <= 20
+                  ? 'success'
+                  : (item.pourCostPercentage || 0) <= 25
+                    ? 'warning'
+                    : 'danger',
             };
           case 'margin':
             return {
               label: 'Margin',
-              value: `$${item.pourCostMargin.toFixed(2)}`,
+              value: `$${(item.pourCostMargin || 0).toFixed(2)}`,
               color: 'success',
             };
           case 'name':
           default:
             return {
               label: 'Pour Size',
-              value: `${item.pourSize}oz`,
+              value: `${item.pourSize || 0}oz`,
               color: 'neutral',
             };
         }
@@ -207,32 +221,41 @@ export const CocktailListItem = ({
     <GenericListItem
       item={cocktail}
       sortBy={sortBy}
-      renderTitle={(item) => item.name}
+      renderTitle={(item) => item?.name || 'Unknown Cocktail'}
       renderSubtitle={(item) => (
         <Text className="text-sm text-g3 dark:text-g2" numberOfLines={1}>
-          {item.ingredients.map(ing => ing.name).join(', ')}
+          {item?.ingredients
+            ?.map((ing) => ing?.name)
+            .filter(Boolean)
+            .join(', ') || 'No ingredients'}
         </Text>
       )}
       renderHighlight={(item, currentSortBy) => {
+        if (!item) return { label: '', value: '', color: 'neutral' };
+
         switch (currentSortBy) {
           case 'cost':
             return {
               label: 'Total Cost',
-              value: `$${item.totalCost.toFixed(2)}`,
+              value: `$${(item.totalCost || 0).toFixed(2)}`,
               color: 'neutral',
             };
           case 'profitMargin':
             return {
               label: 'Profit',
-              value: `$${item.profitMargin.toFixed(2)}`,
+              value: `$${(item.profitMargin || 0).toFixed(2)}`,
               color: 'success',
             };
           case 'costPercent':
             return {
               label: 'Cost %',
-              value: `${item.pourCostPercentage.toFixed(1)}%`,
-              color: item.pourCostPercentage <= 20 ? 'success' : 
-                     item.pourCostPercentage <= 25 ? 'warning' : 'danger',
+              value: `${(item.pourCostPercentage || 0).toFixed(1)}%`,
+              color:
+                (item.pourCostPercentage || 0) <= 20
+                  ? 'success'
+                  : (item.pourCostPercentage || 0) <= 25
+                    ? 'warning'
+                    : 'danger',
             };
           case 'name':
           case 'created':
@@ -240,9 +263,13 @@ export const CocktailListItem = ({
             // Default to Cost % instead of ingredients
             return {
               label: 'Cost %',
-              value: `${item.pourCostPercentage.toFixed(1)}%`,
-              color: item.pourCostPercentage <= 20 ? 'success' : 
-                     item.pourCostPercentage <= 25 ? 'warning' : 'danger',
+              value: `${(item.pourCostPercentage || 0).toFixed(1)}%`,
+              color:
+                (item.pourCostPercentage || 0) <= 20
+                  ? 'success'
+                  : (item.pourCostPercentage || 0) <= 25
+                    ? 'warning'
+                    : 'danger',
             };
         }
       }}

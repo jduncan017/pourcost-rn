@@ -84,5 +84,12 @@ export function useThemeColors() {
     textSecondary: isDarkMode ? '#FFFFFF' : '#6B7280', // n1 (white) in dark mode too
     border: isDarkMode ? '#2C3E63' : '#E5E7EB', // p2 borders in dark mode
     accent: isDarkMode ? '#FBE09D' : '#3262C2', // p1 primary color
+    
+    // Additional colors for feedback system
+    primary: isDarkMode ? '#3B82F6' : '#2563EB',
+    success: isDarkMode ? '#10B981' : '#059669',
+    error: isDarkMode ? '#EF4444' : '#DC2626',
+    warning: isDarkMode ? '#F59E0B' : '#D97706',
+    info: isDarkMode ? '#3B82F6' : '#2563EB',
   };
 }

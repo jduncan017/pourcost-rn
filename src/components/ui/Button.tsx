@@ -7,6 +7,7 @@
 import React from 'react';
 import { Pressable, Text, View, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { HapticService } from '@/src/services/haptic-service';
 
 export interface ButtonProps {
   /** Button text or content */
@@ -214,6 +215,8 @@ export default function Button({
   // Handle press with disabled/loading states
   const handlePress = () => {
     if (!disabled && !loading && onPress) {
+      // Provide haptic feedback for button press
+      HapticService.buttonPress();
       onPress();
     }
   };

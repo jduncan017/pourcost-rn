@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, Text, ScrollView, Alert } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { useAppStore } from '@/src/stores/app-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { CocktailListItem } from '@/src/components/ui/GenericListItem';
@@ -13,6 +13,8 @@ import {
   CocktailCategorySelector,
   SortSelector,
 } from '@/src/components/ui/ChipSelector';
+import { useToast } from '@/src/components/ui/Toast';
+import { FeedbackService } from '@/src/services/feedback-service';
 
 /**
  * Cocktails management screen
@@ -20,30 +22,32 @@ import {
  * Includes filtering, categorization, and detailed cocktail management
  */
 export default function CocktailsScreen() {
-  const { } = useAppStore();
+  const {} = useAppStore();
   const router = useRouter();
-  
+  const toast = useToast();
+
   // Use Zustand store for state management
   const {
     // Data
+    cocktails,
     isLoading,
     error,
-    
+
     // UI State
     searchQuery,
     selectedCategory,
     sortBy,
-    
+
     // Actions
     loadCocktails,
     deleteCocktail,
     setSearchQuery,
     setSelectedCategory,
     setSortBy,
-    
+
     // Computed state
     getFilteredCocktails,
-    
+
     // Utilities
     clearError,
   } = useCocktailsStore();
@@ -51,19 +55,18 @@ export default function CocktailsScreen() {
   // Get filtered cocktails from store
   const filteredCocktails = getFilteredCocktails();
 
-  // Load cocktails on mount
+  // Load cocktails on mount - always call loadCocktails, let the store handle the logic
   useEffect(() => {
     loadCocktails();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Error handling
+  // Error handling with toast
   useEffect(() => {
     if (error) {
-      Alert.alert('Error', error, [
-        { text: 'OK', onPress: clearError }
-      ]);
+      toast.showError('Error', error);
+      clearError();
     }
-  }, [error, clearError]);
+  }, [error, clearError, toast]);
 
   // Handle cocktail selection
   const handleCocktailPress = (cocktail: CocktailWithCalculations) => {
@@ -94,28 +97,14 @@ export default function CocktailsScreen() {
     });
   };
 
-  // Handle cocktail deletion
+  // Handle cocktail deletion with confirmation
   const handleDeleteCocktail = (cocktail: CocktailWithCalculations) => {
-    Alert.alert(
-      'Delete Cocktail',
-      `Are you sure you want to delete "${cocktail.name}"?`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteCocktail(cocktail.id);
-            } catch (error) {
-              Alert.alert('Error', 'Failed to delete cocktail');
-            }
-          },
-        },
-      ]
+    FeedbackService.showDeleteConfirmation(
+      cocktail.name,
+      async () => {
+        await deleteCocktail(cocktail.id);
+      },
+      'cocktail'
     );
   };
 
@@ -194,7 +183,9 @@ export default function CocktailsScreen() {
 
             {isLoading ? (
               <View className="p-8 items-center">
-                <Text className="text-g3 dark:text-g1">Loading cocktails...</Text>
+                <Text className="text-g3 dark:text-g1">
+                  Loading cocktails...
+                </Text>
               </View>
             ) : filteredCocktails.length === 0 ? (
               <EmptyState
