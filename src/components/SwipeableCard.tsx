@@ -29,6 +29,7 @@ interface SwipeableCardProps {
   };
   threshold?: number;
   className?: string;
+  disableRightSwipe?: boolean; // New prop to disable right swipe
 }
 
 const defaultLeftAction = {
@@ -53,12 +54,12 @@ export default function SwipeableCard({
   leftAction = defaultLeftAction,
   rightAction = defaultRightAction,
   className = '',
+  disableRightSwipe = false,
 }: SwipeableCardProps) {
   const { isDarkMode } = useTheme();
   const translateX = useSharedValue(0);
   const startX = useSharedValue(0);
   const hasTriggeredAction = useSharedValue(false);
-  const screenWidth = Dimensions.get('window').width;
   const maxSwipe = 80; // Fixed width for action buttons (80px)
   const triggerThreshold = maxSwipe * 0.9; // 90% of action width to trigger
 
@@ -104,7 +105,9 @@ export default function SwipeableCard({
         // Strictly limit swipe distance to action width
         if (newTranslateX > 0) {
           // Swiping right (revealing left action) - clamp to maxSwipe
-          translateX.value = Math.max(0, Math.min(newTranslateX, maxSwipe));
+          if (!disableRightSwipe) {
+            translateX.value = Math.max(0, Math.min(newTranslateX, maxSwipe));
+          }
         } else {
           // Swiping left (revealing right action) - clamp to -maxSwipe
           translateX.value = Math.min(0, Math.max(newTranslateX, -maxSwipe));
@@ -116,9 +119,9 @@ export default function SwipeableCard({
       const shouldTrigger = Math.abs(translateX.value) >= triggerThreshold;
 
       if (shouldTrigger && !hasTriggeredAction.value) {
-        if (translateX.value > 0) {
+        if (translateX.value > 0 && !disableRightSwipe) {
           runOnJS(triggerAction)('left');
-        } else {
+        } else if (translateX.value < 0) {
           runOnJS(triggerAction)('right');
         }
       } else if (!hasTriggeredAction.value) {
@@ -136,9 +139,9 @@ export default function SwipeableCard({
         const shouldTrigger = Math.abs(translateX.value) >= triggerThreshold;
 
         if (shouldTrigger) {
-          if (translateX.value > 0) {
+          if (translateX.value > 0 && !disableRightSwipe) {
             runOnJS(triggerAction)('left');
-          } else {
+          } else if (translateX.value < 0) {
             runOnJS(triggerAction)('right');
           }
         } else {
@@ -171,9 +174,9 @@ export default function SwipeableCard({
   });
 
   return (
-    <View className={`relative overflow-hidden ${className}`}>
+    <View className={`relative overflow-hidden`}>
       {/* Left Action (Edit) - Static underneath */}
-      {onSwipeLeft && (
+      {onSwipeLeft && !disableRightSwipe && (
         <View
           className="absolute left-0 top-0 bottom-0 flex-row items-center justify-center px-6 rounded-l-xl"
           style={{

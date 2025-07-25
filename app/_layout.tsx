@@ -78,6 +78,10 @@ function RootLayoutNav() {
             name="cocktail-detail"
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="ingredient-selector"
+            options={{ headerShown: false }}
+          />
         </Stack>
         {/* Global Toast Container */}
         <ToastContainer />

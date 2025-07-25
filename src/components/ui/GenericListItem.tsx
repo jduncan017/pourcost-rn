@@ -133,7 +133,7 @@ export const IngredientListItem = ({
       sortBy={sortBy}
       renderTitle={(item) => item?.name || 'Unknown Ingredient'}
       renderSubtitle={(item) => (
-        <Text className="text-sm text-g3 dark:text-g2">
+        <Text className="text-sm text-g3 dark:text-g2" numberOfLines={2}>
           {item?.type || 'Unknown'} • {item?.bottleSize || 0}ml • $
           {(item?.bottlePrice || 0).toFixed(2)}
         </Text>
@@ -213,7 +213,7 @@ export const CocktailListItem = ({
       sortBy={sortBy}
       renderTitle={(item) => item?.name || 'Unknown Cocktail'}
       renderSubtitle={(item) => (
-        <Text className="text-sm text-g3 dark:text-g1" numberOfLines={1}>
+        <Text className="text-sm text-g3 dark:text-g1" numberOfLines={2}>
           {item?.ingredients
             ?.map((ing) => ing?.name)
             .filter(Boolean)

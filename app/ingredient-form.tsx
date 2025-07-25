@@ -151,7 +151,7 @@ export default function IngredientFormScreen() {
 
   return (
     <GradientBackground>
-      <ScrollView 
+      <ScrollView
         className="FormScroll flex-1"
         style={{ paddingTop: insets.top }}
       >
@@ -165,10 +165,7 @@ export default function IngredientFormScreen() {
                   title={isEditing ? 'Edit Ingredient' : 'Create Ingredient'}
                   variant="main"
                 />
-                <Text
-                  className="text-g3 dark:text-n1"
-                  style={{}}
-                >
+                <Text className="text-g3 dark:text-n1" style={{}}>
                   {isEditing
                     ? 'Update ingredient details'
                     : 'Add a new ingredient to your library'}
@@ -276,10 +273,7 @@ export default function IngredientFormScreen() {
 
             <View className="space-y-3">
               <View className="flex-row justify-between items-center">
-                <Text
-                  className="text-g3 dark:text-n1"
-                  style={{}}
-                >
+                <Text className="text-g3 dark:text-n1" style={{}}>
                   Cost per Oz:
                 </Text>
                 <Text
@@ -291,10 +285,7 @@ export default function IngredientFormScreen() {
               </View>
 
               <View className="flex-row justify-between items-center">
-                <Text
-                  className="text-g3 dark:text-n1"
-                  style={{}}
-                >
+                <Text className="text-g3 dark:text-n1" style={{}}>
                   Cost for 1.5oz:
                 </Text>
                 <Text
@@ -306,10 +297,7 @@ export default function IngredientFormScreen() {
               </View>
 
               <View className="flex-row justify-between items-center">
-                <Text
-                  className="text-g3 dark:text-n1"
-                  style={{}}
-                >
+                <Text className="text-g3 dark:text-n1" style={{}}>
                   Pour Cost:
                 </Text>
                 <Text
@@ -321,10 +309,7 @@ export default function IngredientFormScreen() {
               </View>
 
               <View className="flex-row justify-between items-center">
-                <Text
-                  className="text-g3 dark:text-n1"
-                  style={{}}
-                >
+                <Text className="text-g3 dark:text-n1" style={{}}>
                   Suggested Retail (20% target):
                 </Text>
                 <Text
@@ -336,10 +321,7 @@ export default function IngredientFormScreen() {
               </View>
 
               <View className="flex-row justify-between items-center">
-                <Text
-                  className="text-g3 dark:text-n1"
-                  style={{}}
-                >
+                <Text className="text-g3 dark:text-n1" style={{}}>
                   Profit Margin:
                 </Text>
                 <Text
@@ -373,10 +355,7 @@ export default function IngredientFormScreen() {
               }`}
             >
               <Ionicons name="checkmark" size={20} color="white" />
-              <Text
-                className="text-white"
-                style={{ fontWeight: '600' }}
-              >
+              <Text className="text-white" style={{ fontWeight: '600' }}>
                 {isEditing ? 'Update Ingredient' : 'Save Ingredient'}
               </Text>
             </Pressable>
@@ -387,10 +366,7 @@ export default function IngredientFormScreen() {
                 className="bg-e2 dark:bg-e3 rounded-lg p-4 flex-row items-center justify-center gap-2"
               >
                 <Ionicons name="trash" size={20} color="white" />
-                <Text
-                  className="text-white"
-                  style={{ fontWeight: '600' }}
-                >
+                <Text className="text-white" style={{ fontWeight: '600' }}>
                   Delete Ingredient
                 </Text>
               </Pressable>

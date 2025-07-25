@@ -23,26 +23,26 @@ export default function SearchBar({
   };
 
   return (
-    <View className="bg-n1/80 rounded-lg border border-g1/50 flex-row items-center px-4 py-3">
-      <Ionicons name="search" size={20} color="#9CA3AF" />
-      
+    <View className="bg-n1 dark:bg-g1 rounded-lg border border-g1/50 flex-row items-center px-4 py-3">
+      <Ionicons name="search" size={20} color="#111111" />
+
       <TextInput
-        className="flex-1 ml-3 text-g4 dark:text-n1 text-base"
+        className="flex-1 ml-3 text-base text-g4 font-medium leading-5"
         placeholder={placeholder}
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={'#AFAFAF'}
         value={value}
         onChangeText={onChangeText}
         autoFocus={autoFocus}
         clearButtonMode="never"
       />
-      
+
       {value.length > 0 && (
         <Pressable
           onPress={handleClear}
           className="ml-2 p-1"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+          <Ionicons name="close-circle" size={20} color="#111111" />
         </Pressable>
       )}
     </View>

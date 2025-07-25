@@ -60,14 +60,14 @@ export default function PourCostPerformanceBar({
     const deviation = Math.abs(value - goal);
     if (deviation <= 3) return 'bg-s22'; // Within 3% of goal
     if (deviation <= 7) return 'bg-s12'; // Within 7% of goal
-    return 'bg-e2'; // More than 7% away from goal
+    return 'bg-e1'; // More than 7% away from goal
   };
 
   const getPerformanceTextColor = (value: number) => {
     const deviation = Math.abs(value - goal);
     if (deviation <= 3) return 'text-s22';
     if (deviation <= 7) return 'text-s12';
-    return 'text-e3';
+    return 'text-e1';
   };
 
   // Generate feedback message
@@ -95,7 +95,7 @@ export default function PourCostPerformanceBar({
             <Text
               className={`text-sm font-medium ${getPerformanceTextColor(pourCostPercentage)}`}
             >
-              {pourCostPercentage.toFixed(1)}% vs {goal}% goal
+              {pourCostPercentage.toFixed(1)}%
             </Text>
           </View>
         )}
