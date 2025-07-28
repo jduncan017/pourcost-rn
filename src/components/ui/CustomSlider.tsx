@@ -160,7 +160,7 @@ export default function CustomSlider({
   return (
     <View className="">
       {/* Label and Value */}
-      <View className="flex-row justify-between items-center mb-3">
+      <View className="flex-row justify-between items-center">
         <Text className="text-base font-medium text-g4 dark:text-n1">
           {label}
         </Text>

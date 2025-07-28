@@ -17,6 +17,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import { CocktailCategory } from '@/src/constants/appConstants';
 
 // Enhanced cocktail interface
 interface CocktailIngredient {
@@ -31,16 +32,7 @@ interface Cocktail {
   id: string;
   name: string;
   description?: string;
-  category:
-    | 'Classic'
-    | 'Modern'
-    | 'Tropical'
-    | 'Whiskey'
-    | 'Vodka'
-    | 'Rum'
-    | 'Gin'
-    | 'Tequila'
-    | 'Other';
+  category: CocktailCategory;
   ingredients: CocktailIngredient[];
   totalCost: number;
   suggestedPrice: number;
@@ -78,7 +70,7 @@ export default function CocktailDetailScreen() {
   // Animated style for toggle button
   const toggleStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ translateX: togglePosition.value * 24 }], // 24px movement
+      transform: [{ translateX: togglePosition.value * 20 }], // 24px movement
     };
   });
 
@@ -140,13 +132,6 @@ export default function CocktailDetailScreen() {
       cocktail.updatedAt instanceof Date
         ? cocktail.updatedAt.toISOString()
         : new Date().toISOString(),
-  };
-
-  // Get pour cost color
-  const getPourCostColor = (pourCost: number) => {
-    if (pourCost <= 20) return 'text-s22';
-    if (pourCost <= 25) return 'text-s12';
-    return 'text-e3';
   };
 
   const handleEdit = () => {
@@ -221,12 +206,6 @@ export default function CocktailDetailScreen() {
           <Pressable onPress={() => router.back()}>
             <Ionicons name="menu" size={24} color={themeColors.n1} />
           </Pressable>
-          <Text
-            className="text-n1 dark:text-n1 text-xl"
-            style={{ fontWeight: '600' }}
-          >
-            POUR COST
-          </Text>
         </View>
         <View className="flex-row items-center gap-2">
           <Pressable onPress={() => setShowActions(!showActions)}>
@@ -261,9 +240,9 @@ export default function CocktailDetailScreen() {
                 setShowActions(false);
                 handleEdit();
               }}
-              className="p-3"
+              className="p-4"
             >
-              <Text className="text-base font-medium text-g4 dark:text-n1">
+              <Text className="text-xl font-medium text-g4 dark:text-n1">
                 Edit
               </Text>
             </Pressable>
@@ -273,9 +252,9 @@ export default function CocktailDetailScreen() {
                 setShowActions(false);
                 handleDelete();
               }}
-              className="p-3"
+              className="p-4"
             >
-              <Text className="text-base font-medium text-red-600 dark:text-red-400">
+              <Text className="text-xl font-medium text-red-600 dark:text-red-400">
                 Delete
               </Text>
             </Pressable>
@@ -286,20 +265,10 @@ export default function CocktailDetailScreen() {
       {/* Scrollable Content */}
       <ScrollView className="flex-1">
         <View className="p-4">
-          {/* Recipe Header */}
-          <View className="mb-4">
-            <Text
-              className="text-n1 dark:text-n1 text-lg mb-4"
-              style={{ fontWeight: '600' }}
-            >
-              RECIPES
-            </Text>
-          </View>
-
           {/* Cocktail Header */}
           <View className="flex-row gap-4 shadow-4">
             {/* Cocktail Image */}
-            <View className="w-48 h-48 rounded-lg overflow-hidden border border-t-g2 border-l-g2 border-b-g3 border-r-g3">
+            <View className="w-44 h-44 rounded-lg overflow-hidden border border-t-g2 border-l-g2 border-b-g3 border-r-g3">
               {(() => {
                 const imageSource = getCocktailImage();
                 return imageSource ? (
@@ -317,29 +286,26 @@ export default function CocktailDetailScreen() {
             </View>
 
             {/* Cocktail Info */}
-            <View className="flex-1 flex-col gap-3">
-              <Text
-                className="text-n1 text-2xl border-b-2 border-n2 pb-2"
-                style={{ fontWeight: '700' }}
-              >
+            <View className="flex-1 flex-col gap-2">
+              <Text className="text-n1 text-2xl border-b border-g1 pb-2 font-semibold tracking-wider">
                 {cocktailData.name.toUpperCase()}
               </Text>
-              <Text className="text-n1/70 dark:text-n2/90 text-xl font-medium">
+              <Text className="text-n1/70 dark:text-g1 text-lg font-medium">
                 Menu Price: {currencySymbol}
                 {cocktailData.suggestedPrice.toFixed(2)}
               </Text>
-              <Text className="text-n1/70 dark:text-n2/90 text-xl font-medium">
+              <Text className="text-n1/70 dark:text-g1 text-lg font-medium">
                 Margin: {currencySymbol}
                 {cocktailData.profitMargin.toFixed(2)}
               </Text>
-              <Text className="text-n1/70 dark:text-n2/90 text-xl font-medium">
+              <Text className="text-n1/70 dark:text-g1 text-lg font-medium">
                 ABV:{' '}
                 {cocktailData.ingredients
                   .reduce((sum, ing) => sum + ing.amount, 0)
                   .toFixed(1)}
                 oz
               </Text>
-              <Text className="text-n1/70 dark:text-n2/90 text-xl font-medium">
+              <Text className="text-n1/70 dark:text-g1 text-lg font-medium">
                 Total Alcohol:{' '}
                 {cocktailData.ingredients
                   .reduce((sum, ing) => sum + ing.amount, 0)
@@ -350,23 +316,20 @@ export default function CocktailDetailScreen() {
           </View>
 
           {/* Ingredients Section Header - Outside Card */}
-          <View className="flex-row items-center justify-between my-4">
-            <Text
-              className="text-n1 dark:text-n1 text-2xl"
-              style={{ fontWeight: '600' }}
-            >
+          <View className="flex-row items-center justify-between mb-4 mt-6">
+            <Text className="text-n1 dark:text-n1 text-xl font-medium tracking-wider">
               INGREDIENTS
             </Text>
 
             {/* Detail Analysis Toggle */}
             <View className="flex-row items-center gap-3">
-              <Text className="text-n1/70 dark:text-n1/90 text-lg">
+              <Text className="text-n1/70 dark:text-g1 text-lg font-semibold">
                 Detail Analysis
               </Text>
               <Pressable
                 onPress={() => setDetailAnalysisVisible(!detailAnalysisVisible)}
-                className={`w-[52px] h-8 rounded-full justify-center px-1 ${
-                  detailAnalysisVisible ? 'bg-s22' : 'bg-g3'
+                className={`w-[48px] h-8 rounded-full justify-center px-1 ${
+                  detailAnalysisVisible ? 'bg-s21' : 'bg-g3'
                 }`}
               >
                 <Animated.View
@@ -391,19 +354,19 @@ export default function CocktailDetailScreen() {
                       >
                         {ingredient.name}
                       </Text>
-                      <Text className="text-n1/60 dark:text-n1/60 ml-2">
+                      <Text className="text-n1/60 dark:text-n1/70 ml-2">
                         {ingredient.type}
                       </Text>
                     </View>
 
                     <View className="flex-row items-center justify-between">
-                      <Text className="text-n1/70 dark:text-n1/70">
+                      <Text className="text-n1/70 dark:text-n1/70 font-medium w-[25%]">
                         {ingredient.amount}oz
                       </Text>
-                      <Text className="text-n1/70 dark:text-n1/70">
+                      <Text className="text-n1/70 dark:text-n1/70 font-medium w-[25%]">
                         40% ABV
                       </Text>
-                      <Text className="text-n1/70 dark:text-n1/70">
+                      <Text className="text-n1/70 dark:text-n1/70 font-medium w-[25%]">
                         {currencySymbol}
                         {(ingredient.cost / ingredient.amount).toFixed(2)}/oz
                       </Text>
@@ -420,8 +383,7 @@ export default function CocktailDetailScreen() {
                       {ingredient.amount}oz
                     </Text>
                     <Text
-                      className="text-n1 dark:text-n1 text-base flex-1"
-                      style={{ fontWeight: '600' }}
+                      className="text-n1 dark:text-n1 text-base flex-1 font-medium"
                       numberOfLines={2}
                     >
                       {ingredient.name}
@@ -457,17 +419,11 @@ export default function CocktailDetailScreen() {
             </View>
 
             <View className="flex-row justify-between items-center">
-              <Text
-                className="text-n1 dark:text-n2 text-xl"
-                style={{ fontWeight: '700' }}
-              >
+              <Text className="text-n1 dark:text-n2 text-xl font-semibold">
                 Total Cost: {currencySymbol}
                 {cocktailData.totalCost.toFixed(2)}
               </Text>
-              <Text
-                className="text-n1 dark:text-n2 text-lg"
-                style={{ fontWeight: '600' }}
-              >
+              <Text className="text-n1 dark:text-n2 text-lg font-medium">
                 Suggested Price: {currencySymbol}
                 {cocktailData.suggestedPrice.toFixed(2)}
               </Text>

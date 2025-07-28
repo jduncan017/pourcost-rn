@@ -1,8 +1,8 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { useAppStore } from '@/src/stores/app-store';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
-import { IngredientListItem } from '@/src/components/ui/GenericListItem';
+import IngredientListItem from '@/src/components/IngredientListItem';
 import SearchBar from '@/src/components/ui/SearchBar';
 import EmptyState from '@/src/components/EmptyState';
 import { useRouter } from 'expo-router';
@@ -152,16 +152,16 @@ export default function IngredientsScreen() {
             {/* Sort Options */}
             <SortSelector
               sortOptions={[
-                { key: 'name', label: 'Name' },
-                { key: 'created', label: 'Recently Added' },
-                { key: 'cost', label: 'Cost/Oz' },
-                { key: 'pourCost', label: 'Pour Cost' },
-                { key: 'margin', label: 'Margin' },
+                { key: 'Name', label: 'Name' },
+                { key: 'Date Created', label: 'Recently Added' },
+                { key: 'Cost', label: 'Cost/Oz' },
+                { key: 'Cost %', label: 'Pour Cost' },
+                { key: 'Margin', label: 'Margin' },
               ]}
               selectedSort={sortBy}
               onSortChange={(sortKey) => setSortBy(sortKey as any)}
-              showLabel={false}
-              className="flex-row items-center"
+              showLabel={true}
+              label="Sort By:"
             />
           </View>
 

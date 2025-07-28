@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { useAppStore } from '@/src/stores/app-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
-import { CocktailListItem } from '@/src/components/ui/GenericListItem';
+import CocktailListItem from '@/src/components/CocktailListItem';
 import SearchBar from '@/src/components/ui/SearchBar';
 import EmptyState from '@/src/components/EmptyState';
 import { useRouter } from 'expo-router';
@@ -29,7 +29,6 @@ export default function CocktailsScreen() {
   // Use Zustand store for state management
   const {
     // Data
-    cocktails,
     isLoading,
     error,
 
@@ -151,16 +150,16 @@ export default function CocktailsScreen() {
             {/* Sort Options */}
             <SortSelector
               sortOptions={[
-                { key: 'created', label: 'Recently Added' },
-                { key: 'name', label: 'Name' },
-                { key: 'cost', label: 'Cost' },
-                { key: 'costPercent', label: 'Cost %' },
-                { key: 'profitMargin', label: 'Profit' },
+                { key: 'Date Created', label: 'Recently Added' },
+                { key: 'Name', label: 'Name' },
+                { key: 'Cost', label: 'Cost' },
+                { key: 'Cost %', label: 'Cost %' },
+                { key: 'Margin', label: 'Profit' },
               ]}
               selectedSort={sortBy}
               onSortChange={(sortKey) => setSortBy(sortKey as any)}
-              showLabel={false}
-              className="flex-row items-center"
+              showLabel={true}
+              label="Sort By:"
             />
           </View>
 

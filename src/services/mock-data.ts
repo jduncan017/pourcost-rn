@@ -11,6 +11,7 @@ import {
   IngredientWithCalculations 
 } from '@/src/types/models';
 import { CalculationService } from './calculation-service';
+import { type CocktailCategory } from '@/src/constants/appConstants';
 
 // ==========================================
 // SAVED INGREDIENTS - Enhanced mock data for Phase 4
@@ -272,7 +273,7 @@ export const MOCK_COCKTAILS_WITH_CALCULATIONS: CocktailWithCalculations[] = [
     id: '1',
     name: 'Classic Margarita',
     description: 'The perfect balance of tequila, lime, and orange liqueur',
-    category: 'Tequila',
+    category: 'Tequila' as CocktailCategory,
     imagePath: 'margarita.jpg',
     ingredients: [
       {
@@ -307,7 +308,7 @@ export const MOCK_COCKTAILS_WITH_CALCULATIONS: CocktailWithCalculations[] = [
     id: '2',
     name: 'Old Fashioned',
     description: 'Classic whiskey cocktail with muddled sugar and bitters',
-    category: 'Whiskey',
+    category: 'Whiskey' as CocktailCategory,
     // imagePath: 'old-fashioned.jpg', // No image available, will show fallback icon
     ingredients: [
       {
@@ -348,7 +349,7 @@ export const MOCK_COCKTAILS_WITH_CALCULATIONS: CocktailWithCalculations[] = [
     id: '3',
     name: 'Mojito',
     description: 'Refreshing Cuban cocktail with mint, lime, and rum',
-    category: 'Rum',
+    category: 'Rum' as CocktailCategory,
     imagePath: 'mojito.jpg',
     ingredients: [
       {
@@ -389,7 +390,7 @@ export const MOCK_COCKTAILS_WITH_CALCULATIONS: CocktailWithCalculations[] = [
     id: '4',
     name: 'Espresso Martini',
     description: 'Modern coffee cocktail with vodka and coffee liqueur',
-    category: 'Modern',
+    category: 'Modern' as CocktailCategory,
     imagePath: 'espresso-martini.jpg',
     ingredients: [
       {
@@ -424,7 +425,7 @@ export const MOCK_COCKTAILS_WITH_CALCULATIONS: CocktailWithCalculations[] = [
     id: '5',
     name: 'Gin & Tonic',
     description: 'Classic British cocktail with premium gin and tonic',
-    category: 'Gin',
+    category: 'Gin' as CocktailCategory,
     imagePath: 'gin-and-tonic.jpg',
     ingredients: [
       {
@@ -447,7 +448,7 @@ export const MOCK_COCKTAILS_WITH_CALCULATIONS: CocktailWithCalculations[] = [
     id: '6',
     name: 'Manhattan',
     description: 'Classic whiskey cocktail with sweet vermouth and bitters',
-    category: 'Whiskey',
+    category: 'Whiskey' as CocktailCategory,
     imagePath: 'manhattan.jpg',
     ingredients: [
       {

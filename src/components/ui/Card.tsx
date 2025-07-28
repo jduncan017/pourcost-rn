@@ -6,32 +6,29 @@ import { useThemeColors } from '@/src/contexts/ThemeContext';
 interface CardProps extends ViewProps {
   children: React.ReactNode;
   onPress?: () => void;
-  variant?: 'default' | 'elevated' | 'outlined' | 'ghost' | 'gradient';
+  variant?: 'gradient' | 'custom';
   padding?: 'none' | 'small' | 'medium' | 'large';
   className?: string;
+  displayClasses?: string;
 }
 
 export default function Card({
   children,
   onPress,
-  variant = 'default',
+  variant = 'gradient',
   padding = 'medium', // Default to none for gradient
   className = '',
+  displayClasses = '',
   ...viewProps
 }: CardProps) {
   const { colors } = useThemeColors();
   const getVariantClass = (): string => {
     switch (variant) {
-      case 'elevated':
-        return 'bg-g2/15 dark:bg-p1/15 backdrop-blur-sm border border-g1/50 dark:border-p3/40 shadow-sm';
-      case 'outlined':
-        return 'bg-g2/15 dark:bg-p1/15 backdrop-blur-sm border-2 border-g2/50 dark:border-p3/40';
-      case 'ghost':
-        return 'bg-transparent dark:bg-transparent';
+      case 'custom':
+        return ''; // No default styles, use className for full customization
       case 'gradient':
-        return 'border border-g1/50 dark:border-p1/20 rounded-xl overflow-hidden shadow-4'; // No background, handled by LinearGradient
       default:
-        return 'bg-g2/15 dark:bg-p1/15 backdrop-blur-sm border border-g1/50 dark:border-p3/40';
+        return 'border border-g1/50 dark:border-p1/50 rounded-xl overflow-hidden shadow-4'; // No background, handled by LinearGradient
     }
   };
 
@@ -50,12 +47,13 @@ export default function Card({
     }
   };
 
-  const baseClassName = `rounded-lg ${getVariantClass()} ${variant === 'gradient' ? '' : getPaddingClass()} ${className}`;
+  const baseClassName = `rounded-lg ${className} ${getVariantClass()} ${variant === 'gradient' || !variant ? '' : getPaddingClass()}`;
 
   // Define gradient colors for the gradient variant with opacity
-  const gradientColors = [`${colors.p1}50`, `${colors.p3}50`] as const; // 80% and 90% opacity
+  const gradientColors = [`${colors.p1}50`, `${colors.p3}50`] as const;
 
-  if (variant === 'gradient') {
+  // Default behavior is gradient, only render non-gradient for ghost and custom variants
+  if (variant === 'gradient' || !variant) {
     if (onPress) {
       return (
         <Pressable
@@ -69,7 +67,11 @@ export default function Card({
             end={{ x: 1, y: 1 }}
             className="flex-1"
           >
-            <View className={getPaddingClass()}>{children}</View>
+            <View
+              className={`CardContent ${getPaddingClass()} ${displayClasses}`}
+            >
+              {children}
+            </View>
           </LinearGradient>
         </Pressable>
       );
@@ -83,7 +85,11 @@ export default function Card({
           end={{ x: 1, y: 1 }}
           className="rounded-lg flex-1"
         >
-          <View className={getPaddingClass()}>{children}</View>
+          <View
+            className={`CardContent ${getPaddingClass()} ${displayClasses}`}
+          >
+            {children}
+          </View>
         </LinearGradient>
       </View>
     );
@@ -107,77 +113,3 @@ export default function Card({
     </View>
   );
 }
-
-// Convenience components for common card types
-export const FeatureCard = ({
-  children,
-  onPress,
-  className = '',
-}: Pick<CardProps, 'children' | 'onPress' | 'className'>) => (
-  <Card
-    variant="elevated"
-    padding="large"
-    onPress={onPress}
-    className={className}
-  >
-    {children}
-  </Card>
-);
-
-export const ListCard = ({
-  children,
-  onPress,
-  className = '',
-}: Pick<CardProps, 'children' | 'onPress' | 'className'>) => (
-  <Card
-    variant="default"
-    padding="medium"
-    onPress={onPress}
-    className={`mb-3 ${className}`}
-  >
-    {children}
-  </Card>
-);
-
-export const SummaryCard = ({
-  children,
-  className = '',
-}: Pick<CardProps, 'children' | 'className'>) => (
-  <Card
-    variant="outlined"
-    padding="large"
-    className={`bg-p1/20 dark:bg-n1/15 backdrop-blur-sm border-p1/40 dark:border-n1/30 ${className}`}
-  >
-    {children}
-  </Card>
-);
-
-export const CompactCard = ({
-  children,
-  onPress,
-  className = '',
-}: Pick<CardProps, 'children' | 'onPress' | 'className'>) => (
-  <Card
-    variant="default"
-    padding="small"
-    onPress={onPress}
-    className={className}
-  >
-    {children}
-  </Card>
-);
-
-export const GradientCard = ({
-  children,
-  onPress,
-  className = '',
-}: Pick<CardProps, 'children' | 'onPress' | 'className'>) => (
-  <Card
-    variant="gradient"
-    padding="medium" // Explicit padding for GradientCard
-    onPress={onPress}
-    className={className}
-  >
-    {children}
-  </Card>
-);

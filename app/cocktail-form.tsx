@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  Alert,
-  TextInput as RNTextInput,
-} from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,22 +10,12 @@ import Card from '@/src/components/ui/Card';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import BackButton from '@/src/components/ui/BackButton';
-import SwipeableCard from '@/src/components/SwipeableCard';
+import CocktailIngredientItem from '@/src/components/CocktailIngredientItem';
 import { useIngredientSelectionStore } from '@/src/stores/ingredient-selection-store';
-
-// Cocktail category options
-const COCKTAIL_CATEGORIES = [
-  'Classic',
-  'Modern',
-  'Tropical',
-  'Whiskey',
-  'Vodka',
-  'Rum',
-  'Gin',
-  'Tequila',
-  'Other',
-] as const;
-type CocktailCategory = (typeof COCKTAIL_CATEGORIES)[number];
+import {
+  COCKTAIL_CATEGORIES,
+  type CocktailCategory,
+} from '@/src/constants/appConstants';
 
 // Temporary local interface - will be replaced with canonical types in Phase 3.2
 interface LocalCocktailIngredient {
@@ -77,6 +60,45 @@ export default function CocktailFormScreen() {
     (params.preparationNotes as string) || ''
   );
   const [ingredients, setIngredients] = useState<LocalCocktailIngredient[]>([]);
+
+  // Load existing ingredients when editing
+  useEffect(() => {
+    if (isEditing && params.ingredients) {
+      try {
+        // Parse ingredients from params (assuming they're passed as JSON string)
+        const existingIngredients =
+          typeof params.ingredients === 'string'
+            ? JSON.parse(params.ingredients)
+            : params.ingredients;
+
+        if (Array.isArray(existingIngredients)) {
+          const formattedIngredients = existingIngredients.map(
+            (ingredient: any) => {
+              const bottleSizeOz = ingredient.bottleSize / 29.5735;
+              const costPerOz = ingredient.bottlePrice / bottleSizeOz;
+              const cost = costPerOz * ingredient.amount;
+
+              return {
+                id: ingredient.id,
+                name: ingredient.name,
+                amount: ingredient.amount || 0,
+                unit: ingredient.unit || 'oz',
+                bottleSize: ingredient.bottleSize || 750,
+                bottlePrice: ingredient.bottlePrice || 0,
+                type: ingredient.type || 'Unknown',
+                costPerOz,
+                cost,
+              } as LocalCocktailIngredient;
+            }
+          );
+
+          setIngredients(formattedIngredients);
+        }
+      } catch (error) {
+        console.error('Error parsing existing ingredients:', error);
+      }
+    }
+  }, [isEditing, params.ingredients]);
 
   // Listen for selected ingredients from ingredient selector
   useFocusEffect(
@@ -252,13 +274,6 @@ export default function CocktailFormScreen() {
     );
   };
 
-  // Get pour cost color
-  const getPourCostColor = (pourCost: number) => {
-    if (pourCost <= 15) return 'text-s22';
-    if (pourCost <= 25) return 'text-s12';
-    return 'text-e3';
-  };
-
   return (
     <GradientBackground>
       <ScrollView
@@ -295,9 +310,9 @@ export default function CocktailFormScreen() {
 
             <View className="flex flex-row gap-4 mb-4">
               {/* Image Box */}
-              <Pressable className="w-20 h-20 bg-g2/30 dark:bg-g1/80 rounded-lg flex items-center justify-center">
+              <Pressable className="w-24 h-24 bg-g2/30 dark:bg-g1/80 rounded-lg flex items-center justify-center">
                 <Ionicons name="add" size={24} color="#585858" />
-                <Text className="text-xs text-g3 dark:text-g3 mt-1 font-medium">
+                <Text className="text-xs text-g3 dark:text-g3 mt-1 font-bold">
                   Add Photo
                 </Text>
               </Pressable>
@@ -316,7 +331,7 @@ export default function CocktailFormScreen() {
             {/* Category */}
             <View>
               <Text
-                className="text-sm text-g4 dark:text-n1 mb-2"
+                className="text-g4 dark:text-n1 mb-2"
                 style={{ fontWeight: '500' }}
               >
                 Category
@@ -373,93 +388,15 @@ export default function CocktailFormScreen() {
                 description="Search and add ingredients above to build your cocktail"
               />
             ) : (
-              <View className="flex flex-col gap-2 bg-p3/90 dark:bg-p4/90 p-4 rounded-lg">
+              <View className="IngredientsContainer flex flex-col gap-2">
                 {ingredients.map((ingredient) => (
-                  <View key={ingredient.id} className="mb-2">
-                    <SwipeableCard
-                      onSwipeRight={() => removeIngredient(ingredient.id)}
-                      disableRightSwipe={true}
-                      rightAction={{
-                        icon: 'trash',
-                        label: 'Delete',
-                        color: '#FFFFFF',
-                        backgroundColor: '#DC2626',
-                      }}
-                    >
-                      {/* Ingredient display */}
-                      <View>
-                        <View className="flex-row items-center justify-between">
-                          {/* Name and Type Column - More spacing */}
-                          <View className="flex-1 mr-6">
-                            <Text
-                              className="text-n1 text-lg mb-1"
-                              style={{ fontWeight: '600' }}
-                            >
-                              {ingredient.name}
-                            </Text>
-                            <Text className="text-n1/80 text-sm" style={{}}>
-                              {ingredient.type}
-                            </Text>
-                          </View>
-
-                          {/* Amount Input and Unit Dropdown */}
-                          <View className="flex-row items-center gap-2 mr-4">
-                            <RNTextInput
-                              value={ingredient.amount.toString()}
-                              onChangeText={(value) => {
-                                const newAmount = parseFloat(value) || 0;
-                                updateIngredientAmount(
-                                  ingredient.id,
-                                  newAmount
-                                );
-                              }}
-                              placeholder="1.5"
-                              keyboardType="decimal-pad"
-                              className="w-16 text-center text-n1 bg-p4/30 border border-p2/50 rounded px-2 py-1"
-                            />
-                            <Pressable
-                              onPress={() => {
-                                // Cycle through units: oz -> ml -> drops -> splash -> oz
-                                const units: (
-                                  | 'oz'
-                                  | 'ml'
-                                  | 'drops'
-                                  | 'splash'
-                                )[] = ['oz', 'ml', 'drops', 'splash'];
-                                const currentIndex = units.indexOf(
-                                  ingredient.unit
-                                );
-                                const nextUnit =
-                                  units[(currentIndex + 1) % units.length];
-                                updateIngredientUnit(ingredient.id, nextUnit);
-                              }}
-                              className="bg-p2/30 px-2 py-1 rounded"
-                            >
-                              <Text className="text-n1 text-sm">
-                                {ingredient.unit}
-                              </Text>
-                            </Pressable>
-                          </View>
-
-                          {/* Cost Column */}
-                          <View className="items-end">
-                            <Text
-                              className="text-n1 text-sm"
-                              style={{ fontWeight: '500' }}
-                            >
-                              ${ingredient.costPerOz.toFixed(2)}/
-                              {ingredient.unit}
-                            </Text>
-                            <Text
-                              className="text-s12 dark:text-s11 mt-1"
-                              style={{ fontWeight: '700' }}
-                            >
-                              ${ingredient.cost.toFixed(2)}
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                    </SwipeableCard>
+                  <View key={ingredient.id} className="IngredientWrapper mb-2">
+                    <CocktailIngredientItem
+                      ingredient={ingredient}
+                      onRemove={removeIngredient}
+                      onUpdateAmount={updateIngredientAmount}
+                      onUpdateUnit={updateIngredientUnit}
+                    />
                   </View>
                 ))}
               </View>

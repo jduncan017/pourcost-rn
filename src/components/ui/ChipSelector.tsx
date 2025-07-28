@@ -4,45 +4,39 @@
  * Replaces duplicate chip selection patterns throughout the app
  */
 
-import React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
+import { COCKTAIL_CATEGORIES } from '@/src/constants/appConstants';
 
 export interface ChipSelectorProps {
   /** Available options to select from */
   options: string[];
-  
+
   /** Currently selected option */
   selectedOption: string;
-  
+
   /** Selection change handler */
   onSelectionChange: (option: string) => void;
-  
-  /** Label to display above the chips */
+
   label?: string;
-  
-  /** Show label above the chips */
   showLabel?: boolean;
-  
+
   /** Multiple selection mode */
   multiple?: boolean;
-  
+
   /** Selected options (for multiple mode) */
   selectedOptions?: string[];
-  
+
   /** Multiple selection change handler */
   onMultipleSelectionChange?: (options: string[]) => void;
-  
+
   /** Chip size */
   size?: 'small' | 'medium' | 'large';
-  
+
   /** Layout direction */
   direction?: 'horizontal' | 'vertical';
-  
+
   /** Additional styles */
   className?: string;
-  
-  /** Test ID for testing */
-  testID?: string;
 }
 
 /**
@@ -60,9 +54,7 @@ export default function ChipSelector({
   size = 'medium',
   direction = 'horizontal',
   className = '',
-  testID,
 }: ChipSelectorProps) {
-  
   // Get chip size styles
   const getChipSizeStyles = () => {
     switch (size) {
@@ -74,20 +66,6 @@ export default function ChipSelector({
         return 'px-4 py-3';
       default:
         return 'px-3 py-2';
-    }
-  };
-
-  // Get text size styles
-  const getTextSizeStyles = () => {
-    switch (size) {
-      case 'small':
-        return 'text-xs';
-      case 'medium':
-        return 'text-sm';
-      case 'large':
-        return 'text-base';
-      default:
-        return 'text-sm';
     }
   };
 
@@ -103,7 +81,7 @@ export default function ChipSelector({
   const handleSelection = (option: string) => {
     if (multiple && onMultipleSelectionChange) {
       const newSelection = isSelected(option)
-        ? selectedOptions.filter(item => item !== option)
+        ? selectedOptions.filter((item) => item !== option)
         : [...selectedOptions, option];
       onMultipleSelectionChange(newSelection);
     } else {
@@ -115,7 +93,7 @@ export default function ChipSelector({
   const getChipStyles = (option: string) => {
     const baseStyles = `rounded-full border ${getChipSizeStyles()}`;
     const selected = isSelected(option);
-    
+
     if (selected) {
       return `${baseStyles} bg-p1 border-p1`;
     } else {
@@ -125,9 +103,9 @@ export default function ChipSelector({
 
   // Get text styles based on selection state
   const getTextStyles = (option: string) => {
-    const baseStyles = `font-medium ${getTextSizeStyles()}`;
+    const baseStyles = 'font-medium text-sm';
     const selected = isSelected(option);
-    
+
     if (selected) {
       return `${baseStyles} text-white`;
     } else {
@@ -146,9 +124,7 @@ export default function ChipSelector({
           opacity: pressed ? 0.8 : 1,
         })}
       >
-        <Text className={getTextStyles(option)}>
-          {option}
-        </Text>
+        <Text className={getTextStyles(option)}>{option}</Text>
       </Pressable>
     ));
 
@@ -172,17 +148,15 @@ export default function ChipSelector({
   };
 
   return (
-    <View className={className} testID={testID}>
+    <View className={className}>
       {/* Label */}
       {showLabel && label && (
-        <Text className="text-sm font-medium text-g4 dark:text-n1 mb-3">
-          {label}
-        </Text>
+        <Text className="font-medium text-g4 dark:text-n1 mb-3">{label}</Text>
       )}
-      
+
       {/* Chips */}
       {renderChips()}
-      
+
       {/* Multiple selection indicator */}
       {multiple && selectedOptions.length > 0 && (
         <Text className="text-xs text-g3 dark:text-g2 mt-2">
@@ -238,23 +212,10 @@ export const CocktailCategorySelector = ({
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
 } & Partial<ChipSelectorProps>) => {
-  const cocktailCategories = [
-    'All',
-    'Classic',
-    'Modern',
-    'Tropical',
-    'Whiskey',
-    'Vodka',
-    'Rum',
-    'Gin',
-    'Tequila',
-    'Other',
-  ];
-
   return (
     <ChipSelector
       {...props}
-      options={cocktailCategories}
+      options={COCKTAIL_CATEGORIES}
       selectedOption={selectedCategory}
       onSelectionChange={onCategoryChange}
       label="Category"
@@ -278,11 +239,9 @@ export const SortSelector = ({
   return (
     <ChipSelector
       {...props}
-      options={sortOptions.map(option => option.key)}
+      options={sortOptions.map((option) => option.key)}
       selectedOption={selectedSort}
       onSelectionChange={onSortChange}
-      label="Sort by"
-      size="small"
     />
   );
 };

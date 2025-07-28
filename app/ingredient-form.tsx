@@ -12,18 +12,7 @@ import Card from '@/src/components/ui/Card';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import BackButton from '@/src/components/ui/BackButton';
-
-// Ingredient type options
-const INGREDIENT_TYPES = [
-  'Beer',
-  'Wine',
-  'Liquor',
-  'Mixer',
-  'Syrup',
-  'Juice',
-  'Other',
-] as const;
-type IngredientType = (typeof INGREDIENT_TYPES)[number];
+import { LEGACY_INGREDIENT_TYPES as INGREDIENT_TYPES, type LegacyIngredientType as IngredientType } from '@/src/constants/appConstants';
 
 /**
  * Ingredient creation and editing form

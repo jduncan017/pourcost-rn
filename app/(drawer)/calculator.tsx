@@ -201,7 +201,7 @@ export default function CalculatorScreen() {
           <Text className="text-g3 dark:text-g1 text-xl w-full pb-4 border-b border-g2 mb-4">
             Quickly calculate the cost and pricing for a single spirit
           </Text>
-          <Card className="flex flex-col gap-4" padding="large">
+          <Card displayClasses="flex flex-col gap-4" padding="large">
             <BottleSizeDropdown
               label="Bottle Size"
               value={bottleSize}
@@ -242,7 +242,7 @@ export default function CalculatorScreen() {
           </Card>
 
           {/* Cost Display */}
-          <Card className="mt-6 p-4 bg-g1/60 rounded-lg border border-g2/40">
+          <Card className="mt-4">
             <Text className="text-center text-lg font-semibold text-g4 dark:text-n1 mb-2">
               Cost Per Pour
             </Text>
@@ -252,8 +252,8 @@ export default function CalculatorScreen() {
           </Card>
 
           {/* Charge Display */}
-          <View className="mt-4 p-4 bg-p1/10 rounded-lg border-2 border-p1/30">
-            <Text className="text-center text-lg font-semibold text-p3 dark:text-s11 mb-2">
+          <Card className="mt-4">
+            <Text className="text-center text-lg font-semibold text-p3 dark:text-n2 mb-2">
               Suggested Charge
             </Text>
             <Text className="text-center text-3xl font-bold text-p4 dark:text-n1">
@@ -262,18 +262,18 @@ export default function CalculatorScreen() {
             <Text className="text-center text-sm text-p2 dark:text-s22 mt-2">
               {pourSize.toFixed(2)} Oz Pour - {pourCostPercentage}% Pour Cost
             </Text>
-          </View>
+          </Card>
 
           {/* Additional Calculations */}
           <View className="mt-4" style={{ gap: 8 }}>
-            <View className="flex-row justify-between items-center p-4 bg-s11/60 rounded-lg">
+            <View className="flex-row justify-between items-center p-4 bg-s11/50 rounded-lg">
               <Text className="text-n1 font-medium">Cost per Oz:</Text>
               <Text className="text-g4 dark:text-n1 font-semibold">
                 {`${baseCurrency === 'USD' ? '$' : ''}${costPerOz.toFixed(2)}`}
               </Text>
             </View>
 
-            <View className="flex-row justify-between items-center p-4 bg-s11/60 rounded-lg">
+            <View className="flex-row justify-between items-center p-4 bg-s11/50 rounded-lg">
               <Text className="text-n1 font-medium">Pour Cost Margin:</Text>
               <Text className="text-n1 font-semibold">
                 {`${baseCurrency === 'USD' ? '$' : ''}${pourCostMargin.toFixed(2)}`}
