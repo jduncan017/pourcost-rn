@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAppStore } from '@/src/stores/app-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
-import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useThemeColors, themeColors } from '@/src/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '@/src/components/ui/Card';
 import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
@@ -12,6 +12,11 @@ import GradientBackground from '@/src/components/ui/GradientBackground';
 import { getCurrencySymbol } from '@/src/utils/currency';
 import BackButton from '@/src/components/ui/BackButton';
 import { FeedbackService } from '@/src/services/feedback-service';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 
 // Enhanced cocktail interface
 interface CocktailIngredient {
@@ -57,28 +62,51 @@ export default function CocktailDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [showActions, setShowActions] = useState(false);
-  
+  const [detailAnalysisVisible, setDetailAnalysisVisible] = useState(true);
+
+  // Animated value for toggle button
+  const togglePosition = useSharedValue(1); // 1 = on, 0 = off
+
+  // Update toggle position when state changes
+  useEffect(() => {
+    togglePosition.value = withSpring(detailAnalysisVisible ? 1 : 0, {
+      damping: 15,
+      stiffness: 150,
+    });
+  }, [detailAnalysisVisible]);
+
+  // Animated style for toggle button
+  const toggleStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: togglePosition.value * 24 }], // 24px movement
+    };
+  });
+
   // Get cocktail store
-  const { getCocktailById, loadCocktails, deleteCocktail } = useCocktailsStore();
-  
+  const { getCocktailById, loadCocktails, deleteCocktail } =
+    useCocktailsStore();
+
   // Get cocktail ID from params
   const cocktailId = params.id as string;
-  
+
   // Get cocktail from store
   const cocktail = getCocktailById(cocktailId);
-  
+
   // Load cocktails if not already loaded
   useEffect(() => {
     if (!cocktail) {
       loadCocktails();
     }
   }, [cocktail, loadCocktails]);
-  
+
   // Show loading if cocktail not found
   if (!cocktail) {
     return (
       <GradientBackground>
-        <View style={{ paddingTop: insets.top }} className="flex-1 items-center justify-center">
+        <View
+          style={{ paddingTop: insets.top }}
+          className="flex-1 items-center justify-center"
+        >
           <Text className="text-n1 text-lg">Loading cocktail...</Text>
         </View>
       </GradientBackground>
@@ -91,7 +119,7 @@ export default function CocktailDetailScreen() {
     name: cocktail.name,
     description: cocktail.description,
     category: cocktail.category as any,
-    ingredients: cocktail.ingredients.map(ing => ({
+    ingredients: cocktail.ingredients.map((ing) => ({
       id: ing.id,
       name: ing.name,
       amount: ing.amount,
@@ -103,8 +131,15 @@ export default function CocktailDetailScreen() {
     pourCostPercentage: cocktail.pourCostPercentage,
     profitMargin: cocktail.profitMargin,
     notes: cocktail.notes,
-    createdAt: cocktail.createdAt instanceof Date ? cocktail.createdAt.toISOString() : new Date().toISOString(),
-    updatedAt: cocktail.updatedAt instanceof Date ? cocktail.updatedAt.toISOString() : new Date().toISOString(),
+    // imagePath: cocktail.imagePath, // Add missing imagePath field - TypeScript error
+    createdAt:
+      cocktail.createdAt instanceof Date
+        ? cocktail.createdAt.toISOString()
+        : new Date().toISOString(),
+    updatedAt:
+      cocktail.updatedAt instanceof Date
+        ? cocktail.updatedAt.toISOString()
+        : new Date().toISOString(),
   };
 
   // Get pour cost color
@@ -141,248 +176,310 @@ export default function CocktailDetailScreen() {
 
   const currencySymbol = getCurrencySymbol(baseCurrency);
 
+  // Static image mapping for local development
+  // In production, this would be auto-generated or imagePath would be URLs
+  const cocktailImages = {
+    margarita: require('@/assets/images/cocktail-images/margarita.jpg'),
+    manhattan: require('@/assets/images/cocktail-images/manhattan.jpg'),
+    mojito: require('@/assets/images/cocktail-images/mojito.jpg'),
+    'espresso-martini': require('@/assets/images/cocktail-images/espresso-martini.jpg'),
+    'gin-and-tonic': require('@/assets/images/cocktail-images/gin-and-tonic.jpg'),
+  };
+
+  // Get cocktail image from data or show icon fallback
+  const getCocktailImage = () => {
+    // For local development: extract filename from imagePath and map to local asset
+    // For production: imagePath would be a URL and this would just return { uri: cocktail.imagePath }
+    if (cocktail.imagePath) {
+      if (cocktail.imagePath.startsWith('http')) {
+        // Production: Use URL directly
+        return { uri: cocktail.imagePath };
+      } else {
+        // Development: Extract filename and use static mapping
+        const filename = cocktail.imagePath.replace('.jpg', '');
+        if (
+          filename &&
+          cocktailImages[filename as keyof typeof cocktailImages]
+        ) {
+          return cocktailImages[filename as keyof typeof cocktailImages];
+        }
+      }
+    }
+
+    // Return null to show wine glass icon fallback
+    return null;
+  };
+
   return (
     <GradientBackground>
-      {/* Fixed Header - Outside ScrollView */}
+      {/* Header */}
       <View
-        className="CocktailHeader flex-row items-center justify-between px-4 pb-4"
-        style={{
-          backgroundColor: colors.headerBackground,
-          paddingTop: insets.top + 16,
-        }}
+        className="flex-row items-center justify-between px-4 pb-4"
+        style={{ paddingTop: insets.top + 16 }}
       >
-        {/* Back Navigation */}
-        <Pressable
-          onPress={() => router.back()}
-          className="BackButton flex-row items-center gap-2 py-2"
-        >
-          <Ionicons name="chevron-back" size={20} color={colors.accent} />
-          <Text className="BackText text-base font-medium text-p1 dark:text-s11">
-            Cocktails
-          </Text>
-        </Pressable>
-
-        {/* Page Title - Centered */}
-        <View className="TitleContainer items-center">
-          <Text className="PageTitle text-lg font-semibold text-p1 dark:text-s11">
-            Recipe
+        <View className="flex-row items-center gap-3">
+          <Pressable onPress={() => router.back()}>
+            <Ionicons name="menu" size={24} color={themeColors.n1} />
+          </Pressable>
+          <Text
+            className="text-n1 dark:text-n1 text-xl"
+            style={{ fontWeight: '600' }}
+          >
+            POUR COST
           </Text>
         </View>
-
-        {/* Action Menu */}
-        <View className="MenuContainer relative">
-          <Pressable
-            onPress={() => setShowActions(!showActions)}
-            className="MenuButton py-2 px-3"
-          >
-            <Text className="MenuDots text-lg font-semibold text-p1 dark:text-s11">
-              •••
-            </Text>
+        <View className="flex-row items-center gap-2">
+          <Pressable onPress={() => setShowActions(!showActions)}>
+            <Ionicons name="share-outline" size={24} color={themeColors.n1} />
           </Pressable>
-
-          {/* Absolutely Positioned Dropdown */}
-          {showActions && (
-            <View
-              className="Dropdown absolute top-full right-0 min-w-[120px] rounded-xl border shadow-lg"
-              style={{
-                zIndex: 1000,
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 8,
-                elevation: 8,
-              }}
-            >
-              <Pressable
-                onPress={() => {
-                  setShowActions(false);
-                  handleEdit();
-                }}
-                className="EditOption p-3"
-              >
-                <Text className="EditText text-base font-medium text-g4 dark:text-n1">
-                  Edit
-                </Text>
-              </Pressable>
-
-              <View
-                className="Divider h-px mx-3"
-                style={{ backgroundColor: colors.border }}
-              />
-
-              <Pressable
-                onPress={() => {
-                  setShowActions(false);
-                  handleDelete();
-                }}
-                className="DeleteOption p-3"
-              >
-                <Text className="DeleteText text-base font-medium text-red-600 dark:text-red-400">
-                  Delete
-                </Text>
-              </Pressable>
-            </View>
-          )}
+          <Pressable onPress={() => setShowActions(!showActions)}>
+            <Ionicons
+              name="ellipsis-horizontal"
+              size={24}
+              color={themeColors.n1}
+            />
+          </Pressable>
         </View>
       </View>
 
-      {/* Overlay to close dropdown when tapping outside */}
+      {/* Action Menu Dropdown */}
       {showActions && (
-        <Pressable
-          className="DropdownOverlay absolute inset-0"
-          style={{ zIndex: 999 }}
-          onPress={() => setShowActions(false)}
-        />
+        <>
+          <Pressable
+            className="absolute inset-0 z-40"
+            onPress={() => setShowActions(false)}
+          />
+          <View
+            className="absolute top-20 right-4 min-w-[120px] rounded-xl border shadow-lg z-50"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+            }}
+          >
+            <Pressable
+              onPress={() => {
+                setShowActions(false);
+                handleEdit();
+              }}
+              className="p-3"
+            >
+              <Text className="text-base font-medium text-g4 dark:text-n1">
+                Edit
+              </Text>
+            </Pressable>
+            <View className="h-px mx-3 bg-g2 dark:bg-p2" />
+            <Pressable
+              onPress={() => {
+                setShowActions(false);
+                handleDelete();
+              }}
+              className="p-3"
+            >
+              <Text className="text-base font-medium text-red-600 dark:text-red-400">
+                Delete
+              </Text>
+            </Pressable>
+          </View>
+        </>
       )}
 
       {/* Scrollable Content */}
-      <ScrollView className="ContentScroll flex-1">
-        <View className="ContentContainer p-4">
-          {/* Cocktail Name and Description */}
-          <View className="CocktailInfo mb-6">
-            <Text className="CocktailName text-2xl font-bold text-g4 dark:text-n1 mb-2">
-              {cocktailData.name}
-            </Text>
-            <Text className="CocktailDescription text-g3 dark:text-n1">
-              {cocktailData.description}
+      <ScrollView className="flex-1">
+        <View className="p-4">
+          {/* Recipe Header */}
+          <View className="mb-4">
+            <Text
+              className="text-n1 dark:text-n1 text-lg mb-4"
+              style={{ fontWeight: '600' }}
+            >
+              RECIPES
             </Text>
           </View>
 
-          {/* Ingredients */}
-          <Card className="mb-4">
-            <Text className="text-lg text-g4 dark:text-n1 mb-4 font-bold tracking-tight">
-              Ingredients ({cocktailData.ingredients.length})
+          {/* Cocktail Header */}
+          <View className="flex-row gap-4 shadow-4">
+            {/* Cocktail Image */}
+            <View className="w-48 h-48 rounded-lg overflow-hidden border border-t-g2 border-l-g2 border-b-g3 border-r-g3">
+              {(() => {
+                const imageSource = getCocktailImage();
+                return imageSource ? (
+                  <Image
+                    source={imageSource}
+                    className="w-full h-full"
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View className="w-full h-full bg-p3/30 dark:bg-p3/60 flex items-center justify-center">
+                    <Ionicons name="wine" size={64} color={themeColors.s31} />
+                  </View>
+                );
+              })()}
+            </View>
+
+            {/* Cocktail Info */}
+            <View className="flex-1 flex-col gap-3">
+              <Text
+                className="text-n1 text-2xl border-b-2 border-n2 pb-2"
+                style={{ fontWeight: '700' }}
+              >
+                {cocktailData.name.toUpperCase()}
+              </Text>
+              <Text className="text-n1/70 dark:text-n2/90 text-xl font-medium">
+                Menu Price: {currencySymbol}
+                {cocktailData.suggestedPrice.toFixed(2)}
+              </Text>
+              <Text className="text-n1/70 dark:text-n2/90 text-xl font-medium">
+                Margin: {currencySymbol}
+                {cocktailData.profitMargin.toFixed(2)}
+              </Text>
+              <Text className="text-n1/70 dark:text-n2/90 text-xl font-medium">
+                ABV:{' '}
+                {cocktailData.ingredients
+                  .reduce((sum, ing) => sum + ing.amount, 0)
+                  .toFixed(1)}
+                oz
+              </Text>
+              <Text className="text-n1/70 dark:text-n2/90 text-xl font-medium">
+                Total Alcohol:{' '}
+                {cocktailData.ingredients
+                  .reduce((sum, ing) => sum + ing.amount, 0)
+                  .toFixed(1)}
+                oz
+              </Text>
+            </View>
+          </View>
+
+          {/* Ingredients Section Header - Outside Card */}
+          <View className="flex-row items-center justify-between my-4">
+            <Text
+              className="text-n1 dark:text-n1 text-2xl"
+              style={{ fontWeight: '600' }}
+            >
+              INGREDIENTS
             </Text>
 
-            <View className="space-y-3">
-              {cocktailData.ingredients.map((ingredient) => (
-                <View
-                  key={ingredient.id}
-                  className="flex-row items-center py-2 border-b border-g1/40 dark:border-p2/50 last:border-b-0"
-                >
-                  <View className="flex-1 min-w-0 mr-4">
+            {/* Detail Analysis Toggle */}
+            <View className="flex-row items-center gap-3">
+              <Text className="text-n1/70 dark:text-n1/90 text-lg">
+                Detail Analysis
+              </Text>
+              <Pressable
+                onPress={() => setDetailAnalysisVisible(!detailAnalysisVisible)}
+                className={`w-[52px] h-8 rounded-full justify-center px-1 ${
+                  detailAnalysisVisible ? 'bg-s22' : 'bg-g3'
+                }`}
+              >
+                <Animated.View
+                  style={[toggleStyle]}
+                  className="w-6 h-6 bg-white rounded-full"
+                />
+              </Pressable>
+            </View>
+          </View>
+
+          {/* Individual Ingredient Cards */}
+          <View className="flex flex-col gap-3 mb-4">
+            {cocktailData.ingredients.map((ingredient) => (
+              <Card key={ingredient.id} variant="gradient">
+                {detailAnalysisVisible ? (
+                  /* Detailed View */
+                  <>
+                    <View className="flex-row items-center justify-between mb-2 pb-2 border-b border-g3">
+                      <Text
+                        className="text-n1 dark:text-n1 text-xl tracking-wide font-medium flex-1"
+                        numberOfLines={2}
+                      >
+                        {ingredient.name}
+                      </Text>
+                      <Text className="text-n1/60 dark:text-n1/60 ml-2">
+                        {ingredient.type}
+                      </Text>
+                    </View>
+
+                    <View className="flex-row items-center justify-between">
+                      <Text className="text-n1/70 dark:text-n1/70">
+                        {ingredient.amount}oz
+                      </Text>
+                      <Text className="text-n1/70 dark:text-n1/70">
+                        40% ABV
+                      </Text>
+                      <Text className="text-n1/70 dark:text-n1/70">
+                        {currencySymbol}
+                        {(ingredient.cost / ingredient.amount).toFixed(2)}/oz
+                      </Text>
+                      <Text className="text-n1 dark:text-n1 font-medium">
+                        Total: {currencySymbol}
+                        {ingredient.cost.toFixed(2)}
+                      </Text>
+                    </View>
+                  </>
+                ) : (
+                  /* Simple View - measurements on left */
+                  <View className="flex-row items-center gap-3">
+                    <Text className="text-n1/70 dark:text-n1/70 font-medium">
+                      {ingredient.amount}oz
+                    </Text>
                     <Text
-                      className="text-g4 dark:text-n1 tracking-tight font-medium"
-                      numberOfLines={1}
+                      className="text-n1 dark:text-n1 text-base flex-1"
+                      style={{ fontWeight: '600' }}
+                      numberOfLines={2}
                     >
                       {ingredient.name}
                     </Text>
-                    <Text className="text-sm text-g3 dark:text-n1 tracking-tight">
-                      {ingredient.type}
-                    </Text>
                   </View>
-                  <View className="flex-shrink-0">
-                    <Text className="text-g4 dark:text-n1 text-right tracking-tight">
-                      {ingredient.amount}oz
-                    </Text>
-                    <Text className="text-sm text-g3 dark:text-n1 text-right tracking-tight">
-                      {currencySymbol}
-                      {ingredient.cost.toFixed(2)}
-                    </Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-          </Card>
-
-          {/* Cost Analysis */}
-          <Card className="mb-4">
-            <Text className="text-lg text-g4 dark:text-n1 mb-4 font-bold tracking-tight">
-              Cost Analysis
-            </Text>
-
-            <View className="space-y-4">
-              <View className="flex-row justify-between items-center">
-                <Text className="text-g3 dark:text-n1 tracking-tight">
-                  Total Cost:
-                </Text>
-                <Text className="text-g4 dark:text-n1 text-lg tracking-tight">
-                  {currencySymbol}
-                  {cocktailData.totalCost.toFixed(2)}
-                </Text>
-              </View>
-
-              <View className="flex-row justify-between items-center">
-                <Text className="text-g3 dark:text-n1 tracking-tight">
-                  Suggested Price:
-                </Text>
-                <Text className="text-p2 dark:text-n1 text-lg font-medium">
-                  {currencySymbol}
-                  {cocktailData.suggestedPrice.toFixed(2)}
-                </Text>
-              </View>
-
-              <View className="flex-row justify-between items-center">
-                <Text className="text-g3 dark:text-n1">Pour Cost:</Text>
-                <Text
-                  className={`text-lg ${getPourCostColor(cocktailData.pourCostPercentage)}`}
-                >
-                  {cocktailData.pourCostPercentage.toFixed(1)}%
-                </Text>
-              </View>
-
-              <View className="flex-row justify-between items-center">
-                <Text className="text-g3 dark:text-n1">Profit Margin:</Text>
-                <Text className="text-s22 text-lg">
-                  {currencySymbol}
-                  {cocktailData.profitMargin.toFixed(2)}
-                </Text>
-              </View>
-            </View>
-          </Card>
-
-          {/* Performance */}
-          <Card className="mb-4">
-            <Text className="text-lg text-g4 dark:text-n1 mb-4 font-medium">
-              Performance Analysis
-            </Text>
-
-            <PourCostPerformanceBar
-              pourCostPercentage={cocktailData.pourCostPercentage}
-              className="mb-4"
-            />
-
-            <View className="bg-p1/10 dark:bg-p2/20 p-4 rounded-lg border border-p1/30 dark:border-p1/40">
-              <Text className="text-sm text-p3 dark:text-s11 mb-2 font-medium">
-                Profit Analysis
-              </Text>
-              <Text className="text-xs text-p2 dark:text-g1 leading-relaxed">
-                This cocktail generates a profit of {currencySymbol}
-                {cocktailData.profitMargin.toFixed(2)} at the suggested price of{' '}
-                {currencySymbol}
-                {cocktailData.suggestedPrice.toFixed(2)}. The pour cost of{' '}
-                {cocktailData.pourCostPercentage.toFixed(1)}%
-                {cocktailData.pourCostPercentage <= 20
-                  ? ' is excellent and within target range.'
-                  : ' could be optimized by adjusting portion sizes or pricing.'}
-              </Text>
-            </View>
-          </Card>
+                )}
+              </Card>
+            ))}
+          </View>
 
           {/* Recipe Notes */}
           {cocktailData.notes && (
             <Card className="mb-4">
               <Text
-                className="text-lg text-g4 dark:text-n1 mb-3"
+                className="text-n1 dark:text-n1 text-lg mb-3"
                 style={{ fontWeight: '600' }}
               >
-                Recipe Notes
+                RECIPE NOTES
               </Text>
-              <Text className="text-g4 dark:text-n1 leading-relaxed">
+              <Text className="text-n1/80 dark:text-n1/80 leading-relaxed">
                 {cocktailData.notes}
               </Text>
             </Card>
           )}
 
-          {/* Metadata */}
-          <Card>
-            <Text className="text-center text-g3 dark:text-n1 text-sm">
-              Created: {new Date(cocktail.createdAt).toLocaleDateString()} •
-              Last updated: {new Date(cocktail.updatedAt).toLocaleDateString()}
+          {/* Cost Analysis */}
+          <View className="mb-4">
+            {/* Performance Bar */}
+            <View className="mb-3 border-b border-p1 pb-4">
+              <PourCostPerformanceBar
+                pourCostPercentage={cocktailData.pourCostPercentage}
+              />
+            </View>
+
+            <View className="flex-row justify-between items-center">
+              <Text
+                className="text-n1 dark:text-n2 text-xl"
+                style={{ fontWeight: '700' }}
+              >
+                Total Cost: {currencySymbol}
+                {cocktailData.totalCost.toFixed(2)}
+              </Text>
+              <Text
+                className="text-n1 dark:text-n2 text-lg"
+                style={{ fontWeight: '600' }}
+              >
+                Suggested Price: {currencySymbol}
+                {cocktailData.suggestedPrice.toFixed(2)}
+              </Text>
+            </View>
+          </View>
+
+          {/* Updated Info */}
+          <View className="items-center py-4">
+            <Text className="text-n1/60 dark:text-n1/60 text-sm">
+              Updated {new Date(cocktail.updatedAt).toLocaleDateString()}
             </Text>
-          </Card>
+          </View>
         </View>
       </ScrollView>
     </GradientBackground>

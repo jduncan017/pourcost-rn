@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Dimensions, Pressable } from 'react-native';
+import { View, Text } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
@@ -8,7 +8,8 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/src/contexts/ThemeContext';
+import { useTheme, useThemeColors } from '@/src/contexts/ThemeContext';
+import Card from './ui/Card';
 
 interface SwipeableCardProps {
   children: React.ReactNode;
@@ -30,37 +31,46 @@ interface SwipeableCardProps {
   threshold?: number;
   className?: string;
   disableRightSwipe?: boolean; // New prop to disable right swipe
+  variant?: 'default' | 'gradient'; // Card variant to use
 }
 
-const defaultLeftAction = {
-  icon: 'pencil' as const,
-  label: 'Edit',
-  color: '#374151',
-  backgroundColor: '#F3F4F6',
-};
-
-const defaultRightAction = {
-  icon: 'trash' as const,
-  label: 'Delete',
-  color: '#FFFFFF',
-  backgroundColor: '#DC2626',
-};
+// Default actions will use theme colors, defined inside component
 
 export default function SwipeableCard({
   children,
   onPress,
   onSwipeLeft,
   onSwipeRight,
-  leftAction = defaultLeftAction,
-  rightAction = defaultRightAction,
+  leftAction,
+  rightAction,
   className = '',
   disableRightSwipe = false,
+  variant = 'default',
 }: SwipeableCardProps) {
   const { isDarkMode } = useTheme();
+  const { colors } = useThemeColors();
+
+  // Default actions using theme colors
+  const defaultLeftAction = {
+    icon: 'pencil' as const,
+    label: 'Edit',
+    color: colors.g4,
+    backgroundColor: colors.g1,
+  };
+
+  const defaultRightAction = {
+    icon: 'trash' as const,
+    label: 'Delete',
+    color: colors.n1,
+    backgroundColor: colors.e2,
+  };
+
+  const finalLeftAction = leftAction || defaultLeftAction;
+  const finalRightAction = rightAction || defaultRightAction;
   const translateX = useSharedValue(0);
   const startX = useSharedValue(0);
   const hasTriggeredAction = useSharedValue(false);
-  const maxSwipe = 80; // Fixed width for action buttons (80px)
+  const maxSwipe = 100; // Fixed width for action buttons (80px)
   const triggerThreshold = maxSwipe * 0.9; // 90% of action width to trigger
 
   const triggerAction = (direction: 'left' | 'right') => {
@@ -157,19 +167,11 @@ export default function SwipeableCard({
     .failOffsetY([-20, 20]) // More vertical tolerance before failing
     .shouldCancelWhenOutside(true); // Cancel gesture when finger leaves area
 
-  // Get theme colors based on dark mode
-  const cardBackgroundColor = isDarkMode
-    ? 'rgba(29, 39, 60, 1)'
-    : 'rgba(175, 175, 175, 1)';
-
   const cardStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateX: translateX.value }],
       zIndex: 1, // Ensure main content is above the action buttons
       position: 'relative',
-      backgroundColor: cardBackgroundColor,
-      borderRadius: 8,
-      padding: 16,
     };
   });
 
@@ -178,24 +180,23 @@ export default function SwipeableCard({
       {/* Left Action (Edit) - Static underneath */}
       {onSwipeLeft && !disableRightSwipe && (
         <View
-          className="absolute left-0 top-0 bottom-0 flex-row items-center justify-center px-6 rounded-l-xl"
+          className="absolute left-0 top-0 bottom-0 flex-row items-center justify-start px-8 rounded-l-xl z-0"
           style={{
-            backgroundColor: leftAction.backgroundColor,
-            width: maxSwipe,
-            zIndex: 0, // Behind the main content
+            backgroundColor: finalLeftAction.backgroundColor,
+            width: maxSwipe + 20,
           }}
         >
           <View className="items-center">
             <Ionicons
-              name={leftAction.icon}
+              name={finalLeftAction.icon}
               size={24}
-              color={leftAction.color}
+              color={finalLeftAction.color}
             />
             <Text
               className="text-sm font-medium mt-1"
-              style={{ color: leftAction.color }}
+              style={{ color: finalLeftAction.color }}
             >
-              {leftAction.label}
+              {finalLeftAction.label}
             </Text>
           </View>
         </View>
@@ -204,24 +205,23 @@ export default function SwipeableCard({
       {/* Right Action (Delete) - Static underneath */}
       {onSwipeRight && (
         <View
-          className="absolute right-0 top-0 bottom-0 flex-row items-center justify-center px-6 rounded-r-xl"
+          className="absolute right-0 top-0 bottom-0 flex-row items-center justify-end px-8 rounded-r-xl z-0"
           style={{
-            backgroundColor: rightAction.backgroundColor,
-            width: maxSwipe,
-            zIndex: 0, // Behind the main content
+            backgroundColor: finalRightAction.backgroundColor,
+            width: maxSwipe + 20,
           }}
         >
           <View className="items-center">
             <Ionicons
-              name={rightAction.icon}
+              name={finalRightAction.icon}
               size={24}
-              color={rightAction.color}
+              color={finalRightAction.color}
             />
             <Text
               className="text-sm font-medium mt-1"
-              style={{ color: rightAction.color }}
+              style={{ color: finalRightAction.color }}
             >
-              {rightAction.label}
+              {finalRightAction.label}
             </Text>
           </View>
         </View>
@@ -230,17 +230,23 @@ export default function SwipeableCard({
       {/* Main Card Content - Slides over the actions */}
       <GestureDetector gesture={panGesture}>
         <Animated.View style={cardStyle}>
-          <Pressable
+          {/* Solid background layer for gradient cards */}
+          {variant === 'gradient' && (
+            <View className="absolute inset-0 rounded-lg bg-p3" />
+          )}
+
+          <Card
+            variant={variant}
             onPress={() => {
               // Only handle press if we haven't triggered a swipe action
               if (!hasTriggeredAction.value && Math.abs(translateX.value) < 5) {
                 onPress?.();
               }
             }}
-            style={{ flex: 1 }}
+            className={`${className} relative z-[1]`}
           >
             {children}
-          </Pressable>
+          </Card>
         </Animated.View>
       </GestureDetector>
     </View>

@@ -8,38 +8,45 @@ import React from 'react';
 import { Pressable, Text, View, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { HapticService } from '@/src/services/haptic-service';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
 
 export interface ButtonProps {
   /** Button text or content */
   children: React.ReactNode;
-  
+
   /** Button variant for different use cases */
-  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'ghost' | 'outline';
-  
+  variant?:
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'ghost'
+    | 'outline';
+
   /** Button size */
   size?: 'small' | 'medium' | 'large';
-  
+
   /** Optional icon (Ionicons name) */
   icon?: keyof typeof Ionicons.glyphMap;
-  
+
   /** Icon position */
   iconPosition?: 'left' | 'right';
-  
+
   /** Disabled state */
   disabled?: boolean;
-  
+
   /** Loading state */
   loading?: boolean;
-  
+
   /** Full width button */
   fullWidth?: boolean;
-  
+
   /** Press handler */
   onPress: () => void;
-  
+
   /** Additional styles */
   className?: string;
-  
+
   /** Test ID for testing */
   testID?: string;
 }
@@ -60,7 +67,8 @@ export default function Button({
   className = '',
   testID,
 }: ButtonProps) {
-  
+  const { colors } = useThemeColors();
+
   // Base button styles
   const getBaseStyles = () => {
     const base = 'rounded-lg flex-row items-center justify-center';
@@ -72,35 +80,27 @@ export default function Button({
   const getVariantStyles = () => {
     switch (variant) {
       case 'primary':
-        return disabled 
-          ? 'bg-g2 dark:bg-g3' 
-          : 'bg-p1 dark:bg-p2';
-      
+        return disabled ? 'bg-g2 dark:bg-g3' : 'bg-p1';
+
       case 'secondary':
         return disabled
           ? 'bg-g1 dark:bg-g3 border border-g2 dark:border-g4'
           : 'bg-g1 dark:bg-n1/10 border border-g2 dark:border-n1/20';
-      
+
       case 'success':
-        return disabled
-          ? 'bg-g2 dark:bg-g3'
-          : 'bg-s21 dark:bg-s22';
-      
+        return disabled ? 'bg-g2 dark:bg-g3' : 'bg-s21 dark:bg-s22';
+
       case 'danger':
-        return disabled
-          ? 'bg-g2 dark:bg-g3'
-          : 'bg-e2 dark:bg-e3';
-      
+        return disabled ? 'bg-g2 dark:bg-g3' : 'bg-e2 dark:bg-e3';
+
       case 'ghost':
-        return disabled
-          ? 'bg-transparent'
-          : 'bg-transparent';
-      
+        return disabled ? 'bg-transparent' : 'bg-transparent';
+
       case 'outline':
         return disabled
           ? 'bg-transparent border border-g2 dark:border-g3'
           : 'bg-transparent border border-p1 dark:border-p2';
-      
+
       default:
         return 'bg-p1 dark:bg-p2';
     }
@@ -131,16 +131,16 @@ export default function Button({
       case 'success':
       case 'danger':
         return 'text-white';
-      
+
       case 'secondary':
         return 'text-g4 dark:text-n1';
-      
+
       case 'ghost':
         return 'text-p1 dark:text-p2';
-      
+
       case 'outline':
         return 'text-p1 dark:text-p2';
-      
+
       default:
         return 'text-white';
     }
@@ -149,24 +149,24 @@ export default function Button({
   // Icon color (matches text color)
   const getIconColor = () => {
     if (disabled) {
-      return '#9CA3AF'; // g3 color
+      return colors.g3;
     }
 
     switch (variant) {
       case 'primary':
       case 'success':
       case 'danger':
-        return '#FFFFFF';
-      
+        return colors.n1;
+
       case 'secondary':
-        return '#374151'; // g4 color, would need dynamic for dark mode
-      
+        return colors.g4;
+
       case 'ghost':
       case 'outline':
-        return '#3B82F6'; // p1 color
-      
+        return colors.p1;
+
       default:
-        return '#FFFFFF';
+        return colors.n1;
     }
   };
 
@@ -225,10 +225,13 @@ export default function Button({
   const renderIcon = () => {
     if (loading) {
       return (
-        <ActivityIndicator 
-          size="small" 
-          color={getIconColor()} 
-          style={{ marginRight: iconPosition === 'left' ? 8 : 0, marginLeft: iconPosition === 'right' ? 8 : 0 }}
+        <ActivityIndicator
+          size="small"
+          color={getIconColor()}
+          style={{
+            marginRight: iconPosition === 'left' ? 8 : 0,
+            marginLeft: iconPosition === 'right' ? 8 : 0,
+          }}
         />
       );
     }
@@ -239,9 +242,9 @@ export default function Button({
           name={icon}
           size={getIconSize()}
           color={getIconColor()}
-          style={{ 
-            marginRight: iconPosition === 'left' ? 8 : 0, 
-            marginLeft: iconPosition === 'right' ? 8 : 0 
+          style={{
+            marginRight: iconPosition === 'left' ? 8 : 0,
+            marginLeft: iconPosition === 'right' ? 8 : 0,
           }}
         />
       );
@@ -261,15 +264,13 @@ export default function Button({
       })}
     >
       {iconPosition === 'left' && renderIcon()}
-      
+
       {typeof children === 'string' ? (
-        <Text className={textStyles}>
-          {loading ? 'Loading...' : children}
-        </Text>
+        <Text className={textStyles}>{loading ? 'Loading...' : children}</Text>
       ) : (
         children
       )}
-      
+
       {iconPosition === 'right' && renderIcon()}
     </Pressable>
   );

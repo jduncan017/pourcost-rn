@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Card from './ui/Card';
 import { SavedIngredient, CocktailIngredient } from '@/src/types/models';
 import { searchIngredients, createCocktailIngredient, calculateCostPerOz } from '@/src/services/mock-data';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
 
 interface IngredientSearchBarProps {
   onAddIngredient: (ingredient: CocktailIngredient) => void;
@@ -20,6 +21,7 @@ export default function IngredientSearchBar({
   onAddIngredient,
   placeholder = 'Search ingredients...',
 }: IngredientSearchBarProps) {
+  const { colors } = useThemeColors();
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -51,7 +53,7 @@ export default function IngredientSearchBar({
           value={searchQuery}
           onChangeText={handleSearchChange}
           placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.g2}
           className="bg-n1/80 dark:bg-p3/80 border border-g2/50 dark:border-p2/50 rounded-lg px-4 py-3 pr-10 text-g4 dark:text-n1"
           style={{}}
           onFocus={() => setShowDropdown(searchQuery.length > 0)}
@@ -63,7 +65,7 @@ export default function IngredientSearchBar({
 
         {/* Search Icon */}
         <View className="absolute right-3 top-1/2 transform -translate-y-1/2">
-          <Ionicons name="search" size={20} color="#9CA3AF" />
+          <Ionicons name="search" size={20} color={colors.g2} />
         </View>
       </View>
 
@@ -117,7 +119,7 @@ export default function IngredientSearchBar({
         filteredIngredients.length === 0 && (
           <Card className="absolute top-full left-0 right-0 mt-1 z-50 bg-n1 dark:bg-p3">
             <View className="p-4 items-center">
-              <Ionicons name="search" size={32} color="#9CA3AF" />
+              <Ionicons name="search" size={32} color={colors.g2} />
               <Text
                 className="text-g3 dark:text-n1 text-center mt-2"
                 style={{}}

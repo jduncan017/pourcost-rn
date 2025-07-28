@@ -86,45 +86,38 @@ export default function PourCostPerformanceBar({
 
   return (
     <View className={className}>
-      <View className="mb-3">
+      <View className="">
         {showLabels && (
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-sm text-g3 dark:text-g2">
+          <View className="flex-row justify-between mb-3">
+            <Text className="text-g3 dark:text-g1 font-bold">
               Pour Cost Performance
             </Text>
             <Text
-              className={`text-sm font-medium ${getPerformanceTextColor(pourCostPercentage)}`}
+              className={`font-medium ${getPerformanceTextColor(pourCostPercentage)}`}
             >
-              {pourCostPercentage.toFixed(1)}%
+              {pourCostPercentage.toFixed(1)}% / {goal}% Cost Target
             </Text>
           </View>
         )}
 
-        <View className="h-3 bg-g1/80 rounded-full overflow-hidden">
+        <View className="h-5 bg-g1/80 rounded-full">
           <View
-            className={`h-full rounded-full ${getPerformanceColor(pourCostPercentage)}`}
-            style={{ width: `${barPosition}%` }}
+            className={`PerformanceBar h-full rounded-full ${getPerformanceColor(pourCostPercentage)}`}
+            style={{
+              width: `${barPosition}%`,
+              boxShadow: `0 0 8px ${getPerformanceColor(pourCostPercentage)
+                .replace('bg-', '')
+                .replace('s22', '#22c55e')
+                .replace('s12', '#fde047')
+                .replace('e1', '#ef4444')}`,
+            }}
           />
         </View>
 
         {showLabels && (
-          <>
-            <View className="flex-row justify-between mt-1">
-              <Text className="text-xs text-g3 dark:text-g2">
-                {minValue.toFixed(0)}%
-              </Text>
-              <Text className="text-xs text-g3 dark:text-g2">
-                {goal}% (goal)
-              </Text>
-              <Text className="text-xs text-g3 dark:text-g2">
-                {maxValue.toFixed(0)}%
-              </Text>
-            </View>
-
-            <Text className="text-xs text-g3 dark:text-g2 mt-2">
-              {getFeedbackMessage(pourCostPercentage)}
-            </Text>
-          </>
+          <Text className="text-g3 dark:text-g2 mt-4 text-sm">
+            {getFeedbackMessage(pourCostPercentage)}
+          </Text>
         )}
       </View>
     </View>

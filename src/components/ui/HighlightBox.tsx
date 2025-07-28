@@ -32,7 +32,7 @@ export default function HighlightBox({
         />
       );
     }
-    
+
     if (type === 'percentage' && typeof value === 'number') {
       return (
         <Text
@@ -43,7 +43,7 @@ export default function HighlightBox({
         </Text>
       );
     }
-    
+
     return (
       <Text
         className="text-lg text-p2 dark:text-n1"
@@ -55,9 +55,11 @@ export default function HighlightBox({
   };
 
   return (
-    <View className={`bg-p1/20 px-3 py-2 rounded-lg border border-p1/40 flex flex-column items-center justify-center ${className}`}>
+    <View
+      className={`bg-p1/40 px-4 py-2 rounded-lg border border-p1/40 flex flex-column items-center justify-center ${className}`}
+    >
       <Text
-        className="text-xs text-p2 dark:text-n1 mb-1"
+        className="text-sm text-p2 dark:text-n1 mb-1"
         style={{ fontWeight: '500' }}
       >
         {label}

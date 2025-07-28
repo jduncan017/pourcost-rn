@@ -72,18 +72,64 @@ export function useIsDarkMode() {
   return isDarkMode;
 }
 
+// Theme colors matching Tailwind config naming
+export const themeColors = {
+  // Primary colors
+  p1: '#3262C2',
+  p2: '#2C3E63', 
+  p3: '#1D273C',
+  p4: '#041021',
+  
+  // Neutral colors
+  n1: '#FFFFFF',
+  n2: '#FCF9ED',
+  n3: '#ECE7D1',
+  n4: '#CEC59D',
+  
+  // Grey colors
+  g1: '#EEEEEE',
+  g2: '#AFAFAF',
+  g3: '#585858',
+  g4: '#111111',
+  
+  // Secondary yellows
+  s11: '#FBE09D',
+  s12: '#DCB962',
+  s13: '#AF8827',
+  s14: '#694920',
+  
+  // Secondary teals
+  s21: '#51CCAE',
+  s22: '#439883',
+  s23: '#286052',
+  s24: '#062920',
+  
+  // Secondary purples
+  s31: '#7663E7',
+  s32: '#594DA5',
+  s33: '#382E78',
+  s34: '#251C5F',
+  
+  // Error/caution colors (reds)
+  e1: '#D63663',
+  e2: '#B0244B',
+  e3: '#780A29',
+  e4: '#4C0015',
+} as const;
+
 // Hook to get theme-aware colors
 export function useThemeColors() {
   const { isDarkMode } = useTheme();
 
   return {
-    background: isDarkMode ? '#03080F' : '#FFFFFF', // p4 in dark mode
-    surface: isDarkMode ? '#1D273C' : '#F9FAFB', // p3 in dark mode
-    headerBackground: isDarkMode ? '#041021' : '#FFFFFF', // p4 for header in dark mode
-    text: isDarkMode ? '#FFFFFF' : '#1F2937', // n1 (white) in dark mode
-    textSecondary: isDarkMode ? '#FFFFFF' : '#6B7280', // n1 (white) in dark mode too
-    border: isDarkMode ? '#2C3E63' : '#E5E7EB', // p2 borders in dark mode
-    accent: isDarkMode ? '#FBE09D' : '#3262C2', // p1 primary color
+    // Legacy compatibility colors
+    background: isDarkMode ? themeColors.p4 : themeColors.n1,
+    surface: isDarkMode ? themeColors.p3 : '#F9FAFB',
+    headerBackground: isDarkMode ? themeColors.p4 : themeColors.n1,
+    text: isDarkMode ? themeColors.n1 : '#1F2937',
+    textSecondary: isDarkMode ? themeColors.n1 : '#6B7280',
+    border: isDarkMode ? themeColors.p2 : '#E5E7EB',
+    accent: isDarkMode ? themeColors.s11 : themeColors.p1,
     
     // Additional colors for feedback system
     primary: isDarkMode ? '#3B82F6' : '#2563EB',
@@ -91,5 +137,8 @@ export function useThemeColors() {
     error: isDarkMode ? '#EF4444' : '#DC2626',
     warning: isDarkMode ? '#F59E0B' : '#D97706',
     info: isDarkMode ? '#3B82F6' : '#2563EB',
+    
+    // Direct access to theme colors
+    colors: themeColors,
   };
 }

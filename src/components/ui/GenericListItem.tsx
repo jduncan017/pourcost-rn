@@ -66,6 +66,7 @@ export default function GenericListItem<T>({
       onSwipeLeft={onEdit}
       onSwipeRight={onDelete}
       className={className}
+      variant="gradient"
     >
       <View style={{ minHeight: 60, justifyContent: 'center' }}>
         <View className="flex-row items-center gap-4">
@@ -73,7 +74,7 @@ export default function GenericListItem<T>({
           <View className="flex-1 mr-3">
             {/* Title */}
             <Text
-              className="text-g4 dark:text-n1 text-base font-medium mb-1"
+              className="text-g4 dark:text-n1 text-lg tracking-wide font-semibold mb-1"
               numberOfLines={1}
               ellipsizeMode="tail"
             >

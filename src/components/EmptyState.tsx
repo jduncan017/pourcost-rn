@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
 
 interface EmptyStateProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -19,11 +20,12 @@ export default function EmptyState({
   onAction,
   className = '',
 }: EmptyStateProps) {
+  const { colors } = useThemeColors();
   return (
     <View className={`items-center justify-center py-12 px-6 ${className}`}>
       {/* Icon */}
       <View className="w-20 h-20 bg-g1/6 dark:bg-n1/90 rounded-full items-center justify-center mb-4">
-        <Ionicons name={icon} size={40} color="#9CA3AF" />
+        <Ionicons name={icon} size={40} color={colors.g2} />
       </View>
 
       {/* Title */}

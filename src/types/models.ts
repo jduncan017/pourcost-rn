@@ -59,6 +59,7 @@ export interface Cocktail {
   ingredients: CocktailIngredient[];
   notes?: string;
   profitMargin: number;
+  imagePath?: string; // Path to cocktail image
   createdAt: Date;
   updatedAt: Date;
   userId?: string; // For cloud sync

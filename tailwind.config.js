@@ -73,6 +73,10 @@ module.exports = {
         18: '4.5rem',
         22: '5.5rem',
       },
+      // Custom shadows
+      boxShadow: {
+        4: '4px 4px 8px rgba(0, 0, 0, 0.5)',
+      },
     },
   },
   plugins: [],

@@ -273,6 +273,7 @@ export const MOCK_COCKTAILS_WITH_CALCULATIONS: CocktailWithCalculations[] = [
     name: 'Classic Margarita',
     description: 'The perfect balance of tequila, lime, and orange liqueur',
     category: 'Tequila',
+    imagePath: 'margarita.jpg',
     ingredients: [
       {
         ...MOCK_SAVED_INGREDIENTS[2], // Patron Silver Tequila
@@ -307,6 +308,7 @@ export const MOCK_COCKTAILS_WITH_CALCULATIONS: CocktailWithCalculations[] = [
     name: 'Old Fashioned',
     description: 'Classic whiskey cocktail with muddled sugar and bitters',
     category: 'Whiskey',
+    // imagePath: 'old-fashioned.jpg', // No image available, will show fallback icon
     ingredients: [
       {
         ...MOCK_SAVED_INGREDIENTS[4], // Woodford Reserve Bourbon
@@ -347,6 +349,7 @@ export const MOCK_COCKTAILS_WITH_CALCULATIONS: CocktailWithCalculations[] = [
     name: 'Mojito',
     description: 'Refreshing Cuban cocktail with mint, lime, and rum',
     category: 'Rum',
+    imagePath: 'mojito.jpg',
     ingredients: [
       {
         ...MOCK_SAVED_INGREDIENTS[5], // Bacardi Superior Rum
@@ -387,6 +390,7 @@ export const MOCK_COCKTAILS_WITH_CALCULATIONS: CocktailWithCalculations[] = [
     name: 'Espresso Martini',
     description: 'Modern coffee cocktail with vodka and coffee liqueur',
     category: 'Modern',
+    imagePath: 'espresso-martini.jpg',
     ingredients: [
       {
         ...MOCK_SAVED_INGREDIENTS[1], // Grey Goose Vodka
@@ -421,6 +425,7 @@ export const MOCK_COCKTAILS_WITH_CALCULATIONS: CocktailWithCalculations[] = [
     name: 'Gin & Tonic',
     description: 'Classic British cocktail with premium gin and tonic',
     category: 'Gin',
+    imagePath: 'gin-and-tonic.jpg',
     ingredients: [
       {
         ...MOCK_SAVED_INGREDIENTS[3], // Hendricks Gin
@@ -443,6 +448,7 @@ export const MOCK_COCKTAILS_WITH_CALCULATIONS: CocktailWithCalculations[] = [
     name: 'Manhattan',
     description: 'Classic whiskey cocktail with sweet vermouth and bitters',
     category: 'Whiskey',
+    imagePath: 'manhattan.jpg',
     ingredients: [
       {
         ...MOCK_SAVED_INGREDIENTS[4], // Woodford Reserve Bourbon

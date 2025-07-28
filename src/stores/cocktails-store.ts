@@ -26,7 +26,7 @@ export interface CocktailsState {
   sortBy: 'name' | 'cost' | 'created' | 'profitMargin' | 'costPercent';
   
   // Actions - Data Management
-  loadCocktails: () => Promise<void>;
+  loadCocktails: (forceReload?: boolean) => Promise<void>;
   addCocktail: (data: CreateCocktailData) => Promise<Cocktail>;
   updateCocktail: (data: UpdateCocktailData) => Promise<Cocktail>;
   deleteCocktail: (id: string) => Promise<void>;
@@ -84,16 +84,24 @@ export const useCocktailsStore = create<CocktailsState>()(
       sortBy: 'created',
       
       // Data management actions
-      loadCocktails: async () => {
+      loadCocktails: async (forceReload = false) => {
         const currentState = get();
         
-        // Always load if no cocktails exist, regardless of loading state
-        if (currentState.cocktails.length > 0) {
+        // In development, check if we should force reload when mock data changes
+        const isDevelopment = __DEV__;
+        
+        // Skip loading if cocktails exist and not forcing reload (except in development)
+        if (currentState.cocktails.length > 0 && !forceReload && !isDevelopment) {
           console.log('Cocktails already loaded, skipping reload');
           return;
         }
         
-        console.log('Loading cocktails...');
+        if (currentState.cocktails.length > 0 && isDevelopment) {
+          console.log('Development mode: Reloading cocktails to pick up mock data changes');
+        } else {
+          console.log('Loading cocktails...');
+        }
+        
         set({ isLoading: true, error: null });
         try {
           // In Phase 4, we're still using mock data
