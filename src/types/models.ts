@@ -26,6 +26,8 @@ export interface SavedIngredient {
   bottleSize: number; // Size in ml (matches component usage)
   bottlePrice: number; // Price in base currency (matches component usage)
   type?: string; // Ingredient type (Beer, Wine, Liquor, etc.)
+  notForSale?: boolean; // Whether this ingredient is sold individually (false for prepped items like simple syrup)
+  description?: string; // Brief description of the ingredient
   createdAt: Date;
   updatedAt: Date;
   userId?: string; // For cloud sync

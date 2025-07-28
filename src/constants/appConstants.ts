@@ -9,12 +9,12 @@
 // ==========================================
 
 export const INGREDIENT_TYPES = [
+  'Spirit',
   'Beer',
   'Wine',
-  'Spirit',
-  'Liquor',
-  'Prepared',
+  'Prepped',
   'Garnish',
+  'Other',
 ] as const;
 
 export type IngredientType = (typeof INGREDIENT_TYPES)[number];
@@ -47,6 +47,89 @@ export const COCKTAIL_CATEGORIES = [
 ];
 
 export type CocktailCategory = (typeof COCKTAIL_CATEGORIES)[number];
+
+// ==========================================
+// CONTAINER SIZES BY INGREDIENT TYPE
+// ==========================================
+
+export interface ContainerSize {
+  value: number; // Size in ml
+  label: string;
+  isCommon: boolean; // Whether this is a common size for the type
+}
+
+export const CONTAINER_SIZES_BY_TYPE: Record<IngredientType, ContainerSize[]> =
+  {
+    Spirit: [
+      { value: 375, label: '375ml', isCommon: true },
+      { value: 750, label: '750ml', isCommon: true },
+      { value: 1000, label: '1000ml', isCommon: true },
+      { value: 1750, label: '1750ml', isCommon: true },
+    ],
+    Beer: [
+      { value: 19550, label: '1/2 Keg (15.5 gal)', isCommon: true }, // Keep descriptions for beer
+      { value: 5870, label: '1/6 Keg (5 gal)', isCommon: true },
+      { value: 8500, label: '24 Pack', isCommon: true },
+      { value: 355, label: 'Single Can/Bottle', isCommon: true },
+    ],
+    Wine: [
+      { value: 187, label: '187ml', isCommon: true },
+      { value: 375, label: '375ml', isCommon: true },
+      { value: 750, label: '750ml', isCommon: true },
+      { value: 1500, label: '1500ml', isCommon: true },
+    ],
+    Prepped: [
+      { value: 200, label: '200ml', isCommon: true },
+      { value: 500, label: '500ml', isCommon: true },
+      { value: 750, label: '750ml', isCommon: true },
+      { value: 1000, label: '1000ml', isCommon: true },
+    ],
+    Garnish: [
+      { value: 50, label: '50g', isCommon: true },
+      { value: 100, label: '100g', isCommon: true },
+      { value: 200, label: '200g', isCommon: true },
+      { value: 500, label: '500g', isCommon: true },
+    ],
+    Other: [
+      { value: 250, label: '250ml', isCommon: true },
+      { value: 500, label: '500ml', isCommon: true },
+      { value: 750, label: '750ml', isCommon: true },
+      { value: 1000, label: '1000ml', isCommon: true },
+    ],
+  };
+
+// All container sizes for "Other" dropdown
+export const ALL_CONTAINER_SIZES: ContainerSize[] = [
+  // Small sizes
+  { value: 50, label: '50ml/g', isCommon: false },
+  { value: 100, label: '100ml/g', isCommon: false },
+  { value: 150, label: '150ml/g', isCommon: false },
+  { value: 187, label: '187ml (Split)', isCommon: false },
+  { value: 200, label: '200ml/g', isCommon: false },
+  { value: 250, label: '250ml/g', isCommon: false },
+  { value: 330, label: '330ml (Can)', isCommon: false },
+  { value: 355, label: '355ml (Can)', isCommon: false },
+  { value: 375, label: '375ml (Half Bottle)', isCommon: false },
+  { value: 440, label: '440ml (Pint Can)', isCommon: false },
+  { value: 500, label: '500ml', isCommon: false },
+  { value: 568, label: '568ml (Imperial Pint)', isCommon: false },
+  { value: 650, label: '650ml', isCommon: false },
+  { value: 700, label: '700ml', isCommon: false },
+  { value: 750, label: '750ml (Standard)', isCommon: false },
+  { value: 1000, label: '1L', isCommon: false },
+  { value: 1125, label: '1.125L', isCommon: false },
+  { value: 1500, label: '1.5L (Magnum)', isCommon: false },
+  { value: 1750, label: '1.75L (Handle)', isCommon: false },
+  { value: 3000, label: '3L', isCommon: false },
+  { value: 5000, label: '5L', isCommon: false },
+  // Beer kegs
+  { value: 5870, label: '1/6 Keg (5 gal)', isCommon: false },
+  { value: 7750, label: '1/4 Keg (7.75 gal)', isCommon: false },
+  { value: 15500, label: '1/2 Keg (15.5 gal)', isCommon: false },
+  // Bulk sizes
+  { value: 8500, label: '24 Pack Beer', isCommon: false },
+  { value: 12750, label: '36 Pack Beer', isCommon: false },
+];
 
 // ==========================================
 // MEASUREMENT UNITS

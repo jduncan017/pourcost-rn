@@ -32,7 +32,7 @@ export default function CustomDrawerContent(
         <Image
           source={
             isDarkMode
-              ? require('../../assets/images/PC-Logo-Silver.png')
+              ? require('../../assets/images/PC-Logo-Gold.png')
               : require('../../assets/images/PC-Logo-Dark-Gradient.png')
           }
           className="DrawerLogo w-[140px] h-[35px]"
