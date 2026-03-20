@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Pressable, ViewProps } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { Platform } from 'react-native';
+import { useThemeColors, useIsDarkMode, palette } from '@/src/contexts/ThemeContext';
 
 interface CardProps extends ViewProps {
   children: React.ReactNode;
   onPress?: () => void;
-  variant?: 'gradient' | 'custom';
   padding?: 'none' | 'small' | 'medium' | 'large';
   className?: string;
   displayClasses?: string;
@@ -15,101 +15,75 @@ interface CardProps extends ViewProps {
 export default function Card({
   children,
   onPress,
-  variant = 'gradient',
-  padding = 'medium', // Default to none for gradient
+  padding = 'medium',
   className = '',
   displayClasses = '',
   ...viewProps
 }: CardProps) {
-  const { colors } = useThemeColors();
-  const getVariantClass = (): string => {
-    switch (variant) {
-      case 'custom':
-        return ''; // No default styles, use className for full customization
-      case 'gradient':
-      default:
-        return 'border-l border-g1/20 dark:border-n1/20 rounded-xl overflow-hidden shadow-4'; // No background, handled by LinearGradient
-    }
-  };
+  const colors = useThemeColors();
+  const isDark = useIsDarkMode();
 
   const getPaddingClass = (): string => {
     switch (padding) {
-      case 'none':
-        return '';
-      case 'small':
-        return 'p-2';
-      case 'medium':
-        return 'p-4';
-      case 'large':
-        return 'p-6';
-      default:
-        return 'p-4';
+      case 'none': return '';
+      case 'small': return 'p-3';
+      case 'medium': return 'p-4';
+      case 'large': return 'p-6';
+      default: return 'p-4';
     }
   };
 
-  const baseClassName = `rounded-lg ${className} ${getVariantClass()} ${variant === 'gradient' || !variant ? '' : getPaddingClass()}`;
+  // Dark: blue-tinted gradient. Light: no gradient (clean white)
+  const gradientColors = isDark
+    ? [palette.p1 + '30', palette.p2 + '40'] as const
+    : ['transparent', 'transparent'] as const;
 
-  // Define gradient colors for the gradient variant with opacity
-  const gradientColors = [`${colors.p1}50`, `${colors.p1}30`] as const;
+  const shadowStyle = !isDark && Platform.OS !== 'web' ? {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  } : {};
 
-  // Default behavior is gradient, only render non-gradient for ghost and custom variants
-  if (variant === 'gradient' || !variant) {
-    if (onPress) {
-      return (
-        <Pressable
-          onPress={onPress}
-          className={`${baseClassName} active:opacity-70`}
-          {...viewProps}
-        >
-          <LinearGradient
-            colors={gradientColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="flex-1"
-          >
-            <View
-              className={`CardContent ${getPaddingClass()} ${displayClasses}`}
-            >
-              {children}
-            </View>
-          </LinearGradient>
-        </Pressable>
-      );
-    }
-
-    return (
-      <View className={baseClassName} {...viewProps}>
-        <LinearGradient
-          colors={gradientColors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          className="rounded-lg flex-1"
-        >
-          <View
-            className={`CardContent ${getPaddingClass()} ${displayClasses}`}
-          >
-            {children}
-          </View>
-        </LinearGradient>
+  const cardContent = (
+    <LinearGradient
+      colors={gradientColors}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ borderRadius: 12 }}
+    >
+      <View className={`${getPaddingClass()} ${displayClasses}`}>
+        {children}
       </View>
-    );
-  }
+    </LinearGradient>
+  );
+
+  const cardStyle = {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    overflow: 'hidden' as const,
+    ...shadowStyle,
+  };
 
   if (onPress) {
     return (
       <Pressable
         onPress={onPress}
-        className={`${baseClassName} active:opacity-70`}
+        style={cardStyle}
+        className={`${className}`}
         {...viewProps}
       >
-        {children}
+        {cardContent}
       </Pressable>
     );
   }
 
   return (
-    <View className={baseClassName} {...viewProps}>
-      {children}
+    <View style={cardStyle} className={className} {...viewProps}>
+      {cardContent}
     </View>
   );
 }

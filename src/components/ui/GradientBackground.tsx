@@ -1,7 +1,6 @@
-import React from 'react';
 import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '@/src/contexts/ThemeContext';
+import { useThemeColors, useIsDarkMode, palette } from '@/src/contexts/ThemeContext';
 
 interface GradientBackgroundProps {
   children: React.ReactNode;
@@ -14,28 +13,24 @@ export default function GradientBackground({
   className = '',
   style,
 }: GradientBackgroundProps) {
-  const { isDarkMode } = useTheme();
+  const colors = useThemeColors();
+  const isDark = useIsDarkMode();
 
-  if (!isDarkMode) {
-    // Light mode - use regular white background
+  if (!isDark) {
+    // Light mode: flat
     return (
-      <LinearGradient
-        colors={['#FFFFFF', '#EEEEEE']} // p3 to p4
-        start={{ x: 0, y: 0 }} // top-left
-        end={{ x: 1, y: 1 }} // bottom-right
-        style={[{ flex: 1 }, style]}
-      >
+      <View style={[{ flex: 1, backgroundColor: colors.background }, style]}>
         {children}
-      </LinearGradient>
+      </View>
     );
   }
 
-  // Dark mode - use gradient from p3 to p4
+  // Dark mode: subtle gradient — base at top with a hint of navy warmth at bottom
   return (
     <LinearGradient
-      colors={['#1D273C', '#03080F']} // p3 to p4
-      start={{ x: 0, y: 0 }} // top-left
-      end={{ x: 1, y: 1 }} // bottom-right
+      colors={[colors.background, palette.p3 + 'A0']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
       style={[{ flex: 1 }, style]}
     >
       {children}

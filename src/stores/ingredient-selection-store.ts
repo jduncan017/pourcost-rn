@@ -4,19 +4,19 @@ import { CocktailIngredient } from '@/src/types/models';
 interface IngredientSelectionState {
   selectedIngredient: CocktailIngredient | null;
   selectedIngredients: CocktailIngredient[];
+  removedIngredientIds: string[];
   setSelectedIngredient: (ingredient: CocktailIngredient | null) => void;
   setSelectedIngredients: (ingredients: CocktailIngredient[]) => void;
+  setRemovedIngredientIds: (ids: string[]) => void;
   clearSelection: () => void;
 }
 
-/**
- * Simple store for handling ingredient selection between screens
- * Used to pass selected ingredients from ingredient-selector back to cocktail-form
- */
 export const useIngredientSelectionStore = create<IngredientSelectionState>((set) => ({
   selectedIngredient: null,
   selectedIngredients: [],
+  removedIngredientIds: [],
   setSelectedIngredient: (ingredient) => set({ selectedIngredient: ingredient }),
   setSelectedIngredients: (ingredients) => set({ selectedIngredients: ingredients }),
-  clearSelection: () => set({ selectedIngredient: null, selectedIngredients: [] }),
+  setRemovedIngredientIds: (ids) => set({ removedIngredientIds: ids }),
+  clearSelection: () => set({ selectedIngredient: null, selectedIngredients: [], removedIngredientIds: [] }),
 }));

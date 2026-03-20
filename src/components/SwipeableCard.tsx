@@ -49,7 +49,8 @@ export default function SwipeableCard({
   variant = 'gradient',
   padding,
 }: SwipeableCardProps) {
-  const { colors } = useThemeColors();
+  const theme = useThemeColors();
+  const { colors } = theme;
 
   // Default actions using theme colors
   const defaultLeftAction = {
@@ -177,14 +178,18 @@ export default function SwipeableCard({
   });
 
   return (
-    <View className={`relative overflow-hidden`}>
+    <View className="relative" style={{ overflow: 'hidden', borderRadius: 12 }}>
       {/* Left Action (Edit) - Static underneath */}
       {onSwipeLeft && !disableRightSwipe && (
         <View
-          className="absolute left-0 top-0 bottom-0 flex-row items-center justify-start px-8 rounded-l-xl z-0"
+          className="absolute flex-row items-center justify-start px-8 z-0"
           style={{
             backgroundColor: finalLeftAction.backgroundColor,
             width: maxSwipe + 20,
+            left: 4,
+            top: 0,
+            bottom: 0,
+            borderRadius: 12,
           }}
         >
           <View className="items-center">
@@ -206,10 +211,14 @@ export default function SwipeableCard({
       {/* Right Action (Delete) - Static underneath */}
       {onSwipeRight && (
         <View
-          className="absolute right-0 top-0 bottom-0 flex-row items-center justify-end px-8 rounded-r-xl z-0"
+          className="absolute flex-row items-center justify-end px-8 z-0"
           style={{
             backgroundColor: finalRightAction.backgroundColor,
             width: maxSwipe + 20,
+            right: 4,
+            top: 0,
+            bottom: 0,
+            borderRadius: 12,
           }}
         >
           <View className="items-center">
@@ -230,19 +239,14 @@ export default function SwipeableCard({
 
       {/* Main Card Content - Slides over the actions */}
       <GestureDetector gesture={panGesture}>
-        <Animated.View style={cardStyle}>
-          {/* Solid background layer for gradient cards */}
-          {variant === 'gradient' && (
-            <View className="absolute inset-0 rounded-lg bg-p3" />
-          )}
-
+        <Animated.View style={[cardStyle]}>
           <Card
             onPress={() => {
               if (!hasTriggeredAction.value && Math.abs(translateX.value) < 5) {
                 onPress?.();
               }
             }}
-            className={`${className} relative z-[1]`}
+            className={`${className}`}
             padding={padding}
           >
             {children}

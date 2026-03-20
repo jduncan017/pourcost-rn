@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, TextInput, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
@@ -18,7 +17,7 @@ export default function SearchBar({
   onClear,
   autoFocus = false,
 }: SearchBarProps) {
-  const { text, textSecondary } = useThemeColors();
+  const colors = useThemeColors();
 
   const handleClear = () => {
     onChangeText('');
@@ -26,17 +25,25 @@ export default function SearchBar({
   };
 
   return (
-    <View className="bg-n1 dark:bg-p4/80 rounded-lg border border-p1/20 flex-row items-center px-4 py-3">
-      <Ionicons name="search" size={20} color={text} />
+    <View
+      className="flex-row items-center rounded-lg p-4"
+      style={{
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+      }}
+    >
+      <Ionicons name="search" size={20} color={colors.textTertiary} />
 
       <TextInput
-        className="flex-1 ml-3 text-base text-g4 font-medium leading-5"
+        className="flex-1 ml-3"
         placeholder={placeholder}
-        placeholderTextColor={textSecondary}
+        placeholderTextColor={colors.textMuted}
         value={value}
         onChangeText={onChangeText}
         autoFocus={autoFocus}
         clearButtonMode="never"
+        style={{ color: colors.text, fontSize: 16, padding: 0, margin: 0 }}
       />
 
       {value.length > 0 && (
@@ -45,7 +52,7 @@ export default function SearchBar({
           className="ml-2 p-1"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="close-circle" size={20} color={text} />
+          <Ionicons name="close-circle" size={20} color={colors.textTertiary} />
         </Pressable>
       )}
     </View>

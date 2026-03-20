@@ -44,7 +44,7 @@ export default function Dropdown<T = any>({
     <View className={`${className}`}>
       {/* Label */}
       <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-base font-medium text-g4 dark:text-n1">
+        <Text className="text-lg" style={{ color: colors.textSecondary, fontWeight: '500' }}>
           {label}
         </Text>
       </View>
@@ -62,13 +62,12 @@ export default function Dropdown<T = any>({
         }}
       >
         <Text
-          className={`font-medium ${
-            selectedOption ? 'text-g4 dark:text-n1' : 'text-g3 dark:text-g2'
-          }`}
+          className="font-medium"
+          style={{ color: selectedOption ? colors.text : colors.textTertiary }}
         >
           {displayValue}
         </Text>
-        <Ionicons name="chevron-down" size={20} color={colors.textSecondary} />
+        <Ionicons name="chevron-expand-outline" size={18} color={colors.textTertiary} />
       </Pressable>
 
       {/* Bottom Sheet */}
@@ -98,21 +97,15 @@ export default function Dropdown<T = any>({
                 >
                 <View className="flex-1 mr-3">
                   <Text
-                    className={`font-medium tracking-wider ${
-                      isSelected
-                        ? 'text-p1 dark:text-s11'
-                        : 'text-g4 dark:text-n1'
-                    }`}
+                    className="font-medium tracking-wider"
+                    style={{ color: isSelected ? colors.accent : colors.text }}
                   >
                     {option.label}
                   </Text>
                   {option.sublabel && (
                     <Text
-                      className={`text-sm mt-1 ${
-                        isSelected
-                          ? 'text-p1/70 dark:text-s11/70'
-                          : 'text-g3 dark:text-g2'
-                      }`}
+                      className="text-sm mt-1"
+                      style={{ color: isSelected ? colors.accent + 'B3' : colors.textTertiary }}
                     >
                       {option.sublabel}
                     </Text>

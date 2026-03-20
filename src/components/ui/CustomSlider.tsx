@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, Platform } from 'react-native';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
@@ -32,6 +33,7 @@ export default function CustomSlider({
   logarithmic = false,
   pourCostScale = false,
 }: CustomSliderProps) {
+  const colors = useThemeColors();
   const [isActive, setIsActive] = useState(false);
   const sliderWidth = 280;
   const thumbWidth = 32; // Larger thumb
@@ -161,10 +163,10 @@ export default function CustomSlider({
     <View className="">
       {/* Label and Value */}
       <View className="flex-row justify-between items-center">
-        <Text className="text-base font-medium text-g4 dark:text-n1">
+        <Text className="text-lg" style={{ color: colors.textSecondary, fontWeight: '500' }}>
           {label}
         </Text>
-        <Text className="text-base font-semibold text-p2 dark:text-n1">
+        <Text className="text-base" style={{ color: colors.text, fontWeight: '600' }}>
           {value.toFixed(2)}
           {unit}
         </Text>

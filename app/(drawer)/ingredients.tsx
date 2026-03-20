@@ -16,6 +16,8 @@ import {
 import { useToast } from '@/src/components/ui/Toast';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { HapticService } from '@/src/services/haptic-service';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
+import ScreenTitle from '@/src/components/ui/ScreenTitle';
 
 /**
  * Ingredients management screen
@@ -26,6 +28,7 @@ export default function IngredientsScreen() {
   const {} = useAppStore();
   const router = useRouter();
   const toast = useToast();
+  const colors = useThemeColors();
 
   // Use Zustand store for state management
   const {
@@ -117,7 +120,7 @@ export default function IngredientsScreen() {
         <View className="p-4">
           {/* Header */}
           <View className="mb-6">
-            <Text className="text-g3 dark:text-g1 text-xl w-full pb-4 border-b border-g2 mb-4">
+            <Text className="text-base pb-4 mb-4" style={{ color: colors.textSecondary, borderBottomWidth: 1, borderBottomColor: colors.border }}>
               Manage your ingredient library and cost calculations
             </Text>
 
@@ -145,13 +148,16 @@ export default function IngredientsScreen() {
           <View className="mb-6">
             {/* Type Filter */}
             <View className="mb-4">
+              <ScreenTitle title="Type" variant="group" className="mb-2" />
               <IngredientTypeSelector
                 selectedType={selectedType}
                 onTypeChange={setSelectedType}
+                showLabel={false}
               />
             </View>
 
             {/* Sort Options */}
+            <ScreenTitle title="Sort By" variant="group" className="mb-2" />
             <SortSelector
               sortOptions={[
                 { key: 'name', label: 'Name' },
@@ -162,17 +168,14 @@ export default function IngredientsScreen() {
               ]}
               selectedSort={sortBy}
               onSortChange={(sortKey) => setSortBy(sortKey as any)}
-              showLabel={true}
-              label="Sort By:"
+              showLabel={false}
             />
           </View>
 
           {/* Ingredients List */}
           <View className="flex flex-col gap-3">
             <View className="flex-row items-center justify-between">
-              <Text className="text-lg font-semibold text-g4 dark:text-n1">
-                Your Ingredients ({filteredIngredients.length})
-              </Text>
+              <ScreenTitle title={`Your Ingredients (${filteredIngredients.length})`} variant="group" />
               {searchQuery && (
                 <Button
                   onPress={() => setSearchQuery('')}
@@ -186,7 +189,7 @@ export default function IngredientsScreen() {
 
             {isLoading ? (
               <View className="p-8 items-center">
-                <Text className="text-g3 dark:text-g1">
+                <Text style={{ color: colors.textTertiary }}>
                   Loading ingredients...
                 </Text>
               </View>

@@ -1,5 +1,7 @@
 import { View, Text } from 'react-native';
 import { useAppStore } from '@/src/stores/app-store';
+import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
+import Card from './ui/Card';
 
 interface PourCostPerformanceBarProps {
   pourCostPercentage: number;
@@ -7,48 +9,36 @@ interface PourCostPerformanceBarProps {
   className?: string;
 }
 
-/**
- * Feedback messages based on how far the pour cost % is from the user's goal.
- * Uses percentage of the goal as the scale, not absolute %, so it adapts
- * to whatever target the user has set (15%, 20%, 25%, etc.).
- */
+const COLORS = {
+  onTarget: palette.s21,
+  close: palette.s12,
+  drifting: '#E67E22',
+  bad: palette.e1,
+};
+
+function getPerformance(ratio: number) {
+  if (ratio <= 0) return { color: COLORS.onTarget, label: 'On Target' };
+  const distance = Math.abs(ratio - 1);
+  if (distance <= 0.15) return { color: COLORS.onTarget, label: 'On Target' };
+  if (distance <= 0.35) return { color: COLORS.close, label: ratio < 1 ? 'Under Target' : 'Over Target' };
+  if (distance <= 0.6) return { color: COLORS.drifting, label: ratio < 1 ? 'Well Under' : 'Well Over' };
+  return { color: COLORS.bad, label: ratio < 1 ? 'Way Under' : 'Way Over' };
+}
+
 function getFeedbackMessage(value: number, goal: number): string {
   if (value <= 0 || goal <= 0) return 'Add ingredients to see performance.';
-
-  const ratio = value / goal; // 1.0 = exactly at goal
-
-  // Way below goal (< 60% of target) — pricing is very high
-  if (ratio < 0.6) {
-    return `At ${value.toFixed(1)}%, your pour cost is well below your ${goal}% target. Your pricing may be too high — consider lowering prices to drive more sales.`;
-  }
-
-  // Below goal (60-80% of target) — room to optimize
-  if (ratio < 0.8) {
-    return `At ${value.toFixed(1)}%, you're below your ${goal}% target. Strong margins — you could lower pricing slightly to be more competitive.`;
-  }
-
-  // Slightly below goal (80-95% of target) — great range
-  if (ratio < 0.95) {
-    return `At ${value.toFixed(1)}%, you're just under your ${goal}% target. Great balance between margin and value.`;
-  }
-
-  // At goal (95-105% of target) — on target
-  if (ratio <= 1.05) {
-    return `At ${value.toFixed(1)}%, you're right on your ${goal}% target.`;
-  }
-
-  // Slightly above goal (105-120% of target) — watch it
-  if (ratio <= 1.2) {
-    return `At ${value.toFixed(1)}%, you're slightly above your ${goal}% target. Consider a small price increase or a less expensive substitute.`;
-  }
-
-  // Above goal (120-150% of target) — needs attention
-  if (ratio <= 1.5) {
-    return `At ${value.toFixed(1)}%, you're above your ${goal}% target. Review your pricing or ingredient costs to improve margins.`;
-  }
-
-  // Way above goal (>150% of target) — profitability concern
-  return `At ${value.toFixed(1)}%, you're significantly over your ${goal}% target. This item is eating into profits — raise the price or rework the recipe.`;
+  const ratio = value / goal;
+  if (ratio < 0.6)
+    return `At ${value.toFixed(1)}%, well below your ${goal}% target. Pricing may be too high — consider lowering prices.`;
+  if (ratio < 0.85)
+    return `At ${value.toFixed(1)}%, below your ${goal}% target. Strong margins, but you could be more competitive.`;
+  if (ratio <= 1.15)
+    return `At ${value.toFixed(1)}%, right around your ${goal}% target. Well balanced.`;
+  if (ratio <= 1.35)
+    return `At ${value.toFixed(1)}%, slightly above your ${goal}% target. Consider a small price increase.`;
+  if (ratio <= 1.6)
+    return `At ${value.toFixed(1)}%, above your ${goal}% target. Review pricing or ingredient costs.`;
+  return `At ${value.toFixed(1)}%, significantly over your ${goal}% target. Raise the price or rework the recipe.`;
 }
 
 export default function PourCostPerformanceBar({
@@ -57,78 +47,75 @@ export default function PourCostPerformanceBar({
   className = '',
 }: PourCostPerformanceBarProps) {
   const { pourCostGoal } = useAppStore();
+  const colors = useThemeColors();
 
   const goal = pourCostGoal || 20;
-  const minValue = Math.max(goal * 0.25, 2);
-  const maxValue = goal * 2.5;
+  const ratio = pourCostPercentage > 0 ? pourCostPercentage / goal : 0;
+  const perf = getPerformance(ratio);
 
-  const middleRangeStart = goal - 10;
-  const middleRangeEnd = goal + 10;
-
-  const getBarPosition = (value: number): number => {
-    if (value <= middleRangeStart) {
-      const ratio =
-        Math.log(value / minValue) / Math.log(middleRangeStart / minValue);
-      return ratio * 15;
-    } else if (value <= middleRangeEnd) {
-      const ratio =
-        (value - middleRangeStart) / (middleRangeEnd - middleRangeStart);
-      return 15 + ratio * 70;
-    } else {
-      const ratio =
-        Math.log(value / middleRangeEnd) / Math.log(maxValue / middleRangeEnd);
-      return 85 + ratio * 15;
-    }
-  };
-
-  const barPosition = Math.min(
-    Math.max(getBarPosition(pourCostPercentage), 0),
-    100
-  );
-
-  // Color based on ratio to goal
-  const ratio = pourCostPercentage / goal;
-  const getPerformanceColor = () => {
-    if (ratio <= 1.05) return 'bg-s22';  // At or below goal — green
-    if (ratio <= 1.2) return 'bg-s12';   // Slightly above — yellow
-    return 'bg-e1';                       // Over — red
-  };
-
-  const getPerformanceTextColor = () => {
-    if (ratio <= 1.05) return 'text-s22';
-    if (ratio <= 1.2) return 'text-s12';
-    return 'text-e1';
-  };
+  // Linear scale: 0 to 2x goal. Goal sits at 50%.
+  const maxScale = goal * 2;
+  const fillPercent = Math.min(Math.max((pourCostPercentage / maxScale) * 100, 0), 100);
+  const goalPercent = 50; // goal is always at the midpoint
 
   return (
-    <View className={className}>
+    <Card className={className} padding="large">
       <View>
         {showLabels && (
-          <View className="flex-row justify-between mb-3">
-            <Text className="text-g3 dark:text-g1 font-bold">
-              Pour Cost Performance
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="font-bold text-base" style={{ color: colors.text }}>
+              Pour Cost
             </Text>
-            <Text
-              className={`font-medium ${getPerformanceTextColor()}`}
-            >
-              {pourCostPercentage.toFixed(1)}% / {goal}% Target
+            <Text className="font-semibold text-base" style={{ color: perf.color }}>
+              {pourCostPercentage.toFixed(1)}% — {perf.label}
             </Text>
           </View>
         )}
 
-        <View className="h-5 bg-g1/80 rounded-full">
+        {/* Bar */}
+        <View className="relative">
           <View
-            className={`PerformanceBar h-full rounded-full ${getPerformanceColor()}`}
-            style={{ width: `${barPosition}%` }}
-          />
+            className="h-3 rounded-full overflow-hidden"
+            style={{ backgroundColor: colors.inputBg }}
+          >
+            <View
+              className="h-full rounded-full"
+              style={{
+                width: `${Math.max(fillPercent, 1)}%`,
+                backgroundColor: perf.color,
+              }}
+            />
+          </View>
+
+          {/* Goal marker */}
+          <View
+            className="absolute"
+            style={{
+              left: `${goalPercent}%`,
+              top: -2,
+              bottom: -2,
+              marginLeft: -1,
+            }}
+          >
+            <View style={{ width: 2, height: '100%', backgroundColor: colors.text, opacity: 0.35, borderRadius: 1 }} />
+          </View>
+        </View>
+
+        {/* Scale */}
+        <View className="relative mt-1.5" style={{ height: 16 }}>
+          <Text className="absolute left-0 text-xs" style={{ color: colors.textTertiary }}>0%</Text>
+          <View className="absolute items-center" style={{ left: 0, right: 0 }}>
+            <Text className="text-xs font-medium" style={{ color: colors.textSecondary }}>{goal}%</Text>
+          </View>
+          <Text className="absolute right-0 text-xs" style={{ color: colors.textTertiary }}>{maxScale}%</Text>
         </View>
 
         {showLabels && (
-          <Text className="text-g3 dark:text-g2 mt-4 text-sm">
+          <Text className="mt-3 text-sm leading-5" style={{ color: colors.textSecondary }}>
             {getFeedbackMessage(pourCostPercentage, goal)}
           </Text>
         )}
       </View>
-    </View>
+    </Card>
   );
 }

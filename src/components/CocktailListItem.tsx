@@ -4,9 +4,11 @@
  */
 
 import { View, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import SwipeableCard from './SwipeableCard';
 import { Cocktail } from '@/src/types/models';
 import { calculateCocktailMetrics, formatCurrency, formatPercentage } from '@/src/services/calculation-service';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
 
 interface CocktailListItemProps {
   cocktail: Cocktail;
@@ -27,25 +29,26 @@ export default function CocktailListItem({
 }: CocktailListItemProps) {
   if (!cocktail) return null;
 
+  const colors = useThemeColors();
   const metrics = calculateCocktailMetrics(cocktail.ingredients || []);
 
   // Highlight data — only for cost/costPercent/profitMargin
   const getHighlight = (): { label: string; value: string; color: string } | null => {
     switch (sortBy) {
       case 'cost':
-        return { label: 'Cost', value: formatCurrency(metrics.totalCost || 0), color: 'text-n1' };
+        return { label: 'Cost', value: formatCurrency(metrics.totalCost || 0), color: colors.text };
       case 'costPercent':
         return {
           label: 'Cost %',
           value: formatPercentage(metrics.pourCostPercentage || 0),
           color: (metrics.pourCostPercentage || 0) <= 20
-            ? 'text-s21'
-            : (metrics.pourCostPercentage || 0) <= 25
-              ? 'text-s12'
-              : 'text-e1',
+            ? colors.success
+            : (metrics.pourCostPercentage || 0) <= 28
+              ? colors.warning
+              : colors.error,
         };
       case 'profitMargin':
-        return { label: 'Margin', value: formatCurrency(metrics.profitMargin || 0), color: 'text-n1' };
+        return { label: 'Margin', value: formatCurrency(metrics.profitMargin || 0), color: colors.text };
       default:
         return null;
     }
@@ -66,13 +69,14 @@ export default function CocktailListItem({
         {/* Left - Name & ingredients */}
         <View className="flex-1">
           <Text
-            className="text-n1 text-base tracking-wide font-semibold"
+            className="text-base tracking-wide"
+            style={{ color: colors.text, fontWeight: '600' }}
             numberOfLines={1}
             ellipsizeMode="tail"
           >
             {cocktail.name || 'Unknown Cocktail'}
           </Text>
-          <Text className="text-n1/70 text-sm mt-0.5" numberOfLines={1}>
+          <Text className="text-sm mt-0.5" style={{ color: colors.textTertiary }} numberOfLines={1}>
             {cocktail.ingredients
               ?.map((ing) => ing?.name)
               .filter(Boolean)
@@ -80,17 +84,19 @@ export default function CocktailListItem({
           </Text>
         </View>
 
-        {/* Right - Metric with left border accent */}
-        {highlight && (
-          <View className="border-l border-g2/20 pl-3.5 items-center">
-            <Text className="text-n1/80 text-sm">{highlight.label}</Text>
+        {/* Right - Metric or chevron */}
+        {highlight ? (
+          <View className="pl-3.5 items-center" style={{ borderLeftWidth: 1, borderLeftColor: colors.border }}>
+            <Text className="text-sm" style={{ color: colors.textTertiary }}>{highlight.label}</Text>
             <Text
-              className={`text-base ${highlight.color}`}
-              style={{ fontWeight: '700' }}
+              className="text-base"
+              style={{ fontWeight: '700', color: highlight.color }}
             >
               {highlight.value}
             </Text>
           </View>
+        ) : (
+          <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
         )}
       </View>
     </SwipeableCard>

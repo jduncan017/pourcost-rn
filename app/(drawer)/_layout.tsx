@@ -44,8 +44,9 @@ export default function DrawerLayout() {
             backgroundColor: colors.surface,
             width: 280,
           },
-          drawerActiveTintColor: colors.accent,
-          drawerInactiveTintColor: colors.text,
+          drawerActiveTintColor: '#FFFFFF',
+          drawerInactiveTintColor: colors.textSecondary,
+          drawerActiveBackgroundColor: colors.accent + '80',
           drawerItemStyle: {
             marginVertical: 4,
           },

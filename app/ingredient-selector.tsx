@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRouter, useNavigation } from 'expo-router';
+import { useRouter, useNavigation, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GradientBackground from '@/src/components/ui/GradientBackground';
@@ -21,25 +21,50 @@ export default function IngredientSelectorScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
+  const params = useLocalSearchParams();
   const colors = useThemeColors();
-  const { setSelectedIngredients: setStoreIngredients } = useIngredientSelectionStore();
-  
+  const { setSelectedIngredients: setStoreIngredients, setRemovedIngredientIds } = useIngredientSelectionStore();
+  const { ingredients: allIngredients } = useIngredientsStore();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedIngredients, setSelectedIngredients] = useState<SavedIngredient[]>([]);
+  const [initialExistingIds, setInitialExistingIds] = useState<string[]>([]);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  // Pre-load existing ingredients when editing a cocktail
+  useEffect(() => {
+    if (params.existingIngredientIds) {
+      try {
+        const ids: string[] = JSON.parse(params.existingIngredientIds as string);
+        const existing = allIngredients.filter(ing => ids.includes(ing.id));
+        if (existing.length > 0) {
+          setSelectedIngredients(existing);
+          setInitialExistingIds(ids);
+        }
+      } catch (e) {
+        console.error('Error parsing existingIngredientIds:', e);
+      }
+    }
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: 'Add Ingredients',
       headerLeft: () => (
-        <Pressable onPress={handleFinishSelection} className="p-2">
-          {selectedIngredients.length > 0 ? (
-            <Text style={{ color: colors.accent, fontWeight: '600', fontSize: 16 }}>Save</Text>
-          ) : (
-            <Ionicons name="arrow-back" size={22} color={colors.text} />
-          )}
+        <Pressable onPress={() => router.back()} className="flex-row items-center gap-1 p-2">
+          <Ionicons name="arrow-back" size={22} color={colors.text} />
+          <Text style={{ color: colors.text, fontSize: 16 }}>Cancel</Text>
+        </Pressable>
+      ),
+      headerRight: () => (
+        <Pressable
+          onPress={handleFinishSelection}
+          className="px-4 py-1.5 rounded-lg"
+          style={{ backgroundColor: colors.go }}
+        >
+          <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 16 }}>Save</Text>
         </Pressable>
       ),
     });
@@ -80,27 +105,33 @@ export default function IngredientSelectorScreen() {
   const handleFinishSelection = () => {
     // Convert all selected ingredients to cocktail ingredients and send them back
     const defaultPourSize = fraction(3, 2); // 1.5 oz
-    const cocktailIngredients: CocktailIngredient[] = selectedIngredients.map(ingredient => ({
-      ingredientId: ingredient.id,
-      name: ingredient.name,
-      productSize: ingredient.productSize,
-      productCost: ingredient.productCost,
-      pourSize: defaultPourSize,
-      cost: calculateCostPerPour(ingredient.productSize, ingredient.productCost, defaultPourSize),
-    }));
-    
-    setStoreIngredients(cocktailIngredients);
-    
-    // Navigate back to cocktail form
+    const selectedIds = selectedIngredients.map(i => i.id);
+
+    // Only create new CocktailIngredient objects for newly added ingredients
+    const newIngredients: CocktailIngredient[] = selectedIngredients
+      .filter(ingredient => !initialExistingIds.includes(ingredient.id))
+      .map(ingredient => ({
+        ingredientId: ingredient.id,
+        name: ingredient.name,
+        productSize: ingredient.productSize,
+        productCost: ingredient.productCost,
+        pourSize: defaultPourSize,
+        cost: calculateCostPerPour(ingredient.productSize, ingredient.productCost, defaultPourSize),
+      }));
+
+    // Compute which existing ingredients were removed
+    const removed = initialExistingIds.filter(id => !selectedIds.includes(id));
+
+    setStoreIngredients(newIngredients);
+    setRemovedIngredientIds(removed);
+
     router.back();
   };
 
-  const { ingredients } = useIngredientsStore();
-
   const searchResults = (() => {
-    if (!searchQuery.trim()) return ingredients; // Show all ingredients when no search
+    if (!searchQuery.trim()) return allIngredients; // Show all ingredients when no search
     const query = searchQuery.toLowerCase();
-    return ingredients.filter(
+    return allIngredients.filter(
       (i) =>
         i.name.toLowerCase().includes(query) ||
         (i.type && i.type.toLowerCase().includes(query))
@@ -138,9 +169,10 @@ export default function IngredientSelectorScreen() {
               {selectedIngredients.length > 0 && (
                 <Pressable
                   onPress={() => setSelectedIngredients([])}
-                  className="bg-e3/20 px-3 py-1 rounded-lg"
+                  className="px-3 py-1.5 rounded-lg"
+                  style={{ backgroundColor: colors.error }}
                 >
-                  <Text className="text-e3 font-medium text-sm">Clear All</Text>
+                  <Text className="font-medium text-sm" style={{ color: '#FFFFFF' }}>Clear All</Text>
                 </Pressable>
               )}
             </View>

@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import { View, Text, ScrollView, Alert } from 'react-native';
 import { HARDCODED_MEASUREMENT_SYSTEM, HARDCODED_BASE_CURRENCY } from '@/src/stores/app-store';
 import CustomSlider from '@/src/components/ui/CustomSlider';
 import BottleSizeDropdown from '@/src/components/BottleSizeDropdown';
-import { Ionicons } from '@expo/vector-icons';
 import Card from '@/src/components/ui/Card';
 import GradientBackground from '@/src/components/ui/GradientBackground';
+import ScreenTitle from '@/src/components/ui/ScreenTitle';
+import SectionDivider from '@/src/components/ui/SectionDivider';
+import Button from '@/src/components/ui/Button';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { formatCurrency } from '@/src/services/calculation-service';
 
 // Calculator ingredient interface
 interface CalculatorIngredient {
@@ -194,14 +198,23 @@ export default function CalculatorScreen() {
     return 5;
   };
 
+  const colors = useThemeColors();
+
   return (
     <GradientBackground>
       <ScrollView className="flex-1">
-        <View className="p-4">
-          {/* Description */}
-          <Text className="text-g3 dark:text-g1 text-xl w-full pb-4 border-b border-g2 mb-4">
+        <View className="flex-col gap-5 p-4">
+          {/* Subtitle */}
+          <Text
+            className="text-base pb-4"
+            style={{ color: colors.textSecondary, borderBottomWidth: 1, borderBottomColor: colors.borderSubtle }}
+          >
             Quickly calculate the cost and pricing for a single spirit
           </Text>
+
+          {/* INPUTS section */}
+          <ScreenTitle title="INPUTS" variant="group" />
+
           <Card displayClasses="flex flex-col gap-4" padding="large">
             <BottleSizeDropdown
               label="Bottle Size"
@@ -242,57 +255,55 @@ export default function CalculatorScreen() {
             />
           </Card>
 
-          {/* Cost Display */}
-          <Card className="mt-4">
-            <Text className="text-center text-lg font-semibold text-g4 dark:text-n1 mb-2">
-              Cost Per Pour
-            </Text>
-            <Text className="text-center text-3xl font-bold text-g4 dark:text-n1">
-              {`${baseCurrency === 'USD' ? '$' : ''}${costPerPour.toFixed(2)}`}
-            </Text>
-          </Card>
+          <SectionDivider />
 
-          {/* Charge Display */}
-          <Card className="mt-4">
-            <Text className="text-center text-lg font-semibold text-p3 dark:text-n2 mb-2">
-              Suggested Charge
-            </Text>
-            <Text className="text-center text-3xl font-bold text-p4 dark:text-n1">
-              {`${baseCurrency === 'USD' ? '$' : ''}${suggestedCharge.toFixed(2)}`}
-            </Text>
-            <Text className="text-center text-sm text-p2 dark:text-s22 mt-2">
-              {pourSize.toFixed(2)} Oz Pour - {pourCostPercentage}% Pour Cost
-            </Text>
-          </Card>
+          {/* RESULTS section */}
+          <ScreenTitle title="Results" variant="group" className="mb-2" />
 
-          {/* Additional Calculations */}
-          <View className="mt-4" style={{ gap: 8 }}>
-            <View className="flex-row justify-between items-center p-4 bg-s11/50 rounded-lg">
-              <Text className="text-n1 font-medium">Cost per Oz:</Text>
-              <Text className="text-g4 dark:text-n1 font-semibold">
-                {`${baseCurrency === 'USD' ? '$' : ''}${costPerOz.toFixed(2)}`}
+          <Card padding="large">
+            {/* Hero result */}
+            <View className="items-center pb-4 mb-4" style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}>
+              <Text className="text-sm" style={{ color: colors.textTertiary }}>Cost Per Pour</Text>
+              <Text className="text-4xl mt-1" style={{ color: colors.text, fontWeight: '700' }}>
+                {formatCurrency(costPerPour)}
+              </Text>
+              <Text className="text-sm mt-1" style={{ color: colors.textTertiary }}>
+                {pourSize.toFixed(2)}oz pour • {pourCostPercentage}% pour cost
               </Text>
             </View>
 
-            <View className="flex-row justify-between items-center p-4 bg-s11/50 rounded-lg">
-              <Text className="text-n1 font-medium">Pour Cost Margin:</Text>
-              <Text className="text-n1 font-semibold">
-                {`${baseCurrency === 'USD' ? '$' : ''}${pourCostMargin.toFixed(2)}`}
-              </Text>
-            </View>
-          </View>
+            {/* Metric rows */}
+            {[
+              { label: 'Suggested Charge', value: formatCurrency(suggestedCharge) },
+              { label: 'Cost per Oz', value: formatCurrency(costPerOz) },
+              { label: 'Margin', value: formatCurrency(pourCostMargin) },
+            ].map((row, index) => (
+              <View
+                key={row.label}
+                className="flex-row justify-between items-center py-3"
+                style={index < 2 ? { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle } : undefined}
+              >
+                <Text className="text-base" style={{ color: colors.textSecondary }}>{row.label}</Text>
+                <Text className="text-base" style={{ color: colors.text, fontWeight: '500' }}>{row.value}</Text>
+              </View>
+            ))}
+          </Card>
 
-          {/* Save Button */}
-          {/* Action Buttons */}
-          <Pressable
+          {/* Save action */}
+          <Button
+            variant="success"
+            icon="bookmark"
+            fullWidth
+            size="large"
             onPress={handleSaveIngredient}
-            className="bg-s21 dark:bg-s22 rounded-lg p-4 flex-row items-center justify-center gap-2 mt-6"
           >
-            <Ionicons name="bookmark" size={20} color="white" />
-            <Text className="text-white font-semibold">Save as Ingredient</Text>
-          </Pressable>
+            Save as Ingredient
+          </Button>
 
-          <Text className="text-center text-g3 dark:text-n1 text-sm my-4">
+          <Text
+            className="text-center text-sm"
+            style={{ color: colors.textTertiary }}
+          >
             Save your calculated ingredient for use in cocktail recipes
           </Text>
         </View>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, Pressable, TextInput as RNTextInput } from 'react-native';
-import SwipeableCard from './SwipeableCard';
+import Card from './ui/Card';
 import BottomSheet from './ui/BottomSheet';
 import ChipSelector from './ui/ChipSelector';
 import { CocktailIngredient, Volume, volumeToOunces, fraction } from '@/src/types/models';
@@ -80,36 +80,27 @@ export default function CocktailIngredientItem({
   const otherLabel = !isQuickPour && selectedPour ? selectedPour.label : 'Other';
 
   return (
-    <SwipeableCard
-      onSwipeRight={() => onRemove(ingredient.ingredientId)}
-      disableRightSwipe={true}
-      rightAction={{
-        icon: 'trash',
-        label: 'Delete',
-        color: colors.colors.n1,
-        backgroundColor: colors.error,
-      }}
-    >
+    <Card padding="medium">
       <View className="CocktailIngredientItem">
         {/* Header row: name + cost */}
         <View className="flex-row justify-between items-start mb-3">
           <View className="flex-1 mr-4">
             <Text
-              className="text-n1 text-lg"
-              style={{ fontWeight: '600' }}
+              className="text-lg"
+              style={{ fontWeight: '600', color: colors.text }}
               numberOfLines={1}
             >
               {ingredient.name}
             </Text>
-            <Text className="text-n1/60 text-sm mt-1">
+            <Text className="text-sm mt-1" style={{ color: colors.textTertiary }}>
               {formatCurrency(costPerOz)}/oz
             </Text>
           </View>
           <View className="items-end">
-            <Text className="text-n1/60 text-xs">Pour Cost</Text>
+            <Text className="text-xs" style={{ color: colors.textTertiary }}>Pour Cost</Text>
             <Text
-              className="text-s11 text-lg"
-              style={{ fontWeight: '700' }}
+              className="text-lg"
+              style={{ fontWeight: '700', color: colors.gold }}
             >
               {formatCurrency(ingredient.cost)}
             </Text>
@@ -140,8 +131,9 @@ export default function CocktailIngredientItem({
             >
               <Text
                 className={`text-base ${
-                  !isQuickPour && !showCustomInput ? 'text-white font-bold' : 'text-n1/80 font-medium'
+                  !isQuickPour && !showCustomInput ? 'text-white font-bold' : 'font-medium'
                 }`}
+                style={isQuickPour || showCustomInput ? { color: colors.textSecondary } : undefined}
               >
                 {otherLabel}
               </Text>
@@ -167,14 +159,13 @@ export default function CocktailIngredientItem({
                 style={isSelected ? { backgroundColor: colors.accent + '15' } : undefined}
               >
                 <Text
-                  className={`text-base font-medium ${
-                    isSelected ? 'text-p1 dark:text-s11' : 'text-g4 dark:text-n1'
-                  }`}
+                  className="text-base font-medium"
+                  style={{ color: isSelected ? colors.accent : colors.text }}
                 >
                   {op.label}
                 </Text>
                 {isSelected && (
-                  <Text className="text-sm text-p1 dark:text-s11">
+                  <Text className="text-sm" style={{ color: colors.accent }}>
                     {volumeToOunces(op.volume).toFixed(4)} oz
                   </Text>
                 )}
@@ -184,7 +175,7 @@ export default function CocktailIngredientItem({
 
           {/* Custom entry */}
           <View className="px-4 pt-3 border-t" style={{ borderTopColor: colors.border }}>
-            <Text className="text-sm font-medium text-g4 dark:text-n1 mb-2">Custom amount</Text>
+            <Text className="text-sm font-medium mb-2" style={{ color: colors.text }}>Custom amount</Text>
             <View className="flex-row items-center gap-2">
               <RNTextInput
                 value={customText}
@@ -200,7 +191,7 @@ export default function CocktailIngredientItem({
                 }}
                 placeholderTextColor={colors.textSecondary}
               />
-              <Text className="text-g3 dark:text-g1">oz</Text>
+              <Text style={{ color: colors.textTertiary }}>oz</Text>
               <Pressable
                 onPress={handleCustomSubmit}
                 className="bg-p1 px-4 py-2 rounded-lg"
@@ -211,6 +202,6 @@ export default function CocktailIngredientItem({
           </View>
         </View>
       </BottomSheet>
-    </SwipeableCard>
+    </Card>
   );
 }

@@ -49,7 +49,7 @@ export default function CustomDrawerContent(
 
       {/* Settings pinned at bottom */}
       <View
-        className="border-t px-4 py-3"
+        className="border-t px-4 pb-6 pt-3"
         style={{
           borderTopColor: colors.border,
           paddingBottom: insets.bottom + 8,

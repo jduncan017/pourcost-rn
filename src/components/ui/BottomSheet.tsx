@@ -75,7 +75,7 @@ export default function BottomSheet({
             className="rounded-t-2xl overflow-hidden"
             style={[
               {
-                backgroundColor: colors.surface,
+                backgroundColor: colors.elevated,
                 maxHeight: sheetMaxHeight,
                 paddingBottom: insets.bottom,
               },
@@ -93,7 +93,7 @@ export default function BottomSheet({
                   className="flex-row items-center justify-between w-full px-4 pb-3 border-b"
                   style={{ borderBottomColor: colors.border }}
                 >
-                  <Text className="text-lg font-semibold text-g4 dark:text-n1">
+                  <Text className="text-lg font-semibold" style={{ color: colors.text }}>
                     {title}
                   </Text>
                   <Pressable onPress={onClose} className="p-1">

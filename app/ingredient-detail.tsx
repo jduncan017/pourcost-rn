@@ -5,42 +5,45 @@ import { useAppStore } from '@/src/stores/app-store';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import Card from '@/src/components/ui/Card';
+import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
 import MetricRow from '@/src/components/ui/MetricRow';
+import SectionDivider from '@/src/components/ui/SectionDivider';
+import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import ActionSheet from '@/src/components/ui/ActionSheet';
 import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import { HARDCODED_BASE_CURRENCY } from '@/src/stores/app-store';
-import { getCurrencySymbol } from '@/src/utils/currency';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { volumeLabel } from '@/src/types/models';
-import { calculateIngredientMetrics, calculateSuggestedPrice } from '@/src/services/calculation-service';
+import {
+  calculateIngredientMetrics,
+  calculateSuggestedPrice,
+  formatCurrency,
+} from '@/src/services/calculation-service';
 
 export default function IngredientDetailScreen() {
-  const { defaultPourSize, defaultRetailPrice } = useAppStore();
+  const { defaultPourSize, defaultRetailPrice, pourCostGoal } = useAppStore();
   const router = useRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
   const params = useLocalSearchParams();
   const [showActions, setShowActions] = useState(false);
 
-  const { ingredients, loadIngredients, deleteIngredient } =
-    useIngredientsStore();
+  const { ingredients, loadIngredients, deleteIngredient } = useIngredientsStore();
 
   const ingredientId = params.id as string;
-  const storeIngredient = ingredients.find((ing) => ing.id === ingredientId);
+  const ingredient = ingredients.find((ing) => ing.id === ingredientId);
 
   useEffect(() => {
-    if (!storeIngredient && ingredients.length === 0) {
+    if (!ingredient && ingredients.length === 0) {
       loadIngredients();
     }
   }, [ingredientId, ingredients.length]);
 
-  if (!storeIngredient) {
+  if (!ingredient) {
     return (
       <GradientBackground>
         <View className="flex-1 items-center justify-center">
-          <Text className="text-n1 text-lg">Loading ingredient...</Text>
+          <Text style={{ color: colors.text }} className="text-lg">Loading...</Text>
         </View>
       </GradientBackground>
     );
@@ -48,48 +51,58 @@ export default function IngredientDetailScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: storeIngredient.name,
+      title: 'Ingredient',
       headerRight: () => (
         <Pressable onPress={() => setShowActions(true)} className="p-2">
           <Ionicons name="ellipsis-horizontal" size={22} color={colors.text} />
         </Pressable>
       ),
     });
-  }, [storeIngredient.name, navigation, colors.text]);
+  }, [navigation, colors.text]);
 
-  // Calculate metrics on-demand using store defaults
-  const metrics = calculateIngredientMetrics(storeIngredient, defaultPourSize, defaultRetailPrice);
-  const suggestedRetail = calculateSuggestedPrice(metrics.costPerPour);
+  const isNotForSale = ingredient.notForSale === true;
+  const metrics = calculateIngredientMetrics(ingredient, defaultPourSize, defaultRetailPrice);
+  const suggestedRetail = calculateSuggestedPrice(metrics.costPerPour, pourCostGoal / 100);
 
   const handleEdit = () => {
     router.push({
       pathname: '/ingredient-form',
       params: {
-        id: storeIngredient.id,
-        name: storeIngredient.name,
-        type: storeIngredient.type,
-        productSize: JSON.stringify(storeIngredient.productSize),
-        productCost: storeIngredient.productCost.toString(),
+        id: ingredient.id,
+        name: ingredient.name,
+        type: ingredient.type,
+        productSize: JSON.stringify(ingredient.productSize),
+        productCost: ingredient.productCost.toString(),
+        notForSale: ingredient.notForSale ? 'true' : 'false',
+        description: ingredient.description,
       },
     });
   };
 
   const handleDelete = () => {
     FeedbackService.showDeleteConfirmation(
-      storeIngredient.name,
+      ingredient.name,
       async () => {
-        await deleteIngredient(storeIngredient.id);
+        await deleteIngredient(ingredient.id);
         router.back();
       },
       'ingredient'
     );
   };
 
-  const currencySymbol = getCurrencySymbol(HARDCODED_BASE_CURRENCY);
+  // Alternating row background for pricing section
+  const pricingRows = [
+    { label: 'Purchase Price', value: formatCurrency(ingredient.productCost) },
+    { label: 'Cost per Oz', value: formatCurrency(metrics.costPerOz) },
+    { label: 'Cost per Pour', value: formatCurrency(metrics.costPerPour) },
+    ...(!isNotForSale ? [
+      { label: 'Retail Price', value: formatCurrency(defaultRetailPrice) },
+      { label: 'Margin', value: formatCurrency(metrics.pourCostMargin) },
+    ] : []),
+  ];
 
   return (
     <GradientBackground>
-      {/* Action Sheet */}
       <ActionSheet
         visible={showActions}
         onClose={() => setShowActions(false)}
@@ -99,66 +112,65 @@ export default function IngredientDetailScreen() {
         ]}
       />
 
-      {/* Scrollable Content */}
       <ScrollView className="flex-1">
-        <View className="p-4 flex-col gap-4">
-          {/* Ingredient Header */}
-          <Card displayClasses="flex-row gap-4">
-            <View className="flex-1 flex-col gap-2">
-              <Text className="text-n1 text-2xl font-semibold">
-                {storeIngredient.name.toUpperCase()}
-              </Text>
-              <Text className="text-g1 dark:text-g1/90 text-lg font-medium">
-                Type: {storeIngredient.type || 'Other'}
-              </Text>
-              <Text className="text-g1 dark:text-g1/90 text-lg font-medium">
-                Container: {volumeLabel(storeIngredient.productSize)}
-              </Text>
-              <Text className="text-g1 dark:text-g1/90 text-lg font-medium">
-                Retail Price: {currencySymbol}
-                {defaultRetailPrice.toFixed(2)}
-              </Text>
-            </View>
-          </Card>
+        <View className="p-4 pt-6 flex-col gap-6">
+          {/* Name */}
+          <Text className="text-2xl" style={{ color: colors.text, fontWeight: '700' }}>
+            {ingredient.name}
+          </Text>
 
-          {/* Pricing Details Card */}
-          <Card displayClasses="PricingCard flex-col gap-2">
-            <Text className="text-n1 dark:text-n1 text-xl font-medium">
-              PRICING INFO
+          {/* Details */}
+          <View className="flex-col gap-2">
+            <ScreenTitle title="Details" variant="group" />
+            <Text className="text-base" style={{ color: colors.textSecondary }}>
+              {ingredient.type || 'Other'} • {volumeLabel(ingredient.productSize)}{isNotForSale ? ' • Not for sale' : ''}
             </Text>
-            <MetricRow label="Purchase Price:" value={`${currencySymbol}${storeIngredient.productCost.toFixed(2)}`} valueColor="text-g1 dark:text-g1/90" />
-            <MetricRow label="Cost per Oz:" value={`${currencySymbol}${metrics.costPerOz.toFixed(2)}`} valueColor="text-g1 dark:text-g1/90" />
-            <MetricRow label="Suggested Retail:" value={`${currencySymbol}${suggestedRetail.toFixed(2)}`} valueColor="text-g1 dark:text-g1/90" />
-            <MetricRow label="Margin:" value={`${currencySymbol}${metrics.pourCostMargin.toFixed(2)}`} valueColor="text-g1 dark:text-g1/90" />
-          </Card>
-
-          {/* Description Section */}
-          <Card className="mb-4">
-            <Text
-              className="text-n1 dark:text-n1 text-lg mb-3"
-              style={{ fontWeight: '600' }}
-            >
-              DESCRIPTION
-            </Text>
-            <Text className="text-n1/80 dark:text-n1/80 leading-relaxed">
-              {storeIngredient.description || 'No description provided'}
-            </Text>
-          </Card>
-
-          {/* Cost Analysis */}
-          <View className="mb-4">
-            <View className="mb-3 border-b border-p1 pb-4">
-              <PourCostPerformanceBar
-                pourCostPercentage={metrics.pourCostPercentage}
-              />
-            </View>
+            {ingredient.description ? (
+              <Text className="text-base leading-6" style={{ color: colors.textTertiary }}>
+                {ingredient.description}
+              </Text>
+            ) : null}
           </View>
 
-          {/* Updated Info */}
-          <View className="items-center">
-            <Text className="text-n1/60 dark:text-n1/60 text-sm">
-              Last Updated:{' '}
-              {new Date(storeIngredient.updatedAt).toLocaleDateString()}
+          <SectionDivider />
+
+          {/* Pricing — alternating row backgrounds */}
+          <View className="flex-col gap-0">
+            <ScreenTitle title="Pricing" variant="group" className="mb-2" />
+            {pricingRows.map((row, index) => (
+              <View
+                key={row.label}
+                className="flex-row justify-between items-center px-3 py-3 rounded-sm"
+                style={{
+                  backgroundColor: index % 2 === 0 ? colors.surface : 'transparent',
+                }}
+              >
+                <Text className="text-base" style={{ color: colors.textSecondary }}>
+                  {row.label}
+                </Text>
+                <Text className="text-base" style={{ color: colors.text, fontWeight: '500' }}>
+                  {row.value}
+                </Text>
+              </View>
+            ))}
+
+            {!isNotForSale && (
+              <AiSuggestionRow label="Suggested Retail" value={formatCurrency(suggestedRetail)} className="mt-2" />
+            )}
+          </View>
+
+          {/* Performance — only for items that are for sale */}
+          {!isNotForSale && (
+            <>
+              <SectionDivider />
+              <PourCostPerformanceBar pourCostPercentage={metrics.pourCostPercentage} />
+            </>
+          )}
+
+          {/* Footer */}
+          <View className="items-center py-4">
+            <Text className="text-xs" style={{ color: colors.textTertiary }}>
+              Updated {new Date(ingredient.updatedAt).toLocaleDateString()}
             </Text>
           </View>
         </View>

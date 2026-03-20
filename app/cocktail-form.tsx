@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import MetricRow from '@/src/components/ui/MetricRow';
 import SectionDivider from '@/src/components/ui/SectionDivider';
@@ -16,13 +16,16 @@ import ActionSheet from '@/src/components/ui/ActionSheet';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
+import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
 import CocktailIngredientItem from '@/src/components/CocktailIngredientItem';
+import ImagePlaceholder from '@/src/components/ui/ImagePlaceholder';
 import { useIngredientSelectionStore } from '@/src/stores/ingredient-selection-store';
 import {
   COCKTAIL_CATEGORIES,
 } from '@/src/constants/appConstants';
-import { CocktailIngredient, CocktailCategory, Volume } from '@/src/types/models';
-import { calculateCostPerPour, formatCurrency } from '@/src/services/calculation-service';
+import { CocktailIngredient, CocktailCategory, Volume, volumeLabel } from '@/src/types/models';
+import Card from '@/src/components/ui/Card';
+import { calculateCostPerPour, calculateSuggestedPrice, formatCurrency } from '@/src/services/calculation-service';
 import { FeedbackService } from '@/src/services/feedback-service';
 
 /**
@@ -34,28 +37,15 @@ export default function CocktailFormScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const params = useLocalSearchParams();
-  const { selectedIngredient, selectedIngredients, clearSelection } =
+  const { selectedIngredient, selectedIngredients, removedIngredientIds, clearSelection } =
     useIngredientSelectionStore();
-  const { defaultRetailPrice } = useAppStore();
+  const { defaultRetailPrice, pourCostGoal } = useAppStore();
 
   const colors = useThemeColors();
   const [showActions, setShowActions] = useState(false);
 
   // Check if we're editing an existing cocktail
   const isEditing = Boolean(params.id);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: isEditing ? 'Edit Cocktail' : 'Create Cocktail',
-      headerRight: isEditing
-        ? () => (
-            <Pressable onPress={() => setShowActions(true)} className="p-2">
-              <Ionicons name="ellipsis-horizontal" size={22} color={colors.text} />
-            </Pressable>
-          )
-        : undefined,
-    });
-  }, [isEditing, navigation, colors.text]);
 
   // Form state
   const [name, setName] = useState((params.name as string) || '');
@@ -105,6 +95,17 @@ export default function CocktailFormScreen() {
   // Listen for selected ingredients from ingredient selector
   useFocusEffect(
     React.useCallback(() => {
+      let updated = false;
+
+      // Remove ingredients that were deleted in the selector
+      if (removedIngredientIds.length > 0) {
+        setIngredients((prev) =>
+          prev.filter((ing) => !removedIngredientIds.includes(ing.ingredientId))
+        );
+        updated = true;
+      }
+
+      // Add new ingredients
       if (selectedIngredients.length > 0) {
         setIngredients((prevIngredients) => [
           ...prevIngredients,
@@ -113,15 +114,17 @@ export default function CocktailFormScreen() {
               !prevIngredients.some((existing) => existing.ingredientId === newIng.ingredientId)
           ),
         ]);
-        clearSelection();
+        updated = true;
       } else if (selectedIngredient) {
         setIngredients((prev) => {
           if (prev.some((ing) => ing.ingredientId === selectedIngredient.ingredientId)) return prev;
           return [...prev, selectedIngredient];
         });
-        clearSelection();
+        updated = true;
       }
-    }, [selectedIngredients, selectedIngredient])
+
+      if (updated) clearSelection();
+    }, [selectedIngredients, selectedIngredient, removedIngredientIds])
   );
 
   // Calculate totals with actual retail price
@@ -161,6 +164,8 @@ export default function CocktailFormScreen() {
   const { addCocktail, updateCocktail, deleteCocktail } = useCocktailsStore();
   const [isSaving, setIsSaving] = useState(false);
   const cocktailId = params.id as string;
+
+  const saveRef = useRef<() => void>(() => {});
 
   // Handle save
   const handleSave = async () => {
@@ -206,6 +211,33 @@ export default function CocktailFormScreen() {
     );
   };
 
+  // Keep ref in sync so header button always calls latest version
+  saveRef.current = handleSave;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: isEditing ? 'Edit Cocktail' : 'Create Cocktail',
+      headerLeft: () => (
+        <Pressable onPress={() => router.back()} className="flex-row items-center gap-1 p-2">
+          <Ionicons name="arrow-back" size={22} color={colors.text} />
+          <Text style={{ color: colors.textSecondary, fontSize: 16 }}>Cancel</Text>
+        </Pressable>
+      ),
+      headerRight: () => (
+        <Pressable
+          onPress={() => saveRef.current()}
+          disabled={!isValid || isSaving}
+          className="px-4 py-1.5 rounded-lg"
+          style={{ backgroundColor: isValid && !isSaving ? colors.go : colors.textMuted, opacity: isSaving ? 0.6 : 1 }}
+        >
+          <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 16 }}>
+            {isSaving ? 'Saving...' : 'Save'}
+          </Text>
+        </Pressable>
+      ),
+    });
+  }, [isEditing, navigation, colors, isValid, isSaving]);
+
   return (
     <GradientBackground>
       <ScrollView
@@ -217,12 +249,7 @@ export default function CocktailFormScreen() {
           <View className="flex-col gap-4">
             <View className="flex flex-row gap-4">
               {/* Image Box */}
-              <Pressable className="w-24 h-24 bg-g2/30 dark:bg-p3/60 rounded-lg flex items-center justify-center border border-g2/50 dark:border-p2/50">
-                <Ionicons name="add" size={24} color={colors.textSecondary} />
-                <Text className="text-xs text-g3 dark:text-g2 mt-1 font-bold">
-                  Add Photo
-                </Text>
-              </Pressable>
+              <ImagePlaceholder size="small" />
 
               {/* Cocktail Name */}
               <View className="flex-1 justify-center">
@@ -231,7 +258,6 @@ export default function CocktailFormScreen() {
                   value={name}
                   onChangeText={setName}
                   placeholder="e.g., Classic Margarita"
-                  size="large"
                 />
               </View>
             </View>
@@ -254,14 +280,25 @@ export default function CocktailFormScreen() {
             <View className="flex-row items-center justify-between">
               <ScreenTitle
                 title={`Ingredients (${ingredients.length})`}
-                variant="section"
+                variant="group"
               />
               <Pressable
-                onPress={() => router.push('/ingredient-selector')}
+                onPress={() => router.push({
+                  pathname: '/ingredient-selector',
+                  params: ingredients.length > 0
+                    ? { existingIngredientIds: JSON.stringify(ingredients.map(i => i.ingredientId)) }
+                    : undefined,
+                })}
                 className="flex-row items-center gap-2 px-3 py-2 bg-p1 rounded-lg"
               >
-                <Ionicons name="add" size={16} color="white" />
-                <Text className="text-white text-sm font-medium">Add</Text>
+                <Ionicons
+                  name={ingredients.length > 0 ? 'pencil' : 'add'}
+                  size={16}
+                  color="white"
+                />
+                <Text className="text-white text-sm font-medium">
+                  {ingredients.length > 0 ? 'Edit' : 'Add'}
+                </Text>
               </Pressable>
             </View>
 
@@ -288,30 +325,47 @@ export default function CocktailFormScreen() {
           {/* Divider */}
           <SectionDivider />
 
-          {/* Cost Analysis */}
+          {/* Pricing */}
           <View className="flex-col gap-3">
-            <ScreenTitle
-              title="Cost Analysis"
-              variant="section"
-            />
+            <ScreenTitle title="Pricing" variant="group" className="mb-1" />
 
             <TextInput
               label="Retail Price *"
               value={retailPrice}
               onChangeText={setRetailPrice}
-              placeholder="8.00"
+              placeholder="0.00"
               keyboardType="decimal-pad"
+              prefix="$"
             />
 
-            <MetricRow label="Total Cost:" value={formatCurrency(totalCost)} />
-            <MetricRow label="Retail Price:" value={formatCurrency(retailPriceNum)} />
-            <MetricRow label="Profit Margin:" value={formatCurrency(profitMargin)} valueColor="text-s22 dark:text-s21" />
+            <AiSuggestionRow label="Suggested Price" value={formatCurrency(calculateSuggestedPrice(totalCost, pourCostGoal / 100))} />
+          </View>
 
-            <View className="pt-3 border-t border-g2/40 dark:border-p2/50">
-              <PourCostPerformanceBar
-                pourCostPercentage={pourCostPercentage}
-              />
+          <SectionDivider />
+
+          {/* Cost Analysis */}
+          <View className="flex-col gap-3">
+            <ScreenTitle title="Cost Analysis" variant="group" className="mb-1" />
+
+            <View className="flex-col">
+              {[
+                { label: 'Total Cost', value: formatCurrency(totalCost) },
+                { label: 'Profit Margin', value: formatCurrency(profitMargin) },
+              ].map((row, index) => (
+                <View
+                  key={row.label}
+                  className="flex-row justify-between items-center px-3 py-3 rounded-sm"
+                  style={{ backgroundColor: index % 2 === 0 ? colors.surface : 'transparent' }}
+                >
+                  <Text className="text-base" style={{ color: colors.textSecondary }}>{row.label}</Text>
+                  <Text className="text-base" style={{ color: colors.text, fontWeight: '500' }}>{row.value}</Text>
+                </View>
+              ))}
             </View>
+
+            <PourCostPerformanceBar
+              pourCostPercentage={pourCostPercentage}
+            />
           </View>
 
           {/* Divider */}
@@ -319,7 +373,7 @@ export default function CocktailFormScreen() {
 
           {/* Details */}
           <View className="flex-col gap-4">
-            <ScreenTitle title="Details" variant="section" />
+            <ScreenTitle title="Details" variant="group" />
 
             <TextInput
               label="Description"
@@ -338,33 +392,20 @@ export default function CocktailFormScreen() {
             />
           </View>
 
-          {/* Save Button */}
-          <Button
-            variant="success"
-            size="large"
-            fullWidth
-            onPress={handleSave}
-            disabled={!isValid}
-            loading={isSaving}
-          >
-            {isEditing ? 'Update Cocktail' : 'Save Cocktail'}
-          </Button>
+          {/* Delete button at bottom (edit mode only) */}
+          {isEditing && (
+            <Pressable
+              onPress={handleDelete}
+              className="flex-row items-center justify-center gap-2 py-3"
+            >
+              <Ionicons name="trash-outline" size={18} color={colors.error} />
+              <Text style={{ color: colors.error, fontWeight: '500', fontSize: 16 }}>
+                Delete Cocktail
+              </Text>
+            </Pressable>
+          )}
 
-          <Text
-            className="text-center text-g3 dark:text-n1 text-xs my-4"
-            style={{}}
-          >
-            * Required fields
-          </Text>
-
-          {/* Action Sheet for delete (edit mode) */}
-          <ActionSheet
-            visible={showActions}
-            onClose={() => setShowActions(false)}
-            actions={[
-              { label: 'Delete Cocktail', icon: 'trash-outline', onPress: handleDelete, destructive: true },
-            ]}
-          />
+          <View className="h-8" />
         </View>
       </ScrollView>
     </GradientBackground>

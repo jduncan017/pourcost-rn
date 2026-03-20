@@ -6,6 +6,7 @@
  */
 
 import { View, Text, Pressable, ScrollView } from 'react-native';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { COCKTAIL_CATEGORIES } from '@/src/constants/appConstants';
 
 export interface ChipSelectorProps {
@@ -132,10 +133,12 @@ export default function ChipSelector({
     );
   };
 
+  const colors = useThemeColors();
+
   return (
     <View className={className}>
       {showLabel && label && (
-        <Text className="font-medium text-g4 dark:text-n1 mb-3">{label}</Text>
+        <Text className="text-lg mb-2" style={{ color: colors.textSecondary, fontWeight: '500' }}>{label}</Text>
       )}
       {renderChips()}
       {multiple && selectedOptions.length > 0 && (

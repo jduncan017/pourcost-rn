@@ -11,67 +11,77 @@ interface CustomTextInputProps extends Omit<TextInputProps, 'style'> {
   label?: string;
   error?: string;
   icon?: keyof typeof Ionicons.glyphMap;
+  prefix?: string;
   containerClassName?: string;
   inputClassName?: string;
   required?: boolean;
-  size?: 'default' | 'large';
 }
 
 export default function TextInput({
   label,
   error,
   icon,
+  prefix,
   containerClassName = '',
   inputClassName = '',
   required = false,
-  size = 'default',
   ...textInputProps
 }: CustomTextInputProps) {
   const colors = useThemeColors();
 
-  const textSize = size === 'large' ? 'text-xl' : 'text-base';
-  const labelSize = size === 'large' ? 'text-lg font-semibold' : 'text-base font-medium';
-
   return (
     <View className={containerClassName}>
-      {/* Label */}
       {label && (
-        <Text className={`${labelSize} tracking-tight text-g4 dark:text-n1 mb-2`}>
+        <Text
+          className="text-lg mb-2"
+          style={{ color: colors.textSecondary, fontWeight: '500' }}
+        >
           {label}
-          {required && <Text className="text-e3 ml-1">*</Text>}
+          {required && <Text style={{ color: colors.error }}> *</Text>}
         </Text>
       )}
 
-      {/* Input Container */}
       <View
-        className={`flex-row items-center rounded-lg px-3 py-2.5 border ${
-          error ? 'border-e2/50' : ''
-        }`}
-        style={
-          error
-            ? { backgroundColor: colors.error + '15', borderColor: colors.error + '50' }
-            : { backgroundColor: colors.colors.g2, borderColor: colors.border }
-        }
+        className="flex-row items-center rounded-lg p-4"
+        style={{
+          backgroundColor: error ? colors.errorSubtle : colors.surface,
+          borderWidth: 1,
+          borderColor: error ? colors.error + '60' : colors.border,
+        }}
       >
         {icon && (
           <Ionicons
             name={icon}
             size={20}
-            color={error ? colors.error : colors.textSecondary}
+            color={error ? colors.error : colors.textTertiary}
             style={{ marginRight: 10 }}
           />
         )}
 
+        {prefix && (
+          <Text style={{ color: colors.textTertiary, fontSize: 15, marginRight: 4 }}>
+            {prefix}
+          </Text>
+        )}
+
         <RNTextInput
-          className={`p-1 flex-1 leading-tight ${textSize} text-g4 dark:text-n1 ${inputClassName}`}
-          placeholderTextColor={colors.textSecondary}
-          style={{ color: colors.text }}
+          className={`flex-1 ${inputClassName}`}
+          placeholderTextColor={colors.textMuted}
+          style={{
+            color: colors.text,
+            fontSize: 15,
+            padding: 0,
+            margin: 0,
+          }}
           {...textInputProps}
         />
       </View>
 
-      {/* Error Message */}
-      {error && <Text className="text-e3 text-sm mt-1">{error}</Text>}
+      {error && (
+        <Text style={{ color: colors.error }} className="text-sm mt-1">
+          {error}
+        </Text>
+      )}
     </View>
   );
 }

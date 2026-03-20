@@ -1,9 +1,11 @@
 import { View } from 'react-native';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
 
 interface SectionDividerProps {
   className?: string;
 }
 
 export default function SectionDivider({ className = '' }: SectionDividerProps) {
-  return <View className={`h-px bg-g2/30 dark:bg-p2/50 ${className}`} />;
+  const colors = useThemeColors();
+  return <View style={{ height: 1, backgroundColor: colors.borderSubtle }} className={className} />;
 }

@@ -19,21 +19,21 @@ export default function EmptyState({
   onAction,
   className = '',
 }: EmptyStateProps) {
-  const { colors } = useThemeColors();
+  const theme = useThemeColors();
   return (
     <View className={`items-center justify-center py-12 px-6 ${className}`}>
       {/* Icon */}
       <View className="w-20 h-20 bg-g1/6 dark:bg-n1/90 rounded-full items-center justify-center mb-4">
-        <Ionicons name={icon} size={40} color={colors.g2} />
+        <Ionicons name={icon} size={40} color={theme.colors.g2} />
       </View>
 
       {/* Title */}
-      <Text className="text-xl font-semibold text-g4 dark:text-g1 mb-2 text-center">
+      <Text className="text-xl font-semibold mb-2 text-center" style={{ color: theme.text }}>
         {title}
       </Text>
 
       {/* Description */}
-      <Text className="text-g3 dark:text-g2 text-center mb-6 leading-relaxed">
+      <Text className="text-center mb-6 leading-relaxed" style={{ color: theme.textSecondary }}>
         {description}
       </Text>
 

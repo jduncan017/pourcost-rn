@@ -4,6 +4,7 @@
  */
 
 import { View, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import SwipeableCard from './SwipeableCard';
 import { SavedIngredient, volumeLabel } from '@/src/types/models';
 import {
@@ -14,6 +15,7 @@ import {
   formatPercentage,
 } from '@/src/services/calculation-service';
 import { useAppStore } from '@/src/stores/app-store';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
 
 interface IngredientListItemProps {
   ingredient: SavedIngredient;
@@ -35,6 +37,7 @@ export default function IngredientListItem({
   if (!ingredient) return null;
 
   const { defaultPourSize, defaultRetailPrice } = useAppStore();
+  const colors = useThemeColors();
 
   // Compute metrics on-demand
   const costPerOz = calculateCostPerOz(ingredient.productSize, ingredient.productCost);
@@ -51,19 +54,19 @@ export default function IngredientListItem({
 
     switch (sortBy) {
       case 'cost':
-        return { label: 'Cost/Oz', value: formatCurrency(costPerOz || 0), color: 'text-n1' };
+        return { label: 'Cost/Oz', value: formatCurrency(costPerOz || 0), color: colors.text };
       case 'pourCost':
         return {
           label: 'Pour Cost',
           value: formatPercentage(pourCostPercentage || 0),
           color: (pourCostPercentage || 0) <= 20
-            ? 'text-s21'
-            : (pourCostPercentage || 0) <= 25
-              ? 'text-s12'
-              : 'text-e1',
+            ? colors.success
+            : (pourCostPercentage || 0) <= 28
+              ? colors.warning
+              : colors.error,
         };
       case 'margin':
-        return { label: 'Margin', value: formatCurrency(pourCostMargin || 0), color: 'text-n1' };
+        return { label: 'Margin', value: formatCurrency(pourCostMargin || 0), color: colors.text };
       default:
         return null;
     }
@@ -84,28 +87,31 @@ export default function IngredientListItem({
         {/* Left - Name & details */}
         <View className="flex-1">
           <Text
-            className="text-n1 text-base tracking-wide font-semibold"
+            className="text-base tracking-wide"
+            style={{ color: colors.text, fontWeight: '600' }}
             numberOfLines={1}
             ellipsizeMode="tail"
           >
             {ingredient.name || 'Unknown Ingredient'}
           </Text>
-          <Text className="text-n1/70 text-sm mt-0.5" numberOfLines={1}>
+          <Text className="text-sm mt-0.5" style={{ color: colors.textTertiary }} numberOfLines={1}>
             {ingredient.type || 'Unknown'} • {volumeLabel(ingredient.productSize)} • {formatCurrency(ingredient.productCost || 0)}
           </Text>
         </View>
 
-        {/* Right - Metric with left border accent */}
-        {highlight && (
-          <View className="border-l border-g2/20 pl-3.5 items-center">
-            <Text className="text-n1/80 text-sm">{highlight.label}</Text>
+        {/* Right - Metric or chevron */}
+        {highlight ? (
+          <View className="pl-3.5 items-center" style={{ borderLeftWidth: 1, borderLeftColor: colors.border }}>
+            <Text className="text-sm" style={{ color: colors.textTertiary }}>{highlight.label}</Text>
             <Text
-              className={`text-base ${highlight.color}`}
-              style={{ fontWeight: '700' }}
+              className="text-base"
+              style={{ fontWeight: '700', color: highlight.color }}
             >
               {highlight.value}
             </Text>
           </View>
+        ) : (
+          <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
         )}
       </View>
     </SwipeableCard>

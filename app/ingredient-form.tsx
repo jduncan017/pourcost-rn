@@ -1,9 +1,10 @@
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { Ionicons } from '@expo/vector-icons';
 import Dropdown from '@/src/components/ui/Dropdown';
+import Toggle from '@/src/components/ui/Toggle';
 import TextInput from '@/src/components/ui/TextInput';
 import ChipSelector from '@/src/components/ui/ChipSelector';
 import Button from '@/src/components/ui/Button';
@@ -14,6 +15,7 @@ import ActionSheet from '@/src/components/ui/ActionSheet';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
+import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
 import { INGREDIENT_TYPES, PRODUCT_SIZES, INITIAL_PRODUCT_SIZE, type IngredientType } from '@/src/constants/appConstants';
 import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
 import { calculateCostPerOz, calculateCostPerPour, calculateSuggestedPrice, formatCurrency } from '@/src/services/calculation-service';
@@ -33,18 +35,6 @@ export default function IngredientFormScreen() {
   // Check if we're editing an existing ingredient
   const isEditing = Boolean(params.id);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: isEditing ? 'Edit Ingredient' : 'Create Ingredient',
-      headerRight: isEditing
-        ? () => (
-            <Pressable onPress={() => setShowActions(true)} className="p-2">
-              <Ionicons name="ellipsis-horizontal" size={22} color={colors.text} />
-            </Pressable>
-          )
-        : undefined,
-    });
-  }, [isEditing, navigation, colors.text]);
   const ingredientId = params.id as string;
 
   // Form state
@@ -128,6 +118,7 @@ export default function IngredientFormScreen() {
 
   const { addIngredient, updateIngredient, deleteIngredient } = useIngredientsStore();
   const [isSaving, setIsSaving] = useState(false);
+  const saveRef = useRef<() => void>(() => {});
 
   // Handle save
   const handleSave = async () => {
@@ -177,6 +168,32 @@ export default function IngredientFormScreen() {
     );
   };
 
+  saveRef.current = handleSave;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: isEditing ? 'Edit Ingredient' : 'Create Ingredient',
+      headerLeft: () => (
+        <Pressable onPress={() => router.back()} className="flex-row items-center gap-1 p-2">
+          <Ionicons name="arrow-back" size={22} color={colors.text} />
+          <Text style={{ color: colors.textSecondary, fontSize: 16 }}>Cancel</Text>
+        </Pressable>
+      ),
+      headerRight: () => (
+        <Pressable
+          onPress={() => saveRef.current()}
+          disabled={!isValid || isSaving}
+          className="px-4 py-1.5 rounded-lg"
+          style={{ backgroundColor: isValid && !isSaving ? colors.go : colors.textMuted, opacity: isSaving ? 0.6 : 1 }}
+        >
+          <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 16 }}>
+            {isSaving ? 'Saving...' : 'Save'}
+          </Text>
+        </Pressable>
+      ),
+    });
+  }, [isEditing, navigation, colors, isValid, isSaving]);
+
   return (
     <GradientBackground>
       <ScrollView className="FormScroll flex-1">
@@ -187,7 +204,6 @@ export default function IngredientFormScreen() {
             value={name}
             onChangeText={setName}
             placeholder="e.g., Vodka (Premium), Simple Syrup"
-            size="large"
           />
 
           {/* Type */}
@@ -229,33 +245,18 @@ export default function IngredientFormScreen() {
                   setProductCost(price);
                 }
               }}
-              placeholder="25.00"
+              placeholder="0.00"
               keyboardType="decimal-pad"
+              prefix="$"
             />
 
-            {/* Not for sale checkbox */}
-            <View className="flex-row items-center gap-3">
-              <Pressable
-                onPress={() => setNotForSale(!notForSale)}
-                className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-                  notForSale
-                    ? 'bg-p1 border-p1'
-                    : 'bg-transparent border-g3 dark:border-g2'
-                }`}
-              >
-                {notForSale && (
-                  <Ionicons name="checkmark" size={16} color={colors.colors.n1} />
-                )}
-              </Pressable>
-              <View className="flex-1">
-                <Text className="text-g4 dark:text-n1" style={{ fontWeight: '500' }}>
-                  Not for sale
-                </Text>
-                <Text className="text-g3 dark:text-g2 text-xs mt-0.5">
-                  House-made items, garnishes, etc.
-                </Text>
-              </View>
-            </View>
+            {/* Not for sale toggle */}
+            <Toggle
+              value={notForSale}
+              onValueChange={setNotForSale}
+              label="Not for sale"
+              description="House-made items, garnishes, etc."
+            />
           </View>
 
           {/* Divider */}
@@ -263,19 +264,17 @@ export default function IngredientFormScreen() {
 
           {/* Cost Analysis */}
           <View className="flex-col gap-3">
-            <ScreenTitle title="Cost Analysis" variant="section" />
+            <ScreenTitle title="Cost Analysis" variant="group" />
 
             <MetricRow label="Cost per Oz:" value={`$${costPerOz.toFixed(3)}`} />
             <MetricRow label="Cost for 1.5oz:" value={formatCurrency(costFor15oz)} />
 
             {!notForSale && (
               <>
-                <MetricRow label="Suggested Retail:" value={formatCurrency(suggestedRetail)} />
+                <AiSuggestionRow label="Suggested Retail" value={`$${suggestedRetail.toFixed(2)}`} />
                 <MetricRow label="Margin:" value={formatCurrency(pourCostMargin)} />
 
-                <View className="pt-3 border-t border-g2/40 dark:border-p2/50">
-                  <PourCostPerformanceBar pourCostPercentage={pourCostPercentage} />
-                </View>
+                <PourCostPerformanceBar pourCostPercentage={pourCostPercentage} />
               </>
             )}
           </View>
@@ -292,30 +291,20 @@ export default function IngredientFormScreen() {
             multiline
           />
 
-          {/* Save Button */}
-          <Button
-            variant="success"
-            size="large"
-            fullWidth
-            onPress={handleSave}
-            disabled={!isValid}
-            loading={isSaving}
-          >
-            {isEditing ? 'Update Ingredient' : 'Save Ingredient'}
-          </Button>
+          {/* Delete button at bottom (edit mode only) */}
+          {isEditing && (
+            <Pressable
+              onPress={handleDelete}
+              className="flex-row items-center justify-center gap-2 py-3"
+            >
+              <Ionicons name="trash-outline" size={18} color={colors.error} />
+              <Text style={{ color: colors.error, fontWeight: '500', fontSize: 16 }}>
+                Delete Ingredient
+              </Text>
+            </Pressable>
+          )}
 
-          <Text className="text-center text-g3 dark:text-n1 text-xs mb-4">
-            * Required fields
-          </Text>
-
-          {/* Action Sheet for delete (edit mode) */}
-          <ActionSheet
-            visible={showActions}
-            onClose={() => setShowActions(false)}
-            actions={[
-              { label: 'Delete Ingredient', icon: 'trash-outline', onPress: handleDelete, destructive: true },
-            ]}
-          />
+          <View className="h-8" />
         </View>
       </ScrollView>
     </GradientBackground>
