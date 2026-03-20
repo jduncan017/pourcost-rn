@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, Modal, ScrollView } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
+import BottomSheet from './BottomSheet';
 
 export interface DropdownOption<T = any> {
   value: T;
@@ -28,6 +30,7 @@ export default function Dropdown<T = any>({
   className = '',
 }: DropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
+  const colors = useThemeColors();
 
   const selectedOption = options.find((option) => option.value === value);
   const displayValue = selectedOption?.label || placeholder;
@@ -39,87 +42,95 @@ export default function Dropdown<T = any>({
 
   return (
     <View className={`${className}`}>
-      {/* Label and Value */}
+      {/* Label */}
       <View className="flex-row justify-between items-center mb-3">
         <Text className="text-base font-medium text-g4 dark:text-n1">
           {label}
         </Text>
       </View>
 
-      {/* Dropdown Button */}
+      {/* Trigger Button */}
       <Pressable
         onPress={() => !disabled && setIsOpen(true)}
         disabled={disabled}
-        className={`bg-n1/80 dark:bg-g1 border border-g2/50 rounded-lg p-4 flex-row justify-between items-center ${
-          disabled ? 'bg-g1/60 opacity-50' : 'active:bg-n1'
+        className={`rounded-lg p-4 flex-row justify-between items-center border ${
+          disabled ? 'opacity-50' : 'active:opacity-80'
         }`}
+        style={{
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+        }}
       >
         <Text
-          className={`font-medium ${selectedOption ? 'text-g4' : 'text-g3'}`}
+          className={`font-medium ${
+            selectedOption ? 'text-g4 dark:text-n1' : 'text-g3 dark:text-g2'
+          }`}
         >
           {displayValue}
         </Text>
-        <Ionicons
-          name="chevron-down"
-          size={20}
-          color={disabled ? '#9CA3AF' : '#6B7280'}
-        />
+        <Ionicons name="chevron-down" size={20} color={colors.textSecondary} />
       </Pressable>
 
-      {/* Dropdown Modal */}
-      <Modal
+      {/* Bottom Sheet */}
+      <BottomSheet
         visible={isOpen}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setIsOpen(false)}
+        onClose={() => setIsOpen(false)}
+        title={label}
       >
-        <Pressable
-          className="flex-1 bg-p4/90 bg-opacity-50 justify-center items-center"
-          onPress={() => setIsOpen(false)}
-        >
-          <View className="bg-n1 dark:bg-g1 rounded-xl mx-4 max-h-96 w-80">
-            <View className="p-4 border-b border-g/50 dark:border-g2/50">
-              <Text className="text-xl font-bold text-g4 text-center">
-                {label}
-              </Text>
-            </View>
-
-            <ScrollView className="max-h-80">
-              {options.map((option, index) => (
+        <View className="pb-4">
+          {options.map((option, index) => {
+            const isSelected = option.value === value;
+            return (
+              <View key={`${option.label}-${index}`}>
+                {index > 0 && (
+                  <View className="h-px mx-4" style={{ backgroundColor: colors.border + '40' }} />
+                )}
                 <Pressable
-                  key={`${option.value}-${index}`}
                   onPress={() => handleSelect(option.value)}
-                  className={`p-4 flex-row justify-between items-center border-b border-g1/40 dark:border-g2/20 ${
-                    option.value === value ? 'bg-p1/20' : 'active:bg-n1'
+                  className={`px-4 py-3 flex-row justify-between items-center ${
+                    isSelected ? '' : 'active:opacity-80'
                   }`}
+                  style={
+                    isSelected
+                      ? { backgroundColor: colors.accent + '15' }
+                      : undefined
+                  }
                 >
-                  <View className="flex-1">
+                <View className="flex-1 mr-3">
+                  <Text
+                    className={`font-medium tracking-wider ${
+                      isSelected
+                        ? 'text-p1 dark:text-s11'
+                        : 'text-g4 dark:text-n1'
+                    }`}
+                  >
+                    {option.label}
+                  </Text>
+                  {option.sublabel && (
                     <Text
-                      className={`font-medium tracking-wider ${
-                        option.value === value ? 'text-p3' : 'text-g4'
+                      className={`text-sm mt-1 ${
+                        isSelected
+                          ? 'text-p1/70 dark:text-s11/70'
+                          : 'text-g3 dark:text-g2'
                       }`}
                     >
-                      {option.label}
+                      {option.sublabel}
                     </Text>
-                    {option.sublabel && (
-                      <Text
-                        className={`text-sm mt-1 ${
-                          option.value === value ? 'text-p2' : 'text-g3'
-                        }`}
-                      >
-                        {option.sublabel}
-                      </Text>
-                    )}
-                  </View>
-                  {option.value === value && (
-                    <Ionicons name="checkmark" size={20} color="#2563EB" />
                   )}
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
-        </Pressable>
-      </Modal>
+                </View>
+                {isSelected && (
+                  <Ionicons
+                    name="checkmark"
+                    size={20}
+                    color={colors.accent}
+                  />
+                )}
+              </Pressable>
+              </View>
+            );
+          })}
+        </View>
+      </BottomSheet>
     </View>
   );
 }

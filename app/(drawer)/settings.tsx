@@ -1,326 +1,347 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Alert, Switch } from 'react-native';
-import { useAppStore } from '@/src/stores/app-store';
+import { useState, useCallback, useRef } from 'react';
+import { View, Text, ScrollView, Pressable, Image, Alert, Linking } from 'react-native';
+import { useAppStore, ThemeMode, IngredientOrderPref } from '@/src/stores/app-store';
 import { useTheme, useThemeColors } from '@/src/contexts/ThemeContext';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import CustomSlider from '@/src/components/ui/CustomSlider';
-import Modal from '@/src/components/ui/Modal';
-import Card from '@/src/components/ui/Card';
-import GradientBackground from '@/src/components/ui/GradientBackground';
 import SettingsCard from '@/src/components/ui/SettingsCard';
+import GradientBackground from '@/src/components/ui/GradientBackground';
+import { US_POUR_SIZES } from '@/src/constants/appConstants';
+import { volumeLabel, Volume } from '@/src/types/models';
 
-/**
- * Settings screen
- * Manages app preferences, currency, measurements, account settings, and business logic
- */
+// Pour size options: common bartending pours (0.5oz - 3oz fractional only)
+const POUR_SIZE_OPTIONS = US_POUR_SIZES.filter((v) => {
+  if (v.kind !== 'fractionalOunces') return false;
+  const oz = v.numerator / v.denominator;
+  return oz >= 0.5 && oz <= 3;
+});
+
+const pourSizeDropdownOptions = POUR_SIZE_OPTIONS.map((v) => ({
+  value: JSON.stringify(v),
+  label: volumeLabel(v),
+}));
+
+// Pour cost goal options (10% - 50% in 1% steps)
+const pourCostDropdownOptions = Array.from({ length: 41 }, (_, i) => {
+  const val = 10 + i;
+  return { value: val, label: `${val}%` };
+});
+
+// Ingredient order options
+const orderDropdownOptions: { value: IngredientOrderPref; label: string }[] = [
+  { value: 'manual', label: 'Manual' },
+  { value: 'most-to-least', label: 'Most → Least' },
+  { value: 'least-to-most', label: 'Least → Most' },
+  { value: 'cost-high-low', label: 'Cost High → Low' },
+];
+
+// Section header
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <Text className="text-xs font-semibold tracking-widest uppercase text-g3 dark:text-g2 mb-2 px-1">
+      {title}
+    </Text>
+  );
+}
+
 export default function SettingsScreen() {
-  const { measurementSystem, setMeasurementSystem, baseCurrency } =
-    useAppStore();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const {
+    pourCostGoal,
+    setPourCostGoal,
+    defaultPourSize,
+    setDefaultPourSize,
+    defaultRetailPrice,
+    setDefaultRetailPrice,
+    ingredientOrderPref,
+    setIngredientOrderPref,
+    displayName,
+    setDisplayName,
+    saveProfile,
+  } = useAppStore();
+
+  const { isDarkMode, themeMode, setThemeMode } = useTheme();
   const colors = useThemeColors();
+  const { user, signOut } = useAuth();
 
-  // Local state for various settings
-  const [globalPourCostGoal, setGlobalPourCostGoal] = useState(20); // Default 20%
-  const [notifications, setNotifications] = useState(true);
-  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState(baseCurrency);
+  const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Currency options
-  const currencies = [
-    { code: 'USD', name: 'US Dollar', symbol: '$' },
-    { code: 'EUR', name: 'Euro', symbol: '€' },
-    { code: 'GBP', name: 'British Pound', symbol: '£' },
-    { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$' },
-    { code: 'AUD', name: 'Australian Dollar', symbol: 'A$' },
-    { code: 'JPY', name: 'Japanese Yen', symbol: '¥' },
-  ];
+  const debouncedSave = useCallback(() => {
+    if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => { saveProfile(); }, 1500);
+  }, [saveProfile]);
 
-  const toggleMeasurementSystem = () => {
-    setMeasurementSystem(measurementSystem === 'US' ? 'Metric' : 'US');
-  };
+  // Current display values
+  const currentPourSizeLabel = volumeLabel(defaultPourSize);
+  const currentOrderLabel = orderDropdownOptions.find((o) => o.value === ingredientOrderPref)?.label ?? 'Manual';
+  const themeLabel = themeMode === 'dark' ? 'Dark' : themeMode === 'light' ? 'Light' : 'Auto';
 
-  const handleCurrencyChange = (currency: string) => {
-    setSelectedCurrency(currency);
-    // In real app, would update the store
-    Alert.alert('Currency Updated', `Base currency changed to ${currency}`);
-    setShowCurrencyModal(false);
-  };
+  // Dropdown states
+  const [showPourCostPicker, setShowPourCostPicker] = useState(false);
+  const [showPourSizePicker, setShowPourSizePicker] = useState(false);
+  const [showRetailPricePicker, setShowRetailPricePicker] = useState(false);
+  const [showOrderPicker, setShowOrderPicker] = useState(false);
+  const [showThemePicker, setShowThemePicker] = useState(false);
 
-  const handleExportData = () => {
-    Alert.alert(
-      'Export Data',
-      'Would export all ingredients and cocktails to JSON file'
-    );
-  };
+  // Retail price options
+  const retailPriceOptions = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 25, 30].map((v) => ({
+    value: v,
+    label: `$${v.toFixed(2)}`,
+  }));
 
-  const handleImportData = () => {
-    Alert.alert('Import Data', 'Would open file picker to import data');
-  };
-
-  const handleBackupData = () => {
-    Alert.alert('Backup Data', 'Would backup data to cloud storage');
-  };
-
-  const handleRestoreData = () => {
-    Alert.alert('Restore Data', 'Would restore data from cloud backup');
-  };
-
-  const handleResetApp = () => {
-    Alert.alert(
-      'Reset App Data',
-      'This will delete all ingredients, cocktails, and settings. This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: () =>
-            Alert.alert('Reset Complete', 'App data has been reset'),
-        },
-      ]
-    );
+  const handleSignOut = () => {
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Sign Out', style: 'destructive', onPress: signOut },
+    ]);
   };
 
   return (
     <GradientBackground>
       <ScrollView className="flex-1">
-        <View className="p-4">
-          {/* Header */}
-          <View className="mb-6">
-            <Text className="text-g3 dark:text-g1 text-xl w-full pb-4 border-b border-g2">
-              Customize your PourCost experience
+        <View className="p-4 pt-6 flex-col gap-6">
+          {/* App Identity */}
+          <View className="items-center py-4">
+            <Image
+              source={
+                isDarkMode
+                  ? require('@/assets/images/PC-Logo-Gold.png')
+                  : require('@/assets/images/PC-Logo-Dark-Gradient.png')
+              }
+              className="w-[160px] h-[40px] mb-2"
+              resizeMode="contain"
+            />
+            <Text className="text-g3 dark:text-g2 text-sm">
+              Professional cocktail costing
             </Text>
           </View>
 
-          {/* Measurement System */}
-          <Card className="mb-4">
-            <Text className="text-lg font-semibold text-g4 dark:text-n1 mb-3">
-              Measurement System
-            </Text>
-            <View className="flex-row items-center justify-between">
-              <View>
-                <Text className="font-medium text-g4 dark:text-n1">
-                  Current: {measurementSystem}
-                </Text>
-                <Text className="text-sm text-g3 dark:text-n1">
-                  {measurementSystem === 'US'
-                    ? 'Fluid ounces, cups, etc.'
-                    : 'Milliliters, liters, etc.'}
-                </Text>
-              </View>
-              <Pressable
-                onPress={toggleMeasurementSystem}
-                className="bg-p2 px-4 py-2 rounded-lg active:bg-p3"
-              >
-                <Text className="text-white font-medium">
-                  Switch to {measurementSystem === 'US' ? 'Metric' : 'US'}
-                </Text>
-              </Pressable>
-            </View>
-          </Card>
+          {/* Divider */}
+          <View className="h-px bg-g2/30 dark:bg-p2/50" />
 
-          {/* Business Settings */}
-          <Card className="mb-4">
-            <Text className="text-lg font-semibold text-g4 dark:text-n1 mb-4">
-              Business Settings
-            </Text>
-
-            <View>
-              <CustomSlider
-                label="Global Pour Cost Goal"
-                minValue={10}
-                maxValue={40}
-                value={globalPourCostGoal}
-                onValueChange={setGlobalPourCostGoal}
-                unit="%"
-                step={0.5}
-              />
-              <Text className="text-xs text-g3 dark:text-n1 mt-2">
-                Target pour cost percentage for suggested retail pricing
-              </Text>
-            </View>
-          </Card>
-
-          {/* Currency */}
-          <Card className="mb-4">
-            <Text className="text-lg font-semibold text-g4 dark:text-n1 mb-3">
-              Currency
-            </Text>
-            <View className="flex-row items-center justify-between">
-              <View>
-                <Text className="font-medium text-g4 dark:text-n1">
-                  Base Currency: {selectedCurrency}
-                </Text>
-                <Text className="text-sm text-g3 dark:text-n1">
-                  All prices will be displayed in this currency
-                </Text>
-              </View>
-              <Pressable
-                onPress={() => setShowCurrencyModal(true)}
-                className="bg-p1 px-4 py-2 rounded-lg active:bg-p2 flex-row items-center gap-2"
-              >
-                <Ionicons name="globe" size={16} color="white" />
-                <Text className="text-white font-medium">Change</Text>
-              </Pressable>
-            </View>
-          </Card>
-
-          {/* App Preferences */}
-          <Card className="mb-4">
-            <Text className="text-lg font-semibold text-g4 dark:text-n1 mb-4">
-              App Preferences
-            </Text>
-
-            <View className="PreferencesContainer gap-4">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1">
-                  <Text className="font-medium text-g4 dark:text-n1">
-                    Push Notifications
-                  </Text>
-                  <Text className="text-sm text-g3 dark:text-n1">
-                    Receive updates and reminders
-                  </Text>
-                </View>
-                <Switch
-                  value={notifications}
-                  onValueChange={setNotifications}
-                  trackColor={{ false: '#E5E7EB', true: '#3B82F6' }}
-                  thumbColor={notifications ? '#FFFFFF' : '#9CA3AF'}
-                />
-              </View>
-
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1">
-                  <Text className="font-medium text-g4 dark:text-n1">
-                    Dark Mode
-                  </Text>
-                  <Text className="text-sm text-g3 dark:text-n1">
-                    Use dark theme throughout the app
-                  </Text>
-                </View>
-                <Switch
-                  value={isDarkMode}
-                  onValueChange={toggleTheme}
-                  trackColor={{ false: '#E5E7EB', true: '#3B82F6' }}
-                  thumbColor={isDarkMode ? '#FFFFFF' : '#9CA3AF'}
-                />
-              </View>
-            </View>
-          </Card>
-
-          {/* Data Management */}
-          <Card className="mb-4">
-            <Text className="text-lg font-semibold text-g4 dark:text-n1 mb-4">
-              Data Management
-            </Text>
-
-            <View className="flex flex-col gap-3">
-              <SettingsCard
-                title="Export Data"
-                description="Save your ingredients and cocktails to file"
-                iconName="download"
-                iconColor="#3B82F6"
-                onPress={handleExportData}
-              />
-
-              <SettingsCard
-                title="Import Data"
-                description="Load data from backup file"
-                iconName="cloud-upload"
-                iconColor="#10B981"
-                onPress={handleImportData}
-              />
-
-              <SettingsCard
-                title="Cloud Backup"
-                description="Backup data to cloud storage"
-                iconName="cloud"
-                iconColor="#8B5CF6"
-                onPress={handleBackupData}
-              />
-
-              <SettingsCard
-                title="Restore from Cloud"
-                description="Restore data from cloud backup"
-                iconName="refresh"
-                iconColor="#F59E0B"
-                onPress={handleRestoreData}
-              />
-            </View>
-          </Card>
-
-          {/* Danger Zone */}
-          <Card className="mb-4">
-            <Text className="text-lg font-semibold text-e1 mb-3">
-              Danger Zone
-            </Text>
+          {/* Calculations */}
+          <View className="flex-col gap-3">
+            <SectionHeader title="Calculations" />
             <SettingsCard
-              title="Reset App Data"
-              description="Delete all ingredients, cocktails, and settings"
-              iconName="warning"
-              iconColor="#DC2626"
-              onPress={handleResetApp}
-              variant="danger"
+              title="Pour Cost Goal"
+              description={`${pourCostGoal}%`}
+              iconName="analytics-outline"
+              iconColor={colors.accent}
+              onPress={() => setShowPourCostPicker(true)}
             />
-          </Card>
+            <SettingsCard
+              title="Default Pour Size"
+              description={currentPourSizeLabel}
+              iconName="water-outline"
+              iconColor={colors.accent}
+              onPress={() => setShowPourSizePicker(true)}
+            />
+            <SettingsCard
+              title="Default Retail Price"
+              description={`$${defaultRetailPrice.toFixed(2)}`}
+              iconName="pricetag-outline"
+              iconColor={colors.accent}
+              onPress={() => setShowRetailPricePicker(true)}
+            />
+            <SettingsCard
+              title="Ingredient Order"
+              description={currentOrderLabel}
+              iconName="swap-vertical-outline"
+              iconColor={colors.accent}
+              onPress={() => setShowOrderPicker(true)}
+            />
+          </View>
 
-          {/* Currency Selection Modal */}
-          <Modal
-            visible={showCurrencyModal}
-            onClose={() => setShowCurrencyModal(false)}
-            title="Select Currency"
-            size="medium"
-          >
-            <View className="flex flex-col gap-3">
-              {currencies.map((currency) => (
-                <Pressable
-                  key={currency.code}
-                  onPress={() => handleCurrencyChange(currency.code)}
-                  className="CurrencyOption p-4 rounded-xl border w-[75vw]"
-                  style={{
-                    backgroundColor:
-                      selectedCurrency === currency.code
-                        ? colors.accent + '20'
-                        : colors.surface,
-                    borderColor:
-                      selectedCurrency === currency.code
-                        ? colors.accent
-                        : colors.border,
-                  }}
-                >
-                  <View className="CurrencyContent flex-row items-center justify-between">
-                    <View className="CurrencyInfo flex-row items-center gap-4">
-                      <View
-                        className="CurrencySymbolBadge w-12 h-12 rounded-full items-center justify-center"
-                        style={{ backgroundColor: colors.accent + '20' }}
-                      >
-                        <Text className="CurrencySymbol text-xl font-semibold text-p1 dark:text-s11">
-                          {currency.symbol}
-                        </Text>
-                      </View>
-                      <View className="CurrencyDetails">
-                        <Text className="CurrencyName font-semibold text-base text-g4 dark:text-n1">
-                          {currency.name}
-                        </Text>
-                        <Text className="CurrencyCode text-sm text-g3 dark:text-n1">
-                          {currency.code}
-                        </Text>
-                      </View>
-                    </View>
-                    {selectedCurrency === currency.code && (
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={24}
-                        color={colors.accent}
-                      />
-                    )}
-                  </View>
-                </Pressable>
-              ))}
-            </View>
-          </Modal>
+          {/* Divider */}
+          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+
+          {/* Appearance */}
+          <View className="flex-col gap-3">
+            <SectionHeader title="Appearance" />
+            <SettingsCard
+              title="Theme"
+              description={themeLabel}
+              iconName={themeMode === 'dark' ? 'moon-outline' : themeMode === 'light' ? 'sunny-outline' : 'phone-portrait-outline'}
+              iconColor={colors.accent}
+              onPress={() => setShowThemePicker(true)}
+            />
+          </View>
+
+          {/* Divider */}
+          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+
+          {/* Account */}
+          <View className="flex-col gap-3">
+            <SectionHeader title="Account" />
+            {user ? (
+              <>
+                <SettingsCard
+                  title="Display Name"
+                  description={displayName || user?.user_metadata?.full_name || 'Not set'}
+                  iconName="person-outline"
+                  iconColor={colors.textSecondary}
+                />
+                <SettingsCard
+                  title="Sign Out"
+                  description={user.email ?? 'Signed in'}
+                  iconName="log-out-outline"
+                  iconColor={colors.colors.e1}
+                  onPress={handleSignOut}
+                />
+              </>
+            ) : (
+              <SettingsCard
+                title="Sign In"
+                description="Sync your data across devices"
+                iconName="person-outline"
+                iconColor={colors.accent}
+                onPress={() => {}}
+              />
+            )}
+          </View>
+
+          {/* Divider */}
+          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+
+          {/* Support */}
+          <View className="flex-col gap-3">
+            <SectionHeader title="Support" />
+            <SettingsCard
+              title="Help & Support"
+              description="Get help using PourCost"
+              iconName="help-circle-outline"
+              iconColor={colors.textSecondary}
+              onPress={() => Linking.openURL('mailto:support@pourcost.com')}
+            />
+            <SettingsCard
+              title="Suggest a Feature"
+              description="Tell us what you'd like to see"
+              iconName="bulb-outline"
+              iconColor={colors.textSecondary}
+              onPress={() => Linking.openURL('mailto:feedback@pourcost.com?subject=Feature%20Suggestion')}
+            />
+            <SettingsCard
+              title="Terms & Privacy"
+              description="Read our terms and privacy policy"
+              iconName="document-text-outline"
+              iconColor={colors.textSecondary}
+              onPress={() => {}}
+            />
+            <SettingsCard
+              title="Version"
+              description="2.0.0"
+              iconName="information-circle-outline"
+              iconColor={colors.textSecondary}
+            />
+          </View>
+
+          {/* Spacer */}
+          <View className="h-8" />
         </View>
       </ScrollView>
+
+      {/* Pour Cost Goal Picker */}
+      {showPourCostPicker && (
+        <PickerSheet
+          title="Pour Cost Goal"
+          options={pourCostDropdownOptions}
+          value={pourCostGoal}
+          onSelect={(val) => { setPourCostGoal(val); debouncedSave(); }}
+          onClose={() => setShowPourCostPicker(false)}
+        />
+      )}
+
+      {/* Pour Size Picker */}
+      {showPourSizePicker && (
+        <PickerSheet
+          title="Default Pour Size"
+          options={pourSizeDropdownOptions}
+          value={JSON.stringify(defaultPourSize)}
+          onSelect={(val) => { try { setDefaultPourSize(JSON.parse(val) as Volume); debouncedSave(); } catch {} }}
+          onClose={() => setShowPourSizePicker(false)}
+        />
+      )}
+
+      {/* Retail Price Picker */}
+      {showRetailPricePicker && (
+        <PickerSheet
+          title="Default Retail Price"
+          options={retailPriceOptions}
+          value={defaultRetailPrice}
+          onSelect={(val) => { setDefaultRetailPrice(val); debouncedSave(); }}
+          onClose={() => setShowRetailPricePicker(false)}
+        />
+      )}
+
+      {/* Order Picker */}
+      {showOrderPicker && (
+        <PickerSheet
+          title="Ingredient Order"
+          options={orderDropdownOptions}
+          value={ingredientOrderPref}
+          onSelect={(val) => { setIngredientOrderPref(val as IngredientOrderPref); debouncedSave(); }}
+          onClose={() => setShowOrderPicker(false)}
+        />
+      )}
+
+      {/* Theme Picker */}
+      {showThemePicker && (
+        <PickerSheet
+          title="Theme"
+          options={[
+            { value: 'dark' as ThemeMode, label: 'Dark' },
+            { value: 'light' as ThemeMode, label: 'Light' },
+            { value: 'auto' as ThemeMode, label: 'Auto (System)' },
+          ]}
+          value={themeMode}
+          onSelect={(val) => { setThemeMode(val as ThemeMode); debouncedSave(); }}
+          onClose={() => setShowThemePicker(false)}
+        />
+      )}
     </GradientBackground>
+  );
+}
+
+// Inline picker using BottomSheet directly
+import BottomSheet from '@/src/components/ui/BottomSheet';
+
+function PickerSheet<T>({
+  title,
+  options,
+  value,
+  onSelect,
+  onClose,
+}: {
+  title: string;
+  options: { value: T; label: string }[];
+  value: T;
+  onSelect: (value: T) => void;
+  onClose: () => void;
+}) {
+  const colors = useThemeColors();
+  return (
+    <BottomSheet visible onClose={onClose} title={title}>
+      <View className="pb-4">
+        {options.map((option, index) => {
+          const isSelected = option.value === value;
+          return (
+            <View key={`${option.label}-${index}`}>
+              {index > 0 && (
+                <View className="h-px mx-4" style={{ backgroundColor: colors.border + '40' }} />
+              )}
+              <Pressable
+                onPress={() => { onSelect(option.value); onClose(); }}
+                className={`px-4 py-3 flex-row justify-between items-center ${isSelected ? '' : 'active:opacity-80'}`}
+                style={isSelected ? { backgroundColor: colors.accent + '15' } : undefined}
+              >
+                <Text className={`text-base font-medium ${isSelected ? 'text-p1 dark:text-s11' : 'text-g4 dark:text-n1'}`}>
+                  {option.label}
+                </Text>
+                {isSelected && <Ionicons name="checkmark" size={20} color={colors.accent} />}
+              </Pressable>
+            </View>
+          );
+        })}
+      </View>
+    </BottomSheet>
   );
 }

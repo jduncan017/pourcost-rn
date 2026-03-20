@@ -1,57 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Image } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useAppStore } from '@/src/stores/app-store';
+import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
+import { useAppStore, HARDCODED_BASE_CURRENCY } from '@/src/stores/app-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
-import { useThemeColors, themeColors } from '@/src/contexts/ThemeContext';
+import { themeColors, useThemeColors } from '@/src/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '@/src/components/ui/Card';
+import ActionSheet from '@/src/components/ui/ActionSheet';
 import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { getCurrencySymbol } from '@/src/utils/currency';
-import BackButton from '@/src/components/ui/BackButton';
 import { FeedbackService } from '@/src/services/feedback-service';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { CocktailCategory } from '@/src/constants/appConstants';
-
-// Enhanced cocktail interface
-interface CocktailIngredient {
-  id: string;
-  name: string;
-  amount: number; // oz
-  cost: number; // cost for this amount
-  type: 'Beer' | 'Wine' | 'Spirit' | 'Liquor' | 'Prepared' | 'Garnish';
-}
-
-interface Cocktail {
-  id: string;
-  name: string;
-  description?: string;
-  category: CocktailCategory;
-  ingredients: CocktailIngredient[];
-  totalCost: number;
-  suggestedPrice: number;
-  pourCostPercentage: number;
-  profitMargin: number;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { volumeLabel, volumeToOunces } from '@/src/types/models';
+import { calculateCocktailMetrics, calculatePourCostPercentage } from '@/src/services/calculation-service';
 
 /**
  * Cocktail detail screen
  * Shows comprehensive cocktail data with full-screen layout
  */
 export default function CocktailDetailScreen() {
-  const insets = useSafeAreaInsets();
-  const { baseCurrency } = useAppStore();
-  const colors = useThemeColors();
+  const baseCurrency = HARDCODED_BASE_CURRENCY;
+  const { defaultRetailPrice } = useAppStore();
   const router = useRouter();
+  const navigation = useNavigation();
+  const colors = useThemeColors();
   const params = useLocalSearchParams();
   const [showActions, setShowActions] = useState(false);
   const [detailAnalysisVisible, setDetailAnalysisVisible] = useState(true);
@@ -95,62 +72,49 @@ export default function CocktailDetailScreen() {
   if (!cocktail) {
     return (
       <GradientBackground>
-        <View
-          style={{ paddingTop: insets.top }}
-          className="flex-1 items-center justify-center"
-        >
+        <View className="flex-1 items-center justify-center">
           <Text className="text-n1 text-lg">Loading cocktail...</Text>
         </View>
       </GradientBackground>
     );
   }
 
-  // Convert cocktail to the expected interface format
-  const cocktailData: Cocktail = {
-    id: cocktail.id,
-    name: cocktail.name,
-    description: cocktail.description,
-    category: cocktail.category as any,
-    ingredients: cocktail.ingredients.map((ing) => ({
-      id: ing.id,
-      name: ing.name,
-      amount: ing.amount,
-      cost: ing.cost,
-      type: ing.type as any,
-    })),
-    totalCost: cocktail.totalCost,
-    suggestedPrice: cocktail.suggestedPrice,
-    pourCostPercentage: cocktail.pourCostPercentage,
-    profitMargin: cocktail.profitMargin,
-    notes: cocktail.notes,
-    // imagePath: cocktail.imagePath, // Add missing imagePath field - TypeScript error
-    createdAt:
-      cocktail.createdAt instanceof Date
-        ? cocktail.createdAt.toISOString()
-        : new Date().toISOString(),
-    updatedAt:
-      cocktail.updatedAt instanceof Date
-        ? cocktail.updatedAt.toISOString()
-        : new Date().toISOString(),
-  };
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: cocktail.name,
+      headerRight: () => (
+        <Pressable onPress={() => setShowActions(true)} className="p-2">
+          <Ionicons name="ellipsis-horizontal" size={22} color={colors.text} />
+        </Pressable>
+      ),
+    });
+  }, [cocktail.name, navigation, colors.text]);
+
+  // Compute metrics on-demand from ingredients
+  const metrics = calculateCocktailMetrics(cocktail.ingredients);
+  const retailPrice = cocktail.retailPrice ?? defaultRetailPrice;
 
   const handleEdit = () => {
     router.push({
       pathname: '/cocktail-form',
       params: {
         id: cocktail.id,
-        name: cocktailData.name,
-        description: cocktailData.description,
+        name: cocktail.name,
+        description: cocktail.description,
         category: cocktail.category,
-        notes: cocktailData.notes,
-        createdAt: cocktail.createdAt.toISOString(),
+        notes: cocktail.notes,
+        retailPrice: cocktail.retailPrice?.toString(),
+        ingredients: JSON.stringify(cocktail.ingredients),
+        createdAt: cocktail.createdAt instanceof Date
+          ? cocktail.createdAt.toISOString()
+          : new Date(cocktail.createdAt).toISOString(),
       },
     });
   };
 
   const handleDelete = () => {
     FeedbackService.showDeleteConfirmation(
-      cocktailData.name,
+      cocktail.name,
       async () => {
         await deleteCocktail(cocktail.id);
         router.back();
@@ -197,70 +161,15 @@ export default function CocktailDetailScreen() {
 
   return (
     <GradientBackground>
-      {/* Header */}
-      <View
-        className="flex-row items-center justify-between px-4 pb-4"
-        style={{ paddingTop: insets.top + 16 }}
-      >
-        <View className="flex-row items-center gap-3">
-          <Pressable onPress={() => router.back()}>
-            <Ionicons name="menu" size={24} color={themeColors.n1} />
-          </Pressable>
-        </View>
-        <View className="flex-row items-center gap-2">
-          <Pressable onPress={() => setShowActions(!showActions)}>
-            <Ionicons name="share-outline" size={24} color={themeColors.n1} />
-          </Pressable>
-          <Pressable onPress={() => setShowActions(!showActions)}>
-            <Ionicons
-              name="ellipsis-horizontal"
-              size={24}
-              color={themeColors.n1}
-            />
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Action Menu Dropdown */}
-      {showActions && (
-        <>
-          <Pressable
-            className="absolute inset-0 z-40"
-            onPress={() => setShowActions(false)}
-          />
-          <View
-            className="absolute top-20 right-4 min-w-[120px] rounded-xl border shadow-lg z-50"
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-            }}
-          >
-            <Pressable
-              onPress={() => {
-                setShowActions(false);
-                handleEdit();
-              }}
-              className="p-4"
-            >
-              <Text className="text-xl font-medium text-g4 dark:text-n1">
-                Edit
-              </Text>
-            </Pressable>
-            <View className="h-px mx-3 bg-g2 dark:bg-p2" />
-            <Pressable
-              onPress={() => {
-                setShowActions(false);
-                handleDelete();
-              }}
-              className="p-4"
-            >
-              <Text className="text-xl font-medium text-red-600 dark:text-red-400">
-                Delete
-              </Text>
-            </Pressable>
-          </View>
-        </>
-      )}
+      {/* Action Sheet */}
+      <ActionSheet
+        visible={showActions}
+        onClose={() => setShowActions(false)}
+        actions={[
+          { label: 'Edit', icon: 'create-outline', onPress: handleEdit },
+          { label: 'Delete', icon: 'trash-outline', onPress: handleDelete, destructive: true },
+        ]}
+      />
 
       {/* Scrollable Content */}
       <ScrollView className="flex-1">
@@ -288,27 +197,16 @@ export default function CocktailDetailScreen() {
             {/* Cocktail Info */}
             <View className="flex-1 flex-col gap-2">
               <Text className="text-n1 text-2xl border-b border-g1 pb-2 font-semibold tracking-wider">
-                {cocktailData.name.toUpperCase()}
+                {cocktail.name.toUpperCase()}
               </Text>
               <Text className="text-n1/70 dark:text-g1 text-lg font-medium">
-                Menu Price: {currencySymbol}
-                {cocktailData.suggestedPrice.toFixed(2)}
+                Retail Price: {currencySymbol}
+                {retailPrice.toFixed(2)}
               </Text>
               <Text className="text-n1/70 dark:text-g1 text-lg font-medium">
-                Margin: {currencySymbol}
-                {cocktailData.profitMargin.toFixed(2)}
-              </Text>
-              <Text className="text-n1/70 dark:text-g1 text-lg font-medium">
-                ABV:{' '}
-                {cocktailData.ingredients
-                  .reduce((sum, ing) => sum + ing.amount, 0)
-                  .toFixed(1)}
-                oz
-              </Text>
-              <Text className="text-n1/70 dark:text-g1 text-lg font-medium">
-                Total Alcohol:{' '}
-                {cocktailData.ingredients
-                  .reduce((sum, ing) => sum + ing.amount, 0)
+                Total Volume:{' '}
+                {cocktail.ingredients
+                  .reduce((sum, ing) => sum + volumeToOunces(ing.pourSize), 0)
                   .toFixed(1)}
                 oz
               </Text>
@@ -342,60 +240,58 @@ export default function CocktailDetailScreen() {
 
           {/* Individual Ingredient Cards */}
           <View className="flex flex-col gap-3 mb-4">
-            {cocktailData.ingredients.map((ingredient) => (
-              <Card key={ingredient.id} variant="gradient">
-                {detailAnalysisVisible ? (
-                  /* Detailed View */
-                  <>
-                    <View className="flex-row items-center justify-between mb-2 pb-2 border-b border-g3">
+            {cocktail.ingredients.map((ingredient, index) => {
+              const pourOz = volumeToOunces(ingredient.pourSize);
+              const costPerOz = pourOz > 0 ? ingredient.cost / pourOz : 0;
+              return (
+                <Card key={ingredient.ingredientId + '-' + index} variant="gradient">
+                  {detailAnalysisVisible ? (
+                    /* Detailed View */
+                    <>
+                      <View className="flex-row items-center justify-between mb-2 pb-2 border-b border-g3">
+                        <Text
+                          className="text-n1 dark:text-n1 text-xl tracking-wide font-medium flex-1"
+                          numberOfLines={2}
+                        >
+                          {ingredient.name}
+                        </Text>
+                      </View>
+
+                      <View className="flex-row items-center justify-between">
+                        <Text className="text-n1/70 dark:text-n1/70 font-medium w-[30%]">
+                          {volumeLabel(ingredient.pourSize)}
+                        </Text>
+                        <Text className="text-n1/70 dark:text-n1/70 font-medium w-[30%]">
+                          {currencySymbol}
+                          {costPerOz.toFixed(2)}/oz
+                        </Text>
+                        <Text className="text-n1 dark:text-n1 font-medium">
+                          Total: {currencySymbol}
+                          {ingredient.cost.toFixed(2)}
+                        </Text>
+                      </View>
+                    </>
+                  ) : (
+                    /* Simple View - measurements on left */
+                    <View className="flex-row items-center gap-3">
+                      <Text className="text-n1/70 dark:text-n1/70 font-medium">
+                        {volumeLabel(ingredient.pourSize)}
+                      </Text>
                       <Text
-                        className="text-n1 dark:text-n1 text-xl tracking-wide font-medium flex-1"
+                        className="text-n1 dark:text-n1 text-base flex-1 font-medium"
                         numberOfLines={2}
                       >
                         {ingredient.name}
                       </Text>
-                      <Text className="text-n1/60 dark:text-n1/70 ml-2">
-                        {ingredient.type}
-                      </Text>
                     </View>
-
-                    <View className="flex-row items-center justify-between">
-                      <Text className="text-n1/70 dark:text-n1/70 font-medium w-[25%]">
-                        {ingredient.amount}oz
-                      </Text>
-                      <Text className="text-n1/70 dark:text-n1/70 font-medium w-[25%]">
-                        40% ABV
-                      </Text>
-                      <Text className="text-n1/70 dark:text-n1/70 font-medium w-[25%]">
-                        {currencySymbol}
-                        {(ingredient.cost / ingredient.amount).toFixed(2)}/oz
-                      </Text>
-                      <Text className="text-n1 dark:text-n1 font-medium">
-                        Total: {currencySymbol}
-                        {ingredient.cost.toFixed(2)}
-                      </Text>
-                    </View>
-                  </>
-                ) : (
-                  /* Simple View - measurements on left */
-                  <View className="flex-row items-center gap-3">
-                    <Text className="text-n1/70 dark:text-n1/70 font-medium">
-                      {ingredient.amount}oz
-                    </Text>
-                    <Text
-                      className="text-n1 dark:text-n1 text-base flex-1 font-medium"
-                      numberOfLines={2}
-                    >
-                      {ingredient.name}
-                    </Text>
-                  </View>
-                )}
-              </Card>
-            ))}
+                  )}
+                </Card>
+              );
+            })}
           </View>
 
           {/* Recipe Notes */}
-          {cocktailData.notes && (
+          {cocktail.notes && (
             <Card className="mb-4">
               <Text
                 className="text-n1 dark:text-n1 text-lg mb-3"
@@ -404,29 +300,51 @@ export default function CocktailDetailScreen() {
                 RECIPE NOTES
               </Text>
               <Text className="text-n1/80 dark:text-n1/80 leading-relaxed">
-                {cocktailData.notes}
+                {cocktail.notes}
               </Text>
             </Card>
           )}
 
           {/* Cost Analysis */}
-          <View className="mb-4">
-            {/* Performance Bar */}
-            <View className="mb-3 border-b border-p1 pb-4">
-              <PourCostPerformanceBar
-                pourCostPercentage={cocktailData.pourCostPercentage}
-              />
-            </View>
-
+          <View className="mb-4 flex-col gap-3">
             <View className="flex-row justify-between items-center">
               <Text className="text-n1 dark:text-n2 text-xl font-semibold">
                 Total Cost: {currencySymbol}
-                {cocktailData.totalCost.toFixed(2)}
+                {metrics.totalCost.toFixed(2)}
+              </Text>
+            </View>
+
+            <View className="flex-row justify-between items-center">
+              <Text className="text-n1/70 dark:text-g1 text-lg font-medium">
+                Suggested Price
               </Text>
               <Text className="text-n1 dark:text-n2 text-lg font-medium">
-                Suggested Price: {currencySymbol}
-                {cocktailData.suggestedPrice.toFixed(2)}
+                {currencySymbol}
+                {metrics.suggestedPrice.toFixed(2)}
               </Text>
+            </View>
+
+            <View className="flex-row justify-between items-center">
+              <Text className="text-n1/70 dark:text-g1 text-lg font-medium">
+                Pour Cost
+              </Text>
+              <Text className="text-n1 dark:text-n2 text-lg font-medium">
+                {retailPrice > 0
+                  ? calculatePourCostPercentage(metrics.totalCost, retailPrice).toFixed(1)
+                  : '0.0'}
+                %
+              </Text>
+            </View>
+
+            {/* Performance Bar */}
+            <View className="border-t border-p1 pt-3">
+              <PourCostPerformanceBar
+                pourCostPercentage={
+                  retailPrice > 0
+                    ? calculatePourCostPercentage(metrics.totalCost, retailPrice)
+                    : 0
+                }
+              />
             </View>
           </View>
 

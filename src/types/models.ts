@@ -1,81 +1,162 @@
 /**
  * Core domain models for PourCost application
- * These match the Swift models from the original iOS app
+ * Matches the iOS Swift models for data compatibility
  */
 
-// Volume measurement types
-export interface Volume {
-  value: number;
-  unit: VolumeUnit;
+// ==========================================
+// VOLUME MODEL — matches iOS Volume enum
+// ==========================================
+
+/** Discriminated union matching iOS Volume enum with associated values */
+export type Volume =
+  | { kind: 'fractionalOunces'; numerator: number; denominator: number }
+  | { kind: 'decimalOunces'; ounces: number }
+  | { kind: 'namedOunces'; name: string; ounces: number }
+  | { kind: 'unitQuantity'; unitType: UnitQuantityType; name: string; quantity: number; ounces: number }
+  | { kind: 'milliliters'; ml: number }
+  | { kind: 'standardUnit'; si: number };
+
+export type UnitQuantityType = 'oneCanOrBottle' | 'oneThing';
+
+/** Get the ounce value of any Volume (matches iOS Volume.ounces computed property) */
+export function volumeToOunces(v: Volume): number {
+  if (!v?.kind) return 0;
+  switch (v.kind) {
+    case 'fractionalOunces':
+      return v.numerator / v.denominator;
+    case 'decimalOunces':
+      return v.ounces;
+    case 'namedOunces':
+      return v.ounces;
+    case 'unitQuantity':
+      return v.ounces;
+    case 'milliliters':
+      return v.ml * 0.033814; // matches iOS constant
+    case 'standardUnit':
+      return v.si / 29.0; // matches iOS standardUnitsToOunces
+  }
 }
 
-export type VolumeUnit = 'oz' | 'ml' | 'L' | 'gal' | 'qt' | 'pt' | 'cup';
-
-// Pour size types
-export interface PourSize {
-  volume: Volume;
-  type: PourType;
+/** Get display label for a Volume */
+export function volumeLabel(v: Volume): string {
+  if (!v?.kind) return '—';
+  switch (v.kind) {
+    case 'fractionalOunces': {
+      const whole = Math.floor(v.numerator / v.denominator);
+      const remainder = v.numerator % v.denominator;
+      if (remainder === 0) return `${whole} oz`;
+      if (whole === 0) return `${v.numerator}/${v.denominator} oz`;
+      return `${whole} ${remainder}/${v.denominator} oz`;
+    }
+    case 'decimalOunces':
+      return `${v.ounces} oz`;
+    case 'namedOunces':
+      return v.name;
+    case 'unitQuantity':
+      return v.name;
+    case 'milliliters':
+      return v.ml >= 1000 ? `${(v.ml / 1000).toFixed(v.ml % 1000 === 0 ? 0 : 1)}L` : `${v.ml}ml`;
+    case 'standardUnit':
+      return `${v.si} units`;
+  }
 }
 
-export type PourType = 'volume' | 'unit';
+/** Check if a Volume is a unit quantity (for alternate cost calculation path) */
+export function isUnitQuantity(v: Volume): v is Extract<Volume, { kind: 'unitQuantity' }> {
+  return v?.kind === 'unitQuantity';
+}
 
-// Saved ingredient model
+/** Helper to create fractional ounces (matches iOS Volume(fraction:)) */
+export function fraction(numerator: number, denominator: number): Volume {
+  return { kind: 'fractionalOunces', numerator, denominator };
+}
+
+// ==========================================
+// POUR SIZE SCALE — matches iOS PourSizeScale
+// ==========================================
+
+export type PourSizeScale = 'us' | 'metric';
+
+// ==========================================
+// SAVED INGREDIENT — matches iOS SavedIngredient + DynamoDB record
+// ==========================================
+
 export interface SavedIngredient {
   id: string;
   name: string;
-  bottleSize: number; // Size in ml (matches component usage)
-  bottlePrice: number; // Price in base currency (matches component usage)
-  type?: string; // Ingredient type (Beer, Wine, Liquor, etc.)
-  notForSale?: boolean; // Whether this ingredient is sold individually (false for prepped items like simple syrup)
-  description?: string; // Brief description of the ingredient
+  productSize: Volume;     // Container/bottle size (was bottleSize: number in ml)
+  productCost: number;     // Price paid for the container (was bottlePrice)
+  type?: string;
+  notForSale?: boolean;
+  description?: string;
   createdAt: Date;
   updatedAt: Date;
-  userId?: string; // For cloud sync
+  userId?: string;
 }
 
-// Cocktail ingredient extends saved ingredient with pour amount and cost
-export interface CocktailIngredient extends SavedIngredient {
-  amount: number; // Pour amount in oz
-  unit: 'oz' | 'ml' | 'drops' | 'splash';
-  cost: number; // Cost for this amount
-  order?: number; // For ingredient ordering in cocktails
+// ==========================================
+// COCKTAIL INGREDIENT — matches iOS CocktailIngredient
+// ==========================================
+
+export interface CocktailIngredient {
+  ingredientId: string;
+  name: string;
+  productSize: Volume;
+  productCost: number;
+  pourSize: Volume;        // How much of the ingredient goes in the drink
+  cost: number;            // Calculated cost for this pour
+  order?: number;
 }
 
-// Display ingredient with calculated values (for lists)
-export interface IngredientWithCalculations extends SavedIngredient {
-  pourSize: number; // Current pour size in oz
-  costPerPour: number;
-  costPerOz: number;
-  pourCostMargin: number;
-  pourCostPercentage: number;
-  currency: string;
-  measurementSystem: 'US' | 'Metric';
-}
+// ==========================================
+// COCKTAIL — matches iOS Cocktail + DynamoDB record
+// ==========================================
 
-// Cocktail model
 export interface Cocktail {
   id: string;
   name: string;
-  description?: string;
-  category?: 'Classic' | 'Modern' | 'Tropical' | 'Whiskey' | 'Vodka' | 'Rum' | 'Gin' | 'Tequila' | 'Other';
-  ingredients: CocktailIngredient[];
   notes?: string;
-  profitMargin: number;
-  imagePath?: string; // Path to cocktail image
+  ingredients: CocktailIngredient[];
+  category?: CocktailCategory;
+  description?: string;
+  imagePath?: string;
+  favorited?: boolean;
+  retailPrice?: number;
   createdAt: Date;
   updatedAt: Date;
-  userId?: string; // For cloud sync
-  favorited?: boolean;
+  userId?: string;
 }
 
-// Cocktail with calculated values (for display)
-export interface CocktailWithCalculations extends Cocktail {
+export type CocktailCategory =
+  | 'Whiskey'
+  | 'Vodka'
+  | 'Rum'
+  | 'Gin'
+  | 'Tequila'
+  | 'Other';
+
+// ==========================================
+// DISPLAY TYPES (computed on-demand, never stored)
+// ==========================================
+
+export interface IngredientMetrics {
+  costPerOz: number;
+  costPerPour: number;
+  pourCostPercentage: number;
+  pourCostMargin: number;
+}
+
+export interface CocktailMetrics {
   totalCost: number;
   suggestedPrice: number;
   pourCostPercentage: number;
+  profitMargin: number;
 }
 
-// Currency models
+// ==========================================
+// CURRENCY & USER
+// ==========================================
+
 export interface CurrencySymbol {
   code: string;
   symbol: string;
@@ -89,31 +170,13 @@ export interface ConversionRate {
   lastUpdated: Date;
 }
 
-// User profile model
 export interface UserProfile {
   id: string;
   email?: string;
   name?: string;
-  authProvider: 'facebook' | 'google' | 'cognito';
+  authProvider: 'facebook' | 'google' | 'apple' | 'cognito';
   baseCurrency: string;
-  measurementSystem: 'US' | 'Metric';
+  measurementSystem: PourSizeScale;
   createdAt: Date;
   lastLoginAt: Date;
-}
-
-// API response types
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  timestamp: Date;
-}
-
-// Calculation result types
-export interface CostCalculation {
-  costPerPour: number;
-  totalCost: number;
-  profitMargin: number;
-  suggestedPrice: number;
-  currency: string;
 }

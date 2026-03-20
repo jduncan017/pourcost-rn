@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
-import { useAppStore } from '@/src/stores/app-store';
+import { HARDCODED_MEASUREMENT_SYSTEM, HARDCODED_BASE_CURRENCY } from '@/src/stores/app-store';
 import CustomSlider from '@/src/components/ui/CustomSlider';
 import BottleSizeDropdown from '@/src/components/BottleSizeDropdown';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,7 +24,8 @@ interface CalculatorIngredient {
  * Automatically switches between single ingredient mode and cocktail mode
  */
 export default function CalculatorScreen() {
-  const { measurementSystem, baseCurrency } = useAppStore();
+  const measurementSystem = HARDCODED_MEASUREMENT_SYSTEM;
+  const baseCurrency = HARDCODED_BASE_CURRENCY;
 
   // Mode state
   const [mode, setMode] = useState<'single' | 'cocktail'>('single');
@@ -142,7 +143,7 @@ export default function CalculatorScreen() {
         },
         {
           text: 'Save',
-          onPress: (ingredientName) => {
+          onPress: (ingredientName: string | undefined) => {
             if (ingredientName && ingredientName.trim()) {
               // Mock save functionality - would save to ingredients store
               const ingredientData = {

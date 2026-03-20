@@ -32,5 +32,8 @@
     "expo-env.d.ts",
     "nativewind-env.d.ts"
   ],
-  "extends": "expo/tsconfig.base"
+  "exclude": [
+    "src/_future/**"
+  ],
+  "extends": "expo/tsconfig.base.json"
 }

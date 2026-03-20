@@ -3,23 +3,13 @@
  * Displays cocktail information in a list format with swipe actions
  */
 
-import React from 'react';
 import { View, Text } from 'react-native';
 import SwipeableCard from './SwipeableCard';
-import HighlightBox from './ui/HighlightBox';
-
-export interface CocktailListItemData {
-  name: string;
-  ingredients: Array<{ name: string; amount: number; cost: number }>;
-  totalCost: number;
-  suggestedPrice: number;
-  profitMargin: number;
-  pourCostPercentage: number;
-  currency?: string;
-}
+import { Cocktail } from '@/src/types/models';
+import { calculateCocktailMetrics } from '@/src/services/calculation-service';
 
 interface CocktailListItemProps {
-  cocktail: CocktailListItemData;
+  cocktail: Cocktail;
   sortBy?: 'cost' | 'profitMargin' | 'costPercent' | 'name' | 'created';
   onPress?: () => void;
   onEdit?: () => void;
@@ -29,61 +19,39 @@ interface CocktailListItemProps {
 
 export default function CocktailListItem({
   cocktail,
-  sortBy = 'created',
+  sortBy = 'name',
   onPress,
   onEdit,
   onDelete,
   className = '',
 }: CocktailListItemProps) {
-  // Return null if cocktail is not defined or invalid
-  if (!cocktail || cocktail === null || cocktail === undefined) {
-    return null;
-  }
+  if (!cocktail) return null;
 
-  // Get highlight box props based on sort order
-  const getHighlightProps = () => {
+  const metrics = calculateCocktailMetrics(cocktail.ingredients || []);
+
+  // Highlight data — only for cost/costPercent/profitMargin
+  const getHighlight = (): { label: string; value: string; color: string } | null => {
     switch (sortBy) {
       case 'cost':
-        return {
-          label: 'Total Cost',
-          value: `$${(cocktail.totalCost || 0).toFixed(2)}`,
-          color: 'neutral' as const,
-        };
-      case 'profitMargin':
-        return {
-          label: 'Profit',
-          value: `$${(cocktail.profitMargin || 0).toFixed(2)}`,
-          color: 'success' as const,
-        };
+        return { label: 'Cost', value: `$${(metrics.totalCost || 0).toFixed(2)}`, color: 'text-n1' };
       case 'costPercent':
         return {
           label: 'Cost %',
-          value: `${(cocktail.pourCostPercentage || 0).toFixed(1)}%`,
-          color:
-            (cocktail.pourCostPercentage || 0) <= 20
-              ? ('success' as const)
-              : (cocktail.pourCostPercentage || 0) <= 25
-                ? ('warning' as const)
-                : ('danger' as const),
+          value: `${(metrics.pourCostPercentage || 0).toFixed(1)}%`,
+          color: (metrics.pourCostPercentage || 0) <= 20
+            ? 'text-s21'
+            : (metrics.pourCostPercentage || 0) <= 25
+              ? 'text-s12'
+              : 'text-e1',
         };
-      case 'name':
-      case 'created':
+      case 'profitMargin':
+        return { label: 'Margin', value: `$${(metrics.profitMargin || 0).toFixed(2)}`, color: 'text-n1' };
       default:
-        // Default to Cost %
-        return {
-          label: 'Cost %',
-          value: `${(cocktail.pourCostPercentage || 0).toFixed(1)}%`,
-          color:
-            (cocktail.pourCostPercentage || 0) <= 20
-              ? ('success' as const)
-              : (cocktail.pourCostPercentage || 0) <= 25
-                ? ('warning' as const)
-                : ('danger' as const),
-        };
+        return null;
     }
   };
 
-  const highlightProps = getHighlightProps();
+  const highlight = getHighlight();
 
   return (
     <SwipeableCard
@@ -92,34 +60,38 @@ export default function CocktailListItem({
       onSwipeRight={onDelete}
       className={className}
       variant="gradient"
+      padding="medium"
     >
-      <View style={{ minHeight: 60, justifyContent: 'center' }}>
-        <View className="flex-row items-center gap-4">
-          {/* Left Column - Title & Description */}
-          <View className="flex-1 mr-3">
-            {/* Title */}
-            <Text
-              className="text-n1 dark:text-n1 text-lg tracking-wide font-semibold mb-1"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {cocktail.name || 'Unknown Cocktail'}
-            </Text>
-
-            {/* Subtitle/Description - Ingredients */}
-            <Text className="text-n1/70 dark:text-n1/70 text-sm" numberOfLines={2}>
-              {cocktail.ingredients
-                ?.map((ing) => ing?.name)
-                .filter(Boolean)
-                .join(', ') || 'No ingredients'}
-            </Text>
-          </View>
-
-          {/* Right Column - Highlight Box */}
-          <View className="flex-shrink-0">
-            <HighlightBox {...highlightProps} />
-          </View>
+      <View className="flex-row items-center gap-3">
+        {/* Left - Name & ingredients */}
+        <View className="flex-1">
+          <Text
+            className="text-n1 text-base tracking-wide font-semibold"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {cocktail.name || 'Unknown Cocktail'}
+          </Text>
+          <Text className="text-n1/70 text-sm mt-0.5" numberOfLines={1}>
+            {cocktail.ingredients
+              ?.map((ing) => ing?.name)
+              .filter(Boolean)
+              .join(', ') || 'No ingredients'}
+          </Text>
         </View>
+
+        {/* Right - Metric with left border accent */}
+        {highlight && (
+          <View className="border-l border-g2/20 pl-3.5 items-center">
+            <Text className="text-n1/80 text-sm">{highlight.label}</Text>
+            <Text
+              className={`text-base ${highlight.color}`}
+              style={{ fontWeight: '700' }}
+            >
+              {highlight.value}
+            </Text>
+          </View>
+        )}
       </View>
     </SwipeableCard>
   );

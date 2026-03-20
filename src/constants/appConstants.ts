@@ -1,8 +1,202 @@
 /**
  * Application Constants for PourCost-RN
- * Centralized definitions for data types, categories, and global constants
- * used throughout the application to ensure consistency.
+ * Pour sizes and product sizes match the iOS app exactly.
  */
+
+import { Volume, PourSizeScale, fraction } from '@/src/types/models';
+
+// ==========================================
+// POUR SIZES — matches iOS PourSizes-PourCost.swift
+// ==========================================
+
+/** US pour sizes — matches iOS USPourSizes.values exactly */
+export const US_POUR_SIZES: Volume[] = [
+  { kind: 'namedOunces', name: 'drop', ounces: 0.00169 },
+  { kind: 'namedOunces', name: 'dash', ounces: 0.01691 },
+  { kind: 'namedOunces', name: 'bspn', ounces: 0.16907 },
+  fraction(1, 8),
+  fraction(1, 4),
+  fraction(3, 8),
+  fraction(1, 2),
+  fraction(3, 4),
+  fraction(1, 1),       // 1 oz
+  fraction(5, 4),       // 1 1/4
+  fraction(3, 2),       // 1 1/2
+  fraction(7, 4),       // 1 3/4
+  fraction(2, 1),       // 2
+  fraction(9, 4),       // 2 1/4
+  fraction(5, 2),       // 2 1/2
+  fraction(11, 4),      // 2 3/4
+  fraction(3, 1),       // 3
+  fraction(7, 2),       // 3 1/2
+  fraction(4, 1),
+  fraction(5, 1),
+  fraction(6, 1),
+  fraction(7, 1),
+  fraction(8, 1),
+  fraction(9, 1),
+  fraction(10, 1),
+  fraction(12, 1),
+  fraction(14, 1),
+  fraction(16, 1),
+  { kind: 'decimalOunces', ounces: 19.2 },
+  fraction(20, 1),
+  { kind: 'milliliters', ml: 187 },
+  { kind: 'milliliters', ml: 500 },
+  { kind: 'decimalOunces', ounces: 22.0 },
+  { kind: 'decimalOunces', ounces: 25.0 },
+  { kind: 'milliliters', ml: 750 },
+  { kind: 'milliliters', ml: 1000 },
+  { kind: 'milliliters', ml: 1500 },
+  { kind: 'namedOunces', name: '32oz Crowler', ounces: 32 },
+  { kind: 'namedOunces', name: '64oz Growler', ounces: 64 },
+];
+
+/** US initial pour size: 1 oz */
+export const US_INITIAL_POUR_SIZE = fraction(1, 1);
+
+/** Metric pour sizes — matches iOS MetricPourSizes.values exactly */
+export const METRIC_POUR_SIZES: Volume[] = [
+  { kind: 'namedOunces', name: 'drop', ounces: 0.00169 },
+  { kind: 'namedOunces', name: 'dash', ounces: 0.01691 },
+  { kind: 'namedOunces', name: 'bspn', ounces: 0.16907 },
+  { kind: 'milliliters', ml: 5 },
+  { kind: 'milliliters', ml: 7.5 },
+  { kind: 'milliliters', ml: 10 },
+  { kind: 'milliliters', ml: 12.5 },
+  { kind: 'milliliters', ml: 15 },
+  { kind: 'milliliters', ml: 20 },
+  { kind: 'milliliters', ml: 22.5 },
+  { kind: 'milliliters', ml: 25 },
+  { kind: 'milliliters', ml: 30 },
+  { kind: 'milliliters', ml: 35 },
+  { kind: 'milliliters', ml: 37.5 },
+  { kind: 'milliliters', ml: 40 },
+  { kind: 'milliliters', ml: 45 },
+  { kind: 'milliliters', ml: 50 },
+  { kind: 'milliliters', ml: 60 },
+  { kind: 'milliliters', ml: 70 },
+  { kind: 'milliliters', ml: 75 },
+  { kind: 'milliliters', ml: 90 },
+  { kind: 'milliliters', ml: 100 },
+  { kind: 'milliliters', ml: 125 },
+  { kind: 'milliliters', ml: 150 },
+  { kind: 'milliliters', ml: 175 },
+  { kind: 'milliliters', ml: 187 },
+  { kind: 'milliliters', ml: 200 },
+  { kind: 'milliliters', ml: 250 },
+  { kind: 'milliliters', ml: 284 },
+  { kind: 'milliliters', ml: 300 },
+  { kind: 'milliliters', ml: 330 },
+  { kind: 'milliliters', ml: 500 },
+  { kind: 'milliliters', ml: 560 },
+  { kind: 'milliliters', ml: 750 },
+  { kind: 'milliliters', ml: 1000 },
+  { kind: 'milliliters', ml: 1125 },
+  { kind: 'milliliters', ml: 1500 },
+  { kind: 'milliliters', ml: 1750 },
+  { kind: 'namedOunces', name: '32oz Crowler', ounces: 32 },
+  { kind: 'namedOunces', name: '64oz Growler', ounces: 64 },
+];
+
+/** Metric initial pour size: 30ml */
+export const METRIC_INITIAL_POUR_SIZE: Volume = { kind: 'milliliters', ml: 30 };
+
+/** Get pour sizes for a given scale */
+export function getPourSizes(scale: PourSizeScale): Volume[] {
+  return scale === 'us' ? US_POUR_SIZES : METRIC_POUR_SIZES;
+}
+
+/** Get the default pour size for a scale */
+export function getInitialPourSize(scale: PourSizeScale): Volume {
+  return scale === 'us' ? US_INITIAL_POUR_SIZE : METRIC_INITIAL_POUR_SIZE;
+}
+
+// ==========================================
+// PRODUCT (CONTAINER) SIZES — matches iOS PourCostProductSizes exactly
+// ==========================================
+
+/** All product/container sizes — matches iOS PourCostProductSizes.generateValues() */
+export const PRODUCT_SIZES: Volume[] = [
+  { kind: 'unitQuantity', unitType: 'oneThing', name: '1 Can/Bottle', quantity: 1, ounces: 12 },
+  { kind: 'milliliters', ml: 180 },
+  { kind: 'milliliters', ml: 187 },
+  { kind: 'milliliters', ml: 200 },
+  { kind: 'milliliters', ml: 300 },
+  { kind: 'milliliters', ml: 330 },
+  { kind: 'milliliters', ml: 375 },
+  { kind: 'milliliters', ml: 500 },
+  { kind: 'decimalOunces', ounces: 22.0 },
+  { kind: 'decimalOunces', ounces: 25.0 },
+  { kind: 'milliliters', ml: 700 },
+  { kind: 'milliliters', ml: 720 },
+  { kind: 'milliliters', ml: 750 },
+  { kind: 'milliliters', ml: 1000 },
+  { kind: 'milliliters', ml: 1125 },
+  { kind: 'milliliters', ml: 1500 },
+  { kind: 'milliliters', ml: 1750 },
+  { kind: 'milliliters', ml: 1800 },
+  { kind: 'namedOunces', name: '32oz Crowler', ounces: 32 },
+  { kind: 'namedOunces', name: '64oz Growler', ounces: 64 },
+  { kind: 'milliliters', ml: 3000 },
+  { kind: 'milliliters', ml: 5000 },
+  { kind: 'namedOunces', name: 'Corny Keg', ounces: 640 },
+  { kind: 'namedOunces', name: 'Sixth Barrel', ounces: 660.48 },
+  { kind: 'namedOunces', name: '20L Keg', ounces: 676.28 },
+  { kind: 'namedOunces', name: 'Quarter Barrel', ounces: 992 },
+  { kind: 'namedOunces', name: '30L Keg', ounces: 1014.42 },
+  { kind: 'namedOunces', name: '50L Keg', ounces: 1690.7 },
+  { kind: 'namedOunces', name: 'Half Barrel', ounces: 1984 },
+  { kind: 'unitQuantity', unitType: 'oneCanOrBottle', name: '4 pack', quantity: 4, ounces: 48 },
+  { kind: 'unitQuantity', unitType: 'oneCanOrBottle', name: '6 pack', quantity: 6, ounces: 72 },
+  { kind: 'unitQuantity', unitType: 'oneCanOrBottle', name: '12 pack', quantity: 12, ounces: 144 },
+  { kind: 'unitQuantity', unitType: 'oneCanOrBottle', name: '24 pack', quantity: 24, ounces: 288 },
+  { kind: 'unitQuantity', unitType: 'oneCanOrBottle', name: '30 pack', quantity: 30, ounces: 360 },
+];
+
+/** Initial product size: 750ml (matches iOS) */
+export const INITIAL_PRODUCT_SIZE: Volume = { kind: 'milliliters', ml: 750 };
+
+// ==========================================
+// MARGINS — matches iOS Margins-PourCost.swift
+// "Note not actually margins" — these are pour cost percentages
+// ==========================================
+
+/** Generate all margin values matching iOS (0.0025 to 1.0000) */
+function generateMarginValues(): number[] {
+  const values: number[] = [];
+  // set1: 25 to 3975 by 25
+  for (let i = 25; i < 4000; i += 25) values.push(i / 10000);
+  // set2: 4000 to 4950 by 50
+  for (let i = 4000; i < 5000; i += 50) values.push(i / 10000);
+  // set3: 5000 to 6900 by 100
+  for (let i = 5000; i < 7000; i += 100) values.push(i / 10000);
+  // set4: 7000 to 10000 by 500
+  for (let i = 7000; i <= 10000; i += 500) values.push(i / 10000);
+  return values;
+}
+
+export const MARGIN_VALUES = generateMarginValues();
+export const DEFAULT_MARGIN = 0.18; // 18% — matches iOS Margins.isInitial
+
+/** Find the closest margin index for a given value */
+export function findClosestMarginIndex(value: number): number {
+  if (isNaN(value)) return MARGIN_VALUES.indexOf(DEFAULT_MARGIN);
+
+  const exactIndex = MARGIN_VALUES.indexOf(value);
+  if (exactIndex !== -1) return exactIndex;
+
+  let closestIndex = 0;
+  let closestDiff = Math.abs(MARGIN_VALUES[0] - value);
+  for (let i = 1; i < MARGIN_VALUES.length; i++) {
+    const diff = Math.abs(MARGIN_VALUES[i] - value);
+    if (diff < closestDiff) {
+      closestDiff = diff;
+      closestIndex = i;
+    }
+  }
+  return closestIndex;
+}
 
 // ==========================================
 // INGREDIENT TYPES
@@ -19,19 +213,6 @@ export const INGREDIENT_TYPES = [
 
 export type IngredientType = (typeof INGREDIENT_TYPES)[number];
 
-// Legacy ingredient types (for backward compatibility)
-export const LEGACY_INGREDIENT_TYPES = [
-  'Beer',
-  'Wine',
-  'Liquor',
-  'Mixer',
-  'Syrup',
-  'Juice',
-  'Other',
-] as const;
-
-export type LegacyIngredientType = (typeof LEGACY_INGREDIENT_TYPES)[number];
-
 // ==========================================
 // COCKTAIL CATEGORIES
 // ==========================================
@@ -44,126 +225,13 @@ export const COCKTAIL_CATEGORIES = [
   'Gin',
   'Tequila',
   'Other',
-];
-
-export type CocktailCategory = (typeof COCKTAIL_CATEGORIES)[number];
-
-// ==========================================
-// CONTAINER SIZES BY INGREDIENT TYPE
-// ==========================================
-
-export interface ContainerSize {
-  value: number; // Size in ml
-  label: string;
-  isCommon: boolean; // Whether this is a common size for the type
-}
-
-export const CONTAINER_SIZES_BY_TYPE: Record<IngredientType, ContainerSize[]> =
-  {
-    Spirit: [
-      { value: 375, label: '375ml', isCommon: true },
-      { value: 750, label: '750ml', isCommon: true },
-      { value: 1000, label: '1000ml', isCommon: true },
-      { value: 1750, label: '1750ml', isCommon: true },
-    ],
-    Beer: [
-      { value: 19550, label: '1/2 Keg (15.5 gal)', isCommon: true }, // Keep descriptions for beer
-      { value: 5870, label: '1/6 Keg (5 gal)', isCommon: true },
-      { value: 8500, label: '24 Pack', isCommon: true },
-      { value: 355, label: 'Single Can/Bottle', isCommon: true },
-    ],
-    Wine: [
-      { value: 187, label: '187ml', isCommon: true },
-      { value: 375, label: '375ml', isCommon: true },
-      { value: 750, label: '750ml', isCommon: true },
-      { value: 1500, label: '1500ml', isCommon: true },
-    ],
-    Prepped: [
-      { value: 200, label: '200ml', isCommon: true },
-      { value: 500, label: '500ml', isCommon: true },
-      { value: 750, label: '750ml', isCommon: true },
-      { value: 1000, label: '1000ml', isCommon: true },
-    ],
-    Garnish: [
-      { value: 50, label: '50g', isCommon: true },
-      { value: 100, label: '100g', isCommon: true },
-      { value: 200, label: '200g', isCommon: true },
-      { value: 500, label: '500g', isCommon: true },
-    ],
-    Other: [
-      { value: 250, label: '250ml', isCommon: true },
-      { value: 500, label: '500ml', isCommon: true },
-      { value: 750, label: '750ml', isCommon: true },
-      { value: 1000, label: '1000ml', isCommon: true },
-    ],
-  };
-
-// All container sizes for "Other" dropdown
-export const ALL_CONTAINER_SIZES: ContainerSize[] = [
-  // Small sizes
-  { value: 50, label: '50ml/g', isCommon: false },
-  { value: 100, label: '100ml/g', isCommon: false },
-  { value: 150, label: '150ml/g', isCommon: false },
-  { value: 187, label: '187ml (Split)', isCommon: false },
-  { value: 200, label: '200ml/g', isCommon: false },
-  { value: 250, label: '250ml/g', isCommon: false },
-  { value: 330, label: '330ml (Can)', isCommon: false },
-  { value: 355, label: '355ml (Can)', isCommon: false },
-  { value: 375, label: '375ml (Half Bottle)', isCommon: false },
-  { value: 440, label: '440ml (Pint Can)', isCommon: false },
-  { value: 500, label: '500ml', isCommon: false },
-  { value: 568, label: '568ml (Imperial Pint)', isCommon: false },
-  { value: 650, label: '650ml', isCommon: false },
-  { value: 700, label: '700ml', isCommon: false },
-  { value: 750, label: '750ml (Standard)', isCommon: false },
-  { value: 1000, label: '1L', isCommon: false },
-  { value: 1125, label: '1.125L', isCommon: false },
-  { value: 1500, label: '1.5L (Magnum)', isCommon: false },
-  { value: 1750, label: '1.75L (Handle)', isCommon: false },
-  { value: 3000, label: '3L', isCommon: false },
-  { value: 5000, label: '5L', isCommon: false },
-  // Beer kegs
-  { value: 5870, label: '1/6 Keg (5 gal)', isCommon: false },
-  { value: 7750, label: '1/4 Keg (7.75 gal)', isCommon: false },
-  { value: 15500, label: '1/2 Keg (15.5 gal)', isCommon: false },
-  // Bulk sizes
-  { value: 8500, label: '24 Pack Beer', isCommon: false },
-  { value: 12750, label: '36 Pack Beer', isCommon: false },
-];
-
-// ==========================================
-// MEASUREMENT UNITS
-// ==========================================
-
-export const MEASUREMENT_UNITS = [
-  'oz',
-  'ml',
-  'drops',
-  'splash',
-  'dash',
-  'tsp',
-  'tbsp',
 ] as const;
 
-export type MeasurementUnit = (typeof MEASUREMENT_UNITS)[number];
-
-// Primary units for most ingredients
-export const PRIMARY_UNITS = ['oz', 'ml'] as const;
-export type PrimaryUnit = (typeof PRIMARY_UNITS)[number];
+export type CocktailCategoryFilter = (typeof COCKTAIL_CATEGORIES)[number];
 
 // ==========================================
 // SORTING OPTIONS
 // ==========================================
-
-export const COCKTAIL_SORT_OPTIONS = [
-  'name',
-  'cost',
-  'created',
-  'profitMargin',
-  'costPercent',
-] as const;
-
-export type CocktailSortOption = (typeof COCKTAIL_SORT_OPTIONS)[number];
 
 export const INGREDIENT_SORT_OPTIONS = [
   'name',
@@ -174,6 +242,16 @@ export const INGREDIENT_SORT_OPTIONS = [
 ] as const;
 
 export type IngredientSortOption = (typeof INGREDIENT_SORT_OPTIONS)[number];
+
+export const COCKTAIL_SORT_OPTIONS = [
+  'name',
+  'cost',
+  'created',
+  'profitMargin',
+  'costPercent',
+] as const;
+
+export type CocktailSortOption = (typeof COCKTAIL_SORT_OPTIONS)[number];
 
 // ==========================================
 // PERFORMANCE THRESHOLDS
@@ -186,24 +264,14 @@ export const POUR_COST_THRESHOLDS = {
   HIGH: 30,
 } as const;
 
-export const PROFIT_MARGIN_THRESHOLDS = {
-  LOW: 5,
-  GOOD: 10,
-  EXCELLENT: 15,
-} as const;
-
 // ==========================================
 // DEFAULT VALUES
 // ==========================================
 
 export const DEFAULT_VALUES = {
-  POUR_SIZE: 1.5, // oz
-  BOTTLE_SIZE: 750, // ml
-  BOTTLE_PRICE: 25.0, // USD
-  RETAIL_PRICE: 8.0, // USD
-  TARGET_POUR_COST: 20, // percentage
+  POUR_COST_TARGET: 0.18,   // 18% — matches iOS default margin
   CURRENCY: 'USD',
-  MEASUREMENT_SYSTEM: 'US',
+  MEASUREMENT_SYSTEM: 'us' as PourSizeScale,
 } as const;
 
 // ==========================================
@@ -211,27 +279,10 @@ export const DEFAULT_VALUES = {
 // ==========================================
 
 export const VALIDATION_LIMITS = {
-  MIN_BOTTLE_PRICE: 1,
-  MAX_BOTTLE_PRICE: 1000,
-  MIN_POUR_SIZE: 0.25,
-  MAX_POUR_SIZE: 10,
-  MIN_RETAIL_PRICE: 1,
-  MAX_RETAIL_PRICE: 100,
+  MIN_PRODUCT_COST: 0,
+  MAX_PRODUCT_COST: 10000,
   MAX_NAME_LENGTH: 100,
   MAX_DESCRIPTION_LENGTH: 500,
-} as const;
-
-// ==========================================
-// UI CONSTANTS
-// ==========================================
-
-export const UI_CONSTANTS = {
-  ITEM_HEIGHT: 80,
-  CARD_BORDER_RADIUS: 12,
-  ANIMATION_DURATION: 300,
-  DEBOUNCE_DELAY: 300,
-  SEARCH_MIN_LENGTH: 2,
-  MAX_SEARCH_RESULTS: 50,
 } as const;
 
 // ==========================================
@@ -242,62 +293,23 @@ export const STORAGE_KEYS = {
   COCKTAILS: 'cocktails-store',
   INGREDIENTS: 'ingredients-store',
   APP_SETTINGS: 'app-store',
-  USER_PREFERENCES: 'user-preferences',
-  THEME: 'theme-preference',
 } as const;
 
 // ==========================================
-// ERROR MESSAGES
+// UI CONSTANTS
 // ==========================================
 
-export const ERROR_MESSAGES = {
-  REQUIRED_FIELD: 'This field is required',
-  INVALID_NUMBER: 'Please enter a valid number',
-  INVALID_EMAIL: 'Please enter a valid email address',
-  NETWORK_ERROR: 'Network error. Please check your connection.',
-  GENERIC_ERROR: 'Something went wrong. Please try again.',
-  ITEM_NOT_FOUND: 'Item not found',
-  PERMISSION_DENIED: 'Permission denied',
+export const UI_CONSTANTS = {
+  ANIMATION_DURATION: 300,
+  DEBOUNCE_DELAY: 300,
+  SEARCH_MIN_LENGTH: 2,
+  MAX_SEARCH_RESULTS: 50,
 } as const;
 
 // ==========================================
-// SUCCESS MESSAGES
+// HELPERS
 // ==========================================
 
-export const SUCCESS_MESSAGES = {
-  ITEM_CREATED: 'Item created successfully',
-  ITEM_UPDATED: 'Item updated successfully',
-  ITEM_DELETED: 'Item deleted successfully',
-  SETTINGS_SAVED: 'Settings saved successfully',
-  DATA_EXPORTED: 'Data exported successfully',
-  DATA_IMPORTED: 'Data imported successfully',
-} as const;
-
-// ==========================================
-// HELPER FUNCTIONS
-// ==========================================
-
-/**
- * Check if a value is a valid cocktail category
- */
-export const isValidCocktailCategory = (
-  value: string
-): value is CocktailCategory => {
-  return COCKTAIL_CATEGORIES.includes(value as CocktailCategory);
-};
-
-/**
- * Check if a value is a valid ingredient type
- */
-export const isValidIngredientType = (
-  value: string
-): value is IngredientType => {
-  return INGREDIENT_TYPES.includes(value as IngredientType);
-};
-
-/**
- * Get pour cost performance level based on percentage
- */
 export const getPourCostLevel = (percentage: number): string => {
   if (percentage <= POUR_COST_THRESHOLDS.EXCELLENT) return 'excellent';
   if (percentage <= POUR_COST_THRESHOLDS.GOOD) return 'good';
@@ -305,18 +317,15 @@ export const getPourCostLevel = (percentage: number): string => {
   return 'high';
 };
 
-/**
- * Get pour cost color based on performance level
- */
 export const getPourCostColor = (percentage: number): string => {
   const level = getPourCostLevel(percentage);
   switch (level) {
     case 'excellent':
     case 'good':
-      return 'text-s22'; // success green
+      return 'text-s22';
     case 'acceptable':
-      return 'text-s12'; // warning yellow
+      return 'text-s12';
     default:
-      return 'text-e3'; // error red
+      return 'text-e3';
   }
 };

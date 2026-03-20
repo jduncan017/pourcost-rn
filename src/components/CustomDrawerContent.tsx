@@ -1,12 +1,13 @@
-import { View, Alert, Image } from 'react-native';
+import { View, Image, Pressable, Text } from 'react-native';
 import {
   DrawerContentScrollView,
   DrawerItemList,
   DrawerContentComponentProps,
 } from '@react-navigation/drawer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors, useTheme } from '@/src/contexts/ThemeContext';
-import SettingsCard from '@/src/components/ui/SettingsCard';
 
 export default function CustomDrawerContent(
   props: DrawerContentComponentProps
@@ -14,10 +15,7 @@ export default function CustomDrawerContent(
   const colors = useThemeColors();
   const { isDarkMode } = useTheme();
   const insets = useSafeAreaInsets();
-
-  const handleSignIn = () => {
-    Alert.alert('Sign In', 'Sign in functionality would be implemented here');
-  };
+  const router = useRouter();
 
   return (
     <View
@@ -40,7 +38,7 @@ export default function CustomDrawerContent(
         />
       </View>
 
-      {/* Standard drawer items */}
+      {/* Standard drawer items (excludes settings — rendered below) */}
       <DrawerContentScrollView
         {...props}
         className="DrawerScroll"
@@ -49,22 +47,26 @@ export default function CustomDrawerContent(
         <DrawerItemList {...props} />
       </DrawerContentScrollView>
 
-      {/* Sign In/Sign Up button at bottom */}
+      {/* Settings pinned at bottom */}
       <View
-        className="SignInSection p-4 pb-16 border-t"
+        className="border-t px-4 py-3"
         style={{
           borderTopColor: colors.border,
-          paddingBottom: insets.bottom + 16,
+          paddingBottom: insets.bottom + 8,
         }}
       >
-        <SettingsCard
-          title="Sign In / Sign Up"
-          description="Sync your data across devices"
-          iconName="person"
-          iconColor={colors.accent}
-          onPress={handleSignIn}
-          variant="accent"
-        />
+        <Pressable
+          onPress={() => {
+            router.push('/(drawer)/settings');
+            props.navigation.closeDrawer();
+          }}
+          className="flex-row items-center gap-3 px-3 py-3 rounded-lg active:opacity-70"
+        >
+          <Ionicons name="settings-outline" size={22} color={colors.textSecondary} />
+          <Text className="text-base text-g4 dark:text-n1" style={{ fontWeight: '500' }}>
+            Settings
+          </Text>
+        </Pressable>
       </View>
     </View>
   );

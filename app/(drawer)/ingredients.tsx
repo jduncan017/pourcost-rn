@@ -7,7 +7,7 @@ import SearchBar from '@/src/components/ui/SearchBar';
 import EmptyState from '@/src/components/EmptyState';
 import { useRouter } from 'expo-router';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import { IngredientWithCalculations } from '@/src/types/models';
+import { SavedIngredient } from '@/src/types/models';
 import Button from '@/src/components/ui/Button';
 import {
   IngredientTypeSelector,
@@ -70,7 +70,7 @@ export default function IngredientsScreen() {
   }, [error, clearError, toast]);
 
   // Handle ingredient selection
-  const handleIngredientPress = (ingredient: IngredientWithCalculations) => {
+  const handleIngredientPress = (ingredient: SavedIngredient) => {
     HapticService.navigation();
     router.push({
       pathname: '/ingredient-detail',
@@ -80,26 +80,29 @@ export default function IngredientsScreen() {
 
   // Handle add new ingredient
   const handleAddIngredient = () => {
+    HapticService.navigation();
     router.push('/ingredient-form');
   };
 
   // Handle ingredient editing
-  const handleEditIngredient = (ingredient: IngredientWithCalculations) => {
+  const handleEditIngredient = (ingredient: SavedIngredient) => {
     router.push({
       pathname: '/ingredient-form',
       params: {
         id: ingredient.id,
         name: ingredient.name,
         type: ingredient.type,
-        bottleSize: ingredient.bottleSize.toString(),
-        bottlePrice: ingredient.bottlePrice.toString(),
-        createdAt: ingredient.createdAt.toISOString(),
+        productSize: JSON.stringify(ingredient.productSize),
+        productCost: ingredient.productCost.toString(),
+        createdAt: ingredient.createdAt instanceof Date
+          ? ingredient.createdAt.toISOString()
+          : new Date(ingredient.createdAt).toISOString(),
       },
     });
   };
 
   // Handle ingredient deletion with confirmation
-  const handleDeleteIngredient = (ingredient: IngredientWithCalculations) => {
+  const handleDeleteIngredient = (ingredient: SavedIngredient) => {
     FeedbackService.showDeleteConfirmation(
       ingredient.name,
       async () => {
@@ -152,11 +155,11 @@ export default function IngredientsScreen() {
             {/* Sort Options */}
             <SortSelector
               sortOptions={[
-                { key: 'Name', label: 'Name' },
-                { key: 'Date Created', label: 'Recently Added' },
-                { key: 'Cost', label: 'Cost/Oz' },
-                { key: 'Cost %', label: 'Pour Cost' },
-                { key: 'Margin', label: 'Margin' },
+                { key: 'name', label: 'Name' },
+                { key: 'created', label: 'Recent' },
+                { key: 'cost', label: 'Cost' },
+                { key: 'pourCost', label: 'Cost %' },
+                { key: 'margin', label: 'Margin' },
               ]}
               selectedSort={sortBy}
               onSortChange={(sortKey) => setSortBy(sortKey as any)}

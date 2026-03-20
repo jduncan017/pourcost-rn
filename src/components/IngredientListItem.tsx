@@ -3,26 +3,19 @@
  * Displays ingredient information in a list format with swipe actions
  */
 
-import React from 'react';
 import { View, Text } from 'react-native';
 import SwipeableCard from './SwipeableCard';
-import HighlightBox from './ui/HighlightBox';
-
-export interface IngredientListItemData {
-  name: string;
-  bottleSize: number;
-  bottlePrice: number;
-  pourSize: number;
-  costPerPour: number;
-  costPerOz: number;
-  pourCostMargin: number;
-  pourCostPercentage: number;
-  currency: string;
-  type?: string;
-}
+import { SavedIngredient, volumeLabel } from '@/src/types/models';
+import {
+  calculateCostPerOz,
+  calculateCostPerPour,
+  calculateSuggestedPrice,
+  calculatePourCostPercentage,
+} from '@/src/services/calculation-service';
+import { useAppStore } from '@/src/stores/app-store';
 
 interface IngredientListItemProps {
-  ingredient: IngredientListItemData;
+  ingredient: SavedIngredient;
   sortBy?: 'cost' | 'pourCost' | 'margin' | 'name' | 'created';
   onPress?: () => void;
   onEdit?: () => void;
@@ -38,48 +31,44 @@ export default function IngredientListItem({
   onDelete,
   className = '',
 }: IngredientListItemProps) {
-  // Return null if ingredient is not defined or invalid
-  if (!ingredient || ingredient === null || ingredient === undefined) {
-    return null;
-  }
+  if (!ingredient) return null;
 
-  // Get highlight box props based on sort order
-  const getHighlightProps = () => {
+  const { defaultPourSize, defaultRetailPrice } = useAppStore();
+
+  // Compute metrics on-demand
+  const costPerOz = calculateCostPerOz(ingredient.productSize, ingredient.productCost);
+  const isNotForSale = ingredient.notForSale === true;
+  const costPerPour = isNotForSale ? 0 : calculateCostPerPour(ingredient.productSize, ingredient.productCost, defaultPourSize);
+  const pourCostPercentage = defaultRetailPrice > 0 && !isNotForSale
+    ? calculatePourCostPercentage(costPerPour, defaultRetailPrice)
+    : 0;
+  const pourCostMargin = isNotForSale ? 0 : defaultRetailPrice - costPerPour;
+
+  // Highlight data based on sort — only for cost/pourCost/margin
+  const getHighlight = (): { label: string; value: string; color: string } | null => {
+    if (isNotForSale && sortBy !== 'cost') return null;
+
     switch (sortBy) {
       case 'cost':
-        return {
-          label: 'Cost/Oz',
-          value: `$${(ingredient.costPerOz || 0).toFixed(2)}`,
-          color: 'neutral' as const,
-        };
+        return { label: 'Cost/Oz', value: `$${(costPerOz || 0).toFixed(2)}`, color: 'text-n1' };
       case 'pourCost':
         return {
           label: 'Pour Cost',
-          value: `${(ingredient.pourCostPercentage || 0).toFixed(1)}%`,
-          color:
-            (ingredient.pourCostPercentage || 0) <= 20
-              ? ('success' as const)
-              : (ingredient.pourCostPercentage || 0) <= 25
-                ? ('warning' as const)
-                : ('danger' as const),
+          value: `${(pourCostPercentage || 0).toFixed(1)}%`,
+          color: (pourCostPercentage || 0) <= 20
+            ? 'text-s21'
+            : (pourCostPercentage || 0) <= 25
+              ? 'text-s12'
+              : 'text-e1',
         };
       case 'margin':
-        return {
-          label: 'Margin',
-          value: `$${(ingredient.pourCostMargin || 0).toFixed(2)}`,
-          color: 'success' as const,
-        };
-      case 'name':
+        return { label: 'Margin', value: `$${(pourCostMargin || 0).toFixed(2)}`, color: 'text-n1' };
       default:
-        return {
-          label: 'Pour Size',
-          value: `${ingredient.pourSize || 0}oz`,
-          color: 'neutral' as const,
-        };
+        return null;
     }
   };
 
-  const highlightProps = getHighlightProps();
+  const highlight = getHighlight();
 
   return (
     <SwipeableCard
@@ -88,32 +77,35 @@ export default function IngredientListItem({
       onSwipeRight={onDelete}
       className={className}
       variant="gradient"
+      padding="medium"
     >
-      <View style={{ minHeight: 60, justifyContent: 'center' }}>
-        <View className="flex-row items-center gap-4">
-          {/* Left Column - Title & Description */}
-          <View className="flex-1 mr-3">
-            {/* Title */}
-            <Text
-              className="text-n1 dark:text-n1 text-lg tracking-wide font-semibold mb-1"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {ingredient.name || 'Unknown Ingredient'}
-            </Text>
-
-            {/* Subtitle/Description - Type, Size, Price */}
-            <Text className="text-n1/70 dark:text-n1/70 text-sm" numberOfLines={2}>
-              {ingredient.type || 'Unknown'} • {ingredient.bottleSize || 0}ml • $
-              {(ingredient.bottlePrice || 0).toFixed(2)}
-            </Text>
-          </View>
-
-          {/* Right Column - Highlight Box */}
-          <View className="flex-shrink-0">
-            <HighlightBox {...highlightProps} />
-          </View>
+      <View className="flex-row items-center gap-3">
+        {/* Left - Name & details */}
+        <View className="flex-1">
+          <Text
+            className="text-n1 text-base tracking-wide font-semibold"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {ingredient.name || 'Unknown Ingredient'}
+          </Text>
+          <Text className="text-n1/70 text-sm mt-0.5" numberOfLines={1}>
+            {ingredient.type || 'Unknown'} • {volumeLabel(ingredient.productSize)} • ${(ingredient.productCost || 0).toFixed(2)}
+          </Text>
         </View>
+
+        {/* Right - Metric with left border accent */}
+        {highlight && (
+          <View className="border-l border-g2/20 pl-3.5 items-center">
+            <Text className="text-n1/80 text-sm">{highlight.label}</Text>
+            <Text
+              className={`text-base ${highlight.color}`}
+              style={{ fontWeight: '700' }}
+            >
+              {highlight.value}
+            </Text>
+          </View>
+        )}
       </View>
     </SwipeableCard>
   );

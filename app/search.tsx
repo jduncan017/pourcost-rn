@@ -1,413 +1,242 @@
-import React, { useState } from 'react';
+import { useState, useMemo, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import SearchBar from '@/src/components/ui/SearchBar';
-import BackButton from '@/src/components/ui/BackButton';
 import Card from '@/src/components/ui/Card';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
-
-// Mock data for recent searches and recent items
-const RECENT_SEARCHES = ['Vodka Premium', 'Margarita', 'Simple Syrup'];
-
-const RECENT_COCKTAILS = [
-  { id: '1', name: 'Classic Margarita', type: 'cocktail', totalCost: 2.45 },
-  { id: '2', name: 'Old Fashioned', type: 'cocktail', totalCost: 3.2 },
-  { id: '3', name: 'Mojito', type: 'cocktail', totalCost: 1.85 },
-];
-
-const RECENT_INGREDIENTS = [
-  { id: '1', name: 'Vodka Premium', type: 'ingredient', costPerOz: 0.98 },
-  { id: '2', name: 'Simple Syrup', type: 'ingredient', costPerOz: 0.53 },
-];
-
-// Mock search results
-const SEARCH_RESULTS = {
-  ingredients: [
-    {
-      id: '1',
-      name: 'Vodka Premium',
-      type: 'ingredient',
-      costPerOz: 0.98,
-      category: 'Spirit',
-    },
-    {
-      id: '2',
-      name: 'Vodka (Standard)',
-      type: 'ingredient',
-      costPerOz: 0.75,
-      category: 'Spirit',
-    },
-    {
-      id: '3',
-      name: 'Simple Syrup',
-      type: 'ingredient',
-      costPerOz: 0.53,
-      category: 'Syrup',
-    },
-  ],
-  cocktails: [
-    {
-      id: '1',
-      name: 'Classic Margarita',
-      type: 'cocktail',
-      totalCost: 2.45,
-      ingredients: 3,
-    },
-    {
-      id: '2',
-      name: 'Spicy Margarita',
-      type: 'cocktail',
-      totalCost: 2.75,
-      ingredients: 4,
-    },
-    {
-      id: '3',
-      name: 'Frozen Margarita',
-      type: 'cocktail',
-      totalCost: 3.1,
-      ingredients: 4,
-    },
-  ],
-};
+import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useIngredientsStore } from '@/src/stores/ingredients-store';
+import { useCocktailsStore } from '@/src/stores/cocktails-store';
+import { volumeLabel } from '@/src/types/models';
+import {
+  calculateCostPerOz,
+  calculateCocktailMetrics,
+} from '@/src/services/calculation-service';
 
 export default function SearchScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
+  const colors = useThemeColors();
   const [searchQuery, setSearchQuery] = useState('');
-  const [hasSearched, setHasSearched] = useState(false);
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setHasSearched(query.length > 0);
-  };
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: 'Search' });
+  }, [navigation]);
 
-  const handleRecentSearchPress = (search: string) => {
-    setSearchQuery(search);
-    setHasSearched(true);
-  };
+  const { ingredients } = useIngredientsStore();
+  const { cocktails } = useCocktailsStore();
 
-  const handleItemPress = (item: any) => {
-    if (item.type === 'cocktail') {
-      router.push({
-        pathname: '/cocktail-detail',
-        params: { id: item.id },
-      });
-    } else {
-      router.push({
-        pathname: '/ingredient-detail',
-        params: { id: item.id },
-      });
-    }
-  };
+  const hasSearched = searchQuery.length > 0;
 
-  const getFilteredResults = () => {
+  // Search real data from stores
+  const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return { ingredients: [], cocktails: [] };
 
     const query = searchQuery.toLowerCase();
     return {
-      ingredients: SEARCH_RESULTS.ingredients.filter(
-        (item) =>
-          item.name.toLowerCase().includes(query) ||
-          item.category.toLowerCase().includes(query)
-      ),
-      cocktails: SEARCH_RESULTS.cocktails.filter((item) =>
-        item.name.toLowerCase().includes(query)
-      ),
+      ingredients: ingredients
+        .filter(
+          (i) =>
+            i.name.toLowerCase().includes(query) ||
+            (i.type && i.type.toLowerCase().includes(query))
+        )
+        .slice(0, 10),
+      cocktails: cocktails
+        .filter(
+          (c) =>
+            c.name.toLowerCase().includes(query) ||
+            (c.description && c.description.toLowerCase().includes(query)) ||
+            c.ingredients.some((i) =>
+              i.name.toLowerCase().includes(query)
+            )
+        )
+        .slice(0, 10),
     };
-  };
+  }, [searchQuery, ingredients, cocktails]);
 
-  const searchResults = getFilteredResults();
   const totalResults =
     searchResults.ingredients.length + searchResults.cocktails.length;
 
+  const handleItemPress = (type: 'ingredient' | 'cocktail', id: string) => {
+    router.push({
+      pathname: type === 'cocktail' ? '/cocktail-detail' : '/ingredient-detail',
+      params: { id },
+    });
+  };
+
   return (
     <GradientBackground>
-      <ScrollView className="flex-1">
+      <View className="flex-1">
         <View className="p-4">
-          {/* Header */}
-          <View className="flex-row items-center gap-3 mb-6">
-            <BackButton />
-            <View className="flex-1">
-              <ScreenTitle title="Search" variant="main" />
-              <Text
-                className="text-g3 dark:text-n1"
-              >
-                Find ingredients and cocktails
-              </Text>
-            </View>
-          </View>
-
           {/* Search Bar */}
           <View className="mb-6">
             <SearchBar
               placeholder="Search ingredients and cocktails..."
               value={searchQuery}
-              onChangeText={handleSearch}
+              onChangeText={setSearchQuery}
             />
           </View>
 
-          {/* Recent Searches */}
-          {!hasSearched && (
-            <Card className="mb-6">
-              <ScreenTitle
-                title="Recent Searches"
-                variant="section"
-                className="mb-3"
-              />
-              {RECENT_SEARCHES.length > 0 ? (
-                <View className="flex flex-col gap-2">
-                  {RECENT_SEARCHES.map((search, index) => (
-                    <Pressable
-                      key={index}
-                      onPress={() => handleRecentSearchPress(search)}
-                      className="flex-row items-center gap-3 p-3 bg-n1/50 dark:bg-p3/50 rounded-lg"
-                    >
-                      <Ionicons name="time" size={16} color="#6B7280" />
-                      <Text
-                        className="flex-1 text-g4 dark:text-n1"
-                      >
-                        {search}
-                      </Text>
-                      <Ionicons
-                        name="arrow-forward"
-                        size={16}
-                        color="#6B7280"
-                      />
-                    </Pressable>
-                  ))}
-                </View>
-              ) : (
-                <Text
-                  className="text-g3 dark:text-n1 text-center py-4"
-                >
-                  No recent searches
-                </Text>
-              )}
-            </Card>
-          )}
-
-          {/* Search Results */}
-          {hasSearched && (
-            <Card className="mb-6">
-              <ScreenTitle
-                title={`Search Results (${totalResults})`}
-                variant="section"
-                className="mb-3"
-              />
-
-              {totalResults === 0 ? (
+          <ScrollView>
+            {/* Empty state when no search */}
+            {!hasSearched && (
+              <Card>
                 <View className="py-8 items-center">
-                  <Ionicons name="search" size={48} color="#9CA3AF" />
+                  <Ionicons name="search" size={48} color={colors.textSecondary} />
                   <Text
                     className="text-g3 dark:text-n1 text-center mt-3"
                     style={{ fontWeight: '500' }}
                   >
-                    No results found
+                    Search your library
                   </Text>
-                  <Text
-                    className="text-sm text-g3 dark:text-n1 text-center mt-1"
-                  >
-                    Try a different search term
+                  <Text className="text-sm text-g3 dark:text-n1 text-center mt-1">
+                    {ingredients.length} ingredients and {cocktails.length}{' '}
+                    cocktails
                   </Text>
                 </View>
-              ) : (
-                <View className="flex flex-col gap-4">
-                  {/* Ingredients Results */}
-                  {searchResults.ingredients.length > 0 && (
-                    <View>
-                      <Text
-                        className="text-g4 dark:text-n1 mb-2"
-                        style={{ fontWeight: '500' }}
-                      >
-                        Ingredients ({searchResults.ingredients.length})
-                      </Text>
-                      <View className="flex flex-col gap-2">
-                        {searchResults.ingredients.map((item) => (
-                          <Pressable
-                            key={item.id}
-                            onPress={() => handleItemPress(item)}
-                            className="flex-row items-center justify-between p-3 bg-n1/50 dark:bg-p3/50 rounded-lg"
-                          >
-                            <View className="flex-row items-center gap-3">
-                              <Ionicons
-                                name="flask"
-                                size={20}
-                                color="#3B82F6"
-                              />
-                              <View>
-                                <Text
-                                  className="text-g4 dark:text-n1"
-                                  style={{
-                                    fontWeight: '500',
-                                  }}
-                                >
-                                  {item.name}
-                                </Text>
-                                <Text
-                                  className="text-sm text-g3 dark:text-n1"
-                                >
-                                  {item.category} • ${item.costPerOz.toFixed(2)}
-                                  /oz
-                                </Text>
-                              </View>
-                            </View>
-                            <Ionicons
-                              name="chevron-forward"
-                              size={20}
-                              color="#6B7280"
-                            />
-                          </Pressable>
-                        ))}
-                      </View>
-                    </View>
-                  )}
+              </Card>
+            )}
 
-                  {/* Cocktails Results */}
-                  {searchResults.cocktails.length > 0 && (
-                    <View>
-                      <Text
-                        className="text-g4 dark:text-n1 mb-2"
-                        style={{ fontWeight: '500' }}
-                      >
-                        Cocktails ({searchResults.cocktails.length})
-                      </Text>
-                      <View className="flex flex-col gap-2">
-                        {searchResults.cocktails.map((item) => (
-                          <Pressable
-                            key={item.id}
-                            onPress={() => handleItemPress(item)}
-                            className="flex-row items-center justify-between p-3 bg-n1/50 dark:bg-p3/50 rounded-lg"
-                          >
-                            <View className="flex-row items-center gap-3">
-                              <Ionicons name="wine" size={20} color="#10B981" />
-                              <View>
-                                <Text
-                                  className="text-g4 dark:text-n1"
-                                  style={{
-                                    fontWeight: '500',
-                                  }}
-                                >
-                                  {item.name}
-                                </Text>
-                                <Text
-                                  className="text-sm text-g3 dark:text-n1"
-                                >
-                                  {item.ingredients} ingredients • $
-                                  {item.totalCost.toFixed(2)} cost
-                                </Text>
-                              </View>
-                            </View>
-                            <Ionicons
-                              name="chevron-forward"
-                              size={20}
-                              color="#6B7280"
-                            />
-                          </Pressable>
-                        ))}
-                      </View>
-                    </View>
-                  )}
-                </View>
-              )}
-            </Card>
-          )}
+            {/* Search Results */}
+            {hasSearched && (
+              <Card className="mb-6">
+                <ScreenTitle
+                  title={`Search Results (${totalResults})`}
+                  variant="section"
+                  className="mb-3"
+                />
 
-          {/* Recently Viewed */}
-          {!hasSearched && (
-            <Card>
-              <ScreenTitle
-                title="Recently Viewed"
-                variant="section"
-                className="mb-3"
-              />
-              <View className="flex flex-col gap-4">
-                {/* Recent Cocktails */}
-                <View>
-                  <Text
-                    className="text-g4 dark:text-n1 mb-2"
-                    style={{ fontWeight: '500' }}
-                  >
-                    Cocktails
-                  </Text>
-                  <View className="flex flex-col gap-2">
-                    {RECENT_COCKTAILS.map((item) => (
-                      <Pressable
-                        key={item.id}
-                        onPress={() => handleItemPress(item)}
-                        className="flex-row items-center justify-between p-3 bg-n1/50 dark:bg-p3/50 rounded-lg"
-                      >
-                        <View className="flex-row items-center gap-3">
-                          <Ionicons name="wine" size={20} color="#10B981" />
-                          <View>
-                            <Text
-                              className="text-g4 dark:text-n1"
-                              style={{ fontWeight: '500' }}
-                            >
-                              {item.name}
-                            </Text>
-                            <Text
-                              className="text-sm text-g3 dark:text-n1"
-                            >
-                              Total cost: ${item.totalCost.toFixed(2)}
-                            </Text>
-                          </View>
-                        </View>
-                        <Ionicons
-                          name="chevron-forward"
-                          size={20}
-                          color="#6B7280"
-                        />
-                      </Pressable>
-                    ))}
+                {totalResults === 0 ? (
+                  <View className="py-8 items-center">
+                    <Ionicons name="search" size={48} color={colors.textSecondary} />
+                    <Text
+                      className="text-g3 dark:text-n1 text-center mt-3"
+                      style={{ fontWeight: '500' }}
+                    >
+                      No results found
+                    </Text>
+                    <Text className="text-sm text-g3 dark:text-n1 text-center mt-1">
+                      Try a different search term
+                    </Text>
                   </View>
-                </View>
-
-                {/* Recent Ingredients */}
-                <View>
-                  <Text
-                    className="text-g4 dark:text-n1 mb-2"
-                    style={{ fontWeight: '500' }}
-                  >
-                    Ingredients
-                  </Text>
-                  <View className="flex flex-col gap-2">
-                    {RECENT_INGREDIENTS.map((item) => (
-                      <Pressable
-                        key={item.id}
-                        onPress={() => handleItemPress(item)}
-                        className="flex-row items-center justify-between p-3 bg-n1/50 dark:bg-p3/50 rounded-lg"
-                      >
-                        <View className="flex-row items-center gap-3">
-                          <Ionicons name="flask" size={20} color="#3B82F6" />
-                          <View>
-                            <Text
-                              className="text-g4 dark:text-n1"
-                              style={{ fontWeight: '500' }}
-                            >
-                              {item.name}
-                            </Text>
-                            <Text
-                              className="text-sm text-g3 dark:text-n1"
-                            >
-                              ${item.costPerOz.toFixed(2)}/oz
-                            </Text>
-                          </View>
+                ) : (
+                  <View className="flex flex-col gap-4">
+                    {/* Ingredients Results */}
+                    {searchResults.ingredients.length > 0 && (
+                      <View>
+                        <Text
+                          className="text-g4 dark:text-n1 mb-2"
+                          style={{ fontWeight: '500' }}
+                        >
+                          Ingredients ({searchResults.ingredients.length})
+                        </Text>
+                        <View className="flex flex-col gap-2">
+                          {searchResults.ingredients.map((item) => {
+                            const costPerOz = calculateCostPerOz(
+                              item.productSize,
+                              item.productCost
+                            );
+                            return (
+                              <Pressable
+                                key={item.id}
+                                onPress={() =>
+                                  handleItemPress('ingredient', item.id)
+                                }
+                                className="flex-row items-center justify-between p-3 bg-n1/50 dark:bg-p3/50 rounded-lg"
+                              >
+                                <View className="flex-row items-center gap-3">
+                                  <Ionicons
+                                    name="flask"
+                                    size={20}
+                                    color={colors.primary}
+                                  />
+                                  <View>
+                                    <Text
+                                      className="text-g4 dark:text-n1"
+                                      style={{ fontWeight: '500' }}
+                                    >
+                                      {item.name}
+                                    </Text>
+                                    <Text className="text-sm text-g3 dark:text-n1">
+                                      {item.type || 'Other'} •{' '}
+                                      {volumeLabel(item.productSize)} • $
+                                      {costPerOz.toFixed(2)}/oz
+                                    </Text>
+                                  </View>
+                                </View>
+                                <Ionicons
+                                  name="chevron-forward"
+                                  size={20}
+                                  color={colors.textSecondary}
+                                />
+                              </Pressable>
+                            );
+                          })}
                         </View>
-                        <Ionicons
-                          name="chevron-forward"
-                          size={20}
-                          color="#6B7280"
-                        />
-                      </Pressable>
-                    ))}
+                      </View>
+                    )}
+
+                    {/* Cocktails Results */}
+                    {searchResults.cocktails.length > 0 && (
+                      <View>
+                        <Text
+                          className="text-g4 dark:text-n1 mb-2"
+                          style={{ fontWeight: '500' }}
+                        >
+                          Cocktails ({searchResults.cocktails.length})
+                        </Text>
+                        <View className="flex flex-col gap-2">
+                          {searchResults.cocktails.map((item) => {
+                            const metrics = calculateCocktailMetrics(
+                              item.ingredients
+                            );
+                            return (
+                              <Pressable
+                                key={item.id}
+                                onPress={() =>
+                                  handleItemPress('cocktail', item.id)
+                                }
+                                className="flex-row items-center justify-between p-3 bg-n1/50 dark:bg-p3/50 rounded-lg"
+                              >
+                                <View className="flex-row items-center gap-3">
+                                  <Ionicons
+                                    name="wine"
+                                    size={20}
+                                    color={colors.success}
+                                  />
+                                  <View>
+                                    <Text
+                                      className="text-g4 dark:text-n1"
+                                      style={{ fontWeight: '500' }}
+                                    >
+                                      {item.name}
+                                    </Text>
+                                    <Text className="text-sm text-g3 dark:text-n1">
+                                      {item.ingredients.length} ingredients • $
+                                      {metrics.totalCost.toFixed(2)} cost
+                                    </Text>
+                                  </View>
+                                </View>
+                                <Ionicons
+                                  name="chevron-forward"
+                                  size={20}
+                                  color={colors.textSecondary}
+                                />
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    )}
                   </View>
-                </View>
-              </View>
-            </Card>
-          )}
+                )}
+              </Card>
+            )}
+          </ScrollView>
         </View>
-      </ScrollView>
+      </View>
     </GradientBackground>
   );
 }

@@ -9,11 +9,49 @@ interface PourCostPerformanceBarProps {
 }
 
 /**
- * Reusable pour cost performance bar with logarithmic scaling
- * Centers on the global pour cost goal with smart scaling:
- * - Middle 30% of bar: ±10% around goal (most common range)
- * - Outer 40% on each side: Logarithmically scaled for extreme values
+ * Feedback messages based on how far the pour cost % is from the user's goal.
+ * Uses percentage of the goal as the scale, not absolute %, so it adapts
+ * to whatever target the user has set (15%, 20%, 25%, etc.).
  */
+function getFeedbackMessage(value: number, goal: number): string {
+  if (value <= 0 || goal <= 0) return 'Add ingredients to see performance.';
+
+  const ratio = value / goal; // 1.0 = exactly at goal
+
+  // Way below goal (< 60% of target) — pricing is very high
+  if (ratio < 0.6) {
+    return `At ${value.toFixed(1)}%, your pour cost is well below your ${goal}% target. Your pricing may be too high — consider lowering prices to drive more sales.`;
+  }
+
+  // Below goal (60-80% of target) — room to optimize
+  if (ratio < 0.8) {
+    return `At ${value.toFixed(1)}%, you're below your ${goal}% target. Strong margins — you could lower pricing slightly to be more competitive.`;
+  }
+
+  // Slightly below goal (80-95% of target) — great range
+  if (ratio < 0.95) {
+    return `At ${value.toFixed(1)}%, you're just under your ${goal}% target. Great balance between margin and value.`;
+  }
+
+  // At goal (95-105% of target) — on target
+  if (ratio <= 1.05) {
+    return `At ${value.toFixed(1)}%, you're right on your ${goal}% target.`;
+  }
+
+  // Slightly above goal (105-120% of target) — watch it
+  if (ratio <= 1.2) {
+    return `At ${value.toFixed(1)}%, you're slightly above your ${goal}% target. Consider a small price increase or a less expensive substitute.`;
+  }
+
+  // Above goal (120-150% of target) — needs attention
+  if (ratio <= 1.5) {
+    return `At ${value.toFixed(1)}%, you're above your ${goal}% target. Review your pricing or ingredient costs to improve margins.`;
+  }
+
+  // Way above goal (>150% of target) — profitability concern
+  return `At ${value.toFixed(1)}%, you're significantly over your ${goal}% target. This item is eating into profits — raise the price or rework the recipe.`;
+}
+
 export default function PourCostPerformanceBar({
   pourCostPercentage,
   showLabels = true,
@@ -21,29 +59,23 @@ export default function PourCostPerformanceBar({
 }: PourCostPerformanceBarProps) {
   const { pourCostGoal } = useAppStore();
 
-  // Calculate scale points around the goal
   const goal = pourCostGoal || 20;
-  const minValue = Math.max(goal * 0.25, 2); // 25% of goal, minimum 2%
-  const maxValue = goal * 2.5; // 250% of goal
+  const minValue = Math.max(goal * 0.25, 2);
+  const maxValue = goal * 2.5;
 
-  // Middle range (±10% around goal) gets 30% of bar space
   const middleRangeStart = goal - 10;
   const middleRangeEnd = goal + 10;
 
-  // Calculate bar position with logarithmic scaling
   const getBarPosition = (value: number): number => {
     if (value <= middleRangeStart) {
-      // Left side: logarithmic compression (0% to 15% of bar)
       const ratio =
         Math.log(value / minValue) / Math.log(middleRangeStart / minValue);
       return ratio * 15;
     } else if (value <= middleRangeEnd) {
-      // Middle range: linear scaling (15% to 85% of bar)
       const ratio =
         (value - middleRangeStart) / (middleRangeEnd - middleRangeStart);
       return 15 + ratio * 70;
     } else {
-      // Right side: logarithmic compression (85% to 100% of bar)
       const ratio =
         Math.log(value / middleRangeEnd) / Math.log(maxValue / middleRangeEnd);
       return 85 + ratio * 15;
@@ -55,68 +87,46 @@ export default function PourCostPerformanceBar({
     100
   );
 
-  // Get color based on performance relative to goal
-  const getPerformanceColor = (value: number) => {
-    const deviation = Math.abs(value - goal);
-    if (deviation <= 3) return 'bg-s22'; // Within 3% of goal
-    if (deviation <= 7) return 'bg-s12'; // Within 7% of goal
-    return 'bg-e1'; // More than 7% away from goal
+  // Color based on ratio to goal
+  const ratio = pourCostPercentage / goal;
+  const getPerformanceColor = () => {
+    if (ratio <= 1.05) return 'bg-s22';  // At or below goal — green
+    if (ratio <= 1.2) return 'bg-s12';   // Slightly above — yellow
+    return 'bg-e1';                       // Over — red
   };
 
-  const getPerformanceTextColor = (value: number) => {
-    const deviation = Math.abs(value - goal);
-    if (deviation <= 3) return 'text-s22';
-    if (deviation <= 7) return 'text-s12';
+  const getPerformanceTextColor = () => {
+    if (ratio <= 1.05) return 'text-s22';
+    if (ratio <= 1.2) return 'text-s12';
     return 'text-e1';
-  };
-
-  // Generate feedback message
-  const getFeedbackMessage = (value: number) => {
-    const deviation = value - goal;
-    if (Math.abs(deviation) <= 2) {
-      return `Perfect! Right at your ${goal}% goal.`;
-    } else if (deviation < 0) {
-      return `Excellent! ${Math.abs(deviation).toFixed(1)}% below your goal.`;
-    } else if (deviation <= 5) {
-      return `Above goal by ${deviation.toFixed(1)}%. Consider adjusting price.`;
-    } else {
-      return `Significantly above goal. Consider raising price for better profitability.`;
-    }
   };
 
   return (
     <View className={className}>
-      <View className="">
+      <View>
         {showLabels && (
           <View className="flex-row justify-between mb-3">
             <Text className="text-g3 dark:text-g1 font-bold">
               Pour Cost Performance
             </Text>
             <Text
-              className={`font-medium ${getPerformanceTextColor(pourCostPercentage)}`}
+              className={`font-medium ${getPerformanceTextColor()}`}
             >
-              {pourCostPercentage.toFixed(1)}% / {goal}% Cost Target
+              {pourCostPercentage.toFixed(1)}% / {goal}% Target
             </Text>
           </View>
         )}
 
         <View className="h-5 bg-g1/80 rounded-full">
           <View
-            className={`PerformanceBar h-full rounded-full ${getPerformanceColor(pourCostPercentage)}`}
-            style={{
-              width: `${barPosition}%`,
-              boxShadow: `0 0 8px ${getPerformanceColor(pourCostPercentage)
-                .replace('bg-', '')
-                .replace('s22', '#22c55e')
-                .replace('s12', '#fde047')
-                .replace('e1', '#ef4444')}`,
-            }}
+            className={`PerformanceBar h-full rounded-full ${getPerformanceColor()}`}
+            style={{ width: `${barPosition}%` }}
           />
         </View>
 
         {showLabels && (
           <Text className="text-g3 dark:text-g2 mt-4 text-sm">
-            {getFeedbackMessage(pourCostPercentage)}
+            {getFeedbackMessage(pourCostPercentage, goal)}
           </Text>
         )}
       </View>

@@ -7,7 +7,7 @@ import SearchBar from '@/src/components/ui/SearchBar';
 import EmptyState from '@/src/components/EmptyState';
 import { useRouter } from 'expo-router';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import { CocktailWithCalculations } from '@/src/types/models';
+import { Cocktail } from '@/src/types/models';
 import Button from '@/src/components/ui/Button';
 import {
   CocktailCategorySelector,
@@ -68,7 +68,7 @@ export default function CocktailsScreen() {
   }, [error, clearError, toast]);
 
   // Handle cocktail selection
-  const handleCocktailPress = (cocktail: CocktailWithCalculations) => {
+  const handleCocktailPress = (cocktail: Cocktail) => {
     router.push({
       pathname: '/cocktail-detail',
       params: { id: cocktail.id },
@@ -81,7 +81,7 @@ export default function CocktailsScreen() {
   };
 
   // Handle cocktail editing
-  const handleEditCocktail = (cocktail: CocktailWithCalculations) => {
+  const handleEditCocktail = (cocktail: Cocktail) => {
     router.push({
       pathname: '/cocktail-form',
       params: {
@@ -90,14 +90,18 @@ export default function CocktailsScreen() {
         description: cocktail.description,
         category: cocktail.category,
         notes: cocktail.notes,
-        createdAt: cocktail.createdAt.toISOString(),
+        createdAt: cocktail.createdAt instanceof Date
+          ? cocktail.createdAt.toISOString()
+          : new Date(cocktail.createdAt).toISOString(),
         favorited: (cocktail.favorited || false).toString(),
+        retailPrice: cocktail.retailPrice?.toString(),
+        ingredients: JSON.stringify(cocktail.ingredients),
       },
     });
   };
 
   // Handle cocktail deletion with confirmation
-  const handleDeleteCocktail = (cocktail: CocktailWithCalculations) => {
+  const handleDeleteCocktail = (cocktail: Cocktail) => {
     FeedbackService.showDeleteConfirmation(
       cocktail.name,
       async () => {
@@ -150,11 +154,11 @@ export default function CocktailsScreen() {
             {/* Sort Options */}
             <SortSelector
               sortOptions={[
-                { key: 'Date Created', label: 'Recently Added' },
-                { key: 'Name', label: 'Name' },
-                { key: 'Cost', label: 'Cost' },
-                { key: 'Cost %', label: 'Cost %' },
-                { key: 'Margin', label: 'Profit' },
+                { key: 'name', label: 'Name' },
+                { key: 'created', label: 'Recent' },
+                { key: 'cost', label: 'Cost' },
+                { key: 'costPercent', label: 'Cost %' },
+                { key: 'profitMargin', label: 'Margin' },
               ]}
               selectedSort={sortBy}
               onSortChange={(sortKey) => setSortBy(sortKey as any)}

@@ -30,8 +30,9 @@ interface SwipeableCardProps {
   };
   threshold?: number;
   className?: string;
-  disableRightSwipe?: boolean; // New prop to disable right swipe
-  variant?: 'gradient' | 'ghost' | 'custom'; // Card variant to use
+  disableRightSwipe?: boolean;
+  variant?: 'gradient' | 'ghost' | 'custom';
+  padding?: 'none' | 'small' | 'medium' | 'large';
 }
 
 // Default actions will use theme colors, defined inside component
@@ -46,6 +47,7 @@ export default function SwipeableCard({
   className = '',
   disableRightSwipe = false,
   variant = 'gradient',
+  padding,
 }: SwipeableCardProps) {
   const { isDarkMode } = useTheme();
   const { colors } = useThemeColors();
@@ -237,12 +239,12 @@ export default function SwipeableCard({
 
           <Card
             onPress={() => {
-              // Only handle press if we haven't triggered a swipe action
               if (!hasTriggeredAction.value && Math.abs(translateX.value) < 5) {
                 onPress?.();
               }
             }}
             className={`${className} relative z-[1]`}
+            padding={padding}
           >
             {children}
           </Card>

@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import SearchBar from '@/src/components/ui/SearchBar';
-import BackButton from '@/src/components/ui/BackButton';
 import Card from '@/src/components/ui/Card';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
-import { searchIngredients, createCocktailIngredient, calculateCostPerOz } from '@/src/services/mock-data';
-import { SavedIngredient } from '@/src/types/models';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useIngredientsStore } from '@/src/stores/ingredients-store';
+import { SavedIngredient, CocktailIngredient, volumeLabel, fraction } from '@/src/types/models';
+import { calculateCostPerOz, calculateCostPerPour } from '@/src/services/calculation-service';
 import { useIngredientSelectionStore } from '@/src/stores/ingredient-selection-store';
 
 /**
@@ -19,6 +20,8 @@ import { useIngredientSelectionStore } from '@/src/stores/ingredient-selection-s
 export default function IngredientSelectorScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const navigation = useNavigation();
+  const colors = useThemeColors();
   const params = useLocalSearchParams();
   const { setSelectedIngredients: setStoreIngredients } = useIngredientSelectionStore();
   
@@ -27,6 +30,21 @@ export default function IngredientSelectorScreen() {
   const [selectedIngredients, setSelectedIngredients] = useState<SavedIngredient[]>([]);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: 'Add Ingredients',
+      headerLeft: () => (
+        <Pressable onPress={handleFinishSelection} className="p-2">
+          {selectedIngredients.length > 0 ? (
+            <Text style={{ color: colors.accent, fontWeight: '600', fontSize: 16 }}>Save</Text>
+          ) : (
+            <Ionicons name="arrow-back" size={22} color={colors.text} />
+          )}
+        </Pressable>
+      ),
+    });
+  }, [selectedIngredients.length, navigation, colors]);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (event) => {
@@ -62,9 +80,15 @@ export default function IngredientSelectorScreen() {
 
   const handleFinishSelection = () => {
     // Convert all selected ingredients to cocktail ingredients and send them back
-    const cocktailIngredients = selectedIngredients.map(ingredient => 
-      createCocktailIngredient(ingredient, 1.5, 'oz')
-    );
+    const defaultPourSize = fraction(3, 2); // 1.5 oz
+    const cocktailIngredients: CocktailIngredient[] = selectedIngredients.map(ingredient => ({
+      ingredientId: ingredient.id,
+      name: ingredient.name,
+      productSize: ingredient.productSize,
+      productCost: ingredient.productCost,
+      pourSize: defaultPourSize,
+      cost: calculateCostPerPour(ingredient.productSize, ingredient.productCost, defaultPourSize),
+    }));
     
     setStoreIngredients(cocktailIngredients);
     
@@ -72,12 +96,17 @@ export default function IngredientSelectorScreen() {
     router.back();
   };
 
-  const getFilteredResults = () => {
-    if (!searchQuery.trim()) return [];
-    return searchIngredients(searchQuery);
-  };
+  const { ingredients } = useIngredientsStore();
 
-  const searchResults = getFilteredResults();
+  const searchResults = (() => {
+    if (!searchQuery.trim()) return ingredients; // Show all ingredients when no search
+    const query = searchQuery.toLowerCase();
+    return ingredients.filter(
+      (i) =>
+        i.name.toLowerCase().includes(query) ||
+        (i.type && i.type.toLowerCase().includes(query))
+    );
+  })();
 
   return (
     <GradientBackground>
@@ -87,26 +116,10 @@ export default function IngredientSelectorScreen() {
       >
         <ScrollView 
           className="flex-1"
-          style={{ paddingTop: insets.top + 20 }}
           contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
           keyboardShouldPersistTaps="handled"
         >
         <View className="p-4">
-          {/* Header */}
-          <View className="flex-row items-center gap-3 mb-6">
-            <BackButton 
-              onPress={handleFinishSelection}
-              variant={selectedIngredients.length > 0 ? 'save' : 'default'}
-              showSaveText={selectedIngredients.length > 0}
-            />
-            <View className="flex-1">
-              <ScreenTitle title="Add Ingredients" variant="main" />
-              <Text className="text-g3 dark:text-n1">
-                Search and select ingredients for your cocktail
-              </Text>
-            </View>
-          </View>
-
           {/* Search Bar */}
           <View className="mb-6">
             <SearchBar
@@ -228,7 +241,7 @@ export default function IngredientSelectorScreen() {
                               {ingredient.name}
                             </Text>
                             <Text className="text-sm text-g3 dark:text-g2">
-                              {ingredient.type} • ${calculateCostPerOz(ingredient.bottleSize, ingredient.bottlePrice).toFixed(2)}/oz
+                              {ingredient.type} • ${calculateCostPerOz(ingredient.productSize, ingredient.productCost).toFixed(2)}/oz
                             </Text>
                           </View>
                         </View>

@@ -28,7 +28,7 @@ export default function Card({
         return ''; // No default styles, use className for full customization
       case 'gradient':
       default:
-        return 'border border-g1/50 dark:border-p1/50 rounded-xl overflow-hidden shadow-4'; // No background, handled by LinearGradient
+        return 'border-l border-g1/20 dark:border-n1/20 rounded-xl overflow-hidden shadow-4'; // No background, handled by LinearGradient
     }
   };
 
@@ -50,7 +50,7 @@ export default function Card({
   const baseClassName = `rounded-lg ${className} ${getVariantClass()} ${variant === 'gradient' || !variant ? '' : getPaddingClass()}`;
 
   // Define gradient colors for the gradient variant with opacity
-  const gradientColors = [`${colors.p1}50`, `${colors.p3}50`] as const;
+  const gradientColors = [`${colors.p1}50`, `${colors.p1}30`] as const;
 
   // Default behavior is gradient, only render non-gradient for ghost and custom variants
   if (variant === 'gradient' || !variant) {

@@ -23,6 +23,22 @@ A cocktail costing application that helps users calculate ingredient costs and d
 
 ## Architecture Guidelines
 
+### Data Model
+- `Volume` is a discriminated union (see `src/types/models.ts`) matching the iOS Volume enum. Use `volumeToOunces()`, `volumeLabel()`, and `fraction()` helpers.
+- `SavedIngredient` uses `productSize: Volume` and `productCost: number` — NOT bottleSize/bottlePrice.
+- `CocktailIngredient` uses `ingredientId`, `pourSize: Volume`, `cost` — NOT amount/unit.
+- Stores hold base types only (`SavedIngredient[]`, `Cocktail[]`). Metrics are computed on-demand via `calculateIngredientMetrics()` and `calculateCocktailMetrics()` from `calculation-service.ts`.
+- Calculation constants match iOS exactly: `ml * 0.033814 = oz`, default margin 18%.
+
+### Backend (Supabase)
+- **Schema**: `supabase/schema.sql` is the source of truth. Volume stored as JSONB — zero conversion between DB and TypeScript.
+- **Auth**: Facebook + Google via Supabase Auth. Preserve existing Facebook App ID `1522826757747836` for iOS user migration.
+- **RLS Strategy**: MVP uses simple `user_id = auth.uid()` RLS policies with direct client access. This is sufficient while each user only sees their own data. When multi-location, staff roles, or enterprise features are added post-MVP, move authorization logic to Edge Functions (service role key bypasses RLS) and keep RLS as a safety net only. Don't try to encode complex permission logic in SQL policies.
+- **Migration**: DynamoDB → Supabase migration details in `migrationBrief.md`. The Supabase schema in that file is outdated — always use `supabase/schema.sql` instead.
+
+### Archived Code
+- `src/_future/` contains the flexible ingredient system (type-specific forms, multi-retail-config models). Excluded from TypeScript compilation. Intended for post-MVP reimplementation.
+
 ### Theme System
 - Always use the centralized theme colors from `useThemeColors()` hook
 - Never use hardcoded hex colors, RGB, or RGBA values
@@ -40,3 +56,25 @@ A cocktail costing application that helps users calculate ingredient costs and d
   - Example: `className="Button p-2 bg-g1 rounded-lg"`
   - Example: `className="InputField border border-g2 px-3 py-2"`
   - This helps identify component-specific styles and improves maintainability
+
+- **Theme Colors**: Always use ThemeContext instead of hex codes for maintainability
+  - **NEVER** use hex codes like `#8B5CF6` or `#DC2626` 
+  - **DO** use `useThemeColors()` hook when Tailwind classes aren't viable
+  - Example: `color={themeColors.colors.s31}` instead of `color="#8B5CF6"`
+  - Available colors: p1-p4, n1-n4, g1-g4, s11-s14, s21-s24, s31-s34, e1-e4
+
+- **Card Component Usage**: The Card component has built-in styling and special props
+  - **DON'T** add color/background styling via `className` - Card handles this automatically
+  - **DO** use `displayClasses` prop for layout/spacing inside the card
+  - **DO** use `variant` prop: 'gradient' (default) or 'custom'
+  - **DO** use `padding` prop: 'none', 'small', 'medium' (default), 'large'
+  - Example: `<Card displayClasses="flex-row items-center gap-4">` ✅
+  - Example: `<Card className="bg-blue-500 p-4">` ❌ (conflicts with Card's styling)
+  - The Card automatically provides glassmorphism gradient background and proper theming
+
+- **Spacing**: Always use flexbox with `gap` instead of `space-y` or `space-x`
+  - **DON'T** use `space-y-4` or `space-x-3` - these can be unreliable
+  - **DO** use `flex-col gap-4` or `flex-row gap-3` for consistent spacing
+  - Example: `<View className="flex-col gap-4">` ✅
+  - Example: `<View className="space-y-4">` ❌ (unreliable)
+  - This ensures consistent spacing across all platforms

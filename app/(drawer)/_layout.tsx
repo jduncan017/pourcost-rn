@@ -45,7 +45,7 @@ export default function DrawerLayout() {
             width: 280,
           },
           drawerActiveTintColor: colors.accent,
-          drawerInactiveTintColor: colors.textSecondary,
+          drawerInactiveTintColor: colors.text,
           drawerItemStyle: {
             marginVertical: 4,
           },
@@ -90,20 +90,7 @@ export default function DrawerLayout() {
           name="settings"
           options={{
             title: 'Settings',
-            drawerLabel: 'Settings',
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="settings" size={size} color={color} />
-            ),
-          }}
-        />
-        <Drawer.Screen
-          name="about"
-          options={{
-            title: 'About',
-            drawerLabel: 'About',
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="information-circle" size={size} color={color} />
-            ),
+            drawerItemStyle: { display: 'none' },
           }}
         />
       </Drawer>
