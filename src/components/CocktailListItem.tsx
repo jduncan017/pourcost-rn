@@ -6,7 +6,7 @@
 import { View, Text } from 'react-native';
 import SwipeableCard from './SwipeableCard';
 import { Cocktail } from '@/src/types/models';
-import { calculateCocktailMetrics } from '@/src/services/calculation-service';
+import { calculateCocktailMetrics, formatCurrency, formatPercentage } from '@/src/services/calculation-service';
 
 interface CocktailListItemProps {
   cocktail: Cocktail;
@@ -33,11 +33,11 @@ export default function CocktailListItem({
   const getHighlight = (): { label: string; value: string; color: string } | null => {
     switch (sortBy) {
       case 'cost':
-        return { label: 'Cost', value: `$${(metrics.totalCost || 0).toFixed(2)}`, color: 'text-n1' };
+        return { label: 'Cost', value: formatCurrency(metrics.totalCost || 0), color: 'text-n1' };
       case 'costPercent':
         return {
           label: 'Cost %',
-          value: `${(metrics.pourCostPercentage || 0).toFixed(1)}%`,
+          value: formatPercentage(metrics.pourCostPercentage || 0),
           color: (metrics.pourCostPercentage || 0) <= 20
             ? 'text-s21'
             : (metrics.pourCostPercentage || 0) <= 25
@@ -45,7 +45,7 @@ export default function CocktailListItem({
               : 'text-e1',
         };
       case 'profitMargin':
-        return { label: 'Margin', value: `$${(metrics.profitMargin || 0).toFixed(2)}`, color: 'text-n1' };
+        return { label: 'Margin', value: formatCurrency(metrics.profitMargin || 0), color: 'text-n1' };
       default:
         return null;
     }

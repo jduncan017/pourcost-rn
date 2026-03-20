@@ -1,4 +1,3 @@
-import React from 'react';
 import Dropdown, { DropdownOption } from './ui/Dropdown';
 import { BOTTLE_SIZES, getCommonBottleSizes, getDefaultBottleSize } from '@/src/constants/bottleSizes';
 

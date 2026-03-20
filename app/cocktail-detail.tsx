@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Image } from 'react-native';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import { useAppStore, HARDCODED_BASE_CURRENCY } from '@/src/stores/app-store';
@@ -6,6 +6,7 @@ import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { themeColors, useThemeColors } from '@/src/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '@/src/components/ui/Card';
+import MetricRow from '@/src/components/ui/MetricRow';
 import ActionSheet from '@/src/components/ui/ActionSheet';
 import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
 import GradientBackground from '@/src/components/ui/GradientBackground';
@@ -17,7 +18,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { volumeLabel, volumeToOunces } from '@/src/types/models';
-import { calculateCocktailMetrics, calculatePourCostPercentage } from '@/src/services/calculation-service';
+import { calculateCocktailMetrics, calculatePourCostPercentage, formatPercentage } from '@/src/services/calculation-service';
 
 /**
  * Cocktail detail screen
@@ -307,34 +308,23 @@ export default function CocktailDetailScreen() {
 
           {/* Cost Analysis */}
           <View className="mb-4 flex-col gap-3">
-            <View className="flex-row justify-between items-center">
-              <Text className="text-n1 dark:text-n2 text-xl font-semibold">
-                Total Cost: {currencySymbol}
-                {metrics.totalCost.toFixed(2)}
-              </Text>
-            </View>
+            <MetricRow
+              label="Total Cost:"
+              value={`${currencySymbol}${metrics.totalCost.toFixed(2)}`}
+              valueColor="text-n1 dark:text-n2"
+            />
 
-            <View className="flex-row justify-between items-center">
-              <Text className="text-n1/70 dark:text-g1 text-lg font-medium">
-                Suggested Price
-              </Text>
-              <Text className="text-n1 dark:text-n2 text-lg font-medium">
-                {currencySymbol}
-                {metrics.suggestedPrice.toFixed(2)}
-              </Text>
-            </View>
+            <MetricRow
+              label="Suggested Price"
+              value={`${currencySymbol}${metrics.suggestedPrice.toFixed(2)}`}
+              valueColor="text-n1 dark:text-n2"
+            />
 
-            <View className="flex-row justify-between items-center">
-              <Text className="text-n1/70 dark:text-g1 text-lg font-medium">
-                Pour Cost
-              </Text>
-              <Text className="text-n1 dark:text-n2 text-lg font-medium">
-                {retailPrice > 0
-                  ? calculatePourCostPercentage(metrics.totalCost, retailPrice).toFixed(1)
-                  : '0.0'}
-                %
-              </Text>
-            </View>
+            <MetricRow
+              label="Pour Cost"
+              value={formatPercentage(retailPrice > 0 ? calculatePourCostPercentage(metrics.totalCost, retailPrice) : 0)}
+              valueColor="text-n1 dark:text-n2"
+            />
 
             {/* Performance Bar */}
             <View className="border-t border-p1 pt-3">

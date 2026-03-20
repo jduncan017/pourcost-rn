@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import MetricRow from '@/src/components/ui/MetricRow';
+import SectionDivider from '@/src/components/ui/SectionDivider';
+import Button from '@/src/components/ui/Button';
 import ChipSelector from '@/src/components/ui/ChipSelector';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, useFocusEffect, useNavigation } from 'expo-router';
@@ -18,8 +21,9 @@ import { useIngredientSelectionStore } from '@/src/stores/ingredient-selection-s
 import {
   COCKTAIL_CATEGORIES,
 } from '@/src/constants/appConstants';
-import { CocktailIngredient, CocktailCategory, Volume, volumeToOunces, volumeLabel } from '@/src/types/models';
-import { calculateCostPerPour, calculateCostPerOz } from '@/src/services/calculation-service';
+import { CocktailIngredient, CocktailCategory, Volume } from '@/src/types/models';
+import { calculateCostPerPour, formatCurrency } from '@/src/services/calculation-service';
+import { FeedbackService } from '@/src/services/feedback-service';
 
 /**
  * Cocktail creation and editing form
@@ -192,24 +196,13 @@ export default function CocktailFormScreen() {
 
   // Handle delete
   const handleDelete = () => {
-    Alert.alert(
-      'Delete Cocktail',
-      `Are you sure you want to delete "${name}"? This action cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteCocktail(cocktailId);
-              router.back();
-            } catch (error) {
-              Alert.alert('Error', 'Failed to delete cocktail');
-            }
-          },
-        },
-      ]
+    FeedbackService.showDeleteConfirmation(
+      name,
+      async () => {
+        await deleteCocktail(cocktailId);
+        router.back();
+      },
+      'cocktail'
     );
   };
 
@@ -254,7 +247,7 @@ export default function CocktailFormScreen() {
           </View>
 
           {/* Divider */}
-          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+          <SectionDivider />
 
           {/* Ingredients */}
           <View className="flex-col gap-3">
@@ -293,7 +286,7 @@ export default function CocktailFormScreen() {
           </View>
 
           {/* Divider */}
-          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+          <SectionDivider />
 
           {/* Cost Analysis */}
           <View className="flex-col gap-3">
@@ -310,26 +303,9 @@ export default function CocktailFormScreen() {
               keyboardType="decimal-pad"
             />
 
-            <View className="flex-row justify-between">
-              <Text className="text-g3 dark:text-n1">Total Cost:</Text>
-              <Text className="text-g4 dark:text-n1" style={{ fontWeight: '500' }}>
-                ${totalCost.toFixed(2)}
-              </Text>
-            </View>
-
-            <View className="flex-row justify-between">
-              <Text className="text-g3 dark:text-n1">Retail Price:</Text>
-              <Text className="text-g4 dark:text-n1" style={{ fontWeight: '500' }}>
-                ${retailPriceNum.toFixed(2)}
-              </Text>
-            </View>
-
-            <View className="flex-row justify-between">
-              <Text className="text-g3 dark:text-n1">Profit Margin:</Text>
-              <Text className="text-s22 dark:text-s21" style={{ fontWeight: '500' }}>
-                ${profitMargin.toFixed(2)}
-              </Text>
-            </View>
+            <MetricRow label="Total Cost:" value={formatCurrency(totalCost)} />
+            <MetricRow label="Retail Price:" value={formatCurrency(retailPriceNum)} />
+            <MetricRow label="Profit Margin:" value={formatCurrency(profitMargin)} valueColor="text-s22 dark:text-s21" />
 
             <View className="pt-3 border-t border-g2/40 dark:border-p2/50">
               <PourCostPerformanceBar
@@ -339,7 +315,7 @@ export default function CocktailFormScreen() {
           </View>
 
           {/* Divider */}
-          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+          <SectionDivider />
 
           {/* Details */}
           <View className="flex-col gap-4">
@@ -363,17 +339,16 @@ export default function CocktailFormScreen() {
           </View>
 
           {/* Save Button */}
-          <Pressable
+          <Button
+            variant="success"
+            size="large"
+            fullWidth
             onPress={handleSave}
-            disabled={!isValid || isSaving}
-            className={`rounded-lg p-4 flex-row items-center justify-center gap-2 ${
-              isValid && !isSaving ? 'bg-s21 dark:bg-s22' : 'bg-g3 dark:bg-g2/80'
-            }`}
+            disabled={!isValid}
+            loading={isSaving}
           >
-            <Text className="text-white text-base" style={{ fontWeight: '600' }}>
-              {isSaving ? 'Saving...' : isEditing ? 'Update Cocktail' : 'Save Cocktail'}
-            </Text>
-          </Pressable>
+            {isEditing ? 'Update Cocktail' : 'Save Cocktail'}
+          </Button>
 
           <Text
             className="text-center text-g3 dark:text-n1 text-xs my-4"

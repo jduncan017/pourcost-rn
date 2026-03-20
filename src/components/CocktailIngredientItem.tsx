@@ -3,8 +3,8 @@ import { View, Text, Pressable, TextInput as RNTextInput } from 'react-native';
 import SwipeableCard from './SwipeableCard';
 import BottomSheet from './ui/BottomSheet';
 import ChipSelector from './ui/ChipSelector';
-import { CocktailIngredient, Volume, volumeToOunces, volumeLabel, fraction } from '@/src/types/models';
-import { calculateCostPerOz } from '@/src/services/calculation-service';
+import { CocktailIngredient, Volume, volumeToOunces, fraction } from '@/src/types/models';
+import { calculateCostPerOz, formatCurrency } from '@/src/services/calculation-service';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 
 // Primary quick pours: standard fractional ounces
@@ -102,7 +102,7 @@ export default function CocktailIngredientItem({
               {ingredient.name}
             </Text>
             <Text className="text-n1/60 text-sm mt-1">
-              ${costPerOz.toFixed(2)}/oz
+              {formatCurrency(costPerOz)}/oz
             </Text>
           </View>
           <View className="items-end">
@@ -111,7 +111,7 @@ export default function CocktailIngredientItem({
               className="text-s11 text-lg"
               style={{ fontWeight: '700' }}
             >
-              ${ingredient.cost.toFixed(2)}
+              {formatCurrency(ingredient.cost)}
             </Text>
           </View>
         </View>

@@ -8,7 +8,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme, useThemeColors } from '@/src/contexts/ThemeContext';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
 import Card from './ui/Card';
 
 interface SwipeableCardProps {
@@ -49,7 +49,6 @@ export default function SwipeableCard({
   variant = 'gradient',
   padding,
 }: SwipeableCardProps) {
-  const { isDarkMode } = useTheme();
   const { colors } = useThemeColors();
 
   // Default actions using theme colors

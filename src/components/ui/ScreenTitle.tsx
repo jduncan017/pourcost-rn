@@ -3,7 +3,7 @@ import { Text, TextStyle } from 'react-native';
 
 interface ScreenTitleProps {
   title: string;
-  variant?: 'main' | 'section' | 'page';
+  variant?: 'main' | 'section' | 'page' | 'group';
   className?: string;
   style?: TextStyle;
 }
@@ -30,6 +30,11 @@ export default function ScreenTitle({
         return {
           textClassName: 'text-2xl tracking-wide text-g4 dark:text-n1',
           fontWeight: '500' as const,
+        };
+      case 'group':
+        return {
+          textClassName: 'text-xs tracking-widest uppercase text-g3 dark:text-g2 px-1',
+          fontWeight: '600' as const,
         };
       default:
         return {

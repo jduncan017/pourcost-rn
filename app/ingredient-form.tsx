@@ -1,12 +1,14 @@
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
-import { HARDCODED_BASE_CURRENCY } from '@/src/stores/app-store';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { Ionicons } from '@expo/vector-icons';
 import Dropdown from '@/src/components/ui/Dropdown';
 import TextInput from '@/src/components/ui/TextInput';
 import ChipSelector from '@/src/components/ui/ChipSelector';
+import Button from '@/src/components/ui/Button';
+import MetricRow from '@/src/components/ui/MetricRow';
+import SectionDivider from '@/src/components/ui/SectionDivider';
 import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
 import ActionSheet from '@/src/components/ui/ActionSheet';
 import GradientBackground from '@/src/components/ui/GradientBackground';
@@ -14,14 +16,14 @@ import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { INGREDIENT_TYPES, PRODUCT_SIZES, INITIAL_PRODUCT_SIZE, type IngredientType } from '@/src/constants/appConstants';
 import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
-import { calculateCostPerOz, calculateCostPerPour, calculateSuggestedPrice } from '@/src/services/calculation-service';
+import { calculateCostPerOz, calculateCostPerPour, calculateSuggestedPrice, formatCurrency } from '@/src/services/calculation-service';
+import { FeedbackService } from '@/src/services/feedback-service';
 
 /**
  * Ingredient creation and editing form
  * Handles both creating new ingredients and editing existing ones
  */
 export default function IngredientFormScreen() {
-  const baseCurrency = HARDCODED_BASE_CURRENCY;
   const router = useRouter();
   const navigation = useNavigation();
   const params = useLocalSearchParams();
@@ -165,24 +167,13 @@ export default function IngredientFormScreen() {
 
   // Handle delete
   const handleDelete = () => {
-    Alert.alert(
-      'Delete Ingredient',
-      `Are you sure you want to delete "${name}"? This action cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteIngredient(ingredientId);
-              router.back();
-            } catch (error) {
-              Alert.alert('Error', 'Failed to delete ingredient');
-            }
-          },
-        },
-      ]
+    FeedbackService.showDeleteConfirmation(
+      name,
+      async () => {
+        await deleteIngredient(ingredientId);
+        router.back();
+      },
+      'ingredient'
     );
   };
 
@@ -209,7 +200,7 @@ export default function IngredientFormScreen() {
           />
 
           {/* Divider */}
-          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+          <SectionDivider />
 
           {/* Container & Cost */}
           <View className="flex-col gap-4">
@@ -268,41 +259,19 @@ export default function IngredientFormScreen() {
           </View>
 
           {/* Divider */}
-          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+          <SectionDivider />
 
           {/* Cost Analysis */}
           <View className="flex-col gap-3">
             <ScreenTitle title="Cost Analysis" variant="section" />
 
-            <View className="flex-row justify-between">
-              <Text className="text-g3 dark:text-n1">Cost per Oz:</Text>
-              <Text className="text-g4 dark:text-n1" style={{ fontWeight: '500' }}>
-                ${costPerOz.toFixed(3)}
-              </Text>
-            </View>
-
-            <View className="flex-row justify-between">
-              <Text className="text-g3 dark:text-n1">Cost for 1.5oz:</Text>
-              <Text className="text-g4 dark:text-n1" style={{ fontWeight: '500' }}>
-                ${costFor15oz.toFixed(2)}
-              </Text>
-            </View>
+            <MetricRow label="Cost per Oz:" value={`$${costPerOz.toFixed(3)}`} />
+            <MetricRow label="Cost for 1.5oz:" value={formatCurrency(costFor15oz)} />
 
             {!notForSale && (
               <>
-                <View className="flex-row justify-between">
-                  <Text className="text-g3 dark:text-n1">Suggested Retail:</Text>
-                  <Text className="text-g4 dark:text-n1" style={{ fontWeight: '500' }}>
-                    ${suggestedRetail.toFixed(2)}
-                  </Text>
-                </View>
-
-                <View className="flex-row justify-between">
-                  <Text className="text-g3 dark:text-n1">Margin:</Text>
-                  <Text className="text-g4 dark:text-n1" style={{ fontWeight: '500' }}>
-                    ${pourCostMargin.toFixed(2)}
-                  </Text>
-                </View>
+                <MetricRow label="Suggested Retail:" value={formatCurrency(suggestedRetail)} />
+                <MetricRow label="Margin:" value={formatCurrency(pourCostMargin)} />
 
                 <View className="pt-3 border-t border-g2/40 dark:border-p2/50">
                   <PourCostPerformanceBar pourCostPercentage={pourCostPercentage} />
@@ -312,7 +281,7 @@ export default function IngredientFormScreen() {
           </View>
 
           {/* Divider */}
-          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+          <SectionDivider />
 
           {/* Description */}
           <TextInput
@@ -324,17 +293,16 @@ export default function IngredientFormScreen() {
           />
 
           {/* Save Button */}
-          <Pressable
+          <Button
+            variant="success"
+            size="large"
+            fullWidth
             onPress={handleSave}
-            disabled={!isValid || isSaving}
-            className={`rounded-lg p-4 flex-row items-center justify-center gap-2 ${
-              isValid && !isSaving ? 'bg-s21 dark:bg-s22' : 'bg-g2 dark:bg-g3'
-            }`}
+            disabled={!isValid}
+            loading={isSaving}
           >
-            <Text className="text-white text-base" style={{ fontWeight: '600' }}>
-              {isSaving ? 'Saving...' : isEditing ? 'Update Ingredient' : 'Save Ingredient'}
-            </Text>
-          </Pressable>
+            {isEditing ? 'Update Ingredient' : 'Save Ingredient'}
+          </Button>
 
           <Text className="text-center text-g3 dark:text-n1 text-xs mb-4">
             * Required fields

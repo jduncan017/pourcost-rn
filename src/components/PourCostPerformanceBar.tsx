@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text } from 'react-native';
 import { useAppStore } from '@/src/stores/app-store';
 

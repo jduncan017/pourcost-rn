@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRouter, useLocalSearchParams, useNavigation } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GradientBackground from '@/src/components/ui/GradientBackground';
@@ -9,7 +9,7 @@ import Card from '@/src/components/ui/Card';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
-import { SavedIngredient, CocktailIngredient, volumeLabel, fraction } from '@/src/types/models';
+import { SavedIngredient, CocktailIngredient, fraction } from '@/src/types/models';
 import { calculateCostPerOz, calculateCostPerPour } from '@/src/services/calculation-service';
 import { useIngredientSelectionStore } from '@/src/stores/ingredient-selection-store';
 
@@ -22,7 +22,6 @@ export default function IngredientSelectorScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
-  const params = useLocalSearchParams();
   const { setSelectedIngredients: setStoreIngredients } = useIngredientSelectionStore();
   
   const [searchQuery, setSearchQuery] = useState('');

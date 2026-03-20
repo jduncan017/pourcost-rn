@@ -6,6 +6,7 @@ import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '@/src/components/ui/Card';
+import MetricRow from '@/src/components/ui/MetricRow';
 import ActionSheet from '@/src/components/ui/ActionSheet';
 import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
 import GradientBackground from '@/src/components/ui/GradientBackground';
@@ -125,30 +126,10 @@ export default function IngredientDetailScreen() {
             <Text className="text-n1 dark:text-n1 text-xl font-medium">
               PRICING INFO
             </Text>
-            <View className="flex-row items-center justify-between">
-              <Text className="text-g1 dark:text-g1/90 text-lg font-medium">
-                Purchase Price: {currencySymbol}
-                {storeIngredient.productCost.toFixed(2)}
-              </Text>
-            </View>
-            <View className="flex-row items-center justify-between">
-              <Text className="text-g1 dark:text-g1/90 text-lg font-medium">
-                Cost per Oz: {currencySymbol}
-                {metrics.costPerOz.toFixed(2)}
-              </Text>
-            </View>
-            <View className="flex-row items-center justify-between">
-              <Text className="text-g1 dark:text-g1/90 text-lg font-medium">
-                Suggested Retail: {currencySymbol}
-                {suggestedRetail.toFixed(2)}
-              </Text>
-            </View>
-            <View className="flex-row items-center justify-between">
-              <Text className="text-g1 dark:text-g1/90 text-lg font-medium">
-                Margin: {currencySymbol}
-                {metrics.pourCostMargin.toFixed(2)}
-              </Text>
-            </View>
+            <MetricRow label="Purchase Price:" value={`${currencySymbol}${storeIngredient.productCost.toFixed(2)}`} valueColor="text-g1 dark:text-g1/90" />
+            <MetricRow label="Cost per Oz:" value={`${currencySymbol}${metrics.costPerOz.toFixed(2)}`} valueColor="text-g1 dark:text-g1/90" />
+            <MetricRow label="Suggested Retail:" value={`${currencySymbol}${suggestedRetail.toFixed(2)}`} valueColor="text-g1 dark:text-g1/90" />
+            <MetricRow label="Margin:" value={`${currencySymbol}${metrics.pourCostMargin.toFixed(2)}`} valueColor="text-g1 dark:text-g1/90" />
           </Card>
 
           {/* Description Section */}

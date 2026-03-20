@@ -30,7 +30,6 @@ export default function IngredientsScreen() {
   // Use Zustand store for state management
   const {
     // Data
-    ingredients,
     isLoading,
     error,
 

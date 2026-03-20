@@ -6,6 +6,8 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import SettingsCard from '@/src/components/ui/SettingsCard';
 import GradientBackground from '@/src/components/ui/GradientBackground';
+import ScreenTitle from '@/src/components/ui/ScreenTitle';
+import SectionDivider from '@/src/components/ui/SectionDivider';
 import { US_POUR_SIZES } from '@/src/constants/appConstants';
 import { volumeLabel, Volume } from '@/src/types/models';
 
@@ -35,14 +37,6 @@ const orderDropdownOptions: { value: IngredientOrderPref; label: string }[] = [
   { value: 'cost-high-low', label: 'Cost High → Low' },
 ];
 
-// Section header
-function SectionHeader({ title }: { title: string }) {
-  return (
-    <Text className="text-xs font-semibold tracking-widest uppercase text-g3 dark:text-g2 mb-2 px-1">
-      {title}
-    </Text>
-  );
-}
 
 export default function SettingsScreen() {
   const {
@@ -55,7 +49,6 @@ export default function SettingsScreen() {
     ingredientOrderPref,
     setIngredientOrderPref,
     displayName,
-    setDisplayName,
     saveProfile,
   } = useAppStore();
 
@@ -116,11 +109,11 @@ export default function SettingsScreen() {
           </View>
 
           {/* Divider */}
-          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+          <SectionDivider />
 
           {/* Calculations */}
           <View className="flex-col gap-3">
-            <SectionHeader title="Calculations" />
+            <ScreenTitle variant="group" title="Calculations" />
             <SettingsCard
               title="Pour Cost Goal"
               description={`${pourCostGoal}%`}
@@ -152,11 +145,11 @@ export default function SettingsScreen() {
           </View>
 
           {/* Divider */}
-          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+          <SectionDivider />
 
           {/* Appearance */}
           <View className="flex-col gap-3">
-            <SectionHeader title="Appearance" />
+            <ScreenTitle variant="group" title="Appearance" />
             <SettingsCard
               title="Theme"
               description={themeLabel}
@@ -167,11 +160,11 @@ export default function SettingsScreen() {
           </View>
 
           {/* Divider */}
-          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+          <SectionDivider />
 
           {/* Account */}
           <View className="flex-col gap-3">
-            <SectionHeader title="Account" />
+            <ScreenTitle variant="group" title="Account" />
             {user ? (
               <>
                 <SettingsCard
@@ -200,11 +193,11 @@ export default function SettingsScreen() {
           </View>
 
           {/* Divider */}
-          <View className="h-px bg-g2/30 dark:bg-p2/50" />
+          <SectionDivider />
 
           {/* Support */}
           <View className="flex-col gap-3">
-            <SectionHeader title="Support" />
+            <ScreenTitle variant="group" title="Support" />
             <SettingsCard
               title="Help & Support"
               description="Get help using PourCost"

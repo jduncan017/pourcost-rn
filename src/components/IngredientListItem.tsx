@@ -9,8 +9,9 @@ import { SavedIngredient, volumeLabel } from '@/src/types/models';
 import {
   calculateCostPerOz,
   calculateCostPerPour,
-  calculateSuggestedPrice,
   calculatePourCostPercentage,
+  formatCurrency,
+  formatPercentage,
 } from '@/src/services/calculation-service';
 import { useAppStore } from '@/src/stores/app-store';
 
@@ -50,11 +51,11 @@ export default function IngredientListItem({
 
     switch (sortBy) {
       case 'cost':
-        return { label: 'Cost/Oz', value: `$${(costPerOz || 0).toFixed(2)}`, color: 'text-n1' };
+        return { label: 'Cost/Oz', value: formatCurrency(costPerOz || 0), color: 'text-n1' };
       case 'pourCost':
         return {
           label: 'Pour Cost',
-          value: `${(pourCostPercentage || 0).toFixed(1)}%`,
+          value: formatPercentage(pourCostPercentage || 0),
           color: (pourCostPercentage || 0) <= 20
             ? 'text-s21'
             : (pourCostPercentage || 0) <= 25
@@ -62,7 +63,7 @@ export default function IngredientListItem({
               : 'text-e1',
         };
       case 'margin':
-        return { label: 'Margin', value: `$${(pourCostMargin || 0).toFixed(2)}`, color: 'text-n1' };
+        return { label: 'Margin', value: formatCurrency(pourCostMargin || 0), color: 'text-n1' };
       default:
         return null;
     }
@@ -90,7 +91,7 @@ export default function IngredientListItem({
             {ingredient.name || 'Unknown Ingredient'}
           </Text>
           <Text className="text-n1/70 text-sm mt-0.5" numberOfLines={1}>
-            {ingredient.type || 'Unknown'} • {volumeLabel(ingredient.productSize)} • ${(ingredient.productCost || 0).toFixed(2)}
+            {ingredient.type || 'Unknown'} • {volumeLabel(ingredient.productSize)} • {formatCurrency(ingredient.productCost || 0)}
           </Text>
         </View>
 
