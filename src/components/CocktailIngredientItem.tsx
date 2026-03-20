@@ -5,7 +5,7 @@ import BottomSheet from './ui/BottomSheet';
 import ChipSelector from './ui/ChipSelector';
 import { CocktailIngredient, Volume, volumeToOunces, fraction } from '@/src/types/models';
 import { calculateCostPerOz, formatCurrency } from '@/src/services/calculation-service';
-import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 
 // Primary quick pours: standard fractional ounces
 const QUICK_POUR_SIZES: { label: string; volume: Volume }[] = [
@@ -122,18 +122,19 @@ export default function CocktailIngredientItem({
             <Pressable
               key="other"
               onPress={() => setShowOtherSheet(true)}
-              className={`px-3.5 py-2 rounded-lg border ${
-                !isQuickPour && !showCustomInput
-                  ? 'bg-s33 border-s32'
-                  : 'bg-p4/40 border-p2/50'
-              }`}
-              style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+              className="px-3.5 py-2 rounded-lg"
+              style={{
+                backgroundColor: !isQuickPour && !showCustomInput ? palette.P7 : colors.inputBg,
+                borderWidth: 1,
+                borderColor: !isQuickPour && !showCustomInput ? palette.P5 : colors.border,
+              }}
             >
               <Text
-                className={`text-base ${
-                  !isQuickPour && !showCustomInput ? 'text-white font-bold' : 'font-medium'
-                }`}
-                style={isQuickPour || showCustomInput ? { color: colors.textSecondary } : undefined}
+                className="text-base"
+                style={{
+                  color: !isQuickPour && !showCustomInput ? '#FFFFFF' : colors.textSecondary,
+                  fontWeight: !isQuickPour && !showCustomInput ? '700' : '500',
+                }}
               >
                 {otherLabel}
               </Text>

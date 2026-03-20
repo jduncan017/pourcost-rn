@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { View, Text, ScrollView, Pressable, Image, Alert, Linking } from 'react-native';
+import { View, Text, TextInput as RNTextInput, ScrollView, Pressable, Image, Alert, Linking } from 'react-native';
 import { useAppStore, ThemeMode, IngredientOrderPref } from '@/src/stores/app-store';
 import { useTheme, useThemeColors } from '@/src/contexts/ThemeContext';
 import { useAuth } from '@/src/contexts/AuthContext';
@@ -31,7 +31,6 @@ const pourCostDropdownOptions = Array.from({ length: 41 }, (_, i) => {
 
 // Ingredient order options
 const orderDropdownOptions: { value: IngredientOrderPref; label: string }[] = [
-  { value: 'manual', label: 'Manual' },
   { value: 'most-to-least', label: 'Most → Least' },
   { value: 'least-to-most', label: 'Least → Most' },
   { value: 'cost-high-low', label: 'Cost High → Low' },
@@ -49,6 +48,7 @@ export default function SettingsScreen() {
     ingredientOrderPref,
     setIngredientOrderPref,
     displayName,
+    setDisplayName,
     saveProfile,
   } = useAppStore();
 
@@ -74,6 +74,8 @@ export default function SettingsScreen() {
   const [showRetailPricePicker, setShowRetailPricePicker] = useState(false);
   const [showOrderPicker, setShowOrderPicker] = useState(false);
   const [showThemePicker, setShowThemePicker] = useState(false);
+  const [showNameEditor, setShowNameEditor] = useState(false);
+  const [nameText, setNameText] = useState(displayName || user?.user_metadata?.full_name || '');
 
   // Retail price options
   const retailPriceOptions = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 25, 30].map((v) => ({
@@ -118,29 +120,33 @@ export default function SettingsScreen() {
               title="Pour Cost Goal"
               description={`${pourCostGoal}%`}
               iconName="analytics-outline"
-              iconColor={colors.accent}
+              iconColor={colors.text}
               onPress={() => setShowPourCostPicker(true)}
+              showCaret
             />
             <SettingsCard
               title="Default Pour Size"
               description={currentPourSizeLabel}
               iconName="water-outline"
-              iconColor={colors.accent}
+              iconColor={colors.text}
               onPress={() => setShowPourSizePicker(true)}
+              showCaret
             />
             <SettingsCard
               title="Default Retail Price"
               description={`$${defaultRetailPrice.toFixed(2)}`}
               iconName="pricetag-outline"
-              iconColor={colors.accent}
+              iconColor={colors.text}
               onPress={() => setShowRetailPricePicker(true)}
+              showCaret
             />
             <SettingsCard
               title="Ingredient Order"
               description={currentOrderLabel}
               iconName="swap-vertical-outline"
-              iconColor={colors.accent}
+              iconColor={colors.text}
               onPress={() => setShowOrderPicker(true)}
+              showCaret
             />
           </View>
 
@@ -154,8 +160,9 @@ export default function SettingsScreen() {
               title="Theme"
               description={themeLabel}
               iconName={themeMode === 'dark' ? 'moon-outline' : themeMode === 'light' ? 'sunny-outline' : 'phone-portrait-outline'}
-              iconColor={colors.accent}
+              iconColor={colors.text}
               onPress={() => setShowThemePicker(true)}
+              showCaret
             />
           </View>
 
@@ -168,16 +175,17 @@ export default function SettingsScreen() {
             {user ? (
               <>
                 <SettingsCard
-                  title="Display Name"
+                  title="Your Name"
                   description={displayName || user?.user_metadata?.full_name || 'Not set'}
                   iconName="person-outline"
-                  iconColor={colors.textSecondary}
+                  onPress={() => setShowNameEditor(true)}
+                  showCaret
                 />
                 <SettingsCard
                   title="Sign Out"
                   description={user.email ?? 'Signed in'}
                   iconName="log-out-outline"
-                  iconColor={colors.colors.e1}
+                  iconColor={colors.colors.R3}
                   onPress={handleSignOut}
                 />
               </>
@@ -186,7 +194,7 @@ export default function SettingsScreen() {
                 title="Sign In"
                 description="Sync your data across devices"
                 iconName="person-outline"
-                iconColor={colors.accent}
+                iconColor={colors.text}
                 onPress={() => {}}
               />
             )}
@@ -202,28 +210,27 @@ export default function SettingsScreen() {
               title="Help & Support"
               description="Get help using PourCost"
               iconName="help-circle-outline"
-              iconColor={colors.textSecondary}
               onPress={() => Linking.openURL('mailto:support@pourcost.com')}
+              showCaret
             />
             <SettingsCard
               title="Suggest a Feature"
               description="Tell us what you'd like to see"
               iconName="bulb-outline"
-              iconColor={colors.textSecondary}
               onPress={() => Linking.openURL('mailto:feedback@pourcost.com?subject=Feature%20Suggestion')}
+              showCaret
             />
             <SettingsCard
               title="Terms & Privacy"
               description="Read our terms and privacy policy"
               iconName="document-text-outline"
-              iconColor={colors.textSecondary}
               onPress={() => {}}
+              showCaret
             />
             <SettingsCard
               title="Version"
               description="2.0.0"
               iconName="information-circle-outline"
-              iconColor={colors.textSecondary}
             />
           </View>
 
@@ -290,6 +297,42 @@ export default function SettingsScreen() {
           onClose={() => setShowThemePicker(false)}
         />
       )}
+
+      {/* Name Editor */}
+      <BottomSheet
+        visible={showNameEditor}
+        onClose={() => setShowNameEditor(false)}
+        title="Your Name"
+      >
+        <View className="px-4 pb-6 flex-col gap-4">
+          <RNTextInput
+            value={nameText}
+            onChangeText={setNameText}
+            placeholder="Enter your name"
+            placeholderTextColor={colors.textMuted}
+            autoFocus
+            className="rounded-lg p-4"
+            style={{
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.border,
+              color: colors.text,
+              fontSize: 16,
+            }}
+          />
+          <Pressable
+            onPress={() => {
+              setDisplayName(nameText.trim());
+              debouncedSave();
+              setShowNameEditor(false);
+            }}
+            className="rounded-lg py-3 items-center"
+            style={{ backgroundColor: colors.go }}
+          >
+            <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 16 }}>Save</Text>
+          </Pressable>
+        </View>
+      </BottomSheet>
     </GradientBackground>
   );
 }

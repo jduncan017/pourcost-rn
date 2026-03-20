@@ -24,7 +24,7 @@ export default function EmptyState({
     <View className={`items-center justify-center py-12 px-6 ${className}`}>
       {/* Icon */}
       <View className="w-20 h-20 bg-g1/6 dark:bg-n1/90 rounded-full items-center justify-center mb-4">
-        <Ionicons name={icon} size={40} color={theme.colors.g2} />
+        <Ionicons name={icon} size={40} color={theme.colors.N6} />
       </View>
 
       {/* Title */}

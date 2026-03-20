@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
 import { useAppStore } from '@/src/stores/app-store';
-import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
+import { useThemeColors, useIsDarkMode, palette } from '@/src/contexts/ThemeContext';
 import Card from './ui/Card';
 
 interface PourCostPerformanceBarProps {
@@ -10,10 +10,10 @@ interface PourCostPerformanceBarProps {
 }
 
 const COLORS = {
-  onTarget: palette.s21,
-  close: palette.s12,
+  onTarget: palette.G3,
+  close: palette.Y4,
   drifting: '#E67E22',
-  bad: palette.e1,
+  bad: palette.R3,
 };
 
 function getPerformance(ratio: number) {
@@ -48,6 +48,7 @@ export default function PourCostPerformanceBar({
 }: PourCostPerformanceBarProps) {
   const { pourCostGoal } = useAppStore();
   const colors = useThemeColors();
+  const isDark = useIsDarkMode();
 
   const goal = pourCostGoal || 20;
   const ratio = pourCostPercentage > 0 ? pourCostPercentage / goal : 0;
@@ -59,7 +60,7 @@ export default function PourCostPerformanceBar({
   const goalPercent = 50; // goal is always at the midpoint
 
   return (
-    <Card className={className} padding="large">
+    <Card className={className} padding="large" style={!isDark ? { backgroundColor: palette.B1 } : undefined}>
       <View>
         {showLabels && (
           <View className="flex-row justify-between items-center mb-3">

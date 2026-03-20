@@ -35,15 +35,15 @@ export default function Card({
 
   // Dark: blue-tinted gradient. Light: no gradient (clean white)
   const gradientColors = isDark
-    ? [palette.p1 + '30', palette.p2 + '40'] as const
+    ? [palette.B5 + '30', palette.B7 + '40'] as const
     : ['transparent', 'transparent'] as const;
 
   const shadowStyle = !isDark && Platform.OS !== 'web' ? {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowColor: '#1a2a4a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   } : {};
 
   const cardContent = (

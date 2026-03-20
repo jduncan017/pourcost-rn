@@ -45,6 +45,8 @@ export default function ChipSelector({
   className = '',
   trailingChip,
 }: ChipSelectorProps) {
+  const colors = useThemeColors();
+
   const getSizeStyles = () => {
     switch (size) {
       case 'small':
@@ -74,29 +76,27 @@ export default function ChipSelector({
     }
   };
 
-  const getChipStyles = (selected: boolean) => {
-    const padding = getSizeStyles();
+  const getChipStyle = (selected: boolean) => {
     if (variant === 'compact') {
-      const shape = 'rounded-lg border';
-      if (selected) return `${shape} ${padding} bg-p1 border-p1`;
-      return `${shape} ${padding} bg-p4/40 border-p2/50`;
+      return {
+        backgroundColor: selected ? colors.accent : colors.inputBg,
+        borderWidth: 1,
+        borderColor: selected ? colors.accent : colors.border,
+      };
     }
-    // filter variant
-    const shape = 'rounded-full border';
-    if (selected) return `${shape} ${padding} bg-p1 border-p1`;
-    return `${shape} ${padding} bg-n1/80 dark:bg-n1/10 border-g1/50 dark:border-n1/20`;
+    return {
+      backgroundColor: selected ? colors.accent : colors.surface,
+      borderWidth: 1,
+      borderColor: selected ? colors.accent : colors.border,
+    };
   };
 
-  const getTextStyles = (selected: boolean) => {
-    const textSize = size === 'large' ? 'text-base' : 'text-sm';
-    if (variant === 'compact') {
-      if (selected) return `${textSize} font-bold text-white`;
-      return `${textSize} font-medium text-n1/80`;
-    }
-    // filter variant
-    if (selected) return `${textSize} font-medium text-white`;
-    return `${textSize} font-medium text-g4 dark:text-n1`;
+  const getTextColor = (selected: boolean) => {
+    if (selected) return '#FFFFFF';
+    return colors.text;
   };
+
+  const textSize = size === 'large' ? 'text-base' : 'text-sm';
 
   const chips = options.map((option) => {
     const selected = isSelected(option);
@@ -104,10 +104,18 @@ export default function ChipSelector({
       <Pressable
         key={option}
         onPress={() => handleSelection(option)}
-        className={getChipStyles(selected)}
-        style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+        className={`rounded-lg ${getSizeStyles()}`}
+        style={[
+          getChipStyle(selected),
+          ({ pressed }: any) => ({ opacity: pressed ? 0.8 : 1 }),
+        ] as any}
       >
-        <Text className={getTextStyles(selected)}>{option}</Text>
+        <Text
+          className={textSize}
+          style={{ color: getTextColor(selected), fontWeight: selected ? '700' : '500' }}
+        >
+          {option}
+        </Text>
       </Pressable>
     );
   });
@@ -132,8 +140,6 @@ export default function ChipSelector({
       </View>
     );
   };
-
-  const colors = useThemeColors();
 
   return (
     <View className={className}>

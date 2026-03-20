@@ -56,15 +56,15 @@ export default function SwipeableCard({
   const defaultLeftAction = {
     icon: 'pencil' as const,
     label: 'Edit',
-    color: colors.g4,
-    backgroundColor: colors.g1,
+    color: '#FFFFFF',
+    backgroundColor: theme.accent,
   };
 
   const defaultRightAction = {
     icon: 'trash' as const,
     label: 'Delete',
-    color: colors.n1,
-    backgroundColor: colors.e2,
+    color: colors.N1,
+    backgroundColor: colors.R5,
   };
 
   const finalLeftAction = leftAction || defaultLeftAction;

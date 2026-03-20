@@ -17,18 +17,23 @@ export default function GradientBackground({
   const isDark = useIsDarkMode();
 
   if (!isDark) {
-    // Light mode: flat
+    // Light mode: subtle blue gradient
     return (
-      <View style={[{ flex: 1, backgroundColor: colors.background }, style]}>
+      <LinearGradient
+        colors={[colors.background, '#F0F4F8']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={[{ flex: 1 }, style]}
+      >
         {children}
-      </View>
+      </LinearGradient>
     );
   }
 
   // Dark mode: subtle gradient — base at top with a hint of navy warmth at bottom
   return (
     <LinearGradient
-      colors={[colors.background, palette.p3 + 'A0']}
+      colors={[colors.background, palette.B8]}
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
       style={[{ flex: 1 }, style]}

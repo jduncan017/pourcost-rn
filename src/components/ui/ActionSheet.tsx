@@ -43,13 +43,13 @@ export default function ActionSheet({
                 <Ionicons
                   name={action.icon}
                   size={22}
-                  color={action.destructive ? colors.colors.e1 : colors.text}
+                  color={action.destructive ? colors.colors.R3 : colors.text}
                 />
               )}
               <Text
                 className="ActionSheetLabel text-lg font-medium"
                 style={{
-                  color: action.destructive ? colors.colors.e1 : colors.text,
+                  color: action.destructive ? colors.colors.R3 : colors.text,
                 }}
               >
                 {action.label}

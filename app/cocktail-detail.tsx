@@ -166,7 +166,7 @@ export default function CocktailDetailScreen() {
             <View className="flex-1 flex-col justify-center gap-2">
               <Text
                 className="text-2xl pb-2 mb-1"
-                style={{ color: colors.text, fontWeight: '700', borderBottomWidth: 1, borderBottomColor: palette.n1 }}
+                style={{ color: colors.text, fontWeight: '700', borderBottomWidth: 1, borderBottomColor: palette.N1 }}
               >
                 {cocktail.name}
               </Text>

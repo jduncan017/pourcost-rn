@@ -5,7 +5,7 @@ import GradientBackground from '@/src/components/ui/GradientBackground';
 import TextInput from '@/src/components/ui/TextInput';
 import Button from '@/src/components/ui/Button';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { themeColors } from '@/src/contexts/ThemeContext';
+import { palette } from '@/src/contexts/ThemeContext';
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
@@ -51,13 +51,13 @@ export default function LoginScreen() {
           <View className="items-center mb-12">
             <Text
               className="text-4xl tracking-wider"
-              style={{ color: themeColors.n2, fontWeight: '800' }}
+              style={{ color: palette.N2, fontWeight: '800' }}
             >
               POUR COST
             </Text>
             <Text
               className="text-base mt-2"
-              style={{ color: themeColors.n4 }}
+              style={{ color: palette.N4 }}
             >
               Calculate. Optimize. Profit.
             </Text>
@@ -86,7 +86,7 @@ export default function LoginScreen() {
             {error && (
               <Text
                 className="text-sm text-center"
-                style={{ color: themeColors.e1 }}
+                style={{ color: palette.R3 }}
               >
                 {error}
               </Text>
@@ -112,11 +112,11 @@ export default function LoginScreen() {
               }}
               className="items-center py-3"
             >
-              <Text style={{ color: themeColors.g2 }}>
+              <Text style={{ color: palette.N6 }}>
                 {isSignUp
                   ? 'Already have an account? '
                   : "Don't have an account? "}
-                <Text style={{ color: themeColors.p1, fontWeight: '600' }}>
+                <Text style={{ color: palette.B5, fontWeight: '600' }}>
                   {isSignUp ? 'Sign In' : 'Sign Up'}
                 </Text>
               </Text>

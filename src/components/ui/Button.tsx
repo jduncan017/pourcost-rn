@@ -149,24 +149,24 @@ export default function Button({
   // Icon color (matches text color)
   const getIconColor = () => {
     if (disabled) {
-      return colors.g3;
+      return colors.N7;
     }
 
     switch (variant) {
       case 'primary':
       case 'success':
       case 'danger':
-        return colors.n1;
+        return colors.N1;
 
       case 'secondary':
-        return colors.g4;
+        return colors.N8;
 
       case 'ghost':
       case 'outline':
-        return colors.p1;
+        return colors.B5;
 
       default:
-        return colors.n1;
+        return colors.N1;
     }
   };
 

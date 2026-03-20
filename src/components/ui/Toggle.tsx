@@ -42,9 +42,9 @@ export default function Toggle({
       <View
         className="w-[48px] h-7 rounded-full justify-center px-0.5"
         style={{
-          backgroundColor: value ? palette.s21 : colors.inputBg,
+          backgroundColor: value ? palette.G3 : colors.inputBg,
           borderWidth: 1,
-          borderColor: value ? palette.s21 : colors.border,
+          borderColor: value ? palette.G3 : colors.border,
         }}
       >
         <Animated.View
