@@ -40,15 +40,18 @@ export default function DrawerLayout() {
       <Drawer
         drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
+          drawerType: 'front',
           drawerStyle: {
             backgroundColor: colors.surface,
             width: 280,
           },
-          drawerActiveTintColor: '#FFFFFF',
+          overlayColor: 'rgba(0, 0, 0, 0.5)',
+          drawerActiveTintColor: colors.gold,
           drawerInactiveTintColor: colors.textSecondary,
-          drawerActiveBackgroundColor: colors.accent + '80',
+          drawerActiveBackgroundColor: 'transparent',
           drawerItemStyle: {
             marginVertical: 4,
+            borderRadius: 10,
           },
           headerStyle: {
             backgroundColor: colors.headerBackground,

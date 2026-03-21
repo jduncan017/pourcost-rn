@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
+import Card from './Card';
 
 interface SettingsCardProps {
   title: string;
@@ -32,8 +33,8 @@ export default function SettingsCard({
   const titleColor = isDanger ? colors.error : colors.text;
   const descColor = isDanger ? colors.error : colors.textTertiary;
 
-  const content = (
-    <>
+  const inner = (
+    <View className="flex-row items-center gap-3">
       <Ionicons name={iconName} size={22} color={resolvedIconColor} />
       <View className="flex-1">
         <Text className="text-base" style={{ color: titleColor, fontWeight: '500' }}>
@@ -46,32 +47,16 @@ export default function SettingsCard({
       {showCaret && (
         <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
       )}
-    </>
+    </View>
   );
 
-  const cardStyle = {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-  };
-
-  if (!onPress) {
-    return (
-      <View style={cardStyle} className={`p-4 flex-row items-center gap-3 ${className}`}>
-        {content}
-      </View>
-    );
-  }
-
   return (
-    <Pressable
+    <Card
       onPress={disabled ? undefined : onPress}
-      disabled={disabled}
-      style={cardStyle}
-      className={`p-4 flex-row items-center gap-3 ${disabled ? 'opacity-50' : 'active:opacity-80'} ${className}`}
+      padding="medium"
+      className={`${disabled ? 'opacity-50' : ''} ${className}`}
     >
-      {content}
-    </Pressable>
+      {inner}
+    </Card>
   );
 }

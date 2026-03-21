@@ -48,26 +48,35 @@ export default function CustomDrawerContent(
       </DrawerContentScrollView>
 
       {/* Settings pinned at bottom */}
-      <View
-        className="border-t px-4 pb-6 pt-3"
-        style={{
-          borderTopColor: colors.border,
-          paddingBottom: insets.bottom + 8,
-        }}
-      >
-        <Pressable
-          onPress={() => {
-            router.push('/(drawer)/settings');
-            props.navigation.closeDrawer();
-          }}
-          className="flex-row items-center gap-3 px-3 py-3 rounded-lg active:opacity-70"
-        >
-          <Ionicons name="settings-outline" size={22} color={colors.textSecondary} />
-          <Text className="text-base text-g4 dark:text-n1" style={{ fontWeight: '500' }}>
-            Settings
-          </Text>
-        </Pressable>
-      </View>
+      {(() => {
+        const currentRoute = props.state.routes[props.state.index]?.name;
+        const isActive = currentRoute === 'settings';
+        return (
+          <View
+            className="border-t px-4 pb-6 pt-3"
+            style={{
+              borderTopColor: colors.border,
+              paddingBottom: insets.bottom + 8,
+            }}
+          >
+            <Pressable
+              onPress={() => {
+                router.push('/(drawer)/settings');
+                props.navigation.closeDrawer();
+              }}
+              className="flex-row items-center gap-3 px-3 py-3 rounded-lg active:opacity-70"
+            >
+              <Ionicons name="settings-outline" size={22} color={isActive ? colors.gold : colors.textTertiary} />
+              <Text
+                className="text-base"
+                style={{ fontWeight: isActive ? '600' : '500', color: isActive ? colors.gold : colors.textTertiary }}
+              >
+                Settings
+              </Text>
+            </Pressable>
+          </View>
+        );
+      })()}
     </View>
   );
 }

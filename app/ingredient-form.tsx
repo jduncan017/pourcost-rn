@@ -271,10 +271,10 @@ export default function IngredientFormScreen() {
 
             {!notForSale && (
               <>
-                <AiSuggestionRow label="Suggested Retail" value={`$${suggestedRetail.toFixed(2)}`} />
-                <MetricRow label="Margin:" value={formatCurrency(pourCostMargin)} />
+                <MetricRow label="Margin:" value={formatCurrency(pourCostMargin)} className='mb-4'/>
 
-                <PourCostPerformanceBar pourCostPercentage={pourCostPercentage} />
+                <PourCostPerformanceBar pourCostPercentage={pourCostPercentage} className='mb-2'/>
+                <AiSuggestionRow label="Suggested Retail" value={`$${suggestedRetail.toFixed(2)}`} />
               </>
             )}
           </View>

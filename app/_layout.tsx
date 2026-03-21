@@ -99,7 +99,6 @@ function RootLayoutNav() {
                   <Ionicons name="arrow-back" size={22} color={colors.text} />
                 </Pressable>
               ) : null,
-            contentStyle: { paddingHorizontal: 4 },
           }}
         >
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />

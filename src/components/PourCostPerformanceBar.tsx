@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
 import { useAppStore } from '@/src/stores/app-store';
-import { useThemeColors, useIsDarkMode, palette } from '@/src/contexts/ThemeContext';
+import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import Card from './ui/Card';
 
 interface PourCostPerformanceBarProps {
@@ -11,8 +11,8 @@ interface PourCostPerformanceBarProps {
 
 const COLORS = {
   onTarget: palette.G3,
-  close: palette.Y4,
-  drifting: '#E67E22',
+  close: palette.Y3,
+  drifting: palette.O4,
   bad: palette.R3,
 };
 
@@ -48,7 +48,6 @@ export default function PourCostPerformanceBar({
 }: PourCostPerformanceBarProps) {
   const { pourCostGoal } = useAppStore();
   const colors = useThemeColors();
-  const isDark = useIsDarkMode();
 
   const goal = pourCostGoal || 20;
   const ratio = pourCostPercentage > 0 ? pourCostPercentage / goal : 0;
@@ -60,7 +59,7 @@ export default function PourCostPerformanceBar({
   const goalPercent = 50; // goal is always at the midpoint
 
   return (
-    <Card className={className} padding="large" style={!isDark ? { backgroundColor: palette.B1 } : undefined}>
+    <Card className={className} padding="large">
       <View>
         {showLabels && (
           <View className="flex-row justify-between items-center mb-3">
@@ -112,7 +111,7 @@ export default function PourCostPerformanceBar({
         </View>
 
         {showLabels && (
-          <Text className="mt-3 text-sm leading-5" style={{ color: colors.textSecondary }}>
+          <Text className="mt-3 text-base leading-8" style={{ color: colors.text }}>
             {getFeedbackMessage(pourCostPercentage, goal)}
           </Text>
         )}

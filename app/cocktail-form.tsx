@@ -351,11 +351,11 @@ export default function CocktailFormScreen() {
               {[
                 { label: 'Total Cost', value: formatCurrency(totalCost) },
                 { label: 'Profit Margin', value: formatCurrency(profitMargin) },
-              ].map((row, index) => (
+              ].map((row, index, arr) => (
                 <View
                   key={row.label}
-                  className="flex-row justify-between items-center px-3 py-3 rounded-sm"
-                  style={{ backgroundColor: index % 2 === 0 ? colors.surface : 'transparent' }}
+                  className="flex-row justify-between items-center py-3"
+                  style={index < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle } : undefined}
                 >
                   <Text className="text-base" style={{ color: colors.textSecondary }}>{row.label}</Text>
                   <Text className="text-base" style={{ color: colors.text, fontWeight: '500' }}>{row.value}</Text>

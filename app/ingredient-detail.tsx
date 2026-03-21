@@ -6,7 +6,6 @@ import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
-import MetricRow from '@/src/components/ui/MetricRow';
 import SectionDivider from '@/src/components/ui/SectionDivider';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import ActionSheet from '@/src/components/ui/ActionSheet';
@@ -137,13 +136,11 @@ export default function IngredientDetailScreen() {
           {/* Pricing — alternating row backgrounds */}
           <View className="flex-col gap-0">
             <ScreenTitle title="Pricing" variant="group" className="mb-2" />
-            {pricingRows.map((row, index) => (
+            {pricingRows.map((row, index, arr) => (
               <View
                 key={row.label}
-                className="flex-row justify-between items-center px-3 py-3 rounded-sm"
-                style={{
-                  backgroundColor: index % 2 === 0 ? colors.surface : 'transparent',
-                }}
+                className="flex-row justify-between items-center py-3"
+                style={index < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle } : undefined}
               >
                 <Text className="text-base" style={{ color: colors.textSecondary }}>
                   {row.label}
