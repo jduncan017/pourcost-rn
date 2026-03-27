@@ -20,7 +20,7 @@ export default function GradientBackground({
     // Light mode: subtle blue gradient
     return (
       <LinearGradient
-        colors={[colors.background, '#F0F4F8']}
+        colors={[colors.background, palette.B1]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={[{ flex: 1 }, style]}

@@ -1,7 +1,8 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, TextInput as RNTextInput, ScrollView, Pressable, Image, Alert, Linking } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAppStore, ThemeMode, IngredientOrderPref } from '@/src/stores/app-store';
-import { useTheme, useThemeColors } from '@/src/contexts/ThemeContext';
+import { useTheme, useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import SettingsCard from '@/src/components/ui/SettingsCard';
@@ -52,6 +53,7 @@ export default function SettingsScreen() {
     saveProfile,
   } = useAppStore();
 
+  const router = useRouter();
   const { isDarkMode, themeMode, setThemeMode } = useTheme();
   const colors = useThemeColors();
   const { user, signOut } = useAuth();
@@ -62,6 +64,16 @@ export default function SettingsScreen() {
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => { saveProfile(); }, 1500);
   }, [saveProfile]);
+
+  // Save on unmount to prevent lost edits from debounce
+  useEffect(() => {
+    return () => {
+      if (saveTimeout.current) {
+        clearTimeout(saveTimeout.current);
+        saveProfile();
+      }
+    };
+  }, []);
 
   // Current display values
   const currentPourSizeLabel = volumeLabel(defaultPourSize);
@@ -146,6 +158,14 @@ export default function SettingsScreen() {
               iconName="swap-vertical-outline"
               iconColor={colors.text}
               onPress={() => setShowOrderPicker(true)}
+              showCaret
+            />
+            <SettingsCard
+              title="Container Sizes"
+              description="Choose visible bottle & keg sizes"
+              iconName="resize-outline"
+              iconColor={colors.text}
+              onPress={() => router.push('/container-sizes' as any)}
               showCaret
             />
           </View>
@@ -329,7 +349,7 @@ export default function SettingsScreen() {
             className="rounded-lg py-3 items-center"
             style={{ backgroundColor: colors.go }}
           >
-            <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 16 }}>Save</Text>
+            <Text style={{ color: palette.N1, fontWeight: '600', fontSize: 16 }}>Save</Text>
           </Pressable>
         </View>
       </BottomSheet>
@@ -337,47 +357,5 @@ export default function SettingsScreen() {
   );
 }
 
-// Inline picker using BottomSheet directly
 import BottomSheet from '@/src/components/ui/BottomSheet';
-
-function PickerSheet<T>({
-  title,
-  options,
-  value,
-  onSelect,
-  onClose,
-}: {
-  title: string;
-  options: { value: T; label: string }[];
-  value: T;
-  onSelect: (value: T) => void;
-  onClose: () => void;
-}) {
-  const colors = useThemeColors();
-  return (
-    <BottomSheet visible onClose={onClose} title={title}>
-      <View className="pb-4">
-        {options.map((option, index) => {
-          const isSelected = option.value === value;
-          return (
-            <View key={`${option.label}-${index}`}>
-              {index > 0 && (
-                <View className="h-px mx-4" style={{ backgroundColor: colors.border + '40' }} />
-              )}
-              <Pressable
-                onPress={() => { onSelect(option.value); onClose(); }}
-                className={`px-4 py-3 flex-row justify-between items-center ${isSelected ? '' : 'active:opacity-80'}`}
-                style={isSelected ? { backgroundColor: colors.accent + '15' } : undefined}
-              >
-                <Text className={`text-base font-medium ${isSelected ? 'text-p1 dark:text-s11' : 'text-g4 dark:text-n1'}`}>
-                  {option.label}
-                </Text>
-                {isSelected && <Ionicons name="checkmark" size={20} color={colors.accent} />}
-              </Pressable>
-            </View>
-          );
-        })}
-      </View>
-    </BottomSheet>
-  );
-}
+import PickerSheet from '@/src/components/ui/PickerSheet';

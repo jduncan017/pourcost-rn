@@ -1,15 +1,58 @@
-import { Pressable } from 'react-native';
+import { Pressable, View, Text } from 'react-native';
 import { Drawer } from 'expo-router/drawer';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { DrawerActions } from '@react-navigation/native';
+
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useSegments } from 'expo-router';
-import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useRouter, useSegments, useNavigation } from 'expo-router';
+import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
+import { useNetworkStatus } from '@/src/lib/useNetworkStatus';
 import CustomDrawerContent from '@/src/components/CustomDrawerContent';
 
 /**
  * Drawer navigation layout for PourCost
  * Provides side menu navigation matching iOS app structure
  */
+
+// Hamburger menu icon for header left
+function HamburgerIcon() {
+  const navigation = useNavigation();
+  const colors = useThemeColors();
+
+  return (
+    <Pressable
+      onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+      className="p-2 rounded-lg"
+    >
+      <Ionicons name="menu" size={24} color={colors.text} />
+    </Pressable>
+  );
+}
+
+// Offline badge — shows when disconnected or ops are queued
+function OfflineBadge() {
+  const { isOnline, pendingOps } = useNetworkStatus();
+  const colors = useThemeColors();
+
+  if (isOnline && pendingOps === 0) return null;
+
+  return (
+    <View
+      className="flex-row items-center gap-1 px-2 py-1 rounded-full"
+      style={{ backgroundColor: colors.warningSubtle }}
+    >
+      <Ionicons
+        name={isOnline ? 'cloud-upload-outline' : 'cloud-offline-outline'}
+        size={14}
+        color={colors.warning}
+      />
+      {pendingOps > 0 && (
+        <Text style={{ color: colors.warning, fontSize: 12, fontWeight: '600' }}>
+          {pendingOps}
+        </Text>
+      )}
+    </View>
+  );
+}
 
 // Search icon component for header right
 function SearchIcon() {
@@ -36,7 +79,7 @@ export default function DrawerLayout() {
   const colors = useThemeColors();
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <Drawer
         drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
@@ -46,18 +89,25 @@ export default function DrawerLayout() {
             width: 280,
           },
           overlayColor: 'rgba(0, 0, 0, 0.5)',
-          drawerActiveTintColor: colors.gold,
+          drawerActiveTintColor: palette.N1,
           drawerInactiveTintColor: colors.textSecondary,
-          drawerActiveBackgroundColor: 'transparent',
+          drawerActiveBackgroundColor: colors.accent,
           drawerItemStyle: {
             marginVertical: 4,
-            borderRadius: 10,
+            borderRadius: 8,
+            marginHorizontal: 0,
           },
           headerStyle: {
             backgroundColor: colors.headerBackground,
           },
           headerTintColor: colors.text,
-          headerRight: () => <SearchIcon />,
+          headerLeft: () => <HamburgerIcon />,
+          headerRight: () => (
+            <View className="flex-row items-center gap-1">
+              <OfflineBadge />
+              <SearchIcon />
+            </View>
+          ),
         }}
       >
         <Drawer.Screen
@@ -98,6 +148,6 @@ export default function DrawerLayout() {
           }}
         />
       </Drawer>
-    </GestureHandlerRootView>
+    </View>
   );
 }

@@ -39,7 +39,7 @@ export default function ScreenTitle({
         };
       case 'group':
         return {
-          textClassName: 'text-xs tracking-widest uppercase',
+          textClassName: 'text-sm tracking-widest uppercase',
           fontWeight: '600' as const,
           color: colors.gold,
         };

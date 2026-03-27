@@ -11,12 +11,13 @@ import { Cocktail } from '@/src/types/models';
 import { calculateCocktailMetrics } from '@/src/services/calculation-service';
 import { FeedbackService } from '@/src/services/feedback-service';
 import type { CocktailSortOption } from '@/src/constants/appConstants';
+import { ensureDate } from '@/src/lib/ensureDate';
+import { fetchCocktails } from '@/src/lib/supabase-data';
 import {
-  fetchCocktails,
   insertCocktail,
   updateCocktailById,
   deleteCocktailById,
-} from '@/src/lib/supabase-data';
+} from '@/src/lib/supabase-writes';
 
 // ==========================================
 // STORE INTERFACE
@@ -79,8 +80,8 @@ function sortCocktails(
       }
       case 'created':
       default: {
-        const ta = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime();
-        const tb = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime();
+        const ta = ensureDate(a.createdAt).getTime();
+        const tb = ensureDate(b.createdAt).getTime();
         return tb - ta;
       }
     }
@@ -149,20 +150,40 @@ export const useCocktailsStore = create<CocktailsState>()(
 
       deleteCocktail: async (id) => {
         const cocktail = get().cocktails.find(c => c.id === id);
+        if (!cocktail) return;
         set({ error: null });
-        try {
-          await deleteCocktailById(id);
-          set(state => ({
-            cocktails: state.cocktails.filter(c => c.id !== id),
-          }));
-          if (cocktail) {
-            FeedbackService.showOperationSuccess('delete', cocktail.name);
+
+        // Optimistically remove from UI
+        set(state => ({
+          cocktails: state.cocktails.filter(c => c.id !== id),
+        }));
+
+        // Delay the actual delete so user can undo
+        let cancelled = false;
+        const timer = setTimeout(async () => {
+          if (cancelled) return;
+          try {
+            await deleteCocktailById(id);
+          } catch (error) {
+            // Re-add on failure
+            set(state => ({ cocktails: [...state.cocktails, cocktail] }));
+            const msg = error instanceof Error ? error.message : 'Failed to delete cocktail';
+            FeedbackService.showError('Delete Failed', msg);
           }
-        } catch (error) {
-          const msg = error instanceof Error ? error.message : 'Failed to delete cocktail';
-          set({ error: msg });
-          throw error;
-        }
+        }, 5000);
+
+        FeedbackService.showSuccess(
+          'Deleted',
+          `"${cocktail.name}" removed`,
+          {
+            label: 'Undo',
+            onPress: () => {
+              cancelled = true;
+              clearTimeout(timer);
+              set(state => ({ cocktails: [...state.cocktails, cocktail] }));
+            },
+          }
+        );
       },
 
       toggleFavorite: async (id) => {
@@ -201,13 +222,7 @@ export const useCocktailsStore = create<CocktailsState>()(
         const { cocktails, searchQuery, selectedCategory, sortBy } = get();
         if (cocktails.length === 0) return [];
 
-        const valid = cocktails.map(c => ({
-          ...c,
-          createdAt: c.createdAt instanceof Date ? c.createdAt : new Date(c.createdAt),
-          updatedAt: c.updatedAt instanceof Date ? c.updatedAt : new Date(c.updatedAt),
-        }));
-
-        const filtered = valid.filter(c => {
+        const filtered = cocktails.filter(c => {
           const matchesSearch = !searchQuery ||
             c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (c.description && c.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -249,9 +264,17 @@ export const useCocktailsStore = create<CocktailsState>()(
           );
           if (hasStaleData) {
             state.cocktails = [];
+          } else {
+            // Normalize dates from JSON strings back to Date objects
+            state.cocktails = state.cocktails.map(c => ({
+              ...c,
+              createdAt: ensureDate(c.createdAt),
+              updatedAt: ensureDate(c.updatedAt),
+            }));
           }
           state.isLoading = false;
-          state.loadCocktails();
+          // Don't load here — auth may not be ready yet.
+          // Root layout triggers loadCocktails() after auth is confirmed.
         }
       },
     }

@@ -66,10 +66,17 @@ export default function CustomDrawerContent(
               }}
               className="flex-row items-center gap-3 px-3 py-3 rounded-lg active:opacity-70"
             >
-              <Ionicons name="settings-outline" size={22} color={isActive ? colors.gold : colors.textTertiary} />
+              <Ionicons
+                name="settings-outline"
+                size={22}
+                color={isActive ? colors.gold : colors.textTertiary}
+              />
               <Text
                 className="text-base"
-                style={{ fontWeight: isActive ? '600' : '500', color: isActive ? colors.gold : colors.textTertiary }}
+                style={{
+                  fontWeight: isActive ? '600' : '500',
+                  color: isActive ? colors.gold : colors.textTertiary,
+                }}
               >
                 Settings
               </Text>

@@ -1,6 +1,10 @@
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemeColors, useIsDarkMode, palette } from '@/src/contexts/ThemeContext';
+import {
+  useThemeColors,
+  useIsDarkMode,
+  palette,
+} from '@/src/contexts/ThemeContext';
 
 interface AiSuggestionRowProps {
   label: string;
@@ -8,7 +12,11 @@ interface AiSuggestionRowProps {
   className?: string;
 }
 
-export default function AiSuggestionRow({ label, value, className = '' }: AiSuggestionRowProps) {
+export default function AiSuggestionRow({
+  label,
+  value,
+  className = '',
+}: AiSuggestionRowProps) {
   const colors = useThemeColors();
   const isDark = useIsDarkMode();
 
@@ -19,13 +27,22 @@ export default function AiSuggestionRow({ label, value, className = '' }: AiSugg
   return (
     <View
       className={`flex-row justify-between items-center p-4 rounded-lg ${className}`}
-      style={{ backgroundColor: purpleBg, borderWidth: 1, borderColor: purpleBorder }}
+      style={{
+        backgroundColor: purpleBg,
+        borderWidth: 1,
+        borderColor: purpleBorder,
+      }}
     >
       <View className="flex-row items-center gap-2">
         <Ionicons name="sparkles" size={14} color={purpleIcon} />
-        <Text className="text-base" style={{ color: colors.text }}>{label}</Text>
+        <Text className="text-base" style={{ color: colors.text }}>
+          {label}
+        </Text>
       </View>
-      <Text className="text-base" style={{ color: colors.text, fontWeight: '500' }}>
+      <Text
+        className="text-base"
+        style={{ color: colors.text, fontWeight: '500' }}
+      >
         {value}
       </Text>
     </View>

@@ -55,7 +55,13 @@ export function volumeLabel(v: Volume): string {
     case 'unitQuantity':
       return v.name;
     case 'milliliters':
-      return v.ml >= 1000 ? `${(v.ml / 1000).toFixed(v.ml % 1000 === 0 ? 0 : 1)}L` : `${v.ml}ml`;
+      if (v.ml >= 1000) {
+        const liters = v.ml / 1000;
+        // Use enough decimal places to avoid duplicates (1750ml = 1.75L, not 1.8L)
+        const decimals = v.ml % 1000 === 0 ? 0 : v.ml % 100 === 0 ? 1 : 2;
+        return `${liters.toFixed(decimals)}L`;
+      }
+      return `${v.ml}ml`;
     case 'standardUnit':
       return `${v.si} units`;
   }
@@ -86,7 +92,10 @@ export interface SavedIngredient {
   name: string;
   productSize: Volume;     // Container/bottle size (was bottleSize: number in ml)
   productCost: number;     // Price paid for the container (was bottlePrice)
+  retailPrice?: number;    // Sell price per pour (for pour cost % calculation)
+  pourSize?: Volume;       // Per-ingredient pour size (overrides global default)
   type?: string;
+  subType?: string;        // Spirit subcategory (Vodka, Whiskey, etc.)
   notForSale?: boolean;
   description?: string;
   createdAt: Date;

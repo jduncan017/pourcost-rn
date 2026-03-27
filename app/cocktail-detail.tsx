@@ -16,6 +16,7 @@ import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
+import { ensureDate } from '@/src/lib/ensureDate';
 
 /** Display-friendly pour size: "2oz", "3/4oz", "1 1/2oz" — fractions when possible */
 function pourLabel(v: Volume): string {
@@ -109,9 +110,7 @@ export default function CocktailDetailScreen() {
         notes: cocktail.notes,
         retailPrice: cocktail.retailPrice?.toString(),
         ingredients: JSON.stringify(cocktail.ingredients),
-        createdAt: cocktail.createdAt instanceof Date
-          ? cocktail.createdAt.toISOString()
-          : new Date(cocktail.createdAt).toISOString(),
+        createdAt: ensureDate(cocktail.createdAt).toISOString(),
       },
     });
   };

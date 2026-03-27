@@ -29,6 +29,7 @@ export interface ProfileData {
   ingredientOrderPref: IngredientOrderPref;
   themeMode: ThemeMode;
   displayName: string;
+  enabledProductSizes: string[];
 }
 
 const DEFAULT_POUR_SIZE = fraction(3, 2); // 1.5 oz
@@ -39,7 +40,7 @@ export async function fetchProfile(): Promise<ProfileData | null> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, display_name, pour_cost_goal, default_pour_size, default_retail_price, ingredient_order_pref, theme_mode')
+    .select('id, display_name, pour_cost_goal, default_pour_size, default_retail_price, ingredient_order_pref, theme_mode, enabled_product_sizes')
     .eq('id', user.id)
     .single();
 
@@ -53,6 +54,7 @@ export async function fetchProfile(): Promise<ProfileData | null> {
     ingredientOrderPref: (row.ingredient_order_pref as IngredientOrderPref) ?? 'manual',
     themeMode: (row.theme_mode as ThemeMode) ?? 'dark',
     displayName: row.display_name ?? '',
+    enabledProductSizes: (row as any).enabled_product_sizes ?? [],
   };
 }
 
@@ -67,6 +69,7 @@ export async function updateProfile(profile: Partial<ProfileData>): Promise<void
   if (profile.ingredientOrderPref !== undefined) row.ingredient_order_pref = profile.ingredientOrderPref;
   if (profile.themeMode !== undefined) row.theme_mode = profile.themeMode;
   if (profile.displayName !== undefined) row.display_name = profile.displayName;
+  if (profile.enabledProductSizes !== undefined) row.enabled_product_sizes = profile.enabledProductSizes;
 
   const { error } = await supabase
     .from('profiles')
@@ -87,6 +90,9 @@ interface IngredientRow {
   product_cost: number;
   product_size: Volume; // JSONB parses directly to our Volume type
   type: string | null;
+  sub_type: string | null;
+  retail_price: number | null;
+  pour_size: Volume | null;
   not_for_sale: boolean;
   description: string | null;
   created_at: string;
@@ -129,7 +135,10 @@ function rowToIngredient(row: IngredientRow): SavedIngredient {
     name: row.name,
     productSize: row.product_size,
     productCost: Number(row.product_cost),
+    retailPrice: row.retail_price != null ? Number(row.retail_price) : undefined,
+    pourSize: row.pour_size ?? undefined,
     type: row.type ?? undefined,
+    subType: row.sub_type ?? undefined,
     notForSale: row.not_for_sale,
     description: row.description ?? undefined,
     createdAt: new Date(row.created_at),
@@ -195,7 +204,10 @@ export async function insertIngredient(
       name: ingredient.name,
       product_cost: ingredient.productCost,
       product_size: ingredient.productSize,
+      retail_price: ingredient.retailPrice ?? null,
+      pour_size: ingredient.pourSize ?? null,
       type: ingredient.type ?? null,
+      sub_type: ingredient.subType ?? null,
       not_for_sale: ingredient.notForSale ?? false,
       description: ingredient.description ?? null,
     })
@@ -214,7 +226,10 @@ export async function updateIngredientById(
   if (updates.name !== undefined) row.name = updates.name;
   if (updates.productCost !== undefined) row.product_cost = updates.productCost;
   if (updates.productSize !== undefined) row.product_size = updates.productSize;
+  if (updates.retailPrice !== undefined) row.retail_price = updates.retailPrice;
+  if (updates.pourSize !== undefined) row.pour_size = updates.pourSize;
   if (updates.type !== undefined) row.type = updates.type;
+  if (updates.subType !== undefined) row.sub_type = updates.subType;
   if (updates.notForSale !== undefined) row.not_for_sale = updates.notForSale;
   if (updates.description !== undefined) row.description = updates.description;
 
@@ -227,6 +242,39 @@ export async function updateIngredientById(
 
   if (error) throw new Error(error.message);
   return rowToIngredient(data as IngredientRow);
+}
+
+/**
+ * Cascade an ingredient update to all cocktail_ingredients rows referencing it.
+ * Updates the denormalized name, product_size, product_cost, and recomputes cost.
+ */
+export async function cascadeIngredientUpdate(ingredient: SavedIngredient): Promise<void> {
+  // Find all cocktail_ingredients rows that use this ingredient
+  const { data: rows, error: fetchErr } = await supabase
+    .from('cocktail_ingredients')
+    .select('id, pour_size')
+    .eq('ingredient_id', ingredient.id);
+
+  if (fetchErr || !rows || rows.length === 0) return;
+
+  // Lazy import to avoid circular dependency
+  const { calculateCostPerPour } = await import('@/src/services/calculation-service');
+
+  // Update each row with current ingredient data
+  for (const row of rows) {
+    const pourSize = row.pour_size as Volume;
+    const cost = calculateCostPerPour(ingredient.productSize, ingredient.productCost, pourSize);
+
+    await supabase
+      .from('cocktail_ingredients')
+      .update({
+        ingredient_name: ingredient.name,
+        product_size: ingredient.productSize,
+        product_cost: ingredient.productCost,
+        cost,
+      })
+      .eq('id', row.id);
+  }
 }
 
 export async function deleteIngredientById(id: string): Promise<void> {

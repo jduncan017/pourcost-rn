@@ -67,8 +67,7 @@ export class HapticService {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
     } catch (error) {
-      // Silently fail if haptics are not supported
-      console.warn('Haptic feedback failed:', error);
+      // Silently ignore — haptics may not be supported on all devices
     }
   }
   

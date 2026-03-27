@@ -1,23 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { useAppStore } from '@/src/stores/app-store';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import IngredientListItem from '@/src/components/IngredientListItem';
 import SearchBar from '@/src/components/ui/SearchBar';
+import ChipSelector, {
+  IngredientTypeSelector,
+  SortSelector,
+} from '@/src/components/ui/ChipSelector';
 import EmptyState from '@/src/components/EmptyState';
 import { useRouter } from 'expo-router';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { SavedIngredient } from '@/src/types/models';
+import { buildIngredientEditParams } from '@/src/lib/buildIngredientEditParams';
 import Button from '@/src/components/ui/Button';
-import {
-  IngredientTypeSelector,
-  SortSelector,
-} from '@/src/components/ui/ChipSelector';
 import { useToast } from '@/src/components/ui/Toast';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { HapticService } from '@/src/services/haptic-service';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
+import { SUBTYPES_BY_TYPE, type IngredientSortOption } from '@/src/constants/appConstants';
 
 /**
  * Ingredients management screen
@@ -55,8 +57,15 @@ export default function IngredientsScreen() {
     clearError,
   } = useIngredientsStore();
 
-  // Get filtered ingredients from store
-  const filteredIngredients = getFilteredIngredients();
+  const [selectedSubType, setSelectedSubType] = useState('All');
+
+  // Get filtered ingredients from store, then apply subtype filter locally
+  const hasSubtypes = !!SUBTYPES_BY_TYPE[selectedType];
+  const filteredIngredients = (() => {
+    const base = getFilteredIngredients();
+    if (!hasSubtypes || selectedSubType === 'All') return base;
+    return base.filter(i => i.subType === selectedSubType);
+  })();
 
   // Load ingredients on mount - always call loadIngredients, let the store handle the logic
   useEffect(() => {
@@ -88,18 +97,9 @@ export default function IngredientsScreen() {
 
   // Handle ingredient editing
   const handleEditIngredient = (ingredient: SavedIngredient) => {
-    router.push({
+    router.navigate({
       pathname: '/ingredient-form',
-      params: {
-        id: ingredient.id,
-        name: ingredient.name,
-        type: ingredient.type,
-        productSize: JSON.stringify(ingredient.productSize),
-        productCost: ingredient.productCost.toString(),
-        createdAt: ingredient.createdAt instanceof Date
-          ? ingredient.createdAt.toISOString()
-          : new Date(ingredient.createdAt).toISOString(),
-      },
+      params: buildIngredientEditParams(ingredient),
     });
   };
 
@@ -151,10 +151,27 @@ export default function IngredientsScreen() {
               <ScreenTitle title="Type" variant="group" className="mb-2" />
               <IngredientTypeSelector
                 selectedType={selectedType}
-                onTypeChange={setSelectedType}
+                onTypeChange={(t) => {
+                  setSelectedType(t);
+                  if (t !== 'Spirit') setSelectedSubType('All');
+                }}
                 showLabel={false}
               />
             </View>
+
+            {/* Subtype Filter — shows for any type with subtypes */}
+            {hasSubtypes && (
+              <View className="mb-4">
+                <ScreenTitle title={`${selectedType} Type`} variant="group" className="mb-2" />
+                <ChipSelector
+                  options={['All', ...SUBTYPES_BY_TYPE[selectedType]]}
+                  selectedOption={selectedSubType}
+                  onSelectionChange={setSelectedSubType}
+                  showLabel={false}
+                  variant="filter"
+                />
+              </View>
+            )}
 
             {/* Sort Options */}
             <ScreenTitle title="Sort By" variant="group" className="mb-2" />
@@ -167,7 +184,7 @@ export default function IngredientsScreen() {
                 { key: 'margin', label: 'Margin' },
               ]}
               selectedSort={sortBy}
-              onSortChange={(sortKey) => setSortBy(sortKey as any)}
+              onSortChange={(sortKey) => setSortBy(sortKey as IngredientSortOption)}
               showLabel={false}
             />
           </View>

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import BottomSheet from './BottomSheet';
 
 export interface DropdownOption<T = any> {
   value: T;
   label: string;
   sublabel?: string;
+  section?: string; // Section header — renders before this option when section changes
 }
 
 interface DropdownProps<T = any> {
@@ -18,6 +19,7 @@ interface DropdownProps<T = any> {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  sheetHeaderRight?: React.ReactNode | ((close: () => void) => React.ReactNode);
 }
 
 export default function Dropdown<T = any>({
@@ -28,6 +30,7 @@ export default function Dropdown<T = any>({
   placeholder = 'Select an option',
   disabled = false,
   className = '',
+  sheetHeaderRight,
 }: DropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const colors = useThemeColors();
@@ -39,6 +42,8 @@ export default function Dropdown<T = any>({
     onValueChange(selectedValue);
     setIsOpen(false);
   };
+
+  let lastSection: string | undefined;
 
   return (
     <View className={`${className}`}>
@@ -75,13 +80,32 @@ export default function Dropdown<T = any>({
         visible={isOpen}
         onClose={() => setIsOpen(false)}
         title={label}
+        headerRight={typeof sheetHeaderRight === 'function' ? sheetHeaderRight(() => setIsOpen(false)) : sheetHeaderRight}
       >
         <View className="pb-4">
           {options.map((option, index) => {
             const isSelected = option.value === value;
+            const showSectionHeader = option.section && option.section !== lastSection;
+            lastSection = option.section;
+
             return (
               <View key={`${option.label}-${index}`}>
-                {index > 0 && (
+                {/* Section header */}
+                {showSectionHeader && (
+                  <View
+                    className="px-4 pt-4 pb-2"
+                    style={index > 0 ? { borderTopWidth: 1, borderTopColor: colors.border, marginTop: 4 } : undefined}
+                  >
+                    <Text
+                      className="text-xs tracking-widest uppercase"
+                      style={{ color: colors.gold, fontWeight: '600' }}
+                    >
+                      {option.section}
+                    </Text>
+                  </View>
+                )}
+                {/* Divider between items in same section */}
+                {!showSectionHeader && index > 0 && (
                   <View className="h-px mx-4" style={{ backgroundColor: colors.border + '40' }} />
                 )}
                 <Pressable
@@ -91,21 +115,21 @@ export default function Dropdown<T = any>({
                   }`}
                   style={
                     isSelected
-                      ? { backgroundColor: colors.accent + '15' }
+                      ? { backgroundColor: colors.accent }
                       : undefined
                   }
                 >
                 <View className="flex-1 mr-3">
                   <Text
                     className="font-medium tracking-wider"
-                    style={{ color: isSelected ? colors.accent : colors.text }}
+                    style={{ color: isSelected ? palette.N1 : colors.text }}
                   >
                     {option.label}
                   </Text>
                   {option.sublabel && (
                     <Text
                       className="text-sm mt-1"
-                      style={{ color: isSelected ? colors.accent + 'B3' : colors.textTertiary }}
+                      style={{ color: isSelected ? palette.N2 : colors.textTertiary }}
                     >
                       {option.sublabel}
                     </Text>
@@ -115,7 +139,7 @@ export default function Dropdown<T = any>({
                   <Ionicons
                     name="checkmark"
                     size={20}
-                    color={colors.accent}
+                    color={palette.N1}
                   />
                 )}
               </Pressable>

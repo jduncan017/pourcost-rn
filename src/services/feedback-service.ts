@@ -67,8 +67,8 @@ export class FeedbackService {
     const errorMessage = error instanceof Error ? error.message : error;
     const errorDetails = error instanceof Error ? error.stack : undefined;
 
-    // Log error for debugging
-    console.error('Application Error:', {
+    // Log error for debugging (dev only)
+    if (__DEV__) console.error('Application Error:', {
       message: errorMessage,
       details: errorDetails,
       context,
@@ -171,13 +171,13 @@ export class FeedbackService {
   ): void {
     // Trigger success haptic feedback
     HapticService.success();
-    
+
     this.addFeedbackMessage({
       id: this.generateId(),
       type: 'success',
       title,
       message,
-      duration: 'short',
+      duration: action ? 'long' : 'short',
       action,
       timestamp: new Date(),
     });
@@ -300,7 +300,7 @@ export class FeedbackService {
   ): void {
     this.showConfirmation({
       title: `Delete ${itemType}`,
-      message: `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
+      message: `Are you sure you want to delete "${itemName}"?`,
       confirmText: 'Delete',
       destructive: true,
       onConfirm,
@@ -479,7 +479,7 @@ export class FeedbackService {
       try {
         listener([...feedbackQueue]);
       } catch (error) {
-        console.error('Error in feedback listener:', error);
+        if (__DEV__) console.error('Error in feedback listener:', error);
       }
     });
   }
@@ -500,7 +500,7 @@ export class FeedbackService {
    * Test feedback system (development only)
    */
   static testFeedback(): void {
-    console.log('Testing feedback system...');
+    if (__DEV__) console.log('Testing feedback system...');
     
     this.showSuccess('Test Success', 'This is a test success message');
     

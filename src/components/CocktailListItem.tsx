@@ -3,6 +3,7 @@
  * Displays cocktail information in a list format with swipe actions
  */
 
+import { useMemo } from 'react';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import SwipeableCard from './SwipeableCard';
@@ -30,7 +31,10 @@ export default function CocktailListItem({
   if (!cocktail) return null;
 
   const colors = useThemeColors();
-  const metrics = calculateCocktailMetrics(cocktail.ingredients || []);
+  const metrics = useMemo(
+    () => calculateCocktailMetrics(cocktail.ingredients || []),
+    [cocktail.ingredients]
+  );
 
   // Highlight data — only for cost/costPercent/profitMargin
   const getHighlight = (): { label: string; value: string; color: string } | null => {

@@ -8,6 +8,7 @@ import EmptyState from '@/src/components/EmptyState';
 import { useRouter } from 'expo-router';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { Cocktail } from '@/src/types/models';
+import { ensureDate } from '@/src/lib/ensureDate';
 import Button from '@/src/components/ui/Button';
 import {
   CocktailCategorySelector,
@@ -93,9 +94,7 @@ export default function CocktailsScreen() {
         description: cocktail.description,
         category: cocktail.category,
         notes: cocktail.notes,
-        createdAt: cocktail.createdAt instanceof Date
-          ? cocktail.createdAt.toISOString()
-          : new Date(cocktail.createdAt).toISOString(),
+        createdAt: ensureDate(cocktail.createdAt).toISOString(),
         favorited: (cocktail.favorited || false).toString(),
         retailPrice: cocktail.retailPrice?.toString(),
         ingredients: JSON.stringify(cocktail.ingredients),

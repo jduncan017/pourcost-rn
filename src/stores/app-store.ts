@@ -2,7 +2,9 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Volume, fraction } from '@/src/types/models';
-import { fetchProfile, updateProfile } from '@/src/lib/supabase-data';
+import { fetchProfile } from '@/src/lib/supabase-data';
+import { updateProfile } from '@/src/lib/supabase-writes';
+import { FeedbackService } from '@/src/services/feedback-service';
 
 // ==========================================
 // TYPES
@@ -24,6 +26,7 @@ interface AppState {
   isFirstLaunch: boolean;
   isLoading: boolean;
   lastSyncDate: Date | null;
+  enabledProductSizes: string[]; // Volume labels of enabled container sizes (empty = all enabled)
 
   // Actions
   setPourCostGoal: (goal: number) => void;
@@ -34,6 +37,8 @@ interface AppState {
   setDisplayName: (name: string) => void;
   setFirstLaunch: (isFirst: boolean) => void;
   setLoading: (loading: boolean) => void;
+  setEnabledProductSizes: (sizes: string[]) => void;
+  toggleProductSize: (sizeLabel: string) => void;
 
   // Supabase sync
   loadProfile: () => Promise<void>;
@@ -67,6 +72,7 @@ export const useAppStore = create<AppState>()(
       isFirstLaunch: true,
       isLoading: false,
       lastSyncDate: null,
+      enabledProductSizes: [], // empty = all enabled
 
       // Setters
       setPourCostGoal: (goal) => {
@@ -93,6 +99,17 @@ export const useAppStore = create<AppState>()(
 
       setLoading: (loading) => set({ isLoading: loading }),
 
+      setEnabledProductSizes: (sizes) => set({ enabledProductSizes: sizes }),
+
+      toggleProductSize: (sizeLabel) => {
+        const { enabledProductSizes } = get();
+        if (enabledProductSizes.includes(sizeLabel)) {
+          set({ enabledProductSizes: enabledProductSizes.filter(s => s !== sizeLabel) });
+        } else {
+          set({ enabledProductSizes: [...enabledProductSizes, sizeLabel] });
+        }
+      },
+
       // Load profile from Supabase → store
       loadProfile: async () => {
         try {
@@ -106,10 +123,14 @@ export const useAppStore = create<AppState>()(
             ingredientOrderPref: profile.ingredientOrderPref,
             themeMode: profile.themeMode,
             displayName: profile.displayName,
+            enabledProductSizes: profile.enabledProductSizes ?? [],
             lastSyncDate: new Date(),
           });
         } catch (error) {
-          console.warn('Failed to load profile:', error);
+          const msg = error instanceof Error ? error.message : 'Failed to load profile';
+          if (msg !== 'OFFLINE_QUEUED') {
+            FeedbackService.showError('Load Failed', msg);
+          }
         }
       },
 
@@ -124,10 +145,14 @@ export const useAppStore = create<AppState>()(
             ingredientOrderPref: state.ingredientOrderPref,
             themeMode: state.themeMode,
             displayName: state.displayName,
+            enabledProductSizes: state.enabledProductSizes,
           });
           set({ lastSyncDate: new Date() });
         } catch (error) {
-          console.warn('Failed to save profile:', error);
+          const msg = error instanceof Error ? error.message : 'Failed to save settings';
+          if (msg !== 'OFFLINE_QUEUED') {
+            FeedbackService.showError('Save Failed', msg);
+          }
         }
       },
 

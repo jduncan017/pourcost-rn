@@ -36,9 +36,17 @@ function ResultRow({
       className="flex-row items-center py-3"
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
-      <Ionicons name={icon} size={20} color={iconColor} style={{ marginRight: 12 }} />
+      <Ionicons
+        name={icon}
+        size={20}
+        color={iconColor}
+        style={{ marginRight: 12 }}
+      />
       <View className="flex-1">
-        <Text className="text-base" style={{ color: colors.text, fontWeight: '500' }}>
+        <Text
+          className="text-base"
+          style={{ color: colors.text, fontWeight: '500' }}
+        >
           {title}
         </Text>
         <Text className="text-sm mt-0.5" style={{ color: colors.textTertiary }}>
@@ -70,22 +78,25 @@ export default function SearchScreen() {
     const query = searchQuery.toLowerCase();
     return {
       ingredients: ingredients
-        .filter((i) =>
-          i.name.toLowerCase().includes(query) ||
-          (i.type && i.type.toLowerCase().includes(query))
+        .filter(
+          (i) =>
+            i.name.toLowerCase().includes(query) ||
+            (i.type && i.type.toLowerCase().includes(query))
         )
         .slice(0, 10),
       cocktails: cocktails
-        .filter((c) =>
-          c.name.toLowerCase().includes(query) ||
-          (c.description && c.description.toLowerCase().includes(query)) ||
-          c.ingredients.some((i) => i.name.toLowerCase().includes(query))
+        .filter(
+          (c) =>
+            c.name.toLowerCase().includes(query) ||
+            (c.description && c.description.toLowerCase().includes(query)) ||
+            c.ingredients.some((i) => i.name.toLowerCase().includes(query))
         )
         .slice(0, 10),
     };
   }, [searchQuery, ingredients, cocktails]);
 
-  const totalResults = searchResults.ingredients.length + searchResults.cocktails.length;
+  const totalResults =
+    searchResults.ingredients.length + searchResults.cocktails.length;
 
   const handleItemPress = (type: 'ingredient' | 'cocktail', id: string) => {
     router.push({
@@ -109,11 +120,18 @@ export default function SearchScreen() {
           {!hasSearched && (
             <View className="py-12 items-center">
               <Ionicons name="search" size={48} color={colors.textTertiary} />
-              <Text className="text-center mt-3" style={{ color: colors.text, fontWeight: '500' }}>
+              <Text
+                className="text-center mt-3"
+                style={{ color: colors.text, fontWeight: '500' }}
+              >
                 Search your library
               </Text>
-              <Text className="text-sm text-center mt-1" style={{ color: colors.textTertiary }}>
-                {ingredients.length} ingredients and {cocktails.length} cocktails
+              <Text
+                className="text-sm text-center mt-1"
+                style={{ color: colors.textTertiary }}
+              >
+                {ingredients.length} ingredients and {cocktails.length}{' '}
+                cocktails
               </Text>
             </View>
           )}
@@ -122,10 +140,16 @@ export default function SearchScreen() {
           {hasSearched && totalResults === 0 && (
             <View className="py-12 items-center">
               <Ionicons name="search" size={48} color={colors.textTertiary} />
-              <Text className="text-center mt-3" style={{ color: colors.text, fontWeight: '500' }}>
+              <Text
+                className="text-center mt-3"
+                style={{ color: colors.text, fontWeight: '500' }}
+              >
                 No results found
               </Text>
-              <Text className="text-sm text-center mt-1" style={{ color: colors.textTertiary }}>
+              <Text
+                className="text-sm text-center mt-1"
+                style={{ color: colors.textTertiary }}
+              >
                 Try a different search term
               </Text>
             </View>
@@ -140,7 +164,10 @@ export default function SearchScreen() {
                 className="mb-2"
               />
               {searchResults.ingredients.map((item, index) => {
-                const costPerOz = calculateCostPerOz(item.productSize, item.productCost);
+                const costPerOz = calculateCostPerOz(
+                  item.productSize,
+                  item.productCost
+                );
                 return (
                   <View key={item.id}>
                     {index > 0 && <SectionDivider />}

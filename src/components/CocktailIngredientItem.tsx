@@ -3,31 +3,17 @@ import { View, Text, Pressable, TextInput as RNTextInput } from 'react-native';
 import Card from './ui/Card';
 import BottomSheet from './ui/BottomSheet';
 import ChipSelector from './ui/ChipSelector';
-import { CocktailIngredient, Volume, volumeToOunces, fraction } from '@/src/types/models';
-import { calculateCostPerOz, formatCurrency } from '@/src/services/calculation-service';
+import {
+  CocktailIngredient,
+  Volume,
+  volumeToOunces,
+} from '@/src/types/models';
+import {
+  calculateCostPerOz,
+  formatCurrency,
+} from '@/src/services/calculation-service';
+import { QUICK_POUR_SIZES, OTHER_POUR_SIZES } from '@/src/constants/appConstants';
 import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
-
-// Primary quick pours: standard fractional ounces
-const QUICK_POUR_SIZES: { label: string; volume: Volume }[] = [
-  { label: '¼', volume: fraction(1, 4) },
-  { label: '½', volume: fraction(1, 2) },
-  { label: '¾', volume: fraction(3, 4) },
-  { label: '1', volume: fraction(1, 1) },
-  { label: '1¼', volume: fraction(5, 4) },
-  { label: '1½', volume: fraction(3, 2) },
-  { label: '2', volume: fraction(2, 1) },
-  { label: '2½', volume: fraction(5, 2) },
-];
-
-// "Other" pours shown in bottom sheet
-const OTHER_POUR_SIZES: { label: string; volume: Volume }[] = [
-  { label: 'dash', volume: { kind: 'namedOunces', name: 'dash', ounces: 0.01691 } },
-  { label: 'bspn', volume: { kind: 'namedOunces', name: 'bspn', ounces: 0.16907 } },
-  { label: '3 oz', volume: fraction(3, 1) },
-  { label: '4 oz', volume: fraction(4, 1) },
-  { label: '5 oz', volume: fraction(5, 1) },
-  { label: '6 oz', volume: fraction(6, 1) },
-];
 
 interface CocktailIngredientItemProps {
   ingredient: CocktailIngredient;
@@ -41,7 +27,10 @@ export default function CocktailIngredientItem({
   onUpdateAmount,
 }: CocktailIngredientItemProps) {
   const colors = useThemeColors();
-  const costPerOz = calculateCostPerOz(ingredient.productSize, ingredient.productCost);
+  const costPerOz = calculateCostPerOz(
+    ingredient.productSize,
+    ingredient.productCost
+  );
   const pourOz = volumeToOunces(ingredient.pourSize);
   const [showOtherSheet, setShowOtherSheet] = useState(false);
   const [showCustomInput, setShowCustomInput] = useState(false);
@@ -77,7 +66,8 @@ export default function CocktailIngredientItem({
   };
 
   // Label for "Other" chip when a non-quick pour is selected
-  const otherLabel = !isQuickPour && selectedPour ? selectedPour.label : 'Other';
+  const otherLabel =
+    !isQuickPour && selectedPour ? selectedPour.label : 'Other';
 
   return (
     <Card padding="medium">
@@ -92,12 +82,17 @@ export default function CocktailIngredientItem({
             >
               {ingredient.name}
             </Text>
-            <Text className="text-sm mt-1" style={{ color: colors.textTertiary }}>
+            <Text
+              className="text-sm mt-1"
+              style={{ color: colors.textTertiary }}
+            >
               {formatCurrency(costPerOz)}/oz
             </Text>
           </View>
           <View className="items-end">
-            <Text className="text-xs" style={{ color: colors.textTertiary }}>Pour Cost</Text>
+            <Text className="text-xs" style={{ color: colors.textTertiary }}>
+              Pour Cost
+            </Text>
             <Text
               className="text-lg"
               style={{ fontWeight: '700', color: colors.gold }}
@@ -124,15 +119,22 @@ export default function CocktailIngredientItem({
               onPress={() => setShowOtherSheet(true)}
               className="px-3.5 py-2 rounded-lg"
               style={{
-                backgroundColor: !isQuickPour && !showCustomInput ? palette.P7 : colors.inputBg,
+                backgroundColor:
+                  !isQuickPour && !showCustomInput
+                    ? palette.P7
+                    : colors.inputBg,
                 borderWidth: 1,
-                borderColor: !isQuickPour && !showCustomInput ? palette.P5 : colors.border,
+                borderColor:
+                  !isQuickPour && !showCustomInput ? palette.P5 : colors.border,
               }}
             >
               <Text
                 className="text-base"
                 style={{
-                  color: !isQuickPour && !showCustomInput ? '#FFFFFF' : colors.textSecondary,
+                  color:
+                    !isQuickPour && !showCustomInput
+                      ? palette.N1
+                      : colors.textSecondary,
                   fontWeight: !isQuickPour && !showCustomInput ? '700' : '500',
                 }}
               >
@@ -157,7 +159,11 @@ export default function CocktailIngredientItem({
                 key={op.label}
                 onPress={() => handleOtherSelect(op.volume)}
                 className="px-4 py-3 flex-row justify-between items-center"
-                style={isSelected ? { backgroundColor: colors.accent + '15' } : undefined}
+                style={
+                  isSelected
+                    ? { backgroundColor: colors.accent + '15' }
+                    : undefined
+                }
               >
                 <Text
                   className="text-base font-medium"
@@ -175,8 +181,16 @@ export default function CocktailIngredientItem({
           })}
 
           {/* Custom entry */}
-          <View className="px-4 pt-3 border-t" style={{ borderTopColor: colors.border }}>
-            <Text className="text-sm font-medium mb-2" style={{ color: colors.text }}>Custom amount</Text>
+          <View
+            className="px-4 pt-3 border-t"
+            style={{ borderTopColor: colors.border }}
+          >
+            <Text
+              className="text-sm font-medium mb-2"
+              style={{ color: colors.text }}
+            >
+              Custom amount
+            </Text>
             <View className="flex-row items-center gap-2">
               <RNTextInput
                 value={customText}

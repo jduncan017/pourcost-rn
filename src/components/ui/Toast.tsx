@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, Animated, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { FeedbackMessage, FeedbackService, FeedbackType } from '@/src/services/feedback-service';
 
 interface ToastProps {
@@ -29,7 +29,7 @@ const Toast: React.FC<ToastProps> = ({ message, onDismiss }) => {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const [fadeAnim] = useState(new Animated.Value(0));
-  const [slideAnim] = useState(new Animated.Value(-screenWidth));
+  const [slideAnim] = useState(new Animated.Value(-100));
 
   // Animation on mount
   useEffect(() => {
@@ -57,7 +57,7 @@ const Toast: React.FC<ToastProps> = ({ message, onDismiss }) => {
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
-        toValue: -screenWidth,
+        toValue: -100,
         duration: 200,
         useNativeDriver: true,
       }),
@@ -73,21 +73,21 @@ const Toast: React.FC<ToastProps> = ({ message, onDismiss }) => {
         return {
           background: 'bg-s22/90 dark:bg-s21/90',
           border: 'border-s22 dark:border-s21',
-          icon: '#22c55e',
+          icon: palette.G3,
           iconName: 'checkmark-circle' as const,
         };
       case 'error':
         return {
           background: 'bg-e2/90 dark:bg-e3/90',
           border: 'border-e2 dark:border-e3',
-          icon: '#ef4444',
+          icon: palette.R3,
           iconName: 'close-circle' as const,
         };
       case 'warning':
         return {
           background: 'bg-s12/90 dark:bg-s11/90',
           border: 'border-s12 dark:border-s11',
-          icon: '#f59e0b',
+          icon: palette.O4,
           iconName: 'warning' as const,
         };
       case 'info':
@@ -95,7 +95,7 @@ const Toast: React.FC<ToastProps> = ({ message, onDismiss }) => {
         return {
           background: 'bg-p1/90 dark:bg-p2/90',
           border: 'border-p1 dark:border-p2',
-          icon: '#3b82f6',
+          icon: palette.B5,
           iconName: 'information-circle' as const,
         };
     }
@@ -107,7 +107,7 @@ const Toast: React.FC<ToastProps> = ({ message, onDismiss }) => {
     <Animated.View
       style={{
         opacity: fadeAnim,
-        transform: [{ translateX: slideAnim }],
+        transform: [{ translateY: slideAnim }],
         position: 'absolute',
         top: insets.top + 10,
         left: 16,

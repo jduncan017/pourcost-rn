@@ -12,12 +12,13 @@ import { calculateIngredientMetrics } from '@/src/services/calculation-service';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { useAppStore } from '@/src/stores/app-store';
 import type { IngredientSortOption } from '@/src/constants/appConstants';
+import { ensureDate } from '@/src/lib/ensureDate';
+import { fetchIngredients, cascadeIngredientUpdate } from '@/src/lib/supabase-data';
 import {
-  fetchIngredients,
   insertIngredient,
   updateIngredientById,
   deleteIngredientById,
-} from '@/src/lib/supabase-data';
+} from '@/src/lib/supabase-writes';
 
 // ==========================================
 // STORE INTERFACE
@@ -80,8 +81,8 @@ function sortIngredients(
       }
       case 'created':
       default: {
-        const ta = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime();
-        const tb = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime();
+        const ta = ensureDate(a.createdAt).getTime();
+        const tb = ensureDate(b.createdAt).getTime();
         return tb - ta;
       }
     }
@@ -142,6 +143,16 @@ export const useIngredientsStore = create<IngredientsState>()(
               ing.id === id ? updated : ing
             ),
           }));
+
+          // Cascade cost/name changes to cocktails that use this ingredient
+          cascadeIngredientUpdate(updated).then(() => {
+            // Reload cocktails so UI reflects updated costs
+            import('@/src/stores/cocktails-store').then(({ useCocktailsStore }) => {
+              useCocktailsStore.getState().loadCocktails(true);
+            });
+          }).catch(() => {
+            // Non-critical — cocktails will update on next load
+          });
         } catch (error) {
           const msg = error instanceof Error ? error.message : 'Failed to update ingredient';
           set({ error: msg });
@@ -151,20 +162,40 @@ export const useIngredientsStore = create<IngredientsState>()(
 
       deleteIngredient: async (id) => {
         const ingredient = get().ingredients.find(i => i.id === id);
+        if (!ingredient) return;
         set({ error: null });
-        try {
-          await deleteIngredientById(id);
-          set(state => ({
-            ingredients: state.ingredients.filter(i => i.id !== id),
-          }));
-          if (ingredient) {
-            FeedbackService.showOperationSuccess('delete', ingredient.name);
+
+        // Optimistically remove from UI
+        set(state => ({
+          ingredients: state.ingredients.filter(i => i.id !== id),
+        }));
+
+        // Delay the actual delete so user can undo
+        let cancelled = false;
+        const timer = setTimeout(async () => {
+          if (cancelled) return;
+          try {
+            await deleteIngredientById(id);
+          } catch (error) {
+            // Re-add on failure
+            set(state => ({ ingredients: [...state.ingredients, ingredient] }));
+            const msg = error instanceof Error ? error.message : 'Failed to delete ingredient';
+            FeedbackService.showError('Delete Failed', msg);
           }
-        } catch (error) {
-          const msg = error instanceof Error ? error.message : 'Failed to delete ingredient';
-          set({ error: msg });
-          throw error;
-        }
+        }, 5000);
+
+        FeedbackService.showSuccess(
+          'Deleted',
+          `"${ingredient.name}" removed`,
+          {
+            label: 'Undo',
+            onPress: () => {
+              cancelled = true;
+              clearTimeout(timer);
+              set(state => ({ ingredients: [...state.ingredients, ingredient] }));
+            },
+          }
+        );
       },
 
       setSearchQuery: (query) => set({ searchQuery: query }),
@@ -177,13 +208,7 @@ export const useIngredientsStore = create<IngredientsState>()(
         const { ingredients, searchQuery, selectedType, sortBy } = get();
         if (ingredients.length === 0) return [];
 
-        const valid = ingredients.map(i => ({
-          ...i,
-          createdAt: i.createdAt instanceof Date ? i.createdAt : new Date(i.createdAt),
-          updatedAt: i.updatedAt instanceof Date ? i.updatedAt : new Date(i.updatedAt),
-        }));
-
-        const filtered = valid.filter(i => {
+        const filtered = ingredients.filter(i => {
           const matchesSearch = !searchQuery ||
             i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (i.type && i.type.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -223,9 +248,17 @@ export const useIngredientsStore = create<IngredientsState>()(
           );
           if (hasStaleData) {
             state.ingredients = [];
+          } else {
+            // Normalize dates from JSON strings back to Date objects
+            state.ingredients = state.ingredients.map(i => ({
+              ...i,
+              createdAt: ensureDate(i.createdAt),
+              updatedAt: ensureDate(i.updatedAt),
+            }));
           }
           state.isLoading = false;
-          state.loadIngredients();
+          // Don't load here — auth may not be ready yet.
+          // Root layout triggers loadIngredients() after auth is confirmed.
         }
       },
     }

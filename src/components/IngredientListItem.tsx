@@ -3,6 +3,7 @@
  * Displays ingredient information in a list format with swipe actions
  */
 
+import { useMemo } from 'react';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import SwipeableCard from './SwipeableCard';
@@ -39,34 +40,52 @@ export default function IngredientListItem({
   const { defaultPourSize, defaultRetailPrice } = useAppStore();
   const colors = useThemeColors();
 
-  // Compute metrics on-demand
-  const costPerOz = calculateCostPerOz(ingredient.productSize, ingredient.productCost);
+  // Use per-ingredient overrides, fall back to global defaults
+  const effectivePourSize = ingredient.pourSize ?? defaultPourSize;
+  const effectiveRetailPrice = ingredient.retailPrice ?? defaultRetailPrice;
   const isNotForSale = ingredient.notForSale === true;
-  const costPerPour = isNotForSale ? 0 : calculateCostPerPour(ingredient.productSize, ingredient.productCost, defaultPourSize);
-  const pourCostPercentage = defaultRetailPrice > 0 && !isNotForSale
-    ? calculatePourCostPercentage(costPerPour, defaultRetailPrice)
-    : 0;
-  const pourCostMargin = isNotForSale ? 0 : defaultRetailPrice - costPerPour;
+
+  // Memoize calculations — only recompute when inputs change
+  const { costPerOz, costPerPour, pourCostPercentage, pourCostMargin } = useMemo(() => {
+    const cpo = calculateCostPerOz(ingredient.productSize, ingredient.productCost);
+    const cpp = isNotForSale ? 0 : calculateCostPerPour(ingredient.productSize, ingredient.productCost, effectivePourSize);
+    const pcp = effectiveRetailPrice > 0 && !isNotForSale ? calculatePourCostPercentage(cpp, effectiveRetailPrice) : 0;
+    const pcm = isNotForSale ? 0 : effectiveRetailPrice - cpp;
+    return { costPerOz: cpo, costPerPour: cpp, pourCostPercentage: pcp, pourCostMargin: pcm };
+  }, [ingredient.productSize, ingredient.productCost, effectivePourSize, effectiveRetailPrice, isNotForSale]);
 
   // Highlight data based on sort — only for cost/pourCost/margin
-  const getHighlight = (): { label: string; value: string; color: string } | null => {
+  const getHighlight = (): {
+    label: string;
+    value: string;
+    color: string;
+  } | null => {
     if (isNotForSale && sortBy !== 'cost') return null;
 
     switch (sortBy) {
       case 'cost':
-        return { label: 'Cost/Oz', value: formatCurrency(costPerOz || 0), color: colors.text };
+        return {
+          label: 'Cost/Oz',
+          value: formatCurrency(costPerOz || 0),
+          color: colors.text,
+        };
       case 'pourCost':
         return {
           label: 'Pour Cost',
           value: formatPercentage(pourCostPercentage || 0),
-          color: (pourCostPercentage || 0) <= 20
-            ? colors.success
-            : (pourCostPercentage || 0) <= 28
-              ? colors.warning
-              : colors.error,
+          color:
+            (pourCostPercentage || 0) <= 20
+              ? colors.success
+              : (pourCostPercentage || 0) <= 28
+                ? colors.warning
+                : colors.error,
         };
       case 'margin':
-        return { label: 'Margin', value: formatCurrency(pourCostMargin || 0), color: colors.text };
+        return {
+          label: 'Margin',
+          value: formatCurrency(pourCostMargin || 0),
+          color: colors.text,
+        };
       default:
         return null;
     }
@@ -94,15 +113,26 @@ export default function IngredientListItem({
           >
             {ingredient.name || 'Unknown Ingredient'}
           </Text>
-          <Text className="text-sm mt-0.5" style={{ color: colors.textTertiary }} numberOfLines={1}>
-            {ingredient.type || 'Unknown'} • {volumeLabel(ingredient.productSize)} • {formatCurrency(ingredient.productCost || 0)}
+          <Text
+            className="text-sm mt-0.5"
+            style={{ color: colors.textTertiary }}
+            numberOfLines={1}
+          >
+            {ingredient.type || 'Unknown'} •{' '}
+            {volumeLabel(ingredient.productSize)} •{' '}
+            {formatCurrency(ingredient.productCost || 0)}
           </Text>
         </View>
 
         {/* Right - Metric or chevron */}
         {highlight ? (
-          <View className="pl-3.5 items-center" style={{ borderLeftWidth: 1, borderLeftColor: colors.border }}>
-            <Text className="text-sm" style={{ color: colors.textTertiary }}>{highlight.label}</Text>
+          <View
+            className="pl-3.5 items-center"
+            style={{ borderLeftWidth: 1, borderLeftColor: colors.border }}
+          >
+            <Text className="text-sm" style={{ color: colors.textTertiary }}>
+              {highlight.label}
+            </Text>
             <Text
               className="text-base"
               style={{ fontWeight: '700', color: highlight.color }}
@@ -111,7 +141,11 @@ export default function IngredientListItem({
             </Text>
           </View>
         ) : (
-          <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={colors.textTertiary}
+          />
         )}
       </View>
     </SwipeableCard>

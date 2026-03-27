@@ -15,7 +15,8 @@ import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
 import ActionSheet from '@/src/components/ui/ActionSheet';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
-import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
+import { sanitizeName, sanitizeDescription } from '@/src/lib/sanitize';
 import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
 import CocktailIngredientItem from '@/src/components/CocktailIngredientItem';
 import ImagePlaceholder from '@/src/components/ui/ImagePlaceholder';
@@ -75,8 +76,8 @@ export default function CocktailFormScreen() {
 
         if (Array.isArray(existingIngredients)) {
           const formattedIngredients: CocktailIngredient[] = existingIngredients.map(
-            (ingredient: any) => ({
-              ingredientId: ingredient.ingredientId || ingredient.id,
+            (ingredient: Partial<CocktailIngredient> & { id?: string }) => ({
+              ingredientId: ingredient.ingredientId || ingredient.id || '',
               name: ingredient.name,
               productSize: ingredient.productSize,
               productCost: ingredient.productCost || 0,
@@ -87,7 +88,7 @@ export default function CocktailFormScreen() {
           setIngredients(formattedIngredients);
         }
       } catch (error) {
-        console.error('Error parsing existing ingredients:', error);
+        if (__DEV__) console.error('Error parsing existing ingredients:', error);
       }
     }
   }, [isEditing, params.ingredients]);
@@ -177,10 +178,10 @@ export default function CocktailFormScreen() {
     setIsSaving(true);
     try {
       const cocktailData = {
-        name: name.trim(),
-        description: description.trim() || undefined,
+        name: sanitizeName(name),
+        description: sanitizeDescription(description) || undefined,
         category: category as CocktailCategory,
-        notes: notes.trim() || undefined,
+        notes: sanitizeDescription(notes) || undefined,
         ingredients,
         retailPrice: parseFloat(retailPrice) || undefined,
         favorited: false,
@@ -230,7 +231,7 @@ export default function CocktailFormScreen() {
           className="px-4 py-1.5 rounded-lg"
           style={{ backgroundColor: isValid && !isSaving ? colors.go : colors.textMuted, opacity: isSaving ? 0.6 : 1 }}
         >
-          <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 16 }}>
+          <Text style={{ color: palette.N1, fontWeight: '600', fontSize: 16 }}>
             {isSaving ? 'Saving...' : 'Save'}
           </Text>
         </Pressable>
@@ -243,6 +244,7 @@ export default function CocktailFormScreen() {
       <ScrollView
         className="FormScroll flex-1"
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        pointerEvents={isSaving ? 'none' : 'auto'}
       >
         <View className="p-4 pt-6 flex-col gap-6">
           {/* Basic Information */}
@@ -294,9 +296,9 @@ export default function CocktailFormScreen() {
                 <Ionicons
                   name={ingredients.length > 0 ? 'pencil' : 'add'}
                   size={16}
-                  color="white"
+                  color={palette.N1}
                 />
-                <Text className="text-white text-sm font-medium">
+                <Text className="text-sm font-medium" style={{ color: palette.N1 }}>
                   {ingredients.length > 0 ? 'Edit' : 'Add'}
                 </Text>
               </Pressable>

@@ -6,7 +6,7 @@
  */
 
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { COCKTAIL_CATEGORIES } from '@/src/constants/appConstants';
 
 export interface ChipSelectorProps {
@@ -77,13 +77,6 @@ export default function ChipSelector({
   };
 
   const getChipStyle = (selected: boolean) => {
-    if (variant === 'compact') {
-      return {
-        backgroundColor: selected ? colors.accent : colors.inputBg,
-        borderWidth: 1,
-        borderColor: selected ? colors.accent : colors.border,
-      };
-    }
     return {
       backgroundColor: selected ? colors.accent : colors.surface,
       borderWidth: 1,
@@ -92,7 +85,7 @@ export default function ChipSelector({
   };
 
   const getTextColor = (selected: boolean) => {
-    if (selected) return '#FFFFFF';
+    if (selected) return palette.N1;
     return colors.text;
   };
 
@@ -168,7 +161,7 @@ export const IngredientTypeSelector = ({
 } & Partial<ChipSelectorProps>) => (
   <ChipSelector
     {...props}
-    options={['All', 'Spirit', 'Beer', 'Wine', 'Prepped', 'Garnish', 'Other']}
+    options={['All', 'Spirit', 'Beer', 'Wine', 'Non-Alc', 'Prepped', 'Garnish', 'Other']}
     selectedOption={selectedType}
     onSelectionChange={onTypeChange}
     label="Type"

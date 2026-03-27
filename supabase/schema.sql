@@ -19,6 +19,7 @@ CREATE TABLE profiles (
   default_retail_price NUMERIC(10,2) DEFAULT 10.00,
   ingredient_order_pref TEXT DEFAULT 'manual',
   theme_mode TEXT DEFAULT 'dark' CHECK (theme_mode IN ('dark', 'light', 'auto')),
+  enabled_product_sizes JSONB DEFAULT '[]'::jsonb,  -- array of Volume label strings the user wants to see
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -57,6 +58,9 @@ CREATE TABLE ingredients (
     -- e.g. {"kind":"unitQuantity","unitType":"oneCanOrBottle","name":"6 pack","quantity":6,"ounces":72}
     -- e.g. {"kind":"fractionalOunces","numerator":3,"denominator":2}
   type TEXT,                                   -- Spirit, Beer, Wine, Prepped, Garnish, Other
+  sub_type TEXT,                               -- Spirit subcategory: Vodka, Whiskey, Bourbon, etc.
+  retail_price NUMERIC(10,2),                  -- sell price per pour (for pour cost % on individual ingredients)
+  pour_size JSONB,                             -- per-ingredient pour size (overrides global default)
   not_for_sale BOOLEAN DEFAULT false,
   description TEXT,
 

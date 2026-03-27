@@ -1,313 +1,196 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Alert } from 'react-native';
-import { HARDCODED_MEASUREMENT_SYSTEM, HARDCODED_BASE_CURRENCY } from '@/src/stores/app-store';
-import CustomSlider from '@/src/components/ui/CustomSlider';
-import BottleSizeDropdown from '@/src/components/BottleSizeDropdown';
-import Card from '@/src/components/ui/Card';
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { useRouter, type Href } from 'expo-router';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SectionDivider from '@/src/components/ui/SectionDivider';
 import Button from '@/src/components/ui/Button';
+import Card from '@/src/components/ui/Card';
+import CustomSlider from '@/src/components/ui/CustomSlider';
+import IngredientInputs, { IngredientInputValues } from '@/src/components/IngredientInputs';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useAppStore } from '@/src/stores/app-store';
 import { formatCurrency } from '@/src/services/calculation-service';
+import { getPourChipsForContext } from '@/src/constants/appConstants';
+import { Volume, volumeToOunces } from '@/src/types/models';
 
-// Calculator ingredient interface
-interface CalculatorIngredient {
-  id: string;
-  name: string;
-  bottleSize: number;
-  bottlePrice: number;
-  pourSize: number;
-  pourCostPercentage: number;
-  costPerOz: number;
-  costPerPour: number;
-}
-
-/**
- * Calculator screen - supports both quick single ingredient calculations and cocktail building
- * Automatically switches between single ingredient mode and cocktail mode
- */
 export default function CalculatorScreen() {
-  const measurementSystem = HARDCODED_MEASUREMENT_SYSTEM;
-  const baseCurrency = HARDCODED_BASE_CURRENCY;
+  const router = useRouter();
+  const colors = useThemeColors();
+  const { pourCostGoal } = useAppStore();
 
-  // Mode state
-  const [mode, setMode] = useState<'single' | 'cocktail'>('single');
-  const [cocktailIngredients, setCocktailIngredients] = useState<
-    CalculatorIngredient[]
-  >([]);
-  const [cocktailName, setCocktailName] = useState('');
+  const [values, setValues] = useState<IngredientInputValues>({
+    ingredientType: 'Spirit',
+    subType: '',
+    productSize: { kind: 'milliliters', ml: 750 },
+    productCost: 25.0,
+    pourSize: 1.5,
+    retailPrice: 8.0,
+    pourCostPct: pourCostGoal,
+    notForSale: false,
+    garnishAmount: 50,
+    garnishUnit: 'units',
+    servingAmount: 1,
+  });
 
-  // Single ingredient state
-  const [bottleSize, setBottleSize] = useState(750); // ml
-  const [bottlePrice, setBottlePrice] = useState(25.0);
-  const [pourSize, setPourSize] = useState(1.5); // oz
-  const [pourCostPercentage, setPourCostPercentage] = useState(20); // 20%
+  const handleChange = (updates: Partial<IngredientInputValues>) => {
+    setValues(prev => ({ ...prev, ...updates }));
+  };
 
-  // Convert bottle size from ml to oz for calculation
-  const bottleSizeOz = bottleSize / 29.5735;
+  // Calculations
+  const isGarnish = values.ingredientType === 'Garnish';
+  const productSizeOz = volumeToOunces(values.productSize);
+  const costPerOz = productSizeOz > 0 ? values.productCost / productSizeOz : 0;
+  const standardCostPerPour = costPerOz * values.pourSize;
+  const garnishCostPerServing = values.garnishAmount > 0
+    ? (values.productCost / values.garnishAmount) * values.servingAmount
+    : 0;
 
-  // Calculate cost per pour: product price / product size (oz) * pour size (oz)
-  const costPerPour = (bottlePrice / bottleSizeOz) * pourSize;
-
-  // Calculate cost per oz
-  const costPerOz = bottlePrice / bottleSizeOz;
-
-  // Calculate suggested charge: cost per pour / pour cost percentage
-  const suggestedCharge = costPerPour / (pourCostPercentage / 100);
-
-  // Calculate pour cost margin
+  const costPerPour = isGarnish ? garnishCostPerServing : standardCostPerPour;
+  const suggestedCharge = values.pourCostPct > 0 ? costPerPour / (values.pourCostPct / 100) : 0;
   const pourCostMargin = suggestedCharge - costPerPour;
 
-  // Calculate cocktail totals
-  const totalCocktailCost = cocktailIngredients.reduce(
-    (sum, ing) => sum + ing.costPerPour,
-    0
-  );
-  const averagePourCostPercentage =
-    cocktailIngredients.length > 0
-      ? cocktailIngredients.reduce(
-          (sum, ing) => sum + ing.pourCostPercentage,
-          0
-        ) / cocktailIngredients.length
-      : 20;
-  const totalSuggestedCharge =
-    totalCocktailCost / (averagePourCostPercentage / 100);
-  const totalMargin = totalSuggestedCharge - totalCocktailCost;
+  const garnishUnitLabel = isGarnish
+    ? (['units', 'oz', 'ml'].find(u => u === values.garnishUnit) === 'units' ? 'units' : values.garnishUnit)
+    : '';
 
-  // Remove ingredient from cocktail
-  const removeFromCocktail = (id: string) => {
-    const updated = cocktailIngredients.filter((ing) => ing.id !== id);
-    setCocktailIngredients(updated);
+  // Dynamic pour label: "1 Can", "16 oz", "1 Bottle", "32oz Growler", etc.
+  const pourChips = getPourChipsForContext(values.ingredientType, values.productSize);
+  const matchedChip = pourChips.find(c => Math.abs(c.oz - values.pourSize) < 0.001);
+  const pourLabel = matchedChip?.label ?? `${values.pourSize} oz`;
 
-    // Switch back to single mode if no ingredients left
-    if (updated.length === 0) {
-      setMode('single');
-      setCocktailName('');
-    }
-  };
-
-  // Edit ingredient in cocktail
-  const editCocktailIngredient = (id: string) => {
-    const ingredient = cocktailIngredients.find((ing) => ing.id === id);
-    if (ingredient) {
-      Alert.alert(
-        'Edit Ingredient',
-        `Would open edit form for ${ingredient.name}`
-      );
-    }
-  };
-
-  // Save cocktail
-  const saveCocktail = () => {
-    if (cocktailIngredients.length === 0) {
-      Alert.alert(
-        'No Ingredients',
-        'Add ingredients to your cocktail before saving.'
-      );
-      return;
-    }
-
-    const name = cocktailName.trim() || 'Untitled Cocktail';
-    Alert.alert(
-      'Cocktail Saved',
-      `"${name}" has been saved with ${cocktailIngredients.length} ingredients.\n\nTotal Cost: $${totalCocktailCost.toFixed(2)}\nSuggested Price: $${totalSuggestedCharge.toFixed(2)}`
-    );
-  };
-
-  // Clear cocktail
-  const clearCocktail = () => {
-    Alert.alert(
-      'Clear Cocktail',
-      'Are you sure you want to clear all ingredients?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear',
-          style: 'destructive',
-          onPress: () => {
-            setCocktailIngredients([]);
-            setCocktailName('');
-            setMode('single');
-          },
-        },
-      ]
-    );
-  };
-
-  // Handle saving single ingredient
   const handleSaveIngredient = () => {
-    Alert.prompt(
-      'Save Ingredient',
-      'Enter a name for this ingredient:',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
+    if (isGarnish) {
+      const garnishVolume: Volume = values.garnishUnit === 'ml'
+        ? { kind: 'milliliters', ml: values.garnishAmount }
+        : values.garnishUnit === 'oz'
+          ? { kind: 'decimalOunces', ounces: values.garnishAmount }
+          : { kind: 'unitQuantity', unitType: 'oneThing', name: `${values.garnishAmount} units`, quantity: values.garnishAmount, ounces: values.garnishAmount };
+      const servingVolume: Volume = values.garnishUnit === 'ml'
+        ? { kind: 'milliliters', ml: values.servingAmount }
+        : { kind: 'decimalOunces', ounces: values.servingAmount };
+
+      router.navigate({
+        pathname: '/ingredient-form',
+        params: {
+          type: values.ingredientType,
+          productSize: JSON.stringify(garnishVolume),
+          productCost: values.productCost.toString(),
+          pourSize: JSON.stringify(servingVolume),
+          notForSale: 'true',
         },
-        {
-          text: 'Save',
-          onPress: (ingredientName: string | undefined) => {
-            if (ingredientName && ingredientName.trim()) {
-              // Mock save functionality - would save to ingredients store
-              const ingredientData = {
-                name: ingredientName.trim(),
-                bottleSize,
-                bottlePrice,
-                pourSize,
-                pourCostPercentage,
-                costPerOz,
-                retailPrice: suggestedCharge,
-                costPerPour,
-                pourCostMargin,
-                type: 'Liquor', // Default type
-                createdAt: new Date().toISOString(),
-              };
-
-              Alert.alert(
-                'Ingredient Saved',
-                `"${ingredientName}" has been saved to your ingredients list.\n\nCost/Oz: $${costPerOz.toFixed(2)}\nSuggested Retail: $${suggestedCharge.toFixed(2)}`
-              );
-            }
-          },
+      } as Href);
+    } else {
+      router.navigate({
+        pathname: '/ingredient-form',
+        params: {
+          type: values.ingredientType,
+          subType: values.subType || '',
+          productSize: JSON.stringify(values.productSize),
+          productCost: values.productCost.toString(),
+          retailPrice: suggestedCharge.toFixed(2),
+          pourSize: JSON.stringify({ kind: 'decimalOunces', ounces: values.pourSize }),
         },
-      ],
-      'plain-text'
-    );
+      } as Href);
+    }
   };
-
-  // Dynamic step functions matching original PourCost
-  const getPriceStep = (value: number): number => {
-    if (value < 30) return 0.25;
-    if (value < 50) return 0.5;
-    if (value < 100) return 1;
-    if (value < 150) return 2;
-    if (value < 200) return 5;
-    if (value < 300) return 10;
-    if (value < 1000) return 25;
-    if (value < 2000) return 50;
-    return 100;
-  };
-
-  const getPourCostStep = (value: number): number => {
-    if (value < 5) return 1;
-    if (value < 10) return 0.5;
-    if (value < 30) return 0.25;
-    if (value < 50) return 2;
-    if (value < 75) return 5;
-    return 5;
-  };
-
-  const colors = useThemeColors();
 
   return (
     <GradientBackground>
-      <ScrollView className="flex-1">
-        <View className="flex-col gap-5 p-4">
-          {/* Subtitle */}
-          <Text
-            className="text-base pb-4"
-            style={{ color: colors.textSecondary, borderBottomWidth: 1, borderBottomColor: colors.borderSubtle }}
-          >
-            Quickly calculate the cost and pricing for a single spirit
-          </Text>
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
+          <View className="flex-col gap-5 p-4">
+            <Text
+              className="text-base pb-4"
+              style={{ color: colors.textSecondary, borderBottomWidth: 1, borderBottomColor: colors.borderSubtle }}
+            >
+              Quickly calculate cost and pricing for any ingredient
+            </Text>
 
-          {/* INPUTS section */}
-          <ScreenTitle title="INPUTS" variant="group" />
+            <ScreenTitle title="INPUTS" variant="group" />
 
-          <Card displayClasses="flex flex-col gap-4" padding="large">
-            <BottleSizeDropdown
-              label="Bottle Size"
-              value={bottleSize}
-              onValueChange={setBottleSize}
+            <IngredientInputs
+              variant="calculator"
+              values={values}
+              onChange={handleChange}
+              hideOtherType
             />
 
-            <CustomSlider
-              label="Product Cost"
-              minValue={1}
-              maxValue={5000}
-              value={bottlePrice}
-              onValueChange={setBottlePrice}
-              unit={` ${baseCurrency} `}
-              dynamicStep={getPriceStep}
-              logarithmic={true}
-            />
+            <SectionDivider />
 
-            <CustomSlider
-              label="Pour Size"
-              minValue={0.25}
-              maxValue={8}
-              value={pourSize}
-              onValueChange={setPourSize}
-              unit=" oz"
-              step={0.25}
-            />
+            <ScreenTitle title="RESULTS" variant="group" />
 
-            <CustomSlider
-              label="Pour Cost %"
-              minValue={1}
-              maxValue={100}
-              value={pourCostPercentage}
-              onValueChange={setPourCostPercentage}
-              unit="%"
-              dynamicStep={getPourCostStep}
-              pourCostScale={true}
-            />
-          </Card>
-
-          <SectionDivider />
-
-          {/* RESULTS section */}
-          <ScreenTitle title="Results" variant="group" className="mb-2" />
-
-          <Card padding="large">
-            {/* Hero result */}
-            <View className="items-center pb-4 mb-4" style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}>
-              <Text className="text-sm" style={{ color: colors.textTertiary }}>Cost Per Pour</Text>
-              <Text className="text-4xl mt-1" style={{ color: colors.text, fontWeight: '700' }}>
-                {formatCurrency(costPerPour)}
-              </Text>
-              <Text className="text-sm mt-1" style={{ color: colors.textTertiary }}>
-                {pourSize.toFixed(2)}oz pour • {pourCostPercentage}% pour cost
-              </Text>
-            </View>
-
-            {/* Metric rows */}
-            {[
-              { label: 'Suggested Charge', value: formatCurrency(suggestedCharge) },
-              { label: 'Cost per Oz', value: formatCurrency(costPerOz) },
-              { label: 'Margin', value: formatCurrency(pourCostMargin) },
-            ].map((row, index) => (
-              <View
-                key={row.label}
-                className="flex-row justify-between items-center py-3"
-                style={index < 2 ? { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle } : undefined}
-              >
-                <Text className="text-base" style={{ color: colors.textSecondary }}>{row.label}</Text>
-                <Text className="text-base" style={{ color: colors.text, fontWeight: '500' }}>{row.value}</Text>
+            <Card padding="large">
+              {/* Hero — Cost per [pour label] */}
+              <View className="flex-row justify-between items-center pb-4 mb-4" style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}>
+                <Text className="text-xl" style={{ color: colors.textSecondary, fontWeight: '500' }}>
+                  {isGarnish
+                    ? `Cost per ${values.servingAmount} ${garnishUnitLabel}`
+                    : `Cost per ${pourLabel}`
+                  }
+                </Text>
+                <Text className="text-2xl" style={{ color: colors.text, fontWeight: '700' }}>
+                  {formatCurrency(costPerPour)}
+                </Text>
               </View>
-            ))}
-          </Card>
 
-          {/* Save action */}
-          <Button
-            variant="success"
-            icon="bookmark"
-            fullWidth
-            size="large"
-            onPress={handleSaveIngredient}
-          >
-            Save as Ingredient
-          </Button>
+              {[
+                { label: 'Suggested Charge', value: formatCurrency(suggestedCharge) },
+                ...(isGarnish
+                  ? [{ label: `Cost per ${garnishUnitLabel.replace(/s$/, '')}`, value: formatCurrency(values.garnishAmount > 0 ? values.productCost / values.garnishAmount : 0) }]
+                  : [{ label: 'Cost per Oz', value: formatCurrency(costPerOz) }]
+                ),
+                { label: 'Margin', value: formatCurrency(pourCostMargin) },
+              ].map((row, index) => (
+                <View
+                  key={row.label}
+                  className="flex-row justify-between items-center py-3"
+                  style={index < 2 ? { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle } : undefined}
+                >
+                  <Text className="text-base" style={{ color: colors.textSecondary }}>{row.label}</Text>
+                  <Text className="text-base" style={{ color: colors.text, fontWeight: '500' }}>{row.value}</Text>
+                </View>
+              ))}
 
-          <Text
-            className="text-center text-sm"
-            style={{ color: colors.textTertiary }}
-          >
-            Save your calculated ingredient for use in cocktail recipes
-          </Text>
-        </View>
-      </ScrollView>
+              {/* Target Pour Cost slider */}
+              <View
+                className="mt-4 p-4 rounded-xl"
+                style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }}
+              >
+                <CustomSlider
+                  label="Target Pour Cost"
+                  value={values.pourCostPct}
+                  onValueChange={(val) => handleChange({ pourCostPct: Math.round(val) })}
+                  minValue={10}
+                  maxValue={35}
+                  step={1}
+                  formatValue={(v) => `${Math.round(v)}%`}
+                />
+              </View>
+            </Card>
+
+            <Button
+              variant="primary"
+              icon="arrow-forward-circle-outline"
+              fullWidth
+              size="large"
+              onPress={handleSaveIngredient}
+            >
+              Save as Ingredient
+            </Button>
+
+            <Text
+              className="text-center text-sm"
+              style={{ color: colors.textTertiary }}
+            >
+              Opens the ingredient form with these values pre-filled
+            </Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </GradientBackground>
   );
 }

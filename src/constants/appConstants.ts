@@ -3,7 +3,7 @@
  * Pour sizes and product sizes match the iOS app exactly.
  */
 
-import { Volume, PourSizeScale, fraction } from '@/src/types/models';
+import { Volume, PourSizeScale, fraction, volumeToOunces } from '@/src/types/models';
 
 // ==========================================
 // POUR SIZES — matches iOS PourSizes-PourCost.swift
@@ -48,7 +48,7 @@ export const US_POUR_SIZES: Volume[] = [
   { kind: 'milliliters', ml: 750 },
   { kind: 'milliliters', ml: 1000 },
   { kind: 'milliliters', ml: 1500 },
-  { kind: 'namedOunces', name: '32oz Crowler', ounces: 32 },
+  { kind: 'namedOunces', name: '32oz Growler', ounces: 32 },
   { kind: 'namedOunces', name: '64oz Growler', ounces: 64 },
 ];
 
@@ -95,7 +95,7 @@ export const METRIC_POUR_SIZES: Volume[] = [
   { kind: 'milliliters', ml: 1125 },
   { kind: 'milliliters', ml: 1500 },
   { kind: 'milliliters', ml: 1750 },
-  { kind: 'namedOunces', name: '32oz Crowler', ounces: 32 },
+  { kind: 'namedOunces', name: '32oz Growler', ounces: 32 },
   { kind: 'namedOunces', name: '64oz Growler', ounces: 64 },
 ];
 
@@ -136,7 +136,7 @@ export const PRODUCT_SIZES: Volume[] = [
   { kind: 'milliliters', ml: 1500 },
   { kind: 'milliliters', ml: 1750 },
   { kind: 'milliliters', ml: 1800 },
-  { kind: 'namedOunces', name: '32oz Crowler', ounces: 32 },
+  { kind: 'namedOunces', name: '32oz Growler', ounces: 32 },
   { kind: 'namedOunces', name: '64oz Growler', ounces: 64 },
   { kind: 'milliliters', ml: 3000 },
   { kind: 'milliliters', ml: 5000 },
@@ -152,10 +152,281 @@ export const PRODUCT_SIZES: Volume[] = [
   { kind: 'unitQuantity', unitType: 'oneCanOrBottle', name: '12 pack', quantity: 12, ounces: 144 },
   { kind: 'unitQuantity', unitType: 'oneCanOrBottle', name: '24 pack', quantity: 24, ounces: 288 },
   { kind: 'unitQuantity', unitType: 'oneCanOrBottle', name: '30 pack', quantity: 30, ounces: 360 },
+  // BIB (Bag-in-Box) — yield calculated at 5:1 water:syrup ratio
+  { kind: 'namedOunces', name: '2.5 gal BIB', ounces: 1920 },   // 2.5 gal syrup → ~15 gal finished → 1920 oz
+  { kind: 'namedOunces', name: '3 gal BIB', ounces: 2304 },     // 3 gal syrup → ~18 gal finished → 2304 oz
+  { kind: 'namedOunces', name: '5 gal BIB', ounces: 3840 },     // 5 gal syrup → ~30 gal finished → 3840 oz
 ];
 
 /** Initial product size: 750ml (matches iOS) */
 export const INITIAL_PRODUCT_SIZE: Volume = { kind: 'milliliters', ml: 750 };
+
+/**
+ * Maps ingredient types to applicable product size indices.
+ * If a type isn't listed, all sizes are shown.
+ */
+const SPIRIT_SIZES = [
+  // Standard bottles: 180ml through 1.75L
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+];
+
+const WINE_SIZES = [
+  // Bottles
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+  // Cans & packs (wine in cans is a thing)
+  0,  // 1 Can/Bottle
+  29, // 4 pack
+  30, // 6 pack
+  31, // 12 pack
+  32, // 24 pack
+];
+
+const BEER_DRAFT_SIZES = [
+  // Kegs only — what's on tap
+  22, // Corny Keg
+  23, // Sixth Barrel
+  24, // 20L Keg
+  25, // Quarter Barrel
+  26, // 30L Keg
+  27, // 50L Keg
+  28, // Half Barrel
+];
+
+const BEER_PACKAGED_SIZES = [
+  // Cans & packs
+  0,  // 1 Can/Bottle
+  29, // 4 pack
+  30, // 6 pack
+  31, // 12 pack
+  32, // 24 pack
+  33, // 30 pack
+  // Bottles & growlers
+  4,  // 300ml
+  5,  // 330ml
+  6,  // 375ml
+  7,  // 500ml
+  12, // 750ml
+  13, // 1L
+  18, // 32oz Growler
+  19, // 64oz Growler
+];
+
+const BEER_ALL_SIZES = [...BEER_PACKAGED_SIZES, ...BEER_DRAFT_SIZES];
+
+const NA_BIB_SIZES = [
+  34, // 2.5 gal BIB
+  35, // 3 gal BIB
+  36, // 5 gal BIB
+];
+
+const NA_CANNED_SIZES = [
+  0,  // 1 Can/Bottle
+  29, // 4 pack
+  30, // 6 pack
+  31, // 12 pack
+  32, // 24 pack
+];
+
+const NA_TAP_SIZES = [
+  22, // Corny Keg
+  23, // Sixth Barrel
+  24, // 20L Keg
+  25, // Quarter Barrel
+  26, // 30L Keg
+  27, // 50L Keg
+  28, // Half Barrel
+];
+
+const PRODUCT_SIZE_MAP: Record<string, number[]> = {
+  Spirit: SPIRIT_SIZES,
+  Wine: WINE_SIZES,
+  Beer: BEER_ALL_SIZES,
+  'Non-Alc': [...NA_BIB_SIZES, ...NA_CANNED_SIZES, ...NA_TAP_SIZES],
+  // Prepped, Garnish, Other: show all sizes
+};
+
+/** Subtype-specific product size overrides */
+const SUBTYPE_SIZE_MAP: Record<string, number[]> = {
+  'Draft': BEER_DRAFT_SIZES,
+  'Packaged': BEER_PACKAGED_SIZES,
+  'Soda (BIB)': NA_BIB_SIZES,
+  'Soda (Canned)': NA_CANNED_SIZES,
+  'Tap': NA_TAP_SIZES,
+};
+
+/** Get product sizes filtered by ingredient type and optional subtype */
+export function getProductSizesForType(type?: string, subType?: string): Volume[] {
+  // Subtype-specific sizes take priority
+  if (subType && SUBTYPE_SIZE_MAP[subType]) {
+    return SUBTYPE_SIZE_MAP[subType].map(i => PRODUCT_SIZES[i]).filter(Boolean);
+  }
+  if (!type || !PRODUCT_SIZE_MAP[type]) return PRODUCT_SIZES;
+  return PRODUCT_SIZE_MAP[type].map(i => PRODUCT_SIZES[i]).filter(Boolean);
+}
+
+/** Get section label for a product size (for dropdown grouping) */
+export function getProductSizeSection(size: Volume): string {
+  if (size.kind === 'unitQuantity') return 'Cans & Packs';
+  if (size.kind === 'namedOunces') {
+    if (size.name.includes('BIB')) return 'Bag-in-Box (5:1 yield)';
+    if (size.name.includes('Growler')) return 'Growlers';
+    return 'Kegs';
+  }
+  return 'Bottles';
+}
+
+/**
+ * Get contextual pour size options based on ingredient type + product size.
+ * The math always works in oz: costPerOz * pourOz = costPerPour.
+ * For packs, "1 Can" = totalOz / quantity — the division gives cost per unit.
+ */
+export function getPourChipsForContext(
+  type: string,
+  productSize: Volume
+): { label: string; oz: number }[] {
+
+  // ── Unit-based products (packs, single cans) — applies to Beer AND Wine ──
+  if (productSize.kind === 'unitQuantity') {
+    const perUnit = productSize.ounces / productSize.quantity;
+    return [{ label: '1 Can', oz: perUnit }];
+  }
+
+  // ── Growlers — the whole container is the pour ──
+  if (productSize.kind === 'namedOunces' && productSize.name.includes('Growler')) {
+    return [{ label: `1 Growler`, oz: productSize.ounces }];
+  }
+
+  // ── BIB — soda fountain pours ──
+  if (productSize.kind === 'namedOunces' && productSize.name.includes('BIB')) {
+    return [
+      { label: '8 oz', oz: 8 },
+      { label: '10 oz', oz: 10 },
+      { label: '12 oz', oz: 12 },
+      { label: '16 oz', oz: 16 },
+      { label: '20 oz', oz: 20 },
+    ];
+  }
+
+  // ── Beer / Non-Alc from kegs or bottles ──
+  if (type === 'Beer' || type === 'Non-Alc') {
+    if (productSize.kind === 'namedOunces') {
+      // Kegs — draft pours + growler fills
+      return [
+        { label: '12 oz', oz: 12 },
+        { label: '16 oz', oz: 16 },
+        { label: '20 oz', oz: 20 },
+        { label: '32 oz (Growler)', oz: 32 },
+        { label: '64 oz (Growler)', oz: 64 },
+      ];
+    }
+    // Single bottle (ml/oz)
+    const oz = volumeToOunces(productSize);
+    return [{ label: '1 Bottle', oz }];
+  }
+
+  // ── Wine from bottles ──
+  if (type === 'Wine') {
+    const bottleOz = volumeToOunces(productSize);
+    return [
+      { label: '5 oz', oz: 5 },
+      { label: '6 oz', oz: 6 },
+      { label: '8 oz', oz: 8 },
+      { label: '9 oz', oz: 9 },
+      { label: '1 Bottle', oz: bottleOz },
+    ];
+  }
+
+  // ── Spirit ──
+  if (type === 'Spirit') {
+    return [
+      { label: '1 oz', oz: 1 },
+      { label: '1.25 oz', oz: 1.25 },
+      { label: '1.5 oz', oz: 1.5 },
+      { label: '2 oz', oz: 2 },
+    ];
+  }
+
+  // ── Garnish — unit-based: 1 piece, 2 pieces, etc. ──
+  if (type === 'Garnish') {
+    // If it's a unit quantity (bag of 50, etc.), pour is by piece
+    // We approximate 1 garnish ≈ 0.5oz for cost purposes
+    return [
+      { label: '1 piece', oz: 0.5 },
+      { label: '2 pieces', oz: 1 },
+      { label: '3 pieces', oz: 1.5 },
+    ];
+  }
+
+  // ── Prepped, Other ──
+  return [
+    { label: '0.5 oz', oz: 0.5 },
+    { label: '1 oz', oz: 1 },
+    { label: '2 oz', oz: 2 },
+  ];
+}
+
+// ==========================================
+// COCKTAIL QUICK POUR SIZES — fractional ounces for cocktail builder
+// ==========================================
+
+export const QUICK_POUR_SIZES: { label: string; volume: Volume }[] = [
+  { label: '¼', volume: fraction(1, 4) },
+  { label: '½', volume: fraction(1, 2) },
+  { label: '¾', volume: fraction(3, 4) },
+  { label: '1', volume: fraction(1, 1) },
+  { label: '1¼', volume: fraction(5, 4) },
+  { label: '1½', volume: fraction(3, 2) },
+  { label: '2', volume: fraction(2, 1) },
+  { label: '2½', volume: fraction(5, 2) },
+];
+
+/** "Other" pour sizes shown in bottom sheet (dashes, barspoons, larger pours) */
+export const OTHER_POUR_SIZES: { label: string; volume: Volume }[] = [
+  { label: '1 dash', volume: { kind: 'namedOunces', name: 'dash', ounces: 0.01691 } },
+  { label: '2 dash', volume: { kind: 'namedOunces', name: '2 dash', ounces: 0.01691 * 2 } },
+  { label: '3 dash', volume: { kind: 'namedOunces', name: '3 dash', ounces: 0.01691 * 3 } },
+  { label: '1 bspn', volume: { kind: 'namedOunces', name: 'bspn', ounces: 0.16907 } },
+  { label: '2 bspn', volume: { kind: 'namedOunces', name: '2 bspn', ounces: 0.16907 * 2 } },
+  { label: '3 bspn', volume: { kind: 'namedOunces', name: '3 bspn', ounces: 0.16907 * 3 } },
+  { label: '3 oz', volume: fraction(3, 1) },
+  { label: '4 oz', volume: fraction(4, 1) },
+  { label: '5 oz', volume: fraction(5, 1) },
+  { label: '6 oz', volume: fraction(6, 1) },
+];
+
+// ==========================================
+// DEFAULT PRODUCT SIZES BY TYPE — for calculator/form defaults
+// ==========================================
+
+/** Default product size label per ingredient type */
+export const DEFAULT_PRODUCT_SIZE: Record<string, string> = {
+  Spirit: '750ml',
+  Beer: 'Half Barrel',
+  Wine: '750ml',
+  'Non-Alc': '5 gal BIB',
+  Prepped: '500ml',
+  Garnish: '',
+  Other: '500ml',
+};
+
+/** Override default product size when a subtype is selected */
+export const DEFAULT_PRODUCT_SIZE_BY_SUBTYPE: Record<string, string> = {
+  Draft: 'Half Barrel',
+  Packaged: '6 pack',
+  'Soda (BIB)': '5 gal BIB',
+  'Soda (Canned)': '6 pack',
+  Tap: 'Corny Keg',
+};
+
+// ==========================================
+// PERFORMANCE BAR THRESHOLDS — ratio distance from goal
+// ==========================================
+
+export const PERFORMANCE_DISTANCE_THRESHOLDS = {
+  ON_TARGET: 0.15,
+  CLOSE: 0.35,
+  DRIFTING: 0.6,
+} as const;
 
 // ==========================================
 // MARGINS — matches iOS Margins-PourCost.swift
@@ -206,12 +477,69 @@ export const INGREDIENT_TYPES = [
   'Spirit',
   'Beer',
   'Wine',
+  'Non-Alc',
   'Prepped',
   'Garnish',
   'Other',
 ] as const;
 
 export type IngredientType = (typeof INGREDIENT_TYPES)[number];
+
+export const SPIRIT_SUBTYPES = [
+  'Vodka',
+  'Whiskey',
+  'Bourbon',
+  'Scotch',
+  'Rye',
+  'Rum',
+  'Gin',
+  'Tequila',
+  'Mezcal',
+  'Brandy',
+  'Cognac',
+  'Absinthe',
+  'Liqueur',
+  'Amaro',
+  'Cordial',
+  'Bitters',
+  'Other Spirit',
+] as const;
+
+export type SpiritSubtype = (typeof SPIRIT_SUBTYPES)[number];
+
+export const BEER_SUBTYPES = [
+  'Draft',
+  'Packaged',
+] as const;
+
+export type BeerSubtype = (typeof BEER_SUBTYPES)[number];
+
+export const WINE_SUBTYPES = [
+  'Red',
+  'White',
+  'Rosé',
+  'Sparkling',
+  'Orange',
+] as const;
+
+export type WineSubtype = (typeof WINE_SUBTYPES)[number];
+
+export const NA_SUBTYPES = [
+  'Soda (BIB)',
+  'Soda (Canned)',
+  'Tap',
+  'Other',
+] as const;
+
+export type NASubtype = (typeof NA_SUBTYPES)[number];
+
+/** Map of ingredient types that have subtypes */
+export const SUBTYPES_BY_TYPE: Record<string, readonly string[]> = {
+  Spirit: SPIRIT_SUBTYPES,
+  Beer: BEER_SUBTYPES,
+  Wine: WINE_SUBTYPES,
+  'Non-Alc': NA_SUBTYPES,
+};
 
 // ==========================================
 // COCKTAIL CATEGORIES

@@ -13,6 +13,7 @@ import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { volumeLabel } from '@/src/types/models';
+import { buildIngredientEditParams } from '@/src/lib/buildIngredientEditParams';
 import {
   calculateIngredientMetrics,
   calculateSuggestedPrice,
@@ -27,7 +28,8 @@ export default function IngredientDetailScreen() {
   const params = useLocalSearchParams();
   const [showActions, setShowActions] = useState(false);
 
-  const { ingredients, loadIngredients, deleteIngredient } = useIngredientsStore();
+  const { ingredients, loadIngredients, deleteIngredient } =
+    useIngredientsStore();
 
   const ingredientId = params.id as string;
   const ingredient = ingredients.find((ing) => ing.id === ingredientId);
@@ -42,7 +44,9 @@ export default function IngredientDetailScreen() {
     return (
       <GradientBackground>
         <View className="flex-1 items-center justify-center">
-          <Text style={{ color: colors.text }} className="text-lg">Loading...</Text>
+          <Text style={{ color: colors.text }} className="text-lg">
+            Loading...
+          </Text>
         </View>
       </GradientBackground>
     );
@@ -60,21 +64,22 @@ export default function IngredientDetailScreen() {
   }, [navigation, colors.text]);
 
   const isNotForSale = ingredient.notForSale === true;
-  const metrics = calculateIngredientMetrics(ingredient, defaultPourSize, defaultRetailPrice);
-  const suggestedRetail = calculateSuggestedPrice(metrics.costPerPour, pourCostGoal / 100);
+  const effectivePourSize = ingredient.pourSize ?? defaultPourSize;
+  const effectiveRetailPrice = ingredient.retailPrice ?? defaultRetailPrice;
+  const metrics = calculateIngredientMetrics(
+    ingredient,
+    effectivePourSize,
+    effectiveRetailPrice
+  );
+  const suggestedRetail = calculateSuggestedPrice(
+    metrics.costPerPour,
+    pourCostGoal / 100
+  );
 
   const handleEdit = () => {
-    router.push({
+    router.navigate({
       pathname: '/ingredient-form',
-      params: {
-        id: ingredient.id,
-        name: ingredient.name,
-        type: ingredient.type,
-        productSize: JSON.stringify(ingredient.productSize),
-        productCost: ingredient.productCost.toString(),
-        notForSale: ingredient.notForSale ? 'true' : 'false',
-        description: ingredient.description,
-      },
+      params: buildIngredientEditParams(ingredient),
     });
   };
 
@@ -94,10 +99,12 @@ export default function IngredientDetailScreen() {
     { label: 'Purchase Price', value: formatCurrency(ingredient.productCost) },
     { label: 'Cost per Oz', value: formatCurrency(metrics.costPerOz) },
     { label: 'Cost per Pour', value: formatCurrency(metrics.costPerPour) },
-    ...(!isNotForSale ? [
-      { label: 'Retail Price', value: formatCurrency(defaultRetailPrice) },
-      { label: 'Margin', value: formatCurrency(metrics.pourCostMargin) },
-    ] : []),
+    ...(!isNotForSale
+      ? [
+          { label: 'Retail Price', value: formatCurrency(defaultRetailPrice) },
+          { label: 'Margin', value: formatCurrency(metrics.pourCostMargin) },
+        ]
+      : []),
   ];
 
   return (
@@ -107,14 +114,22 @@ export default function IngredientDetailScreen() {
         onClose={() => setShowActions(false)}
         actions={[
           { label: 'Edit', icon: 'create-outline', onPress: handleEdit },
-          { label: 'Delete', icon: 'trash-outline', onPress: handleDelete, destructive: true },
+          {
+            label: 'Delete',
+            icon: 'trash-outline',
+            onPress: handleDelete,
+            destructive: true,
+          },
         ]}
       />
 
       <ScrollView className="flex-1">
         <View className="p-4 pt-6 flex-col gap-6">
           {/* Name */}
-          <Text className="text-2xl" style={{ color: colors.text, fontWeight: '700' }}>
+          <Text
+            className="text-2xl"
+            style={{ color: colors.text, fontWeight: '700' }}
+          >
             {ingredient.name}
           </Text>
 
@@ -122,10 +137,15 @@ export default function IngredientDetailScreen() {
           <View className="flex-col gap-2">
             <ScreenTitle title="Details" variant="group" />
             <Text className="text-base" style={{ color: colors.textSecondary }}>
-              {ingredient.type || 'Other'} • {volumeLabel(ingredient.productSize)}{isNotForSale ? ' • Not for sale' : ''}
+              {ingredient.type || 'Other'} •{' '}
+              {volumeLabel(ingredient.productSize)}
+              {isNotForSale ? ' • Not for sale' : ''}
             </Text>
             {ingredient.description ? (
-              <Text className="text-base leading-6" style={{ color: colors.textTertiary }}>
+              <Text
+                className="text-base leading-6"
+                style={{ color: colors.textTertiary }}
+              >
                 {ingredient.description}
               </Text>
             ) : null}
@@ -140,19 +160,36 @@ export default function IngredientDetailScreen() {
               <View
                 key={row.label}
                 className="flex-row justify-between items-center py-3"
-                style={index < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle } : undefined}
+                style={
+                  index < arr.length - 1
+                    ? {
+                        borderBottomWidth: 1,
+                        borderBottomColor: colors.borderSubtle,
+                      }
+                    : undefined
+                }
               >
-                <Text className="text-base" style={{ color: colors.textSecondary }}>
+                <Text
+                  className="text-base"
+                  style={{ color: colors.textSecondary }}
+                >
                   {row.label}
                 </Text>
-                <Text className="text-base" style={{ color: colors.text, fontWeight: '500' }}>
+                <Text
+                  className="text-base"
+                  style={{ color: colors.text, fontWeight: '500' }}
+                >
                   {row.value}
                 </Text>
               </View>
             ))}
 
             {!isNotForSale && (
-              <AiSuggestionRow label="Suggested Retail" value={formatCurrency(suggestedRetail)} className="mt-2" />
+              <AiSuggestionRow
+                label="Suggested Retail"
+                value={formatCurrency(suggestedRetail)}
+                className="mt-2"
+              />
             )}
           </View>
 
@@ -160,7 +197,9 @@ export default function IngredientDetailScreen() {
           {!isNotForSale && (
             <>
               <SectionDivider />
-              <PourCostPerformanceBar pourCostPercentage={metrics.pourCostPercentage} />
+              <PourCostPerformanceBar
+                pourCostPercentage={metrics.pourCostPercentage}
+              />
             </>
           )}
 

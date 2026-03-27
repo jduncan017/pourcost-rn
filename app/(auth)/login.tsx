@@ -1,23 +1,24 @@
 import { useState } from 'react';
-import { View, Text, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, Image, Pressable, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import TextInput from '@/src/components/ui/TextInput';
-import Button from '@/src/components/ui/Button';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { palette } from '@/src/contexts/ThemeContext';
 
 export default function LoginScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async () => {
+  const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
       setError('Please enter email and password');
       return;
@@ -26,9 +27,7 @@ export default function LoginScreen() {
     setIsLoading(true);
     setError(null);
 
-    const result = isSignUp
-      ? await signUp(email.trim(), password)
-      : await signIn(email.trim(), password);
+    const result = await signIn(email.trim(), password);
 
     if (result.error) {
       setError(result.error);
@@ -44,92 +43,90 @@ export default function LoginScreen() {
         className="flex-1"
       >
         <View
-          className="flex-1 justify-center px-6"
-          style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+          className="flex-1 justify-between px-6"
+          style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 28 }}
         >
-          {/* Logo / Brand */}
-          <View className="items-center mb-12">
-            <Text
-              className="text-4xl tracking-wider"
-              style={{ color: palette.N2, fontWeight: '800' }}
-            >
-              POUR COST
-            </Text>
-            <Text
-              className="text-base mt-2"
-              style={{ color: palette.N4 }}
-            >
-              Calculate. Optimize. Profit.
-            </Text>
-          </View>
+          {/* Back button */}
+          <Pressable onPress={() => router.back()} className="flex-row items-center py-2 -ml-1">
+            <Ionicons name="chevron-back" size={22} color={palette.N3} />
+            <Text style={{ color: palette.N3, fontSize: 16 }}>Back</Text>
+          </Pressable>
 
-          {/* Form */}
-          <View className="flex-col gap-4">
-            <TextInput
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="your@email.com"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-
-            <TextInput
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Password"
-              secureTextEntry
-            />
-
-            {error && (
+          <View className="flex-col gap-8 flex-1 justify-center">
+            {/* Header */}
+            <View className="items-center">
+              <Image
+                source={require('@/assets/images/PC-Logo-Gold.png')}
+                style={{ width: 160, height: 40, marginBottom: 16 }}
+                resizeMode="contain"
+              />
               <Text
-                className="text-sm text-center"
-                style={{ color: palette.R3 }}
+                className="text-2xl"
+                style={{ color: palette.Y4, fontWeight: '700' }}
               >
-                {error}
+                Welcome Back
               </Text>
-            )}
+            </View>
 
-            <Button
-              onPress={handleSubmit}
-              variant="primary"
-              size="large"
-              disabled={isLoading}
-            >
-              {isLoading
-                ? 'Please wait...'
-                : isSignUp
-                  ? 'Create Account'
-                  : 'Sign In'}
-            </Button>
+            {/* Form */}
+            <View className="flex-col gap-4">
+              <TextInput
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+                placeholder="your@email.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
 
-            <Pressable
-              onPress={() => {
-                setIsSignUp(!isSignUp);
-                setError(null);
-              }}
-              className="items-center py-3"
-            >
-              <Text style={{ color: palette.N6 }}>
-                {isSignUp
-                  ? 'Already have an account? '
-                  : "Don't have an account? "}
-                <Text style={{ color: palette.B5, fontWeight: '600' }}>
-                  {isSignUp ? 'Sign In' : 'Sign Up'}
+              <TextInput
+                label="Password"
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Password"
+                secureTextEntry
+              />
+
+              {error && (
+                <Text
+                  className="text-sm text-center"
+                  style={{ color: palette.R3 }}
+                >
+                  {error}
                 </Text>
-              </Text>
-            </Pressable>
+              )}
+            </View>
           </View>
 
-          {/* Future OAuth buttons will go here */}
-          {/* <View className="mt-8">
-            <Button variant="secondary" icon="logo-facebook">Continue with Facebook</Button>
-            <Button variant="secondary" icon="logo-google">Continue with Google</Button>
-          </View> */}
+          <Pressable
+            onPress={handleSignIn}
+            style={[styles.primaryButton, isLoading && styles.disabled]}
+            disabled={isLoading}
+          >
+            <Text style={styles.primaryButtonText}>
+              {isLoading ? 'Signing in...' : 'Sign In'}
+            </Text>
+          </Pressable>
         </View>
       </KeyboardAvoidingView>
     </GradientBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  primaryButton: {
+    backgroundColor: palette.B5,
+    paddingVertical: 16,
+    borderRadius: 999,
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    color: palette.N1,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+});

@@ -56,7 +56,7 @@ export default function SwipeableCard({
   const defaultLeftAction = {
     icon: 'pencil' as const,
     label: 'Edit',
-    color: '#FFFFFF',
+    color: colors.N1,
     backgroundColor: theme.accent,
   };
 
@@ -76,35 +76,20 @@ export default function SwipeableCard({
   const triggerThreshold = maxSwipe * 0.9; // 90% of action width to trigger
 
   const triggerAction = (direction: 'left' | 'right') => {
-    // Prevent multiple triggers with stronger debouncing
-    if (hasTriggeredAction.value) return;
-    hasTriggeredAction.value = true;
+    // Reset position
+    translateX.value = withSpring(0, { damping: 20, stiffness: 300 });
 
-    // Reset position immediately to prevent further triggers
-    translateX.value = withSpring(0, {
-      damping: 20,
-      stiffness: 300,
-    });
-
-    // Trigger the action after a short delay to ensure position reset
-    setTimeout(() => {
-      if (direction === 'left' && onSwipeLeft) {
-        onSwipeLeft();
-      } else if (direction === 'right' && onSwipeRight) {
-        onSwipeRight();
-      }
-    }, 100);
-
-    // Reset trigger flag after a longer delay
-    setTimeout(() => {
-      hasTriggeredAction.value = false;
-    }, 1000);
+    // Fire the callback
+    if (direction === 'left' && onSwipeLeft) {
+      onSwipeLeft();
+    } else if (direction === 'right' && onSwipeRight) {
+      onSwipeRight();
+    }
   };
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
       startX.value = translateX.value;
-      hasTriggeredAction.value = false; // Reset trigger flag
     })
     .onUpdate((event) => {
       // Only activate horizontal swipe if the gesture is primarily horizontal
@@ -127,47 +112,32 @@ export default function SwipeableCard({
       }
     })
     .onEnd(() => {
-      // Use 90% of maxSwipe as trigger threshold
       const shouldTrigger = Math.abs(translateX.value) >= triggerThreshold;
 
-      if (shouldTrigger && !hasTriggeredAction.value) {
+      if (shouldTrigger) {
+        // Set flag on the UI thread BEFORE runOnJS to prevent onFinalize re-trigger
+        hasTriggeredAction.value = true;
+
         if (translateX.value > 0 && !disableRightSwipe) {
           runOnJS(triggerAction)('left');
         } else if (translateX.value < 0) {
           runOnJS(triggerAction)('right');
         }
-      } else if (!hasTriggeredAction.value) {
-        // Snap back to center if not triggered
-        translateX.value = withSpring(0, {
-          damping: 20,
-          stiffness: 300,
-          mass: 0.8,
-        });
+      } else {
+        // Snap back to center
+        translateX.value = withSpring(0, { damping: 20, stiffness: 300, mass: 0.8 });
       }
     })
     .onFinalize(() => {
-      // Handle cancelled gestures
+      // Only snap back if onEnd didn't already trigger an action
       if (!hasTriggeredAction.value) {
-        const shouldTrigger = Math.abs(translateX.value) >= triggerThreshold;
-
-        if (shouldTrigger) {
-          if (translateX.value > 0 && !disableRightSwipe) {
-            runOnJS(triggerAction)('left');
-          } else if (translateX.value < 0) {
-            runOnJS(triggerAction)('right');
-          }
-        } else {
-          translateX.value = withSpring(0, {
-            damping: 20,
-            stiffness: 300,
-            mass: 0.8,
-          });
-        }
+        translateX.value = withSpring(0, { damping: 20, stiffness: 300, mass: 0.8 });
       }
+      hasTriggeredAction.value = false;
     })
-    .activeOffsetX([-15, 15]) // Larger threshold to prevent conflicts
-    .failOffsetY([-20, 20]) // More vertical tolerance before failing
-    .shouldCancelWhenOutside(true); // Cancel gesture when finger leaves area
+    .activeOffsetX([-15, 15])
+    .failOffsetY([-20, 20])
+    .shouldCancelWhenOutside(true);
 
   const cardStyle = useAnimatedStyle(() => {
     return {
