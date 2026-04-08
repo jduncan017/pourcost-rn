@@ -45,6 +45,7 @@ Below is a "shopping list" of feature ideas you can cherry-pick from as PourCost
    - [ ] In app messaging and shift notes
 
 5. Integrations & Automation
+   - [ ] Invoice email forwarding (forward to scan@pourcost.com → auto-process → push notification to review). Requires email ingestion (SendGrid Inbound Parse or Mailgun Routes), PDF text extraction, review notification flow. Best after web app build for review UX.
    - [ ] POS deep links for live sales pulls (Toast, Square, Lightspeed)
    - [ ] Payroll export (tips, comps, spillage tracked)
    - [ ] QuickBooks / Xero journal entries for COGS sync

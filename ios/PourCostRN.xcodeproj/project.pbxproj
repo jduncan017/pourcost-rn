@@ -9,10 +9,10 @@
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		6E9CFF215CBEC32C0D9C717B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C8F977CA2BF7D15D4C1C396F /* PrivacyInfo.xcprivacy */; };
+		420EC7C16641F75B8B204F8C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E33356D5FC0E7968C7F4DFC0 /* PrivacyInfo.xcprivacy */; };
+		4FA1391B92C0F9195AF35CE1 /* libPods-PourCostRN.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ED46747A84452D1D37CDEA58 /* libPods-PourCostRN.a */; };
+		85EB3E3AB71AFE424DDE9B1E /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99FACE073EA86F8B7457DBED /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		DC6C91222965579E39BB7E12 /* libPods-PourCostRN.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 33A95BC333224872A955F136 /* libPods-PourCostRN.a */; };
-		EFFC15D4DB8AB4CA4DB65A95 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD93C0B293AFB7335E35F32 /* ExpoModulesProvider.swift */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
@@ -20,14 +20,14 @@
 		13B07F961A680F5B00A75B9A /* PourCostRN.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PourCostRN.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = PourCostRN/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = PourCostRN/Info.plist; sourceTree = "<group>"; };
-		33A95BC333224872A955F136 /* libPods-PourCostRN.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PourCostRN.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4AD93C0B293AFB7335E35F32 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-PourCostRN/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		92092FACDFB6A876583697CB /* Pods-PourCostRN.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PourCostRN.debug.xcconfig"; path = "Target Support Files/Pods-PourCostRN/Pods-PourCostRN.debug.xcconfig"; sourceTree = "<group>"; };
-		A3683F2A0744262E8EC4C22C /* Pods-PourCostRN.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PourCostRN.release.xcconfig"; path = "Target Support Files/Pods-PourCostRN/Pods-PourCostRN.release.xcconfig"; sourceTree = "<group>"; };
+		99FACE073EA86F8B7457DBED /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-PourCostRN/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		9B6CCB3D03F332618047F1CD /* Pods-PourCostRN.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PourCostRN.debug.xcconfig"; path = "Target Support Files/Pods-PourCostRN/Pods-PourCostRN.debug.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = PourCostRN/SplashScreen.storyboard; sourceTree = "<group>"; };
+		ABDF64D58AE666327C5DA45D /* Pods-PourCostRN.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PourCostRN.release.xcconfig"; path = "Target Support Files/Pods-PourCostRN/Pods-PourCostRN.release.xcconfig"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		C8F977CA2BF7D15D4C1C396F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = PourCostRN/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		E33356D5FC0E7968C7F4DFC0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = PourCostRN/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		ED46747A84452D1D37CDEA58 /* libPods-PourCostRN.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PourCostRN.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = PourCostRN/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* PourCostRN-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "PourCostRN-Bridging-Header.h"; path = "PourCostRN/PourCostRN-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -37,7 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DC6C91222965579E39BB7E12 /* libPods-PourCostRN.a in Frameworks */,
+				4FA1391B92C0F9195AF35CE1 /* libPods-PourCostRN.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,35 +53,26 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				C8F977CA2BF7D15D4C1C396F /* PrivacyInfo.xcprivacy */,
+				E33356D5FC0E7968C7F4DFC0 /* PrivacyInfo.xcprivacy */,
 			);
 			name = PourCostRN;
-			sourceTree = "<group>";
-		};
-		2A1ABFD9E2546E53D6AAF1B4 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				E6611A89F9C6A0FCC24D24F1 /* PourCostRN */,
-			);
-			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				33A95BC333224872A955F136 /* libPods-PourCostRN.a */,
+				ED46747A84452D1D37CDEA58 /* libPods-PourCostRN.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		4DF631569EB55A43E99306C2 /* Pods */ = {
+		6C033141BF59727881B757AA /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
-				92092FACDFB6A876583697CB /* Pods-PourCostRN.debug.xcconfig */,
-				A3683F2A0744262E8EC4C22C /* Pods-PourCostRN.release.xcconfig */,
+				C93EBDDD447059AC1B630245 /* PourCostRN */,
 			);
-			path = Pods;
+			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -98,8 +89,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				4DF631569EB55A43E99306C2 /* Pods */,
-				2A1ABFD9E2546E53D6AAF1B4 /* ExpoModulesProviders */,
+				B3A4EB291884FBBB6A5DB5A2 /* Pods */,
+				6C033141BF59727881B757AA /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -114,6 +105,16 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		B3A4EB291884FBBB6A5DB5A2 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				9B6CCB3D03F332618047F1CD /* Pods-PourCostRN.debug.xcconfig */,
+				ABDF64D58AE666327C5DA45D /* Pods-PourCostRN.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
@@ -123,10 +124,10 @@
 			path = PourCostRN/Supporting;
 			sourceTree = "<group>";
 		};
-		E6611A89F9C6A0FCC24D24F1 /* PourCostRN */ = {
+		C93EBDDD447059AC1B630245 /* PourCostRN */ = {
 			isa = PBXGroup;
 			children = (
-				4AD93C0B293AFB7335E35F32 /* ExpoModulesProvider.swift */,
+				99FACE073EA86F8B7457DBED /* ExpoModulesProvider.swift */,
 			);
 			name = PourCostRN;
 			sourceTree = "<group>";
@@ -139,13 +140,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "PourCostRN" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				6ACE10FB7BA94CF54D3EEDA3 /* [Expo] Configure project */,
+				1AA71A4AC1A2313AE53C692A /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				FCE5777FD18FB923E799C452 /* [CP] Embed Pods Frameworks */,
+				B4C5B64E63FB550F4F0CF500 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -166,6 +167,8 @@
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1250;
+						DevelopmentTeam = "YZ5JYT6T9W";
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -195,7 +198,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				6E9CFF215CBEC32C0D9C717B /* PrivacyInfo.xcprivacy in Resources */,
+				420EC7C16641F75B8B204F8C /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,7 +244,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		6ACE10FB7BA94CF54D3EEDA3 /* [Expo] Configure project */ = {
+		1AA71A4AC1A2313AE53C692A /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -311,7 +314,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PourCostRN/Pods-PourCostRN-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		FCE5777FD18FB923E799C452 /* [CP] Embed Pods Frameworks */ = {
+		B4C5B64E63FB550F4F0CF500 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -353,7 +356,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				EFFC15D4DB8AB4CA4DB65A95 /* ExpoModulesProvider.swift in Sources */,
+				85EB3E3AB71AFE424DDE9B1E /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -362,15 +365,12 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 92092FACDFB6A876583697CB /* Pods-PourCostRN.debug.xcconfig */;
+			baseConfigurationReference = 9B6CCB3D03F332618047F1CD /* Pods-PourCostRN.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PourCostRN/PourCostRN.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YZ5JYT6T9W;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -391,26 +391,25 @@
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.joshuaduncan.pourcostdev;
 				PRODUCT_NAME = PourCostRN;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "PourCostRN/PourCostRN-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
+				DEVELOPMENT_TEAM = "YZ5JYT6T9W";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 			};
 			name = Debug;
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A3683F2A0744262E8EC4C22C /* Pods-PourCostRN.release.xcconfig */;
+			baseConfigurationReference = ABDF64D58AE666327C5DA45D /* Pods-PourCostRN.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = PourCostRN/PourCostRN.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YZ5JYT6T9W;
 				INFOPLIST_FILE = PourCostRN/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -426,11 +425,13 @@
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.joshuaduncan.pourcostdev;
 				PRODUCT_NAME = PourCostRN;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "PourCostRN/PourCostRN-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
+				DEVELOPMENT_TEAM = "YZ5JYT6T9W";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 			};
 			name = Release;
 		};
