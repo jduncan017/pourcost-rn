@@ -30,6 +30,8 @@ import Button from '@/src/components/ui/Button';
 import SearchBar from '@/src/components/ui/SearchBar';
 import type { InvoiceLineItem, MatchStatus } from '@/src/types/invoice-models';
 import { formatCurrency } from '@/src/services/calculation-service';
+import { parseVolumeFromBpc } from '@/src/services/product-normalization-service';
+import { volumeLabel } from '@/src/types/models';
 
 // ==========================================
 // GROUP HEADER
@@ -104,6 +106,18 @@ function LineItemCard({
     ? totalPrice / (qty * packSize)
     : (item.unitPrice ? Number(item.unitPrice) : totalPrice / qty);
 
+  // Parse bottle volume from BPC in raw_text
+  let bottleLabel: string | null = null;
+  if (item.rawText) {
+    const bpcMatch = item.rawText.match(/BPC:\s*(.+?)(?:\s+\d|$)/i);
+    if (bpcMatch) {
+      const parsed = parseVolumeFromBpc(bpcMatch[1]);
+      if (parsed.volume) {
+        bottleLabel = volumeLabel(parsed.volume);
+      }
+    }
+  }
+
   const isActionable = item.matchStatus !== 'confirmed' &&
     item.matchStatus !== 'corrected' &&
     item.matchStatus !== 'skipped' &&
@@ -124,15 +138,17 @@ function LineItemCard({
           <Text className="text-sm font-semibold" style={{ color: colors.text }} numberOfLines={2}>
             {item.productName ?? 'Unknown Product'}
           </Text>
-          {item.sku && (
-            <Text className="text-xs" style={{ color: colors.textTertiary }}>
-              SKU: {item.sku}
-            </Text>
-          )}
+          <Text className="text-xs" style={{ color: colors.textTertiary }}>
+            {[
+              bottleLabel,
+              packSize > 1 ? `${packSize}-pack` : null,
+              item.sku ? `SKU: ${item.sku}` : null,
+            ].filter(Boolean).join(' · ')}
+          </Text>
         </View>
         <View className="items-end gap-0.5">
           <Text className="text-sm font-semibold" style={{ color: colors.text }}>
-            {formatCurrency(perBottle)}/ea
+            {formatCurrency(perBottle)}/{bottleLabel ? 'btl' : 'ea'}
           </Text>
           <Text className="text-xs" style={{ color: colors.textSecondary }}>
             {qty > 1 || packSize > 1

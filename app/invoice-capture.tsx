@@ -1,11 +1,12 @@
 /**
  * Invoice Capture Screen
- * Lets the user photograph or select invoice pages, then uploads them.
  *
- * Requires: npx expo install expo-image-picker
+ * Uses the native document scanner (VisionKit on iOS, ML Kit on Android)
+ * for auto edge detection, perspective correction, and crop preview.
+ * Falls back to photo library picker for pre-existing images.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,22 +15,23 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-// expo-image-picker: run `npx expo install expo-image-picker` before using this screen
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
-const ImagePicker = require('expo-image-picker') as {
-  requestCameraPermissionsAsync: () => Promise<{ status: string }>;
-  requestMediaLibraryPermissionsAsync: () => Promise<{ status: string }>;
-  launchCameraAsync: (opts: object) => Promise<{ canceled: boolean; assets: { uri: string }[] }>;
-  launchImageLibraryAsync: (opts: object) => Promise<{ canceled: boolean; assets: { uri: string }[] }>;
-};
+import DocumentScanner, { ResponseType, ScanDocumentResponseStatus } from 'react-native-document-scanner-plugin';
 import { Ionicons } from '@expo/vector-icons';
 import { useInvoicesStore } from '@/src/stores/invoices-store';
 import { processInvoice } from '@/src/services/invoice-pipeline-service';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import Button from '@/src/components/ui/Button';
+
+// expo-image-picker for library fallback
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+const ImagePicker = require('expo-image-picker') as {
+  requestMediaLibraryPermissionsAsync: () => Promise<{ status: string }>;
+  launchImageLibraryAsync: (opts: object) => Promise<{ canceled: boolean; assets: { uri: string }[] }>;
+};
 
 // ==========================================
 // PAGE THUMBNAIL
@@ -84,49 +86,49 @@ export default function InvoiceCaptureScreen() {
 
   const [pages, setPages] = useState<string[]>([]);
 
-  const requestPermission = useCallback(async (type: 'camera' | 'library'): Promise<boolean> => {
-    if (type === 'camera') {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(
-          'Camera Permission',
-          'Camera access is required to photograph invoices. Enable it in Settings.',
-          [{ text: 'OK' }]
-        );
-        return false;
-      }
-    } else {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(
-          'Photo Library Permission',
-          'Photo library access is required to select invoices. Enable it in Settings.',
-          [{ text: 'OK' }]
-        );
-        return false;
-      }
+  // Auto-launch scanner on mount if no pages yet
+  useEffect(() => {
+    if (pages.length === 0) {
+      scanDocument();
     }
-    return true;
   }, []);
 
-  const takePhoto = useCallback(async () => {
-    const hasPermission = await requestPermission('camera');
-    if (!hasPermission) return;
+  const scanDocument = useCallback(async () => {
+    try {
+      const result = await DocumentScanner.scanDocument({
+        maxNumDocuments: 10,
+        responseType: ResponseType.ImageFilePath,
+      });
 
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      quality: 0.85,
-      allowsEditing: false,
-    });
+      if (result.status === ScanDocumentResponseStatus.Cancel) return;
 
-    if (!result.canceled && result.assets[0]) {
-      setPages(prev => [...prev, result.assets[0].uri]);
+      if (result.scannedImages && result.scannedImages.length > 0) {
+        setPages(prev => [...prev, ...result.scannedImages!]);
+      }
+    } catch (err: any) {
+
+      // Fallback: if native scanner fails, show alert with options
+      Alert.alert(
+        'Scanner Unavailable',
+        'The document scanner is not available on this device. You can select images from your photo library instead.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Photo Library', onPress: pickFromLibrary },
+        ],
+      );
     }
-  }, [requestPermission]);
+  }, []);
 
   const pickFromLibrary = useCallback(async () => {
-    const hasPermission = await requestPermission('library');
-    if (!hasPermission) return;
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Photo Library Permission',
+        'Photo library access is required to select invoices. Enable it in Settings.',
+        [{ text: 'OK' }],
+      );
+      return;
+    }
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -139,7 +141,7 @@ export default function InvoiceCaptureScreen() {
       const uris = result.assets.map((a: { uri: string }) => a.uri);
       setPages(prev => [...prev, ...uris]);
     }
-  }, [requestPermission]);
+  }, []);
 
   const removePage = useCallback((index: number) => {
     setPages(prev => prev.filter((_, i) => i !== index));
@@ -155,7 +157,6 @@ export default function InvoiceCaptureScreen() {
       // Kick off processing in the background (non-blocking)
       processInvoice(invoice).then((result) => {
         if (result.success) {
-          // Reload invoices list to show updated status
           useInvoicesStore.getState().loadInvoices(true);
         }
       });
@@ -167,51 +168,26 @@ export default function InvoiceCaptureScreen() {
   return (
     <GradientBackground>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 120, flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
       >
         <View className="px-4 pt-4 pb-2">
           <Text className="text-2xl font-bold" style={{ color: colors.text }}>Scan Invoice</Text>
           <Text className="text-sm mt-1" style={{ color: colors.textSecondary }}>
-            Photograph each page of the invoice
+            {pages.length > 0
+              ? 'Review your scanned pages, then upload'
+              : 'Position the invoice in the camera to auto-detect edges'}
           </Text>
-        </View>
-
-        {/* Add Page Buttons */}
-        <View className="flex-row gap-3 mx-4 mt-2">
-          <Pressable
-            onPress={takePhoto}
-            disabled={isUploading}
-            className="flex-1 flex-row items-center justify-center gap-2 py-4 rounded-2xl active:opacity-70"
-            style={{ backgroundColor: colors.surface }}
-          >
-            <Ionicons name="camera-outline" size={22} color={colors.gold} />
-            <Text style={{ color: colors.text, fontWeight: '600', fontSize: 15 }}>
-              Take Photo
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={pickFromLibrary}
-            disabled={isUploading}
-            className="flex-1 flex-row items-center justify-center gap-2 py-4 rounded-2xl active:opacity-70"
-            style={{ backgroundColor: colors.surface }}
-          >
-            <Ionicons name="images-outline" size={22} color={colors.gold} />
-            <Text style={{ color: colors.text, fontWeight: '600', fontSize: 15 }}>
-              Choose File
-            </Text>
-          </Pressable>
         </View>
 
         {/* Page Thumbnails */}
         {pages.length > 0 && (
-          <View className="mt-6 mx-4">
+          <View className="mt-4 mx-4">
             <Text
               className="text-sm font-semibold mb-3"
               style={{ color: colors.textSecondary }}
             >
-              {pages.length} {pages.length === 1 ? 'page' : 'pages'} added
+              {pages.length} {pages.length === 1 ? 'page' : 'pages'} scanned
             </Text>
 
             <ScrollView
@@ -228,41 +204,70 @@ export default function InvoiceCaptureScreen() {
                 />
               ))}
 
-              {/* Add More button inline */}
+              {/* Add More — opens scanner again */}
               <Pressable
-                onPress={pickFromLibrary}
+                onPress={scanDocument}
                 className="w-24 h-32 rounded-xl border-2 border-dashed items-center justify-center"
                 style={{ borderColor: colors.border }}
               >
-                <Ionicons name="add" size={28} color={colors.textTertiary} />
+                <Ionicons name="scan" size={24} color={colors.textTertiary} />
                 <Text style={{ color: colors.textTertiary, fontSize: 11, marginTop: 4 }}>
-                  Add page
+                  Scan more
                 </Text>
               </Pressable>
             </ScrollView>
           </View>
         )}
 
-        {/* Tips */}
+        {/* Action buttons when no pages */}
         {pages.length === 0 && (
-          <View className="mx-4 mt-8 gap-3">
-            {[
-              { icon: 'flash-outline', text: 'Use good lighting — avoid shadows across the page' },
-              { icon: 'crop-outline', text: 'Include the full invoice, especially header and totals' },
-              { icon: 'documents-outline', text: 'Multi-page invoices: add each page separately' },
-            ].map(({ icon, text }) => (
-              <View key={icon} className="flex-row items-center gap-3">
-                <View
-                  className="w-8 h-8 rounded-full items-center justify-center"
-                  style={{ backgroundColor: colors.warningSubtle }}
-                >
-                  <Ionicons name={icon as any} size={16} color={colors.gold} />
-                </View>
-                <Text className="flex-1 text-sm" style={{ color: colors.textSecondary }}>
-                  {text}
+          <View className="flex-1 justify-center px-4">
+            <View className="gap-3 mt-8">
+              <Pressable
+                onPress={scanDocument}
+                disabled={isUploading}
+                className="flex-row items-center justify-center gap-3 py-5 rounded-2xl active:opacity-70"
+                style={{ backgroundColor: colors.surface }}
+              >
+                <Ionicons name="scan" size={24} color={colors.gold} />
+                <Text style={{ color: colors.text, fontWeight: '600', fontSize: 16 }}>
+                  Scan Invoice
                 </Text>
-              </View>
-            ))}
+              </Pressable>
+
+              <Pressable
+                onPress={pickFromLibrary}
+                disabled={isUploading}
+                className="flex-row items-center justify-center gap-3 py-5 rounded-2xl active:opacity-70"
+                style={{ backgroundColor: colors.surface }}
+              >
+                <Ionicons name="images-outline" size={24} color={colors.gold} />
+                <Text style={{ color: colors.text, fontWeight: '600', fontSize: 16 }}>
+                  Choose from Library
+                </Text>
+              </Pressable>
+            </View>
+
+            {/* Tips */}
+            <View className="mt-10 gap-3">
+              {[
+                { icon: 'scan-outline', text: 'Hold steady — edges are detected automatically' },
+                { icon: 'crop-outline', text: 'Adjust the crop if needed before confirming' },
+                { icon: 'documents-outline', text: 'Multi-page: scan all pages in one session' },
+              ].map(({ icon, text }) => (
+                <View key={icon} className="flex-row items-center gap-3">
+                  <View
+                    className="w-8 h-8 rounded-full items-center justify-center"
+                    style={{ backgroundColor: colors.warningSubtle }}
+                  >
+                    <Ionicons name={icon as any} size={16} color={colors.gold} />
+                  </View>
+                  <Text className="flex-1 text-sm" style={{ color: colors.textSecondary }}>
+                    {text}
+                  </Text>
+                </View>
+              ))}
+            </View>
           </View>
         )}
       </ScrollView>
@@ -277,7 +282,7 @@ export default function InvoiceCaptureScreen() {
             <View className="flex-row items-center justify-center gap-3 py-4">
               <ActivityIndicator color={colors.gold} />
               <Text style={{ color: colors.text, fontWeight: '600' }}>
-                Uploading {pages.length} {pages.length === 1 ? 'page' : 'pages'}…
+                Uploading {pages.length} {pages.length === 1 ? 'page' : 'pages'}...
               </Text>
             </View>
           ) : (

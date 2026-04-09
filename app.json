@@ -46,7 +46,8 @@
           "addGeneratedScheme": false
         }
       ],
-      "expo-video"
+      "expo-video",
+      "react-native-document-scanner-plugin"
     ],
     "experiments": {
       "typedRoutes": true

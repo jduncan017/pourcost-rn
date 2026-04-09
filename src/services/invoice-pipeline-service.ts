@@ -17,8 +17,9 @@
 import { supabase } from '@/src/lib/supabase';
 import { updateInvoiceStatus } from '@/src/lib/invoice-data';
 import { detectDistributor } from './distributor-detection-service';
-import { extractLineItems, estimateExtractionCost } from './llm-extraction-service';
+import { extractLineItems } from './llm-extraction-service';
 import { resolvePackSizesForInvoice } from './pack-size-service';
+import { normalizeProduct } from './product-normalization-service';
 import { matchInvoiceLineItems, type LineItemInput } from './matching-cascade-service';
 import { applyInvoicePriceUpdates, type PriceUpdateInput, type CascadeResult } from './cost-cascade-service';
 import type { Invoice, InvoiceLineItem, MatchStatus } from '@/src/types/invoice-models';
@@ -113,26 +114,53 @@ export async function processInvoice(invoice: Invoice): Promise<ProcessingResult
       return result;
     }
 
+    // --- Normalize & Filter ---
+    const normalized = extraction.lineItems.map(item => ({
+      item,
+      norm: normalizeProduct(
+        item.productName,
+        item.rawText,
+        item.packSize,
+        item.totalPrice,
+        item.quantity,
+      ),
+    }));
+
+    // Filter out non-product lines (deposits, fees, etc.)
+    const productItems = normalized.filter(n => !n.norm.isNonProduct);
+
+    if (productItems.length === 0) {
+      await updateInvoiceStatus(invoice.id, 'failed');
+      result.error = 'No product line items found (all were fees/deposits)';
+      return result;
+    }
+
     // --- Pack Size Resolution ---
     const packInfos = await resolvePackSizesForInvoice(
-      extraction.lineItems,
+      productItems.map(p => p.item),
       distributorId,
     );
 
     // --- Insert Line Items ---
-    const lineItemRows = extraction.lineItems.map((item, i) => {
+    const lineItemRows = productItems.map(({ item, norm }, i) => {
       const packInfo = packInfos.get(i);
+      const effectivePackSize = norm.packSize ?? packInfo?.packSize ?? item.packSize;
+      const effectiveQty = item.quantity;
+      const perBottle = norm.perBottlePrice
+        ?? packInfo?.unitPrice
+        ?? item.unitPrice;
+
       return {
         invoice_id: invoice.id,
         line_number: i + 1,
         raw_text: item.rawText,
         sku: item.sku,
-        product_name: item.productName,
-        quantity: item.quantity,
+        product_name: norm.name, // Use normalized name
+        quantity: effectiveQty,
         unit: item.unit,
-        unit_price: packInfo?.unitPrice ?? item.unitPrice,
+        unit_price: perBottle,
         total_price: item.totalPrice,
-        pack_size: packInfo?.packSize ?? item.packSize,
+        pack_size: effectivePackSize,
         match_status: item.isCredit ? 'credit' : 'unmatched',
       };
     });
@@ -228,7 +256,7 @@ export async function confirmAndApplyInvoice(
   // Fetch all confirmed/auto-matched line items with their matched ingredients
   const { data: lineItems } = await supabase
     .from('invoice_line_items')
-    .select('id, matched_ingredient_id, unit_price, total_price, quantity, pack_size')
+    .select('id, matched_ingredient_id, unit_price, total_price, quantity, pack_size, raw_text, product_name')
     .eq('invoice_id', invoiceId)
     .in('match_status', ['auto_matched', 'confirmed', 'corrected']);
 
@@ -246,7 +274,8 @@ export async function confirmAndApplyInvoice(
     };
   }
 
-  // Build price update inputs
+  // Build price update inputs with volume data for configurations
+  const { parseVolumeFromBpc } = await import('./product-normalization-service');
   const updates: PriceUpdateInput[] = [];
   const seen = new Set<string>(); // dedupe by ingredient ID
 
@@ -259,9 +288,22 @@ export async function confirmAndApplyInvoice(
     const unitPrice = item.unit_price
       ?? (Number(item.total_price) / Math.max(Number(item.quantity), 1) / packSize);
 
+    // Parse bottle volume from BPC in raw_text
+    let newProductSize: PriceUpdateInput['newProductSize'];
+    if (item.raw_text) {
+      const bpcMatch = item.raw_text.match(/BPC:\s*(.+?)(?:\s+\d|$)/i);
+      if (bpcMatch) {
+        const parsed = parseVolumeFromBpc(bpcMatch[1]);
+        if (parsed.volume) {
+          newProductSize = parsed.volume;
+        }
+      }
+    }
+
     updates.push({
       ingredientId: item.matched_ingredient_id,
       newProductCost: Math.round(unitPrice * 100) / 100,
+      newProductSize,
       invoiceLineItemId: item.id,
       invoiceId,
     });
