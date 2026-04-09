@@ -131,6 +131,16 @@ export default function DrawerLayout() {
           }}
         />
         <Drawer.Screen
+          name="invoices"
+          options={{
+            title: 'Invoices',
+            drawerLabel: 'Invoices',
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="receipt-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
           name="calculator"
           options={{
             title: 'Quick Calculator',

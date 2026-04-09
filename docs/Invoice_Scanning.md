@@ -10,13 +10,67 @@ The architecture is built around **three key principles**:
 2. **Every scan makes the system smarter** — user confirmations build a shared product catalog and distributor template library
 3. **Prices are always org-specific, intelligence is global** — each bar sees only their costs, but the matching/enrichment infrastructure is shared
 
+Implementation Notes:
+Recommended Execution Order
+
+Round 1 — Foundation (COMPLETE)
+
+- [x] Supabase schema migrations (001_invoice_scanning.sql, 002_matching_rpc.sql)
+- [x] Image capture UI (Expo camera/image picker) — app/invoice-capture.tsx
+- [x] Zustand stores for invoices, line items — src/stores/invoices-store.ts
+- [x] Supabase Storage upload for invoice images — FormData approach (blob was unreliable in RN)
+- [x] Matching cascade service — 5-level fallback with confidence scoring
+- [x] Cost cascade engine — invoice → ingredient → prepped → cocktail recalc
+- [x] Integration tests (31 passing) — src/__tests__/invoice-services.test.ts, round2-services.test.ts
+- [x] .env setup with service role key for tests
+
+Round 2 — Processing Pipeline (COMPLETE)
+
+- [x] ~~OCR Edge Function (Google Vision API)~~ — REPLACED by direct vision extraction
+- [x] ~~LLM extraction via Claude Haiku on OCR text~~ — REPLACED by Gemini 2.5 Flash vision
+- [x] Vision extraction via Gemini 2.5 Flash — supabase/functions/extract-invoice/
+- [x] Distributor detection heuristics — src/services/distributor-detection-service.ts
+- [x] Pack size disambiguation + math validation — src/services/pack-size-service.ts, llm-extraction-service.ts
+- [x] Review screen UI (green/yellow/red groups) — app/invoice-review.tsx
+- [x] Line item edit screen — app/invoice-line-edit.tsx
+- [x] Pipeline orchestration — src/services/invoice-pipeline-service.ts
+- [x] Price history component on ingredient detail — src/components/PriceHistory.tsx
+- [x] Invoice list: pull-to-refresh, polling for processing status, retry/delete actions
+- [x] Per-bottle pricing display on review screen
+
+Architecture change (Round 2): Replaced the OCR → text → Claude Haiku pipeline with direct
+Gemini 2.5 Flash vision. The model reads invoice images directly, eliminating OCR column-alignment
+issues. Cost: ~$0.003/invoice vs ~$0.03 for the original OCR + Claude approach. The OCR Edge
+Function (supabase/functions/ocr-invoice/) is retained but unused — may be useful for template
+parsing in Round 3.
+
+Round 2.5 — Product Normalization & Configurations (NEXT)
+
+- [ ] Product name normalization (strip proof numbers, expand abbreviations: TEQ→Tequila, SCHN→Schnapps, etc.)
+- [ ] Extract bottle size from BPC into Volume type (e.g., "6 - 1.0L" → Volume{ml:1000}, pack_size:6)
+- [ ] Wire ingredient_configurations into price update flow (create/update configs per size/pack)
+- [ ] Handle "same product, different size" matching (750ml vs 1.0L vs 1.75L all map to one ingredient)
+- [ ] Deposit fee / non-product line filtering
+- [ ] Review screen: show bottle size and pack info clearly
+
+Round 3 — Intelligence & Polish
+
+Opus: Template auto-generation, verification anti-spam, multi-pack-size resolution
+
+Sonnet: Prepped ingredient recipe builder UI, price change alerts, settings additions, configurations CRUD
+
 ---
 
 ## 1. Processing Pipeline
 
 ```
-Photo → OCR → Distributor Detection → Line Item Extraction → Product Matching → User Review → Price Update
+Photo → Gemini Vision Extraction → Distributor Detection → Pack Size Resolution → Product Matching → User Review → Price Update
 ```
+
+> **Architecture note (updated):** The original plan called for OCR (Google Vision) → text → Claude Haiku
+> extraction. In practice, OCR mangled tabular column layouts badly, causing SKU/product misalignment.
+> We replaced the entire OCR + text LLM pipeline with a single Gemini 2.5 Flash vision call that reads
+> the invoice image directly. Cost dropped from ~$0.03 to ~$0.003/invoice with better accuracy.
 
 ### Step 1: Image Capture
 
@@ -576,36 +630,36 @@ This cascade is invisible to the user but immensely valuable. One invoice scan c
 
 These involve tricky logic, multi-step reasoning, or ambiguous edge cases where getting it wrong means bad data propagating through the system:
 
-| Task | Why Opus |
-|---|---|
-| **Matching cascade logic** (Section 1, Step 5) | Multi-level fallback with confidence scoring, fuzzy matching thresholds, deciding when to auto-match vs. ask the user. Getting this wrong means wrong prices on cocktails. |
-| **LLM extraction prompts** (Section 1, Step 4 Tier 3) | Prompt engineering for structured invoice data extraction. Needs to handle wildly different invoice formats, abbreviations, edge cases (partial cases, split lines, multi-line items). |
-| **Multi-pack-size resolution** (Section 13) | When an invoice line matches an existing ingredient but at a different size/pack config — deciding whether to update existing config, create new one, or prompt user. Interacts with default config logic. |
-| **Cost cascade engine** (Section 8) | Invoice → ingredient price update → prepped ingredient recalc → cocktail recalc. Must handle circular deps (prepped ingredient A uses prepped ingredient B), partial updates, and avoid unnecessary recalculations. |
-| **Template auto-generation** (Section 12, Q7) | Analyzing 10+ LLM extraction results to reverse-engineer a regex/column-mapping template. Essentially building a parser from examples. |
-| **Pack size disambiguation** (Section 12, Q3) | Determining from invoice text whether "6 × 750ml" means 6 individual bottles or 1 case of 6. Context-dependent, distributor-specific. |
-| **Distributor detection heuristics** (Section 1, Step 3) | Pattern matching against invoice headers to identify distributors. Needs to handle variations, regional branches, subsidiary names. |
-| **Verification anti-spam logic** (Section 12, Q6) | Anomaly detection on SKU mapping verification patterns. Edge cases around contested mappings. |
+| Task                                                     | Why Opus                                                                                                                                                                                                            |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Matching cascade logic** (Section 1, Step 5)           | Multi-level fallback with confidence scoring, fuzzy matching thresholds, deciding when to auto-match vs. ask the user. Getting this wrong means wrong prices on cocktails.                                          |
+| **LLM extraction prompts** (Section 1, Step 4 Tier 3)    | Prompt engineering for structured invoice data extraction. Needs to handle wildly different invoice formats, abbreviations, edge cases (partial cases, split lines, multi-line items).                              |
+| **Multi-pack-size resolution** (Section 13)              | When an invoice line matches an existing ingredient but at a different size/pack config — deciding whether to update existing config, create new one, or prompt user. Interacts with default config logic.          |
+| **Cost cascade engine** (Section 8)                      | Invoice → ingredient price update → prepped ingredient recalc → cocktail recalc. Must handle circular deps (prepped ingredient A uses prepped ingredient B), partial updates, and avoid unnecessary recalculations. |
+| **Template auto-generation** (Section 12, Q7)            | Analyzing 10+ LLM extraction results to reverse-engineer a regex/column-mapping template. Essentially building a parser from examples.                                                                              |
+| **Pack size disambiguation** (Section 12, Q3)            | Determining from invoice text whether "6 × 750ml" means 6 individual bottles or 1 case of 6. Context-dependent, distributor-specific.                                                                               |
+| **Distributor detection heuristics** (Section 1, Step 3) | Pattern matching against invoice headers to identify distributors. Needs to handle variations, regional branches, subsidiary names.                                                                                 |
+| **Verification anti-spam logic** (Section 12, Q6)        | Anomaly detection on SKU mapping verification patterns. Edge cases around contested mappings.                                                                                                                       |
 
 ### Sonnet handles these fine
 
 Straightforward implementation with clear specs — the hard thinking is already done in this doc:
 
-| Task | Why Sonnet is fine |
-|---|---|
-| **Supabase schema migrations** | SQL is fully specified in Section 7. Just needs to be turned into migration files. |
-| **Image capture UI** | Standard Expo camera/image picker. Well-documented APIs. |
-| **OCR Edge Function** | API wrapper around Google Vision. Send image, get text back. Minimal logic. |
-| **Review screen UI** | React Native screen with three groups (green/yellow/red). Complex visually but the logic is straightforward list rendering with action buttons. |
-| **Zustand stores** (invoices, configurations) | CRUD operations following existing store patterns in the codebase. |
-| **Supabase Storage upload** | Standard file upload to a bucket. Existing patterns in the app. |
-| **Price history tracking** | Insert a row on price change. Simple trigger or app-side logic. |
-| **Supply type filtering** | Add `'Supply'` to type enum, filter cocktail picker with `type !== 'Supply'`. One-line change. |
-| **ingredient_configurations CRUD** | Standard table operations. The schema is defined, just wire it up. |
-| **Prepped ingredient recipe builder UI** | Form with ingredient search, quantity inputs, yield input. Standard form pattern. |
-| **Price change alerts UI** | Query price_history, show items with >X% change. Display logic. |
-| **Settings additions** (labor rate, etc.) | Add fields to existing settings screen. Pattern already exists. |
-| **Ingredient detail — configurations tab** | List of pack sizes with default toggle. Standard list UI. |
+| Task                                          | Why Sonnet is fine                                                                                                                              |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Supabase schema migrations**                | SQL is fully specified in Section 7. Just needs to be turned into migration files.                                                              |
+| **Image capture UI**                          | Standard Expo camera/image picker. Well-documented APIs.                                                                                        |
+| **OCR Edge Function**                         | API wrapper around Google Vision. Send image, get text back. Minimal logic.                                                                     |
+| **Review screen UI**                          | React Native screen with three groups (green/yellow/red). Complex visually but the logic is straightforward list rendering with action buttons. |
+| **Zustand stores** (invoices, configurations) | CRUD operations following existing store patterns in the codebase.                                                                              |
+| **Supabase Storage upload**                   | Standard file upload to a bucket. Existing patterns in the app.                                                                                 |
+| **Price history tracking**                    | Insert a row on price change. Simple trigger or app-side logic.                                                                                 |
+| **Supply type filtering**                     | Add `'Supply'` to type enum, filter cocktail picker with `type !== 'Supply'`. One-line change.                                                  |
+| **ingredient_configurations CRUD**            | Standard table operations. The schema is defined, just wire it up.                                                                              |
+| **Prepped ingredient recipe builder UI**      | Form with ingredient search, quantity inputs, yield input. Standard form pattern.                                                               |
+| **Price change alerts UI**                    | Query price_history, show items with >X% change. Display logic.                                                                                 |
+| **Settings additions** (labor rate, etc.)     | Add fields to existing settings screen. Pattern already exists.                                                                                 |
+| **Ingredient detail — configurations tab**    | List of pack sizes with default toggle. Standard list UI.                                                                                       |
 
 ### Suggested workflow
 
@@ -616,7 +670,7 @@ Straightforward implementation with clear specs — the hard thinking is already
 5. **Opus**: Template auto-generation logic, verification/anti-spam, distributor detection heuristics.
 6. **Sonnet**: Everything else — price history, alerts, prepped ingredient UI, settings.
 
-**Rule of thumb**: If the task involves deciding *what to do* based on ambiguous input (matching, parsing, classifying), use Opus. If the task involves *doing a known thing* (CRUD, UI, API calls), use Sonnet.
+**Rule of thumb**: If the task involves deciding _what to do_ based on ambiguous input (matching, parsing, classifying), use Opus. If the task involves _doing a known thing_ (CRUD, UI, API calls), use Sonnet.
 
 ---
 
@@ -868,9 +922,11 @@ Invoice price:   1.75L case of 6 — $24.99/bottle ($149.94/case)
 ## 14. Resolved — Remaining Questions
 
 ### 1. Barcode Scanning
+
 **Decision: Post-MVP, useful for inventory features**
 
 Not difficult to implement (Expo has `expo-barcode-scanner`), but it's a different entry point than invoice scanning. Most useful for:
+
 - Initial inventory setup (scan your whole bar)
 - Spot-checking individual bottles
 - Future inventory count features
@@ -878,11 +934,13 @@ Not difficult to implement (Expo has `expo-barcode-scanner`), but it's a differe
 Add to post-MVP roadmap. UPC → canonical product lookup is straightforward once the canonical product catalog exists.
 
 ### 2. Invoice Email Forwarding
+
 **Decision: Post-MVP, after web app — add to feature-list.md**
 
 The flow: forward invoice email to `scan@pourcost.com` → auto-extract PDF → process through same pipeline → push notification to review in app.
 
 Requires:
+
 - Email ingestion service (e.g., SendGrid Inbound Parse, Mailgun Routes)
 - PDF parsing (separate from image OCR — PDFs often have extractable text layers)
 - Push notification for review prompt
@@ -891,6 +949,7 @@ Requires:
 High value, lower urgency. Pairs well with the web app build.
 
 ### 3. Multi-Pack-Size Ingredients
+
 **Decision: Support multiple configurations per ingredient (see Section 13)**
 
 Resolved above — no merge flow needed. Each ingredient tracks multiple purchase configurations with one default.

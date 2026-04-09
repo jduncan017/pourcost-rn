@@ -167,6 +167,8 @@ function RootLayoutNav() {
             <Stack.Screen name="ingredient-selector" options={{ title: 'Add Ingredients' }} />
             <Stack.Screen name="search" options={{ title: 'Search' }} />
             <Stack.Screen name="container-sizes" options={{ title: 'Container Sizes' }} />
+            <Stack.Screen name="invoice-review" options={{ title: 'Review Invoice' }} />
+            <Stack.Screen name="invoice-line-edit" options={{ title: 'Edit Line Item' }} />
           </Stack>
         </View>
         <ToastContainer />

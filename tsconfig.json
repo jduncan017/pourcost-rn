@@ -33,7 +33,8 @@
     "nativewind-env.d.ts"
   ],
   "exclude": [
-    "src/_future/**"
+    "src/_future/**",
+    "supabase/functions/**"
   ],
   "extends": "expo/tsconfig.base.json"
 }

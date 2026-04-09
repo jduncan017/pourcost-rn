@@ -19,6 +19,7 @@ import {
   calculateSuggestedPrice,
   formatCurrency,
 } from '@/src/services/calculation-service';
+import PriceHistory from '@/src/components/PriceHistory';
 
 export default function IngredientDetailScreen() {
   const { defaultPourSize, defaultRetailPrice, pourCostGoal } = useAppStore();
@@ -202,6 +203,10 @@ export default function IngredientDetailScreen() {
               />
             </>
           )}
+
+          {/* Price History */}
+          <SectionDivider />
+          <PriceHistory ingredientId={ingredient.id} />
 
           {/* Footer */}
           <View className="items-center py-4">
