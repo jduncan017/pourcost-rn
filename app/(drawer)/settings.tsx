@@ -1,9 +1,10 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { View, Text, TextInput as RNTextInput, ScrollView, Pressable, Image, Alert, Linking } from 'react-native';
+import { View, Text, TextInput as RNTextInput, ScrollView, Pressable, Image, Alert, Linking, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppStore, ThemeMode, IngredientOrderPref } from '@/src/stores/app-store';
 import { useTheme, useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { FeedbackService } from '@/src/services/feedback-service';
 import { Ionicons } from '@expo/vector-icons';
 import SettingsCard from '@/src/components/ui/SettingsCard';
 import GradientBackground from '@/src/components/ui/GradientBackground';
@@ -56,7 +57,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { isDarkMode, themeMode, setThemeMode } = useTheme();
   const colors = useThemeColors();
-  const { user, signOut } = useAuth();
+  const { user, signOut, deleteAccount, linkedProviders, linkWithApple, linkWithGoogle } = useAuth();
 
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -100,6 +101,44 @@ export default function SettingsScreen() {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign Out', style: 'destructive', onPress: signOut },
     ]);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'This permanently deletes your account, ingredients, cocktails, invoices, and saved data. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Continue',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Are you sure?',
+              'This is your last chance to cancel. All of your PourCost data will be permanently deleted.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Delete Forever',
+                  style: 'destructive',
+                  onPress: async () => {
+                    const { error } = await deleteAccount();
+                    if (error) {
+                      FeedbackService.showError('Delete Failed', error);
+                    } else {
+                      FeedbackService.showSuccess(
+                        'Account Deleted',
+                        'Your account and all data have been removed.'
+                      );
+                    }
+                  },
+                },
+              ]
+            );
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -201,12 +240,45 @@ export default function SettingsScreen() {
                   onPress={() => setShowNameEditor(true)}
                   showCaret
                 />
+                {Platform.OS === 'ios' && (
+                  <SettingsCard
+                    title="Apple Sign-In"
+                    description={linkedProviders.includes('apple') ? 'Linked' : 'Not linked — tap to link'}
+                    iconName={linkedProviders.includes('apple') ? 'checkmark-circle-outline' : 'add-circle-outline'}
+                    iconColor={linkedProviders.includes('apple') ? colors.colors.G3 : colors.text}
+                    onPress={async () => {
+                      if (linkedProviders.includes('apple')) return;
+                      const { error } = await linkWithApple();
+                      if (error) FeedbackService.showError('Link Failed', error);
+                      else FeedbackService.showSuccess('Apple Linked', 'You can now sign in with Apple.');
+                    }}
+                  />
+                )}
+                <SettingsCard
+                  title="Google Sign-In"
+                  description={linkedProviders.includes('google') ? 'Linked' : 'Not linked — tap to link'}
+                  iconName={linkedProviders.includes('google') ? 'checkmark-circle-outline' : 'add-circle-outline'}
+                  iconColor={linkedProviders.includes('google') ? colors.colors.G3 : colors.text}
+                  onPress={async () => {
+                    if (linkedProviders.includes('google')) return;
+                    const { error } = await linkWithGoogle();
+                    if (error) FeedbackService.showError('Link Failed', error);
+                    else FeedbackService.showSuccess('Google Linked', 'You can now sign in with Google.');
+                  }}
+                />
                 <SettingsCard
                   title="Sign Out"
                   description={user.email ?? 'Signed in'}
                   iconName="log-out-outline"
                   iconColor={colors.colors.R3}
                   onPress={handleSignOut}
+                />
+                <SettingsCard
+                  title="Delete Account"
+                  description="Permanently remove your account and data"
+                  iconName="trash-outline"
+                  iconColor={colors.colors.R3}
+                  onPress={handleDeleteAccount}
                 />
               </>
             ) : (
@@ -241,10 +313,17 @@ export default function SettingsScreen() {
               showCaret
             />
             <SettingsCard
-              title="Terms & Privacy"
-              description="Read our terms and privacy policy"
+              title="Terms of Service"
+              description="Read our terms of service"
               iconName="document-text-outline"
-              onPress={() => {}}
+              onPress={() => Linking.openURL('https://www.pourcost.app/terms')}
+              showCaret
+            />
+            <SettingsCard
+              title="Privacy Policy"
+              description="Read our privacy policy"
+              iconName="shield-checkmark-outline"
+              onPress={() => Linking.openURL('https://www.pourcost.app/privacy')}
               showCaret
             />
             <SettingsCard

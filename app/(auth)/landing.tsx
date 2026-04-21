@@ -94,6 +94,7 @@ export default function LandingScreen() {
           >
             <Text style={styles.outlineButtonText}>I already have an account</Text>
           </Pressable>
+
         </View>
       </View>
     </View>

@@ -6,7 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useSegments, useNavigation } from 'expo-router';
 import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { useNetworkStatus } from '@/src/lib/useNetworkStatus';
+import { HapticService } from '@/src/services/haptic-service';
 import CustomDrawerContent from '@/src/components/CustomDrawerContent';
+import { useAuth } from '@/src/contexts/AuthContext';
 
 /**
  * Drawer navigation layout for PourCost
@@ -20,7 +22,7 @@ function HamburgerIcon() {
 
   return (
     <Pressable
-      onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+      onPress={() => { HapticService.buttonPress(); navigation.dispatch(DrawerActions.toggleDrawer()); }}
       className="p-2 rounded-lg"
     >
       <Ionicons name="menu" size={24} color={colors.text} />
@@ -67,7 +69,7 @@ function SearchIcon() {
 
   return (
     <Pressable
-      onPress={() => router.push('/search')}
+      onPress={() => { HapticService.buttonPress(); router.push('/search'); }}
       className="p-2 rounded-lg"
     >
       <Ionicons name="search" size={20} color={colors.text} />
@@ -77,6 +79,7 @@ function SearchIcon() {
 
 export default function DrawerLayout() {
   const colors = useThemeColors();
+  const { isAdmin } = useAuth();
 
   return (
     <View style={{ flex: 1 }}>
@@ -138,13 +141,14 @@ export default function DrawerLayout() {
             drawerIcon: ({ color, size }) => (
               <Ionicons name="receipt-outline" size={size} color={color} />
             ),
+            drawerItemStyle: isAdmin ? undefined : { display: 'none' },
           }}
         />
         <Drawer.Screen
           name="calculator"
           options={{
-            title: 'Quick Calculator',
-            drawerLabel: 'Quick Calculator',
+            title: 'Quick Calc',
+            drawerLabel: 'Quick Calc',
             drawerIcon: ({ color, size }) => (
               <Ionicons name="calculator" size={size} color={color} />
             ),

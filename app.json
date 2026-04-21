@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "PourCostRN",
-    "slug": "PourCost-RN",
+    "slug": "pourcost",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/ios-dark.png",
@@ -9,15 +9,23 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash-icon-dark.png",
+      "image": "./assets/images/PC-Logo-Gold.png",
       "resizeMode": "contain",
       "backgroundColor": "#0B1120"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.joshuaduncan.pourcostdev",
+      "bundleIdentifier": "clutterbuck.PourCostFree",
+      "usesAppleSignIn": true,
       "infoPlist": {
-        "CFBundleDisplayName": "PourCost"
+        "CFBundleDisplayName": "PourCost",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.985050413872-blhmjb4b6dn8i8335kp9aqkh1l4d3csd"
+            ]
+          }
+        ]
       },
       "icon": {
         "dark": "./assets/images/ios-dark.png",
@@ -31,7 +39,7 @@
         "backgroundColor": "#0B1120"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.twentyninelabs.pourcost"
+      "package": "app.pourcost"
     },
     "web": {
       "bundler": "metro",
@@ -40,17 +48,19 @@
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-dev-client",
-        {
-          "addGeneratedScheme": false
-        }
-      ],
-      "expo-video",
+"expo-video",
+      "expo-apple-authentication",
       "react-native-document-scanner-plugin"
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "56b0fd22-9ca9-4514-b9c7-bbec925886db"
+      }
+    },
+    "owner": "pourcost-llc"
   }
 }

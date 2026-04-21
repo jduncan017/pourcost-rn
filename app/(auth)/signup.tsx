@@ -1,181 +1,94 @@
-import { useState, useMemo } from 'react';
-import { View, Text, Image, Pressable, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import TextInput from '@/src/components/ui/TextInput';
-import { useAuth } from '@/src/contexts/AuthContext';
+import AppleSignInButton from '@/src/components/ui/AppleSignInButton';
+import GoogleSignInButton from '@/src/components/ui/GoogleSignInButton';
 import { palette } from '@/src/contexts/ThemeContext';
-
-const PASSWORD_RULES = [
-  { label: 'At least 8 characters', test: (pw: string) => pw.length >= 8 },
-  { label: 'One uppercase letter', test: (pw: string) => /[A-Z]/.test(pw) },
-  { label: 'One number', test: (pw: string) => /[0-9]/.test(pw) },
-  { label: 'One symbol', test: (pw: string) => /[^A-Za-z0-9]/.test(pw) },
-  { label: 'Passwords match', test: (_pw: string, confirm: string, pw: string) => pw.length > 0 && confirm.length > 0 && pw === confirm },
-];
 
 export default function SignUpScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { signUp } = useAuth();
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const ruleResults = useMemo(
-    () => PASSWORD_RULES.map((rule) => ({ ...rule, passed: rule.test(password, confirmPassword, password) })),
-    [password, confirmPassword]
-  );
-
-  const allRulesPassed = ruleResults.every((r) => r.passed);
-
-  const handleSignUp = async () => {
-    if (!email.trim()) {
-      setError('Please enter your email');
-      return;
-    }
-    if (!allRulesPassed) {
-      setError('Please fix the password requirements above');
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    const result = await signUp(email.trim(), password);
-
-    if (result.error) {
-      setError(result.error);
-      setIsLoading(false);
-    } else {
-      router.push('/(auth)/onboarding-profile' as any);
-      setIsLoading(false);
-    }
-  };
 
   return (
     <GradientBackground>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
+      <View
+        className="flex-1 px-6"
+        style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 28 }}
       >
-        <View
-          className="flex-1 justify-between px-6"
-          style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 28 }}
-        >
-          {/* Back button */}
-          <Pressable onPress={() => router.back()} className="flex-row items-center py-2 -ml-1">
-            <Ionicons name="chevron-back" size={22} color={palette.N3} />
-            <Text style={{ color: palette.N3, fontSize: 16 }}>Back</Text>
-          </Pressable>
+        {/* Back */}
+        <Pressable onPress={() => router.back()} className="flex-row items-center py-2 -ml-1">
+          <Ionicons name="chevron-back" size={22} color={palette.N3} />
+          <Text style={{ color: palette.N3, fontSize: 16 }}>Back</Text>
+        </Pressable>
 
-          <View className="flex-col gap-8 flex-1 justify-center">
-            {/* Header */}
-            <View className="items-center">
-              <Image
-                source={require('@/assets/images/PC-Logo-Gold.png')}
-                style={{ width: 160, height: 40, marginBottom: 16 }}
-                resizeMode="contain"
-              />
-              <Text
-                className="text-2xl"
-                style={{ color: palette.N2, fontWeight: '700' }}
-              >
-                Create Your Account
-              </Text>
-            </View>
+        {/* Header */}
+        <View className="items-center mt-10">
+          <Image
+            source={require('@/assets/images/PC-Logo-Gold.png')}
+            style={{ width: 160, height: 40, marginBottom: 16 }}
+            resizeMode="contain"
+          />
+          <Text className="text-2xl" style={{ color: palette.N2, fontWeight: '700' }}>
+            Create Your Account
+          </Text>
+          <Text className="text-base text-center mt-2" style={{ color: palette.N4 }}>
+            Choose how you'd like to sign up
+          </Text>
+        </View>
 
-            {/* Form */}
-            <View className="flex-col gap-4">
-              <TextInput
-                label="Email"
-                value={email}
-                onChangeText={setEmail}
-                placeholder="your@email.com"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
+        <View style={{ flex: 1 }} />
 
-              <TextInput
-                label="Password"
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Password"
-                secureTextEntry
-              />
+        {/* Auth options */}
+        <View className="flex-col gap-3">
+          <AppleSignInButton mode="sign-up" onSuccess={() => router.replace('/(auth)/onboarding-profile' as any)} />
+          <GoogleSignInButton mode="sign-up" onSuccess={() => router.replace('/(auth)/onboarding-profile' as any)} />
 
-              <TextInput
-                label="Confirm Password"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                placeholder="Re-enter your password"
-                secureTextEntry
-              />
-
-              {/* Password requirements */}
-              <View className="flex-col gap-2 mt-1">
-                {ruleResults.map((rule, i) => (
-                  <View key={i} className="flex-row items-center gap-2">
-                    <Ionicons
-                      name={rule.passed ? 'checkmark-circle' : 'close-circle'}
-                      size={16}
-                      color={rule.passed ? palette.G3 : palette.R3}
-                    />
-                    <Text
-                      className="text-sm"
-                      style={{ color: rule.passed ? palette.G3 : palette.R3 }}
-                    >
-                      {rule.label}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-
-              {error && (
-                <Text
-                  className="text-sm text-center"
-                  style={{ color: palette.R3 }}
-                >
-                  {error}
-                </Text>
-              )}
-            </View>
+          {/* Divider */}
+          <View className="flex-row items-center gap-3 my-2">
+            <View className="flex-1 h-px" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }} />
+            <Text style={{ color: palette.N4, fontSize: 13 }}>or</Text>
+            <View className="flex-1 h-px" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }} />
           </View>
 
           <Pressable
-            onPress={handleSignUp}
-            style={[styles.primaryButton, isLoading && styles.disabled]}
-            disabled={isLoading}
+            onPress={() => router.push('/(auth)/signup-email' as any)}
+            style={styles.emailButton}
           >
-            <Text style={styles.primaryButtonText}>
-              {isLoading ? 'Creating account...' : 'Sign Up'}
-            </Text>
+            <Ionicons name="mail-outline" size={20} color={palette.N1} />
+            <Text style={styles.emailButtonText}>Sign up with Email</Text>
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
+
+        {/* Sign in link */}
+        <View className="flex-row justify-center items-center mt-8 gap-1">
+          <Text style={{ color: palette.N4, fontSize: 14 }}>Already have an account?</Text>
+          <Pressable onPress={() => router.replace('/(auth)/login' as any)}>
+            <Text style={{ color: palette.Y4, fontSize: 14, fontWeight: '600' }}>Sign In</Text>
+          </Pressable>
+        </View>
+      </View>
     </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  primaryButton: {
-    backgroundColor: palette.B5,
-    paddingVertical: 16,
-    borderRadius: 999,
+  emailButton: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    width: '100%',
+    height: 52,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
   },
-  primaryButtonText: {
+  emailButtonText: {
     color: palette.N1,
     fontSize: 16,
-    fontWeight: '600',
-  },
-  disabled: {
-    opacity: 0.5,
+    fontWeight: '500',
   },
 });

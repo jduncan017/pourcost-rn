@@ -17,6 +17,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { ThemeProvider, useTheme, useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { AuthProvider, useAuth } from '@/src/contexts/AuthContext';
+import { HapticService } from '@/src/services/haptic-service';
 import { ToastContainer } from '@/src/components/ui/Toast';
 import { useAppStore } from '@/src/stores/app-store';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
@@ -152,7 +153,7 @@ function RootLayoutNav() {
               headerShadowVisible: false,
               headerLeft: ({ canGoBack }) =>
                 canGoBack ? (
-                  <Pressable onPress={() => router.back()} className="py-2 pr-4">
+                  <Pressable onPress={() => { HapticService.buttonPress(); router.back(); }} className="py-2 pr-4">
                     <Ionicons name="arrow-back" size={22} color={colors.text} />
                   </Pressable>
                 ) : null,
@@ -169,6 +170,7 @@ function RootLayoutNav() {
             <Stack.Screen name="container-sizes" options={{ title: 'Container Sizes' }} />
             <Stack.Screen name="invoice-review" options={{ title: 'Review Invoice' }} />
             <Stack.Screen name="invoice-line-edit" options={{ title: 'Edit Line Item' }} />
+            <Stack.Screen name="invoice-ingredient-setup" options={{ title: 'Set Up Ingredients' }} />
           </Stack>
         </View>
         <ToastContainer />

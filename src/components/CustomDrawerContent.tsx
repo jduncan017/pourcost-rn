@@ -8,6 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors, useTheme } from '@/src/contexts/ThemeContext';
+import { useNetworkStatus } from '@/src/lib/useNetworkStatus';
+import { HapticService } from '@/src/services/haptic-service';
 
 export default function CustomDrawerContent(
   props: DrawerContentComponentProps
@@ -16,6 +18,7 @@ export default function CustomDrawerContent(
   const { isDarkMode } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { isOnline } = useNetworkStatus();
 
   return (
     <View
@@ -36,6 +39,12 @@ export default function CustomDrawerContent(
           className="DrawerLogo w-[140px] h-[35px]"
           resizeMode="contain"
         />
+        {!isOnline && (
+          <View className="flex-row items-center gap-1 mt-2">
+            <View className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors.error }} />
+            <Text style={{ color: colors.error, fontSize: 11, fontWeight: '500' }}>Offline</Text>
+          </View>
+        )}
       </View>
 
       {/* Standard drawer items (excludes settings — rendered below) */}
@@ -61,6 +70,7 @@ export default function CustomDrawerContent(
           >
             <Pressable
               onPress={() => {
+                HapticService.buttonPress();
                 router.push('/(drawer)/settings');
                 props.navigation.closeDrawer();
               }}

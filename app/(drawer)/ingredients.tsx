@@ -19,6 +19,7 @@ import { FeedbackService } from '@/src/services/feedback-service';
 import { HapticService } from '@/src/services/haptic-service';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
+import SkeletonLoader from '@/src/components/ui/SkeletonLoader';
 import { SUBTYPES_BY_TYPE, type IngredientSortOption } from '@/src/constants/appConstants';
 
 /**
@@ -205,11 +206,7 @@ export default function IngredientsScreen() {
             </View>
 
             {isLoading ? (
-              <View className="p-8 items-center">
-                <Text style={{ color: colors.textTertiary }}>
-                  Loading ingredients...
-                </Text>
-              </View>
+              <SkeletonLoader count={6} />
             ) : filteredIngredients.length === 0 ? (
               <EmptyState
                 icon="flask"

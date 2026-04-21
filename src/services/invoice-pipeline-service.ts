@@ -249,19 +249,23 @@ export async function processInvoice(invoice: Invoice): Promise<ProcessingResult
 /**
  * After the user confirms matches on the review screen, apply all
  * price updates and move the invoice to 'complete'.
+ *
+ * For matched items: update ingredient price + create/update configuration.
+ * For unmatched items (not skipped): create a new ingredient from the line item data.
  */
 export async function confirmAndApplyInvoice(
   invoiceId: string,
 ): Promise<ConfirmAllResult> {
-  // Fetch all confirmed/auto-matched line items with their matched ingredients
-  const { data: lineItems } = await supabase
-    .from('invoice_line_items')
-    .select('id, matched_ingredient_id, unit_price, total_price, quantity, pack_size, raw_text, product_name')
-    .eq('invoice_id', invoiceId)
-    .in('match_status', ['auto_matched', 'confirmed', 'corrected']);
+  const { parseVolumeFromBpc } = await import('./product-normalization-service');
 
-  if (!lineItems || lineItems.length === 0) {
-    // No matched items — just mark complete
+  // Fetch ALL non-skipped, non-credit line items
+  const { data: allItems } = await supabase
+    .from('invoice_line_items')
+    .select('id, matched_ingredient_id, unit_price, total_price, quantity, pack_size, raw_text, product_name, match_status')
+    .eq('invoice_id', invoiceId)
+    .not('match_status', 'in', '("skipped","credit")');
+
+  if (!allItems || allItems.length === 0) {
     await updateInvoiceStatus(invoiceId, 'complete');
     return {
       invoiceId,
@@ -274,36 +278,89 @@ export async function confirmAndApplyInvoice(
     };
   }
 
-  // Build price update inputs with volume data for configurations
-  const { parseVolumeFromBpc } = await import('./product-normalization-service');
+  // Get user ID
+  const { data: inv } = await supabase
+    .from('invoices')
+    .select('user_id')
+    .eq('id', invoiceId)
+    .single();
+
+  if (!inv) throw new Error('Invoice not found');
+
   const updates: PriceUpdateInput[] = [];
-  const seen = new Set<string>(); // dedupe by ingredient ID
+  const seen = new Set<string>();
+  let createdCount = 0;
 
-  for (const item of lineItems) {
-    if (!item.matched_ingredient_id || seen.has(item.matched_ingredient_id)) continue;
-    seen.add(item.matched_ingredient_id);
-
-    // Calculate per-bottle price
-    const packSize = item.pack_size ?? 1;
-    const unitPrice = item.unit_price
-      ?? (Number(item.total_price) / Math.max(Number(item.quantity), 1) / packSize);
-
-    // Parse bottle volume from BPC in raw_text
-    let newProductSize: PriceUpdateInput['newProductSize'];
+  for (const item of allItems) {
+    // Parse volume from BPC
+    let volume: import('@/src/types/models').Volume | undefined;
     if (item.raw_text) {
       const bpcMatch = item.raw_text.match(/BPC:\s*(.+?)(?:\s+\d|$)/i);
       if (bpcMatch) {
         const parsed = parseVolumeFromBpc(bpcMatch[1]);
-        if (parsed.volume) {
-          newProductSize = parsed.volume;
-        }
+        if (parsed.volume) volume = parsed.volume;
       }
     }
 
+    const packSize = item.pack_size ?? 1;
+    const perBottle = item.unit_price
+      ?? (Number(item.total_price) / Math.max(Number(item.quantity), 1) / packSize);
+    const cost = Math.round(perBottle * 100) / 100;
+
+    // --- UNMATCHED: create a new ingredient ---
+    if (!item.matched_ingredient_id) {
+      const productSize = volume ?? { kind: 'milliliters' as const, ml: 750 }; // default 750ml
+
+      const { data: newIng, error: ingErr } = await supabase
+        .from('ingredients')
+        .insert({
+          user_id: inv.user_id,
+          name: item.product_name ?? 'Unknown',
+          product_cost: cost,
+          product_size: productSize,
+        })
+        .select('id')
+        .single();
+
+      if (ingErr || !newIng) continue;
+
+      // Link the line item to the new ingredient
+      await supabase
+        .from('invoice_line_items')
+        .update({
+          matched_ingredient_id: newIng.id,
+          match_status: 'confirmed',
+          match_method: 'manual',
+          match_confidence: 1.0,
+        })
+        .eq('id', item.id);
+
+      createdCount++;
+
+      // Still run the price update to create configuration
+      if (!seen.has(newIng.id)) {
+        seen.add(newIng.id);
+        updates.push({
+          ingredientId: newIng.id,
+          newProductCost: cost,
+          newProductSize: volume,
+          packSize: packSize > 1 ? packSize : undefined,
+          invoiceLineItemId: item.id,
+          invoiceId,
+        });
+      }
+      continue;
+    }
+
+    // --- MATCHED: update existing ingredient ---
+    if (seen.has(item.matched_ingredient_id)) continue;
+    seen.add(item.matched_ingredient_id);
+
     updates.push({
       ingredientId: item.matched_ingredient_id,
-      newProductCost: Math.round(unitPrice * 100) / 100,
-      newProductSize,
+      newProductCost: cost,
+      newProductSize: volume,
+      packSize: packSize > 1 ? packSize : undefined,
       invoiceLineItemId: item.id,
       invoiceId,
     });
@@ -313,8 +370,14 @@ export async function confirmAndApplyInvoice(
   const cascadeResult = await applyInvoicePriceUpdates(updates);
 
   // Update matched count and mark complete
-  const matchedCount = lineItems.length;
-  await updateInvoiceStatus(invoiceId, 'complete', { matchedItems: matchedCount });
+  await updateInvoiceStatus(invoiceId, 'complete', {
+    matchedItems: allItems.length,
+  });
+
+  // Reload ingredients store to reflect new/updated ingredients
+  import('@/src/stores/ingredients-store').then(({ useIngredientsStore }) => {
+    useIngredientsStore.getState().loadIngredients(true);
+  }).catch(() => {});
 
   return { invoiceId, cascadeResult };
 }

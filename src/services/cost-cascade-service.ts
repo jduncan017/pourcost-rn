@@ -35,6 +35,8 @@ export interface PriceUpdateInput {
   newProductCost: number;
   /** New product size (if pack size changed), otherwise existing is kept */
   newProductSize?: Volume;
+  /** Pack size from the invoice (bottles per case) */
+  packSize?: number;
   /** Invoice line item ID that triggered the update (for price history) */
   invoiceLineItemId?: string;
   /** Invoice ID (for linking ingredient_configurations) */
@@ -389,46 +391,50 @@ async function upsertDefaultConfiguration(
   newCost: number,
   newSize: Volume,
 ): Promise<void> {
-  // Check if a configuration already exists for this size
-  const { data: existing } = await supabase
+  const packSize = input.packSize ?? 1;
+  const packCost = Math.round(packSize * newCost * 100) / 100;
+  const now = new Date().toISOString();
+
+  // Fetch all configs for this ingredient and find a size match in JS
+  // (avoids JSONB equality issues with .eq on structured objects)
+  const { data: existingConfigs } = await supabase
     .from('ingredient_configurations')
-    .select('id, is_default')
-    .eq('ingredient_id', input.ingredientId)
-    .eq('product_size', JSON.stringify(newSize))
-    .maybeSingle();
+    .select('id, is_default, product_size, pack_size')
+    .eq('ingredient_id', input.ingredientId);
+
+  const newSizeOz = volumeToOunces(newSize);
+
+  const existing = (existingConfigs ?? []).find(c => {
+    const configOz = volumeToOunces(c.product_size as Volume);
+    return Math.abs(configOz - newSizeOz) < 0.5 && (c.pack_size ?? 1) === packSize;
+  });
 
   if (existing) {
-    // Update existing configuration
     await supabase
       .from('ingredient_configurations')
       .update({
         product_cost: newCost,
+        pack_cost: packCost,
         source: 'invoice',
         last_invoice_id: input.invoiceId,
-        last_updated_price_at: new Date().toISOString(),
+        last_updated_price_at: now,
       })
       .eq('id', existing.id);
   } else {
-    // Check if any default exists
-    const { data: hasDefault } = await supabase
-      .from('ingredient_configurations')
-      .select('id')
-      .eq('ingredient_id', input.ingredientId)
-      .eq('is_default', true)
-      .maybeSingle();
+    const hasDefault = (existingConfigs ?? []).some(c => c.is_default);
 
-    // New config — make it default only if no other default exists
     await supabase
       .from('ingredient_configurations')
       .insert({
         ingredient_id: input.ingredientId,
         product_size: newSize,
         product_cost: newCost,
-        pack_size: 1,
+        pack_size: packSize,
+        pack_cost: packCost,
         is_default: !hasDefault,
         source: 'invoice',
         last_invoice_id: input.invoiceId,
-        last_updated_price_at: new Date().toISOString(),
+        last_updated_price_at: now,
       });
   }
 }

@@ -18,6 +18,7 @@ import { useToast } from '@/src/components/ui/Toast';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
+import SkeletonLoader from '@/src/components/ui/SkeletonLoader';
 
 /**
  * Cocktails management screen
@@ -187,11 +188,7 @@ export default function CocktailsScreen() {
             </View>
 
             {isLoading ? (
-              <View className="p-8 items-center">
-                <Text style={{ color: colors.textTertiary }}>
-                  Loading cocktails...
-                </Text>
-              </View>
+              <SkeletonLoader count={6} />
             ) : filteredCocktails.length === 0 ? (
               <EmptyState
                 icon="wine"

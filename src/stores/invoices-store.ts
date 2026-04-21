@@ -258,21 +258,21 @@ export const useInvoicesStore = create<InvoicesState>()(
     {
       name: 'invoices-store',
       storage: createJSONStorage(() => AsyncStorage),
-      // Only persist the invoice list, not line items (fetched fresh on review)
       partialize: (state) => ({ invoices: state.invoices }),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          // Normalize dates from JSON strings
-          state.invoices = state.invoices.map(inv => ({
+      // merge runs synchronously inside setState so dates are Date objects before
+      // the first re-render — avoids "undefined is not a function" on toLocaleDateString
+      merge: (persisted, current) => {
+        const stored = persisted as Partial<InvoicesState>;
+        return {
+          ...current,
+          invoices: (stored.invoices ?? []).map(inv => ({
             ...inv,
-            invoiceDate: inv.invoiceDate ? ensureDate(inv.invoiceDate) : undefined,
-            createdAt: ensureDate(inv.createdAt),
-            updatedAt: ensureDate(inv.updatedAt),
-          }));
-          state.isLoading = false;
-          state.isUploading = false;
-          state.lineItemsByInvoiceId = {};
-        }
+            imageUrls: inv.imageUrls ?? [],
+            invoiceDate: inv.invoiceDate ? ensureDate(inv.invoiceDate as any) : undefined,
+            createdAt: ensureDate(inv.createdAt as any),
+            updatedAt: ensureDate(inv.updatedAt as any),
+          })),
+        };
       },
     }
   )

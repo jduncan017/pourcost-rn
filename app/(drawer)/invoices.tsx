@@ -1,10 +1,12 @@
 import { useEffect, useCallback, useState } from 'react';
-import { View, Text, FlatList, Pressable, ActivityIndicator, Alert, RefreshControl } from 'react-native';
+import { View, Text, FlatList, Pressable, ActivityIndicator, Alert, RefreshControl, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useInvoicesStore } from '@/src/stores/invoices-store';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { HapticService } from '@/src/services/haptic-service';
+import { getInvoiceImageUrl } from '@/src/lib/invoice-data';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import EmptyState from '@/src/components/EmptyState';
 import type { Invoice } from '@/src/types/invoice-models';
@@ -48,8 +50,18 @@ function InvoiceCard({
   onRetry: () => void;
 }) {
   const colors = useThemeColors();
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
-  const date = invoice.invoiceDate ?? invoice.createdAt;
+  const imageUrls = invoice.imageUrls ?? [];
+
+  useEffect(() => {
+    if (imageUrls.length > 0) {
+      getInvoiceImageUrl(imageUrls[0]).then(setThumbnailUrl).catch(() => {});
+    }
+  }, [imageUrls[0]]);
+
+  const rawDate = invoice.invoiceDate ?? invoice.createdAt;
+  const date = rawDate instanceof Date ? rawDate : new Date(rawDate as string);
   const formattedDate = date.toLocaleDateString(undefined, {
     month: 'short', day: 'numeric', year: 'numeric',
   });
@@ -63,73 +75,96 @@ function InvoiceCard({
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => { HapticService.buttonPress(); onPress(); }}
       className="InvoiceCard mx-4 mb-3 p-4 rounded-2xl active:opacity-70"
       style={{ backgroundColor: colors.surface }}
     >
-      <View className="flex-row items-start justify-between">
-        <View className="flex-1 gap-1">
-          <Text className="text-base font-semibold" style={{ color: colors.text }}>
-            {invoice.distributorName ?? 'Unknown Distributor'}
-          </Text>
-          <Text className="text-sm" style={{ color: colors.textSecondary }}>
-            {formattedDate}
-            {invoice.invoiceNumber ? ` · #${invoice.invoiceNumber}` : ''}
-          </Text>
-        </View>
-        {isProcessing ? (
-          <View className="flex-row items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ backgroundColor: colors.warningSubtle }}>
-            <ActivityIndicator size="small" color={colors.warning} style={{ transform: [{ scale: 0.7 }] }} />
-            <Text style={{ color: colors.warning, fontSize: 11, fontWeight: '600' }}>Processing</Text>
-          </View>
-        ) : (
-          <StatusBadge status={invoice.status} />
-        )}
-      </View>
-
-      {invoice.totalItems > 0 && (
-        <View className="flex-row items-center gap-2 mt-3">
-          <View className="flex-1 h-1.5 rounded-full" style={{ backgroundColor: colors.border }}>
-            <View
-              className="h-1.5 rounded-full"
-              style={{
-                width: `${matchProgress}%` as `${number}%`,
-                backgroundColor: matchProgress === 100 ? colors.success : colors.gold,
-              }}
+      <View className="flex-row items-start gap-3">
+        {/* Thumbnail */}
+        <View
+          className="rounded-lg overflow-hidden shrink-0"
+          style={{ width: 48, height: 60, backgroundColor: colors.border }}
+        >
+          {thumbnailUrl ? (
+            <Image
+              source={{ uri: thumbnailUrl }}
+              style={{ width: 48, height: 60 }}
+              resizeMode="cover"
             />
-          </View>
-          <Text className="text-xs" style={{ color: colors.textSecondary }}>
-            {invoice.matchedItems}/{invoice.totalItems} matched
-          </Text>
-        </View>
-      )}
-
-      <View className="flex-row items-center justify-between mt-2">
-        <View className="flex-row items-center gap-1">
-          <Ionicons name="images-outline" size={13} color={colors.textTertiary} />
-          <Text className="text-xs" style={{ color: colors.textTertiary }}>
-            {invoice.imageUrls.length} {invoice.imageUrls.length === 1 ? 'page' : 'pages'}
-          </Text>
+          ) : (
+            <View className="flex-1 items-center justify-center">
+              <Ionicons name="document-text-outline" size={20} color={colors.textTertiary} />
+            </View>
+          )}
         </View>
 
-        {showActions && (
-          <View className="flex-row items-center gap-3">
-            {invoice.status !== 'complete' && (
-              <Pressable
-                onPress={(e) => { e.stopPropagation(); onRetry(); }}
-                hitSlop={8}
-              >
-                <Ionicons name="refresh" size={18} color={colors.gold} />
-              </Pressable>
+        {/* Content */}
+        <View className="flex-1">
+          <View className="flex-row items-start justify-between">
+            <View className="flex-1 gap-1">
+              <Text className="text-base font-semibold" style={{ color: colors.text }}>
+                {invoice.distributorName ?? 'Unknown Distributor'}
+              </Text>
+              <Text className="text-sm" style={{ color: colors.textSecondary }}>
+                {formattedDate}
+                {invoice.invoiceNumber ? ` · #${invoice.invoiceNumber}` : ''}
+              </Text>
+            </View>
+            {isProcessing ? (
+              <View className="flex-row items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ backgroundColor: colors.warningSubtle }}>
+                <ActivityIndicator size="small" color={colors.warning} style={{ transform: [{ scale: 0.7 }] }} />
+                <Text style={{ color: colors.warning, fontSize: 11, fontWeight: '600' }}>Processing</Text>
+              </View>
+            ) : (
+              <StatusBadge status={invoice.status} />
             )}
-            <Pressable
-              onPress={(e) => { e.stopPropagation(); onDelete(); }}
-              hitSlop={8}
-            >
-              <Ionicons name="trash-outline" size={18} color={colors.error} />
-            </Pressable>
           </View>
-        )}
+
+          {invoice.totalItems > 0 && (
+            <View className="flex-row items-center gap-2 mt-3">
+              <View className="flex-1 h-1.5 rounded-full" style={{ backgroundColor: colors.border }}>
+                <View
+                  className="h-1.5 rounded-full"
+                  style={{
+                    width: `${matchProgress}%` as `${number}%`,
+                    backgroundColor: matchProgress === 100 ? colors.success : colors.gold,
+                  }}
+                />
+              </View>
+              <Text className="text-xs" style={{ color: colors.textSecondary }}>
+                {invoice.matchedItems}/{invoice.totalItems} matched
+              </Text>
+            </View>
+          )}
+
+          <View className="flex-row items-center justify-between mt-2">
+            <View className="flex-row items-center gap-1">
+              <Ionicons name="images-outline" size={13} color={colors.textTertiary} />
+              <Text className="text-xs" style={{ color: colors.textTertiary }}>
+                {imageUrls.length} {imageUrls.length === 1 ? 'page' : 'pages'}
+              </Text>
+            </View>
+
+            {showActions && (
+              <View className="flex-row items-center gap-3">
+                {invoice.status !== 'complete' && (
+                  <Pressable
+                    onPress={(e) => { e.stopPropagation(); HapticService.buttonPress(); onRetry(); }}
+                    hitSlop={8}
+                  >
+                    <Ionicons name="refresh" size={18} color={colors.gold} />
+                  </Pressable>
+                )}
+                <Pressable
+                  onPress={(e) => { e.stopPropagation(); HapticService.buttonPress(); onDelete(); }}
+                  hitSlop={8}
+                >
+                  <Ionicons name="trash-outline" size={18} color={colors.error} />
+                </Pressable>
+              </View>
+            )}
+          </View>
+        </View>
       </View>
     </Pressable>
   );
@@ -217,7 +252,9 @@ export default function InvoicesScreen() {
   }, [deleteInvoice]);
 
   const handleInvoicePress = (invoice: Invoice) => {
-    if (invoice.status === 'review' || invoice.status === 'complete') {
+    if (invoice.status === 'complete') {
+      router.push({ pathname: '/invoice-detail' as any, params: { id: invoice.id } });
+    } else if (invoice.status === 'review') {
       router.push({ pathname: '/invoice-review' as any, params: { id: invoice.id } });
     }
   };
@@ -265,7 +302,7 @@ export default function InvoicesScreen() {
 
       {/* Floating Action Button */}
       <Pressable
-        onPress={() => router.push('/invoice-capture' as any)}
+        onPress={() => { HapticService.buttonPress(); router.push('/invoice-capture' as any); }}
         className="InvoiceFAB absolute bottom-8 right-6 w-14 h-14 rounded-full items-center justify-center shadow-lg active:opacity-80"
         style={{ backgroundColor: colors.gold }}
       >

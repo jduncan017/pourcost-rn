@@ -7,6 +7,7 @@ import {
   useIsDarkMode,
   palette,
 } from '@/src/contexts/ThemeContext';
+import { HapticService } from '@/src/services/haptic-service';
 
 interface CardProps extends ViewProps {
   children: React.ReactNode;
@@ -83,7 +84,7 @@ export default function Card({
   if (onPress) {
     return (
       <Pressable
-        onPress={onPress}
+        onPress={() => { HapticService.buttonPress(); onPress(); }}
         style={cardStyle}
         className={`${className}`}
         {...viewProps}

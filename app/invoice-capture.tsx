@@ -18,7 +18,18 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import DocumentScanner, { ResponseType, ScanDocumentResponseStatus } from 'react-native-document-scanner-plugin';
+// Native document scanner — requires dev build. Falls back gracefully if unavailable.
+let DocumentScanner: any = null;
+let ResponseType: any = {};
+let ScanDocumentResponseStatus: any = {};
+try {
+  const mod = require('react-native-document-scanner-plugin');
+  DocumentScanner = mod.default;
+  ResponseType = mod.ResponseType;
+  ScanDocumentResponseStatus = mod.ScanDocumentResponseStatus;
+} catch {
+  // Native module not available (e.g. Expo Go) — scanner buttons will fall back to image picker
+}
 import { Ionicons } from '@expo/vector-icons';
 import { useInvoicesStore } from '@/src/stores/invoices-store';
 import { processInvoice } from '@/src/services/invoice-pipeline-service';
@@ -86,39 +97,6 @@ export default function InvoiceCaptureScreen() {
 
   const [pages, setPages] = useState<string[]>([]);
 
-  // Auto-launch scanner on mount if no pages yet
-  useEffect(() => {
-    if (pages.length === 0) {
-      scanDocument();
-    }
-  }, []);
-
-  const scanDocument = useCallback(async () => {
-    try {
-      const result = await DocumentScanner.scanDocument({
-        maxNumDocuments: 10,
-        responseType: ResponseType.ImageFilePath,
-      });
-
-      if (result.status === ScanDocumentResponseStatus.Cancel) return;
-
-      if (result.scannedImages && result.scannedImages.length > 0) {
-        setPages(prev => [...prev, ...result.scannedImages!]);
-      }
-    } catch (err: any) {
-
-      // Fallback: if native scanner fails, show alert with options
-      Alert.alert(
-        'Scanner Unavailable',
-        'The document scanner is not available on this device. You can select images from your photo library instead.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Photo Library', onPress: pickFromLibrary },
-        ],
-      );
-    }
-  }, []);
-
   const pickFromLibrary = useCallback(async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -140,6 +118,35 @@ export default function InvoiceCaptureScreen() {
     if (!result.canceled) {
       const uris = result.assets.map((a: { uri: string }) => a.uri);
       setPages(prev => [...prev, ...uris]);
+    }
+  }, []);
+
+  const scanDocument = useCallback(async () => {
+    if (!DocumentScanner) {
+      pickFromLibrary();
+      return;
+    }
+
+    try {
+      const result = await DocumentScanner.scanDocument({
+        maxNumDocuments: 10,
+        responseType: ResponseType.ImageFilePath,
+      });
+
+      if (result.status === ScanDocumentResponseStatus.Cancel) return;
+
+      if (result.scannedImages && result.scannedImages.length > 0) {
+        setPages(prev => [...prev, ...result.scannedImages!]);
+      }
+    } catch {
+      pickFromLibrary();
+    }
+  }, [pickFromLibrary]);
+
+  // Auto-launch scanner on mount if no pages yet
+  useEffect(() => {
+    if (pages.length === 0) {
+      scanDocument();
     }
   }, []);
 
