@@ -102,7 +102,11 @@ export default function DrawerLayout() {
           },
           headerStyle: {
             backgroundColor: colors.headerBackground,
+            borderBottomWidth: 0,
+            elevation: 0,
+            shadowOpacity: 0,
           },
+          headerShadowVisible: false,
           headerTintColor: colors.text,
           headerLeft: () => <HamburgerIcon />,
           headerRight: () => (

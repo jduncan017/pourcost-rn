@@ -18,19 +18,19 @@ const COLORS = {
   bad: palette.R3,
 };
 
-function getPerformance(ratio: number) {
+export function getPerformance(ratio: number) {
   if (ratio <= 0) return { color: COLORS.onTarget, label: 'On Target' };
   const distance = Math.abs(ratio - 1);
   if (distance <= PERFORMANCE_DISTANCE_THRESHOLDS.ON_TARGET) return { color: COLORS.onTarget, label: 'On Target' };
   if (distance <= PERFORMANCE_DISTANCE_THRESHOLDS.CLOSE)
     return {
       color: COLORS.close,
-      label: ratio < 1 ? 'Under Target' : 'Over Target',
+      label: ratio < 1 ? 'Slight Under' : 'Slight Over',
     };
   if (distance <= PERFORMANCE_DISTANCE_THRESHOLDS.DRIFTING)
     return {
       color: COLORS.drifting,
-      label: ratio < 1 ? 'Well Under' : 'Well Over',
+      label: ratio < 1 ? 'Under' : 'Over',
     };
   return { color: COLORS.bad, label: ratio < 1 ? 'Way Under' : 'Way Over' };
 }

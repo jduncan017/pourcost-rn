@@ -12,6 +12,7 @@ import { FeedbackService } from '@/src/services/feedback-service';
 
 export type ThemeMode = 'dark' | 'light' | 'auto';
 export type IngredientOrderPref = 'manual' | 'most-to-least' | 'least-to-most' | 'cost-high-low';
+export type DetailLevel = 'simple' | 'detailed';
 
 interface AppState {
   // Synced with Supabase profiles
@@ -23,6 +24,7 @@ interface AppState {
   displayName: string;
 
   // Local-only state
+  detailLevel: DetailLevel;
   isFirstLaunch: boolean;
   isLoading: boolean;
   lastSyncDate: Date | null;
@@ -35,6 +37,7 @@ interface AppState {
   setIngredientOrderPref: (pref: IngredientOrderPref) => void;
   setThemeMode: (mode: ThemeMode) => void;
   setDisplayName: (name: string) => void;
+  setDetailLevel: (level: DetailLevel) => void;
   setFirstLaunch: (isFirst: boolean) => void;
   setLoading: (loading: boolean) => void;
   setEnabledProductSizes: (sizes: string[]) => void;
@@ -69,6 +72,7 @@ export const useAppStore = create<AppState>()(
       ingredientOrderPref: 'manual',
       themeMode: 'dark',
       displayName: '',
+      detailLevel: 'detailed',
       isFirstLaunch: true,
       isLoading: false,
       lastSyncDate: null,
@@ -94,6 +98,8 @@ export const useAppStore = create<AppState>()(
       setThemeMode: (mode) => set({ themeMode: mode }),
 
       setDisplayName: (name) => set({ displayName: name }),
+
+      setDetailLevel: (level) => set({ detailLevel: level }),
 
       setFirstLaunch: (isFirst) => set({ isFirstLaunch: isFirst }),
 
@@ -164,6 +170,7 @@ export const useAppStore = create<AppState>()(
           ingredientOrderPref: 'manual',
           themeMode: 'dark',
           displayName: '',
+          detailLevel: 'detailed',
           isFirstLaunch: false,
         });
       },

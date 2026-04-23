@@ -121,10 +121,16 @@ export function calculateIngredientCost(ing: CocktailIngredient): number {
 /**
  * Calculate all metrics for a cocktail.
  * iOS: totalCost = sum of ingredient costs, charge = totalCost / margin
+ *
+ * profitMargin uses retailPrice when provided (real margin at current price).
+ * If retailPrice is omitted or 0, falls back to suggestedPrice - totalCost
+ * (hypothetical margin at the target pour-cost %) to keep sort/list behavior
+ * stable for cocktails without a set price.
  */
 export function calculateCocktailMetrics(
   ingredients: CocktailIngredient[],
   margin: number = DEFAULT_VALUES.POUR_COST_TARGET,
+  retailPrice?: number,
 ): CocktailMetrics {
   const totalCost = round2(
     ingredients.reduce((sum, ing) => sum + calculateIngredientCost(ing), 0)
@@ -133,7 +139,9 @@ export function calculateCocktailMetrics(
   const pourCostPercentage = suggestedPrice > 0
     ? calculatePourCostPercentage(totalCost, suggestedPrice)
     : 0;
-  const profitMargin = round2(suggestedPrice - totalCost);
+  const profitMargin = retailPrice && retailPrice > 0
+    ? round2(retailPrice - totalCost)
+    : round2(suggestedPrice - totalCost);
 
   return { totalCost, suggestedPrice, pourCostPercentage, profitMargin };
 }

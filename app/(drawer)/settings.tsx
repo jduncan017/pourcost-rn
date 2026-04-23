@@ -70,6 +70,7 @@ export default function SettingsScreen() {
     );
   };
 
+  const accountNeedsAttention = !!user && !isEmailVerified;
   const accountSubtitle = user
     ? (isEmailVerified
         ? (user.email ?? 'Manage sign-in & profile')
@@ -92,8 +93,6 @@ export default function SettingsScreen() {
               resizeMode="contain"
             />
           </View>
-
-          <SectionDivider />
 
           {/* Sample Data — only shown while the starter bar is still loaded.
               Disappears permanently once the user clears it. */}
@@ -118,10 +117,10 @@ export default function SettingsScreen() {
           <View className="flex-col gap-3">
             <ScreenTitle variant="group" title="Settings" />
             <SettingsCard
-              tone="gold"
+              tone={accountNeedsAttention ? 'gold' : 'default'}
               title="Account"
               description={accountSubtitle}
-              iconName={user && !isEmailVerified ? 'alert-circle-outline' : 'person-circle-outline'}
+              iconName={accountNeedsAttention ? 'alert-circle-outline' : 'person-circle-outline'}
               onPress={() => router.push('/settings-account' as any)}
               showCaret
             />

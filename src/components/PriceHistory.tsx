@@ -13,6 +13,7 @@ import { fetchPriceHistory } from '@/src/lib/invoice-data';
 import { formatCurrency } from '@/src/services/calculation-service';
 import type { IngredientPriceHistory } from '@/src/types/invoice-models';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
+import Card from '@/src/components/ui/Card';
 
 interface PriceHistoryProps {
   ingredientId: string;
@@ -41,8 +42,9 @@ export default function PriceHistory({ ingredientId }: PriceHistoryProps) {
   if (history.length === 0) return null;
 
   return (
-    <View className="PriceHistory flex-col gap-2">
-      <ScreenTitle title="Price History" variant="group" />
+    <Card padding="medium">
+      <View className="PriceHistory flex-col gap-2">
+        <ScreenTitle title="Price History" variant="group" className="mb-1" />
 
       {history.map((entry, i) => {
         const isIncrease = (entry.priceChangePct ?? 0) > 0;
@@ -59,7 +61,7 @@ export default function PriceHistory({ ingredientId }: PriceHistoryProps) {
         return (
           <View
             key={entry.id}
-            className="flex-row items-center py-2.5"
+            className="flex-row items-center py-2"
             style={
               i < history.length - 1
                 ? { borderBottomWidth: 0.5, borderBottomColor: colors.borderSubtle }
@@ -110,6 +112,7 @@ export default function PriceHistory({ ingredientId }: PriceHistoryProps) {
           </View>
         );
       })}
-    </View>
+      </View>
+    </Card>
   );
 }

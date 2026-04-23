@@ -62,10 +62,10 @@ export default function CustomDrawerContent(
         const isActive = currentRoute === 'settings';
         return (
           <View
-            className="border-t px-4 pb-6 pt-3"
+            className="border-t px-4 pt-3"
             style={{
               borderTopColor: colors.border,
-              paddingBottom: insets.bottom + 8,
+              paddingBottom: insets.bottom + 20,
             }}
           >
             <Pressable

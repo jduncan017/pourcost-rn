@@ -49,16 +49,14 @@ export default function SettingsCard({
 
   // Icon: explicit iconColor prop wins, else tone accent, else textSecondary
   const resolvedIconColor = iconColor ?? accentColor ?? colors.textSecondary;
-  // Tinted background + border — text stays white for readability.
+  // Tinted background only — border stays uniform across all tones for visual consistency.
   const tintedBg = accentColor ? accentColor + '30' : undefined; // ~19% opacity
-  const tintedBorder = accentColor ? accentColor + 'CC' : undefined; // 80% opacity
 
   return (
     <Card
       onPress={disabled ? undefined : onPress}
       padding="medium"
       backgroundColor={tintedBg}
-      borderColor={tintedBorder}
       disableGradient={!!accentColor}
       className={`${disabled ? 'opacity-50' : ''} ${className}`}
     >

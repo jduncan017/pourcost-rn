@@ -31,6 +31,7 @@ import {
   ThemeProvider as NavigationThemeProvider,
 } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
+import { PlayfairDisplay_400Regular_Italic, PlayfairDisplay_600SemiBold_Italic } from '@expo-google-fonts/playfair-display';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, useCallback } from 'react';
@@ -62,6 +63,8 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     Geist: require('../assets/fonts/Geist-VariableFont_wght.ttf'),
+    PlayfairDisplay_400Regular_Italic,
+    PlayfairDisplay_600SemiBold_Italic,
   });
 
   useEffect(() => {

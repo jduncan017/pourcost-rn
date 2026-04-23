@@ -6,10 +6,11 @@ import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
-import SectionDivider from '@/src/components/ui/SectionDivider';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import ActionSheet from '@/src/components/ui/ActionSheet';
-import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
+import StatCard from '@/src/components/ui/StatCard';
+import DetailLevelToggle from '@/src/components/ui/DetailLevelToggle';
+import PourCostHero from '@/src/components/PourCostHero';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { volumeLabel } from '@/src/types/models';
@@ -21,16 +22,42 @@ import {
 } from '@/src/services/calculation-service';
 import PriceHistory from '@/src/components/PriceHistory';
 
+/** One row in the LEDGER open list — no dividers between rows. */
+function LedgerRow({
+  label,
+  value,
+  valueColor,
+  colors,
+}: {
+  label: string;
+  value: string;
+  valueColor?: string;
+  colors: any;
+}) {
+  return (
+    <View className="flex-row justify-between items-center py-2">
+      <Text className="text-base" style={{ color: colors.textSecondary }}>
+        {label}
+      </Text>
+      <Text
+        className="text-base"
+        style={{ color: valueColor ?? colors.text, fontWeight: '600' }}
+      >
+        {value}
+      </Text>
+    </View>
+  );
+}
+
 export default function IngredientDetailScreen() {
-  const { defaultPourSize, defaultRetailPrice, pourCostGoal } = useAppStore();
+  const { defaultPourSize, defaultRetailPrice, pourCostGoal, detailLevel } = useAppStore();
   const router = useRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
   const params = useLocalSearchParams();
   const [showActions, setShowActions] = useState(false);
 
-  const { ingredients, loadIngredients, deleteIngredient } =
-    useIngredientsStore();
+  const { ingredients, loadIngredients, deleteIngredient } = useIngredientsStore();
 
   const ingredientId = params.id as string;
   const ingredient = ingredients.find((ing) => ing.id === ingredientId);
@@ -55,7 +82,8 @@ export default function IngredientDetailScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: 'Ingredient',
+      headerTitle: () => <DetailLevelToggle />,
+      headerTitleAlign: 'center',
       headerRight: () => (
         <Pressable onPress={() => setShowActions(true)} className="p-2">
           <Ionicons name="ellipsis-horizontal" size={22} color={colors.text} />
@@ -64,6 +92,7 @@ export default function IngredientDetailScreen() {
     });
   }, [navigation, colors.text]);
 
+  const isDetailed = detailLevel === 'detailed';
   const isNotForSale = ingredient.notForSale === true;
   const effectivePourSize = ingredient.pourSize ?? defaultPourSize;
   const effectiveRetailPrice = ingredient.retailPrice ?? defaultRetailPrice;
@@ -95,19 +124,6 @@ export default function IngredientDetailScreen() {
     );
   };
 
-  // Alternating row background for pricing section
-  const pricingRows = [
-    { label: 'Purchase Price', value: formatCurrency(ingredient.productCost) },
-    { label: 'Cost per Oz', value: formatCurrency(metrics.costPerOz) },
-    { label: 'Cost per Pour', value: formatCurrency(metrics.costPerPour) },
-    ...(!isNotForSale
-      ? [
-          { label: 'Retail Price', value: formatCurrency(defaultRetailPrice) },
-          { label: 'Margin', value: formatCurrency(metrics.pourCostMargin) },
-        ]
-      : []),
-  ];
-
   return (
     <GradientBackground>
       <ActionSheet
@@ -125,26 +141,23 @@ export default function IngredientDetailScreen() {
       />
 
       <ScrollView className="flex-1">
-        <View className="p-4 pt-6 flex-col gap-6">
-          {/* Name */}
-          <Text
-            className="text-2xl"
-            style={{ color: colors.text, fontWeight: '700' }}
-          >
-            {ingredient.name}
-          </Text>
-
-          {/* Details */}
-          <View className="flex-col gap-2">
-            <ScreenTitle title="Details" variant="group" />
-            <Text className="text-base" style={{ color: colors.textSecondary }}>
-              {ingredient.type || 'Other'} •{' '}
-              {volumeLabel(ingredient.productSize)}
+        <View className="pt-4 pb-6 flex-col gap-7">
+          {/* Identity */}
+          <View className="px-6 flex-col gap-1.5">
+            <Text
+              className="text-3xl"
+              style={{ color: colors.text, fontWeight: '700' }}
+              numberOfLines={2}
+            >
+              {ingredient.name}
+            </Text>
+            <Text className="text-sm" style={{ color: colors.textSecondary }}>
+              {ingredient.type || 'Other'} • {volumeLabel(ingredient.productSize)}
               {isNotForSale ? ' • Not for sale' : ''}
             </Text>
             {ingredient.description ? (
               <Text
-                className="text-base leading-6"
+                className="text-sm leading-5 mt-1"
                 style={{ color: colors.textTertiary }}
               >
                 {ingredient.description}
@@ -152,68 +165,96 @@ export default function IngredientDetailScreen() {
             ) : null}
           </View>
 
-          <SectionDivider />
-
-          {/* Pricing — alternating row backgrounds */}
-          <View className="flex-col gap-0">
-            <ScreenTitle title="Pricing" variant="group" className="mb-2" />
-            {pricingRows.map((row, index, arr) => (
-              <View
-                key={row.label}
-                className="flex-row justify-between items-center py-3"
-                style={
-                  index < arr.length - 1
-                    ? {
-                        borderBottomWidth: 1,
-                        borderBottomColor: colors.borderSubtle,
-                      }
-                    : undefined
-                }
-              >
-                <Text
-                  className="text-base"
-                  style={{ color: colors.textSecondary }}
-                >
-                  {row.label}
-                </Text>
-                <Text
-                  className="text-base"
-                  style={{ color: colors.text, fontWeight: '500' }}
-                >
-                  {row.value}
-                </Text>
+          {/* Stats group — twin stat cards + AI suggestion, equal gap */}
+          <View className="px-6 flex-col gap-3">
+            {!isNotForSale ? (
+              <View className="flex-row gap-3">
+                <StatCard
+                  label="Retail Price"
+                  value={formatCurrency(effectiveRetailPrice)}
+                />
+                <StatCard
+                  label="Margin"
+                  value={formatCurrency(metrics.pourCostMargin)}
+                />
               </View>
-            ))}
-
-            {!isNotForSale && (
+            ) : (
+              <View className="flex-row gap-3">
+                <StatCard
+                  label="Purchase Price"
+                  value={formatCurrency(ingredient.productCost)}
+                />
+                <StatCard
+                  label="Cost / Pour"
+                  value={formatCurrency(metrics.costPerPour)}
+                />
+              </View>
+            )}
+            {isDetailed && !isNotForSale && (
               <AiSuggestionRow
                 label="Suggested Retail"
                 value={formatCurrency(suggestedRetail)}
-                className="mt-2"
               />
             )}
           </View>
 
-          {/* Performance — only for items that are for sale */}
-          {!isNotForSale && (
-            <>
-              <SectionDivider />
-              <PourCostPerformanceBar
-                pourCostPercentage={metrics.pourCostPercentage}
-              />
-            </>
+          {/* Pour Cost hero — detailed + for-sale only */}
+          {isDetailed && !isNotForSale && (
+            <PourCostHero pourCostPercentage={metrics.pourCostPercentage} />
           )}
 
-          {/* Price History */}
-          <SectionDivider />
-          <PriceHistory ingredientId={ingredient.id} />
-
-          {/* Footer */}
-          <View className="items-center py-4">
-            <Text className="text-xs" style={{ color: colors.textTertiary }}>
-              Updated {new Date(ingredient.updatedAt).toLocaleDateString()}
-            </Text>
+          {/* LEDGER — open rows, top hairline separator */}
+          <View
+            className="px-6 pt-4 flex-col gap-1"
+            style={{ borderTopWidth: 1, borderTopColor: colors.borderSubtle }}
+          >
+            <ScreenTitle title="Ledger" variant="muted" className="mb-1" />
+            <LedgerRow
+              label="Purchase Price"
+              value={formatCurrency(ingredient.productCost)}
+              colors={colors}
+            />
+            {isDetailed && (
+              <LedgerRow
+                label="Cost per Oz"
+                value={formatCurrency(metrics.costPerOz)}
+                colors={colors}
+              />
+            )}
+            <LedgerRow
+              label="Cost per Pour"
+              value={formatCurrency(metrics.costPerPour)}
+              colors={colors}
+            />
+            <LedgerRow
+              label="Pour Size"
+              value={volumeLabel(effectivePourSize)}
+              colors={colors}
+            />
+            {isDetailed && !isNotForSale && (
+              <LedgerRow
+                label="Type"
+                value={ingredient.type || 'Other'}
+                colors={colors}
+              />
+            )}
           </View>
+
+          {/* Price History — detailed only (self-wraps in Card when non-empty) */}
+          {isDetailed && (
+            <View className="px-6">
+              <PriceHistory ingredientId={ingredient.id} />
+            </View>
+          )}
+
+          {/* Updated footer — detailed only */}
+          {isDetailed && (
+            <View className="items-center pt-2">
+              <Text className="text-xs" style={{ color: colors.textTertiary }}>
+                Updated {new Date(ingredient.updatedAt).toLocaleDateString()}
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </GradientBackground>

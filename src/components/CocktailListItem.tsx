@@ -32,8 +32,8 @@ export default function CocktailListItem({
 
   const colors = useThemeColors();
   const metrics = useMemo(
-    () => calculateCocktailMetrics(cocktail.ingredients || []),
-    [cocktail.ingredients]
+    () => calculateCocktailMetrics(cocktail.ingredients || [], undefined, cocktail.retailPrice),
+    [cocktail.ingredients, cocktail.retailPrice]
   );
 
   // Highlight data — only for cost/costPercent/profitMargin

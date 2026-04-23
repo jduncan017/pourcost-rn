@@ -69,8 +69,9 @@ function sortCocktails(
         return ma.totalCost - mb.totalCost;
       }
       case 'profitMargin': {
-        const ma = calculateCocktailMetrics(a.ingredients);
-        const mb = calculateCocktailMetrics(b.ingredients);
+        // Sort by real margin when retailPrice is set; otherwise hypothetical fallback.
+        const ma = calculateCocktailMetrics(a.ingredients, undefined, a.retailPrice);
+        const mb = calculateCocktailMetrics(b.ingredients, undefined, b.retailPrice);
         return mb.profitMargin - ma.profitMargin;
       }
       case 'costPercent': {

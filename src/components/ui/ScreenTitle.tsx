@@ -4,7 +4,7 @@ import { useThemeColors } from '@/src/contexts/ThemeContext';
 
 interface ScreenTitleProps {
   title: string;
-  variant?: 'main' | 'section' | 'page' | 'group';
+  variant?: 'main' | 'section' | 'page' | 'group' | 'muted';
   className?: string;
   style?: TextStyle;
 }
@@ -42,6 +42,12 @@ export default function ScreenTitle({
           textClassName: 'text-sm tracking-widest uppercase',
           fontWeight: '600' as const,
           color: colors.gold,
+        };
+      case 'muted':
+        return {
+          textClassName: 'text-xs tracking-widest uppercase',
+          fontWeight: '600' as const,
+          color: colors.textTertiary,
         };
       default:
         return {
