@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { fetchPriceHistory } from '@/src/lib/invoice-data';
@@ -31,15 +31,9 @@ export default function PriceHistory({ ingredientId }: PriceHistoryProps) {
       .finally(() => setIsLoading(false));
   }, [ingredientId]);
 
-  if (isLoading) {
-    return (
-      <View className="PriceHistory py-4 items-center">
-        <ActivityIndicator size="small" color={colors.textTertiary} />
-      </View>
-    );
-  }
-
-  if (history.length === 0) return null;
+  // Render nothing while loading OR when empty — avoids a layout shift when
+  // toggling Simple → Detailed on ingredients with no history.
+  if (isLoading || history.length === 0) return null;
 
   return (
     <Card padding="medium">

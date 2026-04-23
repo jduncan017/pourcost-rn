@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
+import { View, Text, Image, StyleSheet, Pressable, AppState } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
@@ -28,9 +28,16 @@ export default function LandingScreen() {
     p.play();
   });
 
+  // Resume video on both screen focus AND app foreground (lock → unlock).
+  // expo-video pauses on background; without the AppState listener the
+  // splash video stays frozen after unlock.
   useFocusEffect(
     useCallback(() => {
       player.play();
+      const sub = AppState.addEventListener('change', (state) => {
+        if (state === 'active') player.play();
+      });
+      return () => sub.remove();
     }, [player])
   );
 

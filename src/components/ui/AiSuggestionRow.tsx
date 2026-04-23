@@ -2,10 +2,14 @@ import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { palette } from '@/src/contexts/ThemeContext';
+import InfoIcon from './InfoIcon';
+import { GlossaryKey } from '@/src/constants/glossary';
 
 interface AiSuggestionRowProps {
   label: string;
   value: string;
+  /** Optional glossary term — adds a small info icon next to the label. */
+  infoTermKey?: GlossaryKey;
   className?: string;
 }
 
@@ -16,6 +20,7 @@ interface AiSuggestionRowProps {
 export default function AiSuggestionRow({
   label,
   value,
+  infoTermKey,
   className = '',
 }: AiSuggestionRowProps) {
   // BR purple → TL fully transparent. TR stays ~40% alpha via biased stops.
@@ -43,12 +48,13 @@ export default function AiSuggestionRow({
           <View className="flex-row items-center gap-2 flex-1">
             <Ionicons name="sparkles" size={16} color={palette.P2} />
             <Text
-              className="text-base flex-1"
+              className="text-base"
               style={{ color: palette.P2, fontWeight: '500' }}
               numberOfLines={1}
             >
               {label}
             </Text>
+            {infoTermKey && <InfoIcon termKey={infoTermKey} size={13} color={palette.P2} />}
           </View>
           <Text
             className="text-base"

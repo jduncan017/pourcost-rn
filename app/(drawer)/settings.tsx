@@ -71,10 +71,20 @@ export default function SettingsScreen() {
   };
 
   const accountNeedsAttention = !!user && !isEmailVerified;
+
+  // Safe URL open — simulator / devices without a mail app throw otherwise.
+  const openURL = (url: string) => {
+    Linking.openURL(url).catch(() => {
+      FeedbackService.showError(
+        'Unavailable',
+        'No app configured to open this link.'
+      );
+    });
+  };
   const accountSubtitle = user
     ? (isEmailVerified
         ? (user.email ?? 'Manage sign-in & profile')
-        : 'Email not verified — tap to review')
+        : 'Email not verified. Tap to review')
     : 'Sign in to sync across devices';
 
   return (
@@ -135,6 +145,34 @@ export default function SettingsScreen() {
 
           <SectionDivider />
 
+          {/* Learn */}
+          <View className="flex-col gap-3">
+            <ScreenTitle variant="group" title="Learn" />
+            <SettingsCard
+              title="Glossary"
+              description="Bar finance terms: Pour Cost, COGS, Margin, etc."
+              iconName="book-outline"
+              onPress={() => router.push('/settings-glossary' as any)}
+              showCaret
+            />
+            <SettingsCard
+              title="Pro Tips"
+              description="Pricing, pouring, and running the bar"
+              iconName="bulb-outline"
+              onPress={() => router.push('/settings-pro-tips' as any)}
+              showCaret
+            />
+            <SettingsCard
+              title="Conversions"
+              description="Bottle sizes, pours, metric ↔ oz, keg yields"
+              iconName="swap-horizontal-outline"
+              onPress={() => router.push('/settings-conversions' as any)}
+              showCaret
+            />
+          </View>
+
+          <SectionDivider />
+
           {/* Appearance — hidden for MVP (dark-only). Re-enable by uncommenting. */}
           {/*
           <View className="flex-col gap-3">
@@ -156,31 +194,24 @@ export default function SettingsScreen() {
           <View className="flex-col gap-3">
             <ScreenTitle variant="group" title="Support" />
             <SettingsCard
-              title="Help & Support"
-              description="Get help using PourCost"
-              iconName="help-circle-outline"
-              onPress={() => Linking.openURL('mailto:support@pourcost.com')}
-              showCaret
-            />
-            <SettingsCard
-              title="Suggest a Feature"
-              description="Tell us what you'd like to see"
-              iconName="bulb-outline"
-              onPress={() => Linking.openURL('mailto:feedback@pourcost.com?subject=Feature%20Suggestion')}
+              title="Help & Feedback"
+              description="Email us with bugs, questions, or feature ideas"
+              iconName="chatbubble-ellipses-outline"
+              onPress={() => openURL('mailto:support@pourcost.com')}
               showCaret
             />
             <SettingsCard
               title="Terms of Service"
               description="Read our terms of service"
               iconName="document-text-outline"
-              onPress={() => Linking.openURL('https://www.pourcost.app/terms')}
+              onPress={() => openURL('https://www.pourcost.app/terms')}
               showCaret
             />
             <SettingsCard
               title="Privacy Policy"
               description="Read our privacy policy"
               iconName="shield-checkmark-outline"
-              onPress={() => Linking.openURL('https://www.pourcost.app/privacy')}
+              onPress={() => openURL('https://www.pourcost.app/privacy')}
               showCaret
             />
             <SettingsCard

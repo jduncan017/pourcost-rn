@@ -10,81 +10,81 @@ import { useAppStore, ThemeMode } from '@/src/stores/app-store';
 
 export const palette = {
   // Blues — H:220 S:59 | hero: B5
-  B1: '#EFF1F5',    // L:95
-  B2: '#C3CEE4',    // L:83
-  B3: '#8DAAE2',    // L:72
-  B4: '#5D85D5',    // L:60
-  B5: '#3262C3',    // L:48 — primary CTA
-  B6: '#284E9A',    // L:38
-  B7: '#1D3972',    // L:28 — elevated surfaces
-  B8: '#132549',    // L:18 — card surfaces dark
-  B9: '#0C121D',    // L:8  — deepest bg
+  B1: '#EFF1F5', // L:95
+  B2: '#C3CEE4', // L:83
+  B3: '#8DAAE2', // L:72
+  B4: '#5D85D5', // L:60
+  B5: '#3262C3', // L:48 — primary CTA
+  B6: '#284E9A', // L:38
+  B7: '#1D3972', // L:28 — elevated surfaces
+  B8: '#12274D', // L:18 — card surfaces dark
+  B9: '#0C121D', // L:8  — deepest bg
 
   // Neutrals — pure gray, zero saturation
-  N1: '#FFFFFF',    // L:100
-  N2: '#EDEDED',    // L:93
-  N3: '#D1D1D1',    // L:82
-  N4: '#B3B3B3',    // L:70
-  N5: '#8F8F8F',    // L:56
-  N6: '#6B6B6B',    // L:42
-  N7: '#4D4D4D',    // L:30
-  N8: '#262626',    // L:15
-  N9: '#0D0D0D',    // L:5
+  N1: '#FFFFFF', // L:100
+  N2: '#EDEDED', // L:93
+  N3: '#D1D1D1', // L:82
+  N4: '#B3B3B3', // L:70
+  N5: '#8F8F8F', // L:56
+  N6: '#6B6B6B', // L:42
+  N7: '#4D4D4D', // L:30
+  N8: '#262626', // L:15
+  N9: '#0D0D0D', // L:5
 
   // Yellows / Golds — H:43 S:64 | hero: Y4 (brand gold, warm creams at Y1-Y3)
-  Y1: '#F6F4EF',    // L:95 — lightest cream
-  Y2: '#E7DEC5',    // L:84 — warm off-white
-  Y3: '#E6CD8E',    // L:73 — cream
-  Y4: '#DCB960',    // L:62 — brand gold
-  Y5: '#D2A532',    // L:51
-  Y6: '#A78225',    // L:40
-  Y7: '#7D621C',    // L:30
-  Y8: '#4F3E11',    // L:19
-  Y9: '#1E180B',    // L:8
+  Y1: '#F6F4EF', // L:95 — lightest cream
+  Y2: '#E7DEC5', // L:84 — warm off-white
+  Y3: '#E6CD8E', // L:73 — cream
+  Y4: '#DCB960', // L:62 — brand gold
+  Y5: '#D2A532', // L:51
+  Y6: '#A78225', // L:40
+  Y7: '#7D621C', // L:30
+  Y8: '#4F3E11', // L:19
+  Y9: '#1E180B', // L:8
 
   // Greens / Teals — H:165 S:55 | hero: G3
-  G1: '#EFF5F4',    // L:95
-  G2: '#ACD8CD',    // L:76
-  G3: '#51CDAE',    // L:56 — primary success
-  G4: '#37BE9C',    // L:48
-  G5: '#2E9E82',    // L:40
-  G6: '#257E68',    // L:32
-  G7: '#1C5F4E',    // L:24
-  G8: '#123F34',    // L:16
-  G9: '#0D1C18',    // L:8
+  G1: '#EFF5F4', // L:95
+  G2: '#ACD8CD', // L:76
+  G3: '#51CDAE', // L:56 — primary success
+  G4: '#37BE9C', // L:48
+  G5: '#2E9E82', // L:40
+  G6: '#257E68', // L:32
+  G7: '#1C5F4E', // L:24
+  G8: '#123F34', // L:16
+  G9: '#0D1C18', // L:8
 
   // Purples — H:249 S:73 | hero: P3
-  P1: '#F0EFF6',    // L:95
-  P2: '#BBB4E4',    // L:80
-  P3: '#7865E7',    // L:65 — AI/intelligence
-  P4: '#553DE1',    // L:56
-  P5: '#3920CB',    // L:46
-  P6: '#2E19A3',    // L:37
-  P7: '#221377',    // L:27
-  P8: '#160C4F',    // L:18
-  P9: '#0D0A1F',    // L:8
+  P1: '#F0EFF6', // L:95
+  P2: '#BBB4E4', // L:80
+  P3: '#7865E7', // L:65 — AI/intelligence
+  P4: '#553DE1', // L:56
+  P5: '#3920CB', // L:46
+  P6: '#2E19A3', // L:37
+  P7: '#221377', // L:27
+  P8: '#160C4F', // L:18
+  P9: '#0D0A1F', // L:8
 
   // Reds / Pinks — H:343 S:66 | hero: R3
-  R1: '#F6EFF1',    // L:95
-  R2: '#E891AA',    // L:74
-  R3: '#D63865',    // L:53 — primary danger
-  R4: '#C32854',    // L:46
-  R5: '#A12145',    // L:38
-  R6: '#831B38',    // L:31
-  R7: '#61142A',    // L:23
-  R8: '#440E1D',    // L:16
-  R9: '#1E0B10',    // L:8
+  R1: '#F6EFF1', // L:95
+  R2: '#E891AA', // L:74
+  R3: '#D63865', // L:53 — primary danger
+  R4: '#C32854', // L:46
+  R5: '#A12145', // L:38
+  R6: '#831B38', // L:31
+  R7: '#61142A', // L:23
+  R8: '#440E1D', // L:16
+  R9: '#1E0B10', // L:8
 
   // Oranges — H:28 S:80 | hero: O4
-  O1: '#F6F2EE',    // L:95
-  O2: '#E8CDB5',    // L:81
-  O3: '#EEA463',    // L:66
-  O4: '#E77E23',    // L:52 — primary caution
-  O5: '#C56816',    // L:43
-  O6: '#9C5211',    // L:34
-  O7: '#773F0D',    // L:26
-  O8: '#4E2909',    // L:17
-  O9: '#201409',    // L:8
+  O1: '#F6F2EE', // L:95
+  O2: '#E8CDB5', // L:81
+  O3: '#EEA463', // L:66
+  O4: '#E77E23', // L:52 — primary caution
+  O5: '#C56816', // L:43
+  O6: '#9C5211', // L:34
+  O7: '#773F0D', // L:26
+  O8: '#4E2909', // L:17
+  O9: '#201409', // L:8
 } as const;
 
 // Legacy alias
@@ -174,7 +174,7 @@ const light: ThemeColors = {
   borderStrong: palette.N4,
 
   accent: palette.B5,
-  gold: palette.B5,        // blue instead of gold in light mode
+  gold: palette.B5, // blue instead of gold in light mode
   go: palette.G6,
 
   success: palette.G6,
@@ -215,7 +215,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [isDarkMode, setColorScheme]);
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, themeMode, setThemeMode, colorScheme }}>
+    <ThemeContext.Provider
+      value={{ isDarkMode, themeMode, setThemeMode, colorScheme }}
+    >
       {children}
     </ThemeContext.Provider>
   );

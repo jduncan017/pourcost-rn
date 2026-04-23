@@ -58,7 +58,7 @@ export default function Card({
   const gradientColors = disableGradient
     ? (['transparent', 'transparent'] as const)
     : isDark
-      ? ([palette.B5 + '30', palette.B7 + '40'] as const)
+      ? ([palette.B5 + '40', palette.B9 + '40'] as const)
       : (['transparent', 'transparent'] as const);
 
   const shadowStyle =
@@ -97,7 +97,10 @@ export default function Card({
   if (onPress) {
     return (
       <Pressable
-        onPress={() => { HapticService.buttonPress(); onPress(); }}
+        onPress={() => {
+          HapticService.buttonPress();
+          onPress();
+        }}
         style={cardStyle}
         className={`${className}`}
         {...viewProps}

@@ -120,11 +120,7 @@ export default function CocktailsScreen() {
       <ScrollView className="flex-1">
         <View className="p-4">
           {/* Header */}
-          <View className="mb-6">
-            <Text className="text-base pb-4 mb-4" style={{ color: colors.textSecondary, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-              Manage your cocktail recipes and cost calculations
-            </Text>
-
+          <View className="mb-6 mt-4">
             {/* Search Bar + Create Button */}
             <View className="flex-row items-center gap-3">
               <View className="flex-1">
@@ -139,6 +135,7 @@ export default function CocktailsScreen() {
                 variant="primary"
                 icon="add"
                 size="medium"
+                className="h-full"
               >
                 Create
               </Button>
@@ -176,7 +173,10 @@ export default function CocktailsScreen() {
           {/* Cocktails List */}
           <View className="flex flex-col gap-3">
             <View className="flex-row items-center justify-between">
-              <ScreenTitle title={`Your Cocktails (${filteredCocktails.length})`} variant="group" />
+              <ScreenTitle
+                title={`Your Cocktails (${filteredCocktails.length})`}
+                variant="group"
+              />
               {searchQuery && (
                 <Button
                   onPress={() => setSearchQuery('')}
@@ -210,26 +210,41 @@ export default function CocktailsScreen() {
               />
             ) : (
               <>
-                <View className="flex-row justify-between items-center" style={{ opacity: 0.45 }}>
+                <View
+                  className="flex-row justify-between items-center"
+                  style={{ opacity: 0.45 }}
+                >
                   <View className="flex-row items-center gap-1">
-                    <Ionicons name="arrow-back" size={11} color={colors.textSecondary} />
-                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>Swipe left to delete</Text>
+                    <Ionicons
+                      name="arrow-back"
+                      size={11}
+                      color={colors.textSecondary}
+                    />
+                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>
+                      Swipe left to delete
+                    </Text>
                   </View>
                   <View className="flex-row items-center gap-1">
-                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>Swipe right to edit</Text>
-                    <Ionicons name="arrow-forward" size={11} color={colors.textSecondary} />
+                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>
+                      Swipe right to edit
+                    </Text>
+                    <Ionicons
+                      name="arrow-forward"
+                      size={11}
+                      color={colors.textSecondary}
+                    />
                   </View>
                 </View>
-              {filteredCocktails.map((cocktail) => (
-                <CocktailListItem
-                  key={cocktail.id}
-                  cocktail={cocktail}
-                  sortBy={sortBy}
-                  onPress={() => handleCocktailPress(cocktail)}
-                  onEdit={() => handleEditCocktail(cocktail)}
-                  onDelete={() => handleDeleteCocktail(cocktail)}
-                />
-              ))}
+                {filteredCocktails.map((cocktail) => (
+                  <CocktailListItem
+                    key={cocktail.id}
+                    cocktail={cocktail}
+                    sortBy={sortBy}
+                    onPress={() => handleCocktailPress(cocktail)}
+                    onEdit={() => handleEditCocktail(cocktail)}
+                    onDelete={() => handleDeleteCocktail(cocktail)}
+                  />
+                ))}
               </>
             )}
           </View>

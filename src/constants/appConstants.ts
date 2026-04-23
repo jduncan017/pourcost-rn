@@ -487,10 +487,7 @@ export type IngredientType = (typeof INGREDIENT_TYPES)[number];
 
 export const SPIRIT_SUBTYPES = [
   'Vodka',
-  'Whiskey',
-  'Bourbon',
-  'Scotch',
-  'Rye',
+  'Whiskey', // umbrella — covers bourbon, scotch, rye, Irish, Canadian, etc.
   'Rum',
   'Gin',
   'Tequila',

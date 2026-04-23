@@ -3,8 +3,8 @@ import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-na
 import { useRouter, type Href } from 'expo-router';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
-import SectionDivider from '@/src/components/ui/SectionDivider';
 import Button from '@/src/components/ui/Button';
+import StatCard from '@/src/components/ui/StatCard';
 import Card from '@/src/components/ui/Card';
 import CustomSlider from '@/src/components/ui/CustomSlider';
 import IngredientInputs, { IngredientInputValues } from '@/src/components/IngredientInputs';
@@ -12,7 +12,7 @@ import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { useAppStore } from '@/src/stores/app-store';
 import { formatCurrency } from '@/src/services/calculation-service';
 import { getPourChipsForContext } from '@/src/constants/appConstants';
-import { Volume, volumeToOunces } from '@/src/types/models';
+import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
 
 export default function CalculatorScreen() {
   const router = useRouter();
@@ -59,6 +59,20 @@ export default function CalculatorScreen() {
   const matchedChip = pourChips.find(c => Math.abs(c.oz - values.pourSize) < 0.001);
   const pourLabel = matchedChip?.label ?? `${values.pourSize} oz`;
 
+  // Size labels used for the margin stat cards.
+  const perPourSizeLabel = isGarnish
+    ? `${values.servingAmount} ${garnishUnitLabel}`
+    : pourLabel;
+  const perProductSizeLabel = isGarnish
+    ? `${values.garnishAmount} ${garnishUnitLabel}`
+    : volumeLabel(values.productSize);
+
+  // Total margin across the whole product (per-pour margin × uses per product).
+  const usesPerProduct = isGarnish
+    ? (values.servingAmount > 0 ? values.garnishAmount / values.servingAmount : 0)
+    : (values.pourSize > 0 ? productSizeOz / values.pourSize : 0);
+  const marginPerProduct = pourCostMargin * usesPerProduct;
+
   const handleSaveIngredient = () => {
     if (isGarnish) {
       const garnishVolume: Volume = values.garnishUnit === 'ml'
@@ -102,66 +116,51 @@ export default function CalculatorScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
-          <View className="flex-col gap-5 p-4">
-            <Text
-              className="text-base pb-4"
-              style={{ color: colors.textSecondary, borderBottomWidth: 1, borderBottomColor: colors.borderSubtle }}
-            >
-              Quickly calculate cost and pricing for any ingredient
-            </Text>
+          <View className="flex-col gap-7 pt-4 pb-16">
+            {/* Inputs */}
+            <View className="px-6 flex-col gap-3">
+              <ScreenTitle title="Inputs" variant="muted" />
+              <IngredientInputs
+                variant="calculator"
+                values={values}
+                onChange={handleChange}
+                hideOtherType
+                noCard
+              />
+            </View>
 
-            <ScreenTitle title="INPUTS" variant="group" />
-
-            <IngredientInputs
-              variant="calculator"
-              values={values}
-              onChange={handleChange}
-              hideOtherType
-            />
-
-            <SectionDivider />
-
-            <ScreenTitle title="RESULTS" variant="group" />
-
-            <Card padding="large">
-              {/* Hero — Cost per [pour label] */}
-              <View className="flex-row justify-between items-center pb-4 mb-4" style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}>
-                <Text className="text-xl" style={{ color: colors.textSecondary, fontWeight: '500' }}>
-                  {isGarnish
-                    ? `Cost per ${values.servingAmount} ${garnishUnitLabel}`
-                    : `Cost per ${pourLabel}`
-                  }
-                </Text>
-                <Text className="text-2xl" style={{ color: colors.text, fontWeight: '700' }}>
-                  {formatCurrency(costPerPour)}
-                </Text>
+            {/* Results — 2×2 stat grid */}
+            <View className="px-6 flex-col gap-3">
+              <ScreenTitle title="Results" variant="muted" className="mb-1" />
+              <View className="flex-row gap-3">
+                <StatCard
+                  label={`Cost / ${perPourSizeLabel}`}
+                  value={formatCurrency(costPerPour)}
+                />
+                <StatCard
+                  label={`Margin / ${perPourSizeLabel}`}
+                  value={formatCurrency(pourCostMargin)}
+                  infoTermKey="margin"
+                />
+              </View>
+              <View className="flex-row gap-3">
+                <StatCard
+                  label="Suggested Price"
+                  value={formatCurrency(suggestedCharge)}
+                  infoTermKey="suggestedPrice"
+                />
+                <StatCard
+                  label={`Margin / ${perProductSizeLabel}`}
+                  value={formatCurrency(marginPerProduct)}
+                  infoTermKey="margin"
+                />
               </View>
 
-              {[
-                { label: 'Suggested Charge', value: formatCurrency(suggestedCharge) },
-                ...(isGarnish
-                  ? [{ label: `Cost per ${garnishUnitLabel.replace(/s$/, '')}`, value: formatCurrency(values.garnishAmount > 0 ? values.productCost / values.garnishAmount : 0) }]
-                  : [{ label: 'Cost per Oz', value: formatCurrency(costPerOz) }]
-                ),
-                { label: 'Margin', value: formatCurrency(pourCostMargin) },
-              ].map((row, index) => (
-                <View
-                  key={row.label}
-                  className="flex-row justify-between items-center py-3"
-                  style={index < 2 ? { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle } : undefined}
-                >
-                  <Text className="text-base" style={{ color: colors.textSecondary }}>{row.label}</Text>
-                  <Text className="text-base" style={{ color: colors.text, fontWeight: '500' }}>{row.value}</Text>
-                </View>
-              ))}
-
-              {/* Target Pour Cost slider */}
-              <View
-                className="mt-4 p-4 rounded-xl"
-                style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }}
-              >
+              {/* Pour Cost slider — styled as a stat card you can drag */}
+              <Card padding="medium">
                 <CustomSlider
-                  label="Target Pour Cost"
+                  variant="stat"
+                  label="Pour Cost"
                   value={values.pourCostPct}
                   onValueChange={(val) => handleChange({ pourCostPct: Math.round(val) })}
                   minValue={10}
@@ -169,25 +168,21 @@ export default function CalculatorScreen() {
                   step={1}
                   formatValue={(v) => `${Math.round(v)}%`}
                 />
-              </View>
-            </Card>
+              </Card>
+            </View>
 
-            <Button
-              variant="primary"
-              icon="arrow-forward-circle-outline"
-              fullWidth
-              size="large"
-              onPress={handleSaveIngredient}
-            >
-              Save as Ingredient
-            </Button>
-
-            <Text
-              className="text-center text-sm"
-              style={{ color: colors.textTertiary }}
-            >
-              Opens the ingredient form with these values pre-filled
-            </Text>
+            {/* Save action */}
+            <View className="px-6 flex-col gap-2">
+              <Button
+                variant="primary"
+                icon="arrow-forward-circle-outline"
+                fullWidth
+                size="large"
+                onPress={handleSaveIngredient}
+              >
+                Save as Ingredient
+              </Button>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

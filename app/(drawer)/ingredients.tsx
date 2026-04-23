@@ -21,7 +21,10 @@ import { HapticService } from '@/src/services/haptic-service';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SkeletonLoader from '@/src/components/ui/SkeletonLoader';
-import { SUBTYPES_BY_TYPE, type IngredientSortOption } from '@/src/constants/appConstants';
+import {
+  SUBTYPES_BY_TYPE,
+  type IngredientSortOption,
+} from '@/src/constants/appConstants';
 
 /**
  * Ingredients management screen
@@ -66,7 +69,7 @@ export default function IngredientsScreen() {
   const filteredIngredients = (() => {
     const base = getFilteredIngredients();
     if (!hasSubtypes || selectedSubType === 'All') return base;
-    return base.filter(i => i.subType === selectedSubType);
+    return base.filter((i) => i.subType === selectedSubType);
   })();
 
   // Load ingredients on mount - always call loadIngredients, let the store handle the logic
@@ -121,11 +124,7 @@ export default function IngredientsScreen() {
       <ScrollView className="flex-1">
         <View className="p-4">
           {/* Header */}
-          <View className="mb-6">
-            <Text className="text-base pb-4 mb-4" style={{ color: colors.textSecondary, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-              Manage your ingredient library and cost calculations
-            </Text>
-
+          <View className="mb-6 mt-4">
             {/* Search Bar + Add Button */}
             <View className="flex-row items-center gap-3">
               <View className="flex-1">
@@ -140,6 +139,7 @@ export default function IngredientsScreen() {
                 variant="primary"
                 icon="add"
                 size="medium"
+                className="h-full"
               >
                 Add
               </Button>
@@ -164,7 +164,11 @@ export default function IngredientsScreen() {
             {/* Subtype Filter — shows for any type with subtypes */}
             {hasSubtypes && (
               <View className="mb-4">
-                <ScreenTitle title={`${selectedType} Type`} variant="group" className="mb-2" />
+                <ScreenTitle
+                  title={`${selectedType} Type`}
+                  variant="group"
+                  className="mb-2"
+                />
                 <ChipSelector
                   options={['All', ...SUBTYPES_BY_TYPE[selectedType]]}
                   selectedOption={selectedSubType}
@@ -186,7 +190,9 @@ export default function IngredientsScreen() {
                 { key: 'margin', label: 'Margin' },
               ]}
               selectedSort={sortBy}
-              onSortChange={(sortKey) => setSortBy(sortKey as IngredientSortOption)}
+              onSortChange={(sortKey) =>
+                setSortBy(sortKey as IngredientSortOption)
+              }
               showLabel={false}
             />
           </View>
@@ -194,7 +200,10 @@ export default function IngredientsScreen() {
           {/* Ingredients List */}
           <View className="flex flex-col gap-3">
             <View className="flex-row items-center justify-between">
-              <ScreenTitle title={`Your Ingredients (${filteredIngredients.length})`} variant="group" />
+              <ScreenTitle
+                title={`Your Ingredients (${filteredIngredients.length})`}
+                variant="group"
+              />
               {searchQuery && (
                 <Button
                   onPress={() => setSearchQuery('')}
@@ -228,14 +237,29 @@ export default function IngredientsScreen() {
               />
             ) : (
               <>
-                <View className="flex-row justify-between items-center" style={{ opacity: 0.45 }}>
+                <View
+                  className="flex-row justify-between items-center"
+                  style={{ opacity: 0.45 }}
+                >
                   <View className="flex-row items-center gap-1">
-                    <Ionicons name="arrow-back" size={11} color={colors.textSecondary} />
-                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>Swipe left to delete</Text>
+                    <Ionicons
+                      name="arrow-back"
+                      size={11}
+                      color={colors.textSecondary}
+                    />
+                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>
+                      Swipe left to delete
+                    </Text>
                   </View>
                   <View className="flex-row items-center gap-1">
-                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>Swipe right to edit</Text>
-                    <Ionicons name="arrow-forward" size={11} color={colors.textSecondary} />
+                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>
+                      Swipe right to edit
+                    </Text>
+                    <Ionicons
+                      name="arrow-forward"
+                      size={11}
+                      color={colors.textSecondary}
+                    />
                   </View>
                 </View>
                 {filteredIngredients.map((ingredient) => (

@@ -18,8 +18,8 @@ import {
   Modal,
   Image,
   StatusBar,
-  SafeAreaView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInvoicesStore } from '@/src/stores/invoices-store';
@@ -59,22 +59,26 @@ function ImageModal({
   onClose: () => void;
 }) {
   const [pageIndex, setPageIndex] = useState(0);
+  const insets = useSafeAreaInsets();
 
   return (
     <Modal visible={visible} animationType="fade" statusBarTranslucent>
       <View className="flex-1 bg-black">
         <StatusBar barStyle="light-content" backgroundColor="black" />
 
-        {/* Close button */}
-        <SafeAreaView>
-          <Pressable
-            onPress={onClose}
-            className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full items-center justify-center"
-            style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
-          >
-            <Ionicons name="close" size={22} color="white" />
-          </Pressable>
-        </SafeAreaView>
+        {/* Close button — pinned below the status bar using real safe-area insets */}
+        <Pressable
+          onPress={onClose}
+          hitSlop={10}
+          className="absolute z-10 w-10 h-10 rounded-full items-center justify-center"
+          style={{
+            top: insets.top + 12,
+            right: 16,
+            backgroundColor: 'rgba(255,255,255,0.15)',
+          }}
+        >
+          <Ionicons name="close" size={22} color="white" />
+        </Pressable>
 
         {/* Image */}
         <Image
@@ -85,20 +89,22 @@ function ImageModal({
 
         {/* Page selector */}
         {urls.length > 1 && (
-          <SafeAreaView>
-            <View className="flex-row items-center justify-center gap-3 py-4">
-              {urls.map((_, i) => (
-                <Pressable key={i} onPress={() => setPageIndex(i)}>
-                  <View
-                    className="w-2 h-2 rounded-full"
-                    style={{
-                      backgroundColor: i === pageIndex ? 'white' : 'rgba(255,255,255,0.4)',
-                    }}
-                  />
-                </Pressable>
-              ))}
-            </View>
-          </SafeAreaView>
+          <View
+            className="flex-row items-center justify-center gap-3"
+            style={{ paddingBottom: insets.bottom + 16, paddingTop: 16 }}
+          >
+            {urls.map((_, i) => (
+              <Pressable key={i} onPress={() => setPageIndex(i)} hitSlop={8}>
+                <View
+                  className="w-2 h-2 rounded-full"
+                  style={{
+                    backgroundColor:
+                      i === pageIndex ? 'white' : 'rgba(255,255,255,0.4)',
+                  }}
+                />
+              </Pressable>
+            ))}
+          </View>
         )}
       </View>
     </Modal>

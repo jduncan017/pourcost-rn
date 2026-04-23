@@ -9,11 +9,13 @@ import { Ionicons } from '@expo/vector-icons';
 import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import ActionSheet from '@/src/components/ui/ActionSheet';
-import Card from '@/src/components/ui/Card';
+import InfoIcon from '@/src/components/ui/InfoIcon';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StatCard from '@/src/components/ui/StatCard';
 import DetailLevelToggle from '@/src/components/ui/DetailLevelToggle';
 import PourCostHero from '@/src/components/PourCostHero';
 import GradientBackground from '@/src/components/ui/GradientBackground';
+import { LinearGradient } from 'expo-linear-gradient';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
 import { ensureDate } from '@/src/lib/ensureDate';
@@ -27,14 +29,27 @@ import {
 function pourLabel(v: Volume): string {
   const oz = volumeToOunces(v);
   const fractions: [number, string][] = [
-    [0.25, '1/4'], [0.5, '1/2'], [0.75, '3/4'],
-    [1, '1'], [1.25, '1 1/4'], [1.5, '1 1/2'], [1.75, '1 3/4'],
-    [2, '2'], [2.25, '2 1/4'], [2.5, '2 1/2'], [2.75, '2 3/4'],
-    [3, '3'], [3.5, '3 1/2'], [4, '4'], [5, '5'], [6, '6'],
+    [0.25, '1/4'],
+    [0.5, '1/2'],
+    [0.75, '3/4'],
+    [1, '1'],
+    [1.25, '1 1/4'],
+    [1.5, '1 1/2'],
+    [1.75, '1 3/4'],
+    [2, '2'],
+    [2.25, '2 1/4'],
+    [2.5, '2 1/2'],
+    [2.75, '2 3/4'],
+    [3, '3'],
+    [3.5, '3 1/2'],
+    [4, '4'],
+    [5, '5'],
+    [6, '6'],
   ];
   const match = fractions.find(([val]) => Math.abs(val - oz) < 0.001);
   if (match) return `${match[1]}oz`;
-  if (v.kind === 'namedOunces' || v.kind === 'unitQuantity') return volumeLabel(v);
+  if (v.kind === 'namedOunces' || v.kind === 'unitQuantity')
+    return volumeLabel(v);
   return `${oz % 1 === 0 ? oz : oz.toFixed(1)}oz`;
 }
 
@@ -44,17 +59,22 @@ function LedgerRow({
   value,
   valueColor,
   colors,
+  infoTermKey,
 }: {
   label: string;
   value: string;
   valueColor?: string;
   colors: any;
+  infoTermKey?: import('@/src/constants/glossary').GlossaryKey;
 }) {
   return (
     <View className="flex-row justify-between items-center py-2">
-      <Text className="text-base" style={{ color: colors.textSecondary }}>
-        {label}
-      </Text>
+      <View className="flex-row items-center gap-1">
+        <Text className="text-base" style={{ color: colors.textSecondary }}>
+          {label}
+        </Text>
+        {infoTermKey && <InfoIcon termKey={infoTermKey} size={13} />}
+      </View>
       <Text
         className="text-base"
         style={{ color: valueColor ?? colors.text, fontWeight: '600' }}
@@ -66,14 +86,16 @@ function LedgerRow({
 }
 
 export default function CocktailDetailScreen() {
-  const { defaultRetailPrice, ingredientOrderPref, pourCostGoal, detailLevel } = useAppStore();
+  const { defaultRetailPrice, ingredientOrderPref, pourCostGoal, detailLevel } =
+    useAppStore();
   const router = useRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
   const params = useLocalSearchParams();
   const [showActions, setShowActions] = useState(false);
 
-  const { getCocktailById, loadCocktails, deleteCocktail } = useCocktailsStore();
+  const { getCocktailById, loadCocktails, deleteCocktail } =
+    useCocktailsStore();
   const { ingredients: allIngredients } = useIngredientsStore();
   const cocktailId = params.id as string;
   const cocktail = getCocktailById(cocktailId);
@@ -86,7 +108,9 @@ export default function CocktailDetailScreen() {
     return (
       <GradientBackground>
         <View className="flex-1 items-center justify-center">
-          <Text style={{ color: colors.text }} className="text-lg">Loading...</Text>
+          <Text style={{ color: colors.text }} className="text-lg">
+            Loading...
+          </Text>
         </View>
       </GradientBackground>
     );
@@ -106,9 +130,19 @@ export default function CocktailDetailScreen() {
 
   const isDetailed = detailLevel === 'detailed';
   const retailPrice = cocktail.retailPrice ?? defaultRetailPrice;
-  const metrics = calculateCocktailMetrics(cocktail.ingredients, pourCostGoal / 100, retailPrice);
-  const pourCostPct = retailPrice > 0 ? calculatePourCostPercentage(metrics.totalCost, retailPrice) : 0;
-  const totalVolume = cocktail.ingredients.reduce((sum, ing) => sum + volumeToOunces(ing.pourSize), 0);
+  const metrics = calculateCocktailMetrics(
+    cocktail.ingredients,
+    pourCostGoal / 100,
+    retailPrice
+  );
+  const pourCostPct =
+    retailPrice > 0
+      ? calculatePourCostPercentage(metrics.totalCost, retailPrice)
+      : 0;
+  const totalVolume = cocktail.ingredients.reduce(
+    (sum, ing) => sum + volumeToOunces(ing.pourSize),
+    0
+  );
 
   const sortedIngredients = [...cocktail.ingredients].sort((a, b) => {
     switch (ingredientOrderPref) {
@@ -161,14 +195,14 @@ export default function CocktailDetailScreen() {
 
   const getImage = () => {
     if (!cocktail.imagePath) return null;
-    if (cocktail.imagePath.startsWith('http')) return { uri: cocktail.imagePath };
+    if (cocktail.imagePath.startsWith('http'))
+      return { uri: cocktail.imagePath };
     const key = cocktail.imagePath.replace('.jpg', '');
     return cocktailImages[key] ?? null;
   };
 
   const imageSource = getImage();
-  const avgVolPerPour = sortedIngredients.length > 0 ? totalVolume / sortedIngredients.length : 0;
-
+  const insets = useSafeAreaInsets();
   return (
     <GradientBackground>
       <ActionSheet
@@ -176,12 +210,21 @@ export default function CocktailDetailScreen() {
         onClose={() => setShowActions(false)}
         actions={[
           { label: 'Edit', icon: 'create-outline', onPress: handleEdit },
-          { label: 'Delete', icon: 'trash-outline', onPress: handleDelete, destructive: true },
+          {
+            label: 'Delete',
+            icon: 'trash-outline',
+            onPress: handleDelete,
+            destructive: true,
+          },
         ]}
       />
 
-      <ScrollView className="flex-1">
-        <View className="pt-4 pb-6 flex-col gap-7">
+      <ScrollView
+        className="flex-1"
+        bounces={false}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        <View className="pt-4 flex-col gap-7" style={{ flex: 1 }}>
           {/* Identity — image + name + description */}
           <View className="px-6 flex-row gap-4">
             {imageSource && (
@@ -213,7 +256,10 @@ export default function CocktailDetailScreen() {
                   {cocktail.description}
                 </Text>
               ) : (
-                <Text className="text-sm" style={{ color: colors.textTertiary }}>
+                <Text
+                  className="text-sm"
+                  style={{ color: colors.textTertiary }}
+                >
                   {cocktail.category || 'Other'}
                 </Text>
               )}
@@ -223,13 +269,21 @@ export default function CocktailDetailScreen() {
           {/* Stats group — twin stat cards + AI suggestion, equal gap */}
           <View className="px-6 flex-col gap-3">
             <View className="flex-row gap-3">
-              <StatCard label="Menu Price" value={formatCurrency(retailPrice)} />
-              <StatCard label="Margin" value={formatCurrency(metrics.profitMargin)} />
+              <StatCard
+                label="Menu Price"
+                value={formatCurrency(retailPrice)}
+              />
+              <StatCard
+                label="Margin"
+                value={formatCurrency(metrics.profitMargin)}
+                infoTermKey="margin"
+              />
             </View>
             {isDetailed && (
               <AiSuggestionRow
                 label="Suggested Price"
                 value={formatCurrency(metrics.suggestedPrice)}
+                infoTermKey="suggestedPrice"
               />
             )}
           </View>
@@ -241,7 +295,9 @@ export default function CocktailDetailScreen() {
             {sortedIngredients.map((ingredient, index) => {
               const pourOz = volumeToOunces(ingredient.pourSize);
               const costPerOz = pourOz > 0 ? ingredient.cost / pourOz : 0;
-              const source = allIngredients.find((i) => i.id === ingredient.ingredientId);
+              const source = allIngredients.find(
+                (i) => i.id === ingredient.ingredientId
+              );
               const subtitle = [
                 source?.subType || source?.type,
                 `${formatCurrency(costPerOz)}/oz`,
@@ -255,7 +311,10 @@ export default function CocktailDetailScreen() {
                   className="flex-row items-start py-3"
                   style={
                     index < sortedIngredients.length - 1
-                      ? { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle }
+                      ? {
+                          borderBottomWidth: 1,
+                          borderBottomColor: colors.borderSubtle,
+                        }
                       : undefined
                   }
                 >
@@ -288,7 +347,10 @@ export default function CocktailDetailScreen() {
                     ) : null}
                   </View>
                   {/* Col 3: cost */}
-                  <Text className="text-base" style={{ color: colors.text, fontWeight: '600' }}>
+                  <Text
+                    className="text-base"
+                    style={{ color: colors.text, fontWeight: '600' }}
+                  >
                     {formatCurrency(ingredient.cost)}
                   </Text>
                 </View>
@@ -296,41 +358,9 @@ export default function CocktailDetailScreen() {
             })}
           </View>
 
-          {/* Pour Cost hero — detailed only, edge-to-edge. Sits below the recipe. */}
-          {isDetailed && <PourCostHero pourCostPercentage={pourCostPct} />}
-
-          {/* LEDGER — detailed only. Top hairline separates from Hero; no row dividers */}
-          {isDetailed && (
-            <View
-              className="px-6 pt-4 flex-col gap-1"
-              style={{ borderTopWidth: 1, borderTopColor: colors.borderSubtle }}
-            >
-              <ScreenTitle title="Ledger" variant="muted" className="mb-1" />
-              <LedgerRow
-                label="Cost of goods"
-                value={formatCurrency(metrics.totalCost)}
-                colors={colors}
-              />
-              <LedgerRow
-                label="Total volume"
-                value={`${totalVolume.toFixed(2)} oz`}
-                colors={colors}
-              />
-              <LedgerRow
-                label="Avg pour"
-                value={`${avgVolPerPour.toFixed(2)} oz`}
-                colors={colors}
-              />
-              <LedgerRow
-                label="Category"
-                value={cocktail.category || 'Other'}
-                colors={colors}
-              />
-            </View>
-          )}
-
-          {/* Notes — detailed only, open text */}
-          {isDetailed && cocktail.notes ? (
+          {/* Notes — build/prep instructions, shown whenever present (both modes).
+              Placed here so the recipe + prep reads as one unit before performance data. */}
+          {cocktail.notes ? (
             <View className="px-6 flex-col gap-2">
               <ScreenTitle title="Notes" variant="muted" />
               <Text
@@ -342,13 +372,50 @@ export default function CocktailDetailScreen() {
             </View>
           ) : null}
 
-          {/* Updated footer — detailed only */}
+          {/* Pour Cost hero — detailed only, edge-to-edge. Sits below the recipe. */}
+          {isDetailed && <PourCostHero pourCostPercentage={pourCostPct} />}
+
+          {/* LEDGER — detailed only. Final section: edge-to-edge gradient runs
+              to the bottom of the page. Updated date lives here as the last row. */}
           {isDetailed && (
-            <View className="items-center pt-2">
-              <Text className="text-xs" style={{ color: colors.textTertiary }}>
-                Updated {new Date(cocktail.updatedAt).toLocaleDateString()}
-              </Text>
-            </View>
+            <LinearGradient
+              colors={[palette.B9 + '50', palette.N9] as const}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
+              style={{ marginTop: 'auto' }}
+            >
+              <View
+                className="px-6 pt-5 flex-col gap-1"
+                style={{
+                  borderTopWidth: 1,
+                  borderTopColor: colors.borderSubtle,
+                  paddingBottom: insets.bottom + 20,
+                }}
+              >
+                <ScreenTitle title="Ledger" variant="muted" className="mb-1" />
+                <LedgerRow
+                  label="Cost Of Goods"
+                  value={formatCurrency(metrics.totalCost)}
+                  colors={colors}
+                  infoTermKey="cogs"
+                />
+                <LedgerRow
+                  label="Total Volume"
+                  value={`${totalVolume.toFixed(2)} oz`}
+                  colors={colors}
+                />
+                <LedgerRow
+                  label="Category"
+                  value={cocktail.category || 'Other'}
+                  colors={colors}
+                />
+                <LedgerRow
+                  label="Last Updated"
+                  value={new Date(cocktail.updatedAt).toLocaleDateString()}
+                  colors={colors}
+                />
+              </View>
+            </LinearGradient>
           )}
         </View>
       </ScrollView>

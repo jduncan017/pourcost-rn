@@ -142,7 +142,7 @@ export default function InvoiceLineEditScreen() {
             </View>
             <View className="flex-1">
               <TextInput
-                label="Unit Price (per bottle)"
+                label="Unit Price / Bottle"
                 value={unitPrice}
                 onChangeText={setUnitPrice}
                 keyboardType="decimal-pad"

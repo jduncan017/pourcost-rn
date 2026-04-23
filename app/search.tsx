@@ -1,12 +1,12 @@
 import { useState, useMemo, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useRouter, useNavigation } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import SearchBar from '@/src/components/ui/SearchBar';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SectionDivider from '@/src/components/ui/SectionDivider';
-import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { volumeLabel } from '@/src/types/models';
@@ -15,16 +15,17 @@ import {
   calculateCocktailMetrics,
   formatCurrency,
 } from '@/src/services/calculation-service';
+import { ingredientTypeIcon, cocktailIcon, TypeIcon } from '@/src/lib/type-icons';
+import { getIngredientUsageCounts, sortByUsage } from '@/src/lib/ingredientUsage';
+import { ensureDate } from '@/src/lib/ensureDate';
 
 function ResultRow({
   icon,
-  iconColor,
   title,
   subtitle,
   onPress,
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
-  iconColor: string;
+  icon: TypeIcon;
   title: string;
   subtitle: string;
   onPress: () => void;
@@ -36,10 +37,10 @@ function ResultRow({
       className="flex-row items-center py-3"
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
-      <Ionicons
-        name={icon}
-        size={20}
-        color={iconColor}
+      <MaterialCommunityIcons
+        name={icon.name}
+        size={22}
+        color={icon.color}
         style={{ marginRight: 12 }}
       />
       <View className="flex-1">
@@ -98,6 +99,23 @@ export default function SearchScreen() {
   const totalResults =
     searchResults.ingredients.length + searchResults.cocktails.length;
 
+  // Suggested ingredients: top 5 by cocktail-usage frequency.
+  const usageCounts = useMemo(() => getIngredientUsageCounts(cocktails), [cocktails]);
+  const suggestedIngredients = useMemo(() => {
+    const used = ingredients.filter((i) => (usageCounts.get(i.id) ?? 0) > 0);
+    return sortByUsage(used, usageCounts).slice(0, 5);
+  }, [ingredients, usageCounts]);
+
+  // Suggested cocktails: top 5 most-recently-updated.
+  const suggestedCocktails = useMemo(() => {
+    return [...cocktails]
+      .sort(
+        (a, b) =>
+          ensureDate(b.updatedAt).getTime() - ensureDate(a.updatedAt).getTime()
+      )
+      .slice(0, 5);
+  }, [cocktails]);
+
   const handleItemPress = (type: 'ingredient' | 'cocktail', id: string) => {
     router.push({
       pathname: type === 'cocktail' ? '/cocktail-detail' : '/ingredient-detail',
@@ -116,25 +134,85 @@ export default function SearchScreen() {
             onChangeText={setSearchQuery}
           />
 
-          {/* Empty state */}
-          {!hasSearched && (
-            <View className="py-12 items-center">
-              <Ionicons name="search" size={48} color={colors.textTertiary} />
-              <Text
-                className="text-center mt-3"
-                style={{ color: colors.text, fontWeight: '500' }}
-              >
-                Search your library
-              </Text>
-              <Text
-                className="text-sm text-center mt-1"
-                style={{ color: colors.textTertiary }}
-              >
-                {ingredients.length} ingredients and {cocktails.length}{' '}
-                cocktails
-              </Text>
+          {/* Suggested — shown when no search query */}
+          {!hasSearched && suggestedIngredients.length > 0 && (
+            <View>
+              <View className="flex-row items-center gap-1.5 mb-1">
+                <Ionicons name="sparkles" size={12} color={palette.P2} />
+                <ScreenTitle
+                  title="Suggested Ingredients"
+                  variant="muted"
+                  style={{ color: palette.P2 }}
+                />
+              </View>
+              {suggestedIngredients.map((item, index) => {
+                const costPerOz = calculateCostPerOz(
+                  item.productSize,
+                  item.productCost
+                );
+                return (
+                  <View key={item.id}>
+                    {index > 0 && <SectionDivider />}
+                    <ResultRow
+                      icon={ingredientTypeIcon(item.type)}
+                      title={item.name}
+                      subtitle={`${item.type || 'Other'} • ${volumeLabel(item.productSize)} • ${formatCurrency(costPerOz)}/oz`}
+                      onPress={() => handleItemPress('ingredient', item.id)}
+                    />
+                  </View>
+                );
+              })}
             </View>
           )}
+
+          {!hasSearched && suggestedCocktails.length > 0 && (
+            <View>
+              <View className="flex-row items-center gap-1.5 mb-1">
+                <Ionicons name="sparkles" size={12} color={palette.P2} />
+                <ScreenTitle
+                  title="Suggested Cocktails"
+                  variant="muted"
+                  style={{ color: palette.P2 }}
+                />
+              </View>
+              {suggestedCocktails.map((item, index) => {
+                const metrics = calculateCocktailMetrics(item.ingredients);
+                return (
+                  <View key={item.id}>
+                    {index > 0 && <SectionDivider />}
+                    <ResultRow
+                      icon={cocktailIcon}
+                      title={item.name}
+                      subtitle={`${item.ingredients.length} ingredients • ${formatCurrency(metrics.totalCost)} cost`}
+                      onPress={() => handleItemPress('cocktail', item.id)}
+                    />
+                  </View>
+                );
+              })}
+            </View>
+          )}
+
+          {/* Empty library hint — only when user has no ingredients AND no cocktails */}
+          {!hasSearched &&
+            suggestedIngredients.length === 0 &&
+            suggestedCocktails.length === 0 && (
+              <View className="py-12 items-center">
+                <Ionicons name="search" size={48} color={colors.textTertiary} />
+                <Text
+                  className="text-center mt-3"
+                  style={{ color: colors.text, fontWeight: '500' }}
+                >
+                  Search your library
+                </Text>
+                <Text
+                  className="text-sm text-center mt-1"
+                  style={{ color: colors.textTertiary }}
+                >
+                  {ingredients.length} ingredients and {cocktails.length}{' '}
+                  cocktails
+                </Text>
+              </View>
+            )}
 
           {/* No results */}
           {hasSearched && totalResults === 0 && (
@@ -172,8 +250,7 @@ export default function SearchScreen() {
                   <View key={item.id}>
                     {index > 0 && <SectionDivider />}
                     <ResultRow
-                      icon="flask"
-                      iconColor={colors.accent}
+                      icon={ingredientTypeIcon(item.type)}
                       title={item.name}
                       subtitle={`${item.type || 'Other'} • ${volumeLabel(item.productSize)} • ${formatCurrency(costPerOz)}/oz`}
                       onPress={() => handleItemPress('ingredient', item.id)}
@@ -198,8 +275,7 @@ export default function SearchScreen() {
                   <View key={item.id}>
                     {index > 0 && <SectionDivider />}
                     <ResultRow
-                      icon="wine"
-                      iconColor={colors.success}
+                      icon={cocktailIcon}
                       title={item.name}
                       subtitle={`${item.ingredients.length} ingredients • ${formatCurrency(metrics.totalCost)} cost`}
                       onPress={() => handleItemPress('cocktail', item.id)}

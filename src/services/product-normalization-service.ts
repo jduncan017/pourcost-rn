@@ -281,15 +281,14 @@ function detectCategory(rawName: string, cleanName: string): { category: string 
   // Spirits
   if (/\b(TEQ|TEQUILA)\b/.test(r)) return { category: 'Spirit', subcategory: 'Tequila' };
   if (/\b(VODKA|VDKA?)\b/.test(r)) return { category: 'Spirit', subcategory: 'Vodka' };
-  if (/\b(BOURBON)\b/.test(r)) return { category: 'Spirit', subcategory: 'Bourbon' };
-  if (/\b(WHISKEY|WHSKY|WHISKY)\b/.test(r)) return { category: 'Spirit', subcategory: 'Whiskey' };
+  // Whiskey family — bourbon, scotch, rye, Canadian all fold under Whiskey.
+  if (/\b(BOURBON|SCOTCH|RYE|WHISKEY|WHSKY|WHISKY|CANADIAN)\b/.test(r))
+    return { category: 'Spirit', subcategory: 'Whiskey' };
   if (/\b(RUM)\b/.test(r)) return { category: 'Spirit', subcategory: 'Rum' };
   if (/\b(GIN)\b/.test(r)) return { category: 'Spirit', subcategory: 'Gin' };
   if (/\b(COGNAC|COGN|BRANDY)\b/.test(r)) return { category: 'Spirit', subcategory: 'Brandy' };
   if (/\b(SCHN|SCHNAPPS|LIQUEUR|LIQ)\b/.test(r)) return { category: 'Spirit', subcategory: 'Liqueur' };
-  if (/\b(SCOTCH)\b/.test(r)) return { category: 'Spirit', subcategory: 'Scotch' };
   if (/\b(MEZCAL)\b/.test(r)) return { category: 'Spirit', subcategory: 'Mezcal' };
-  if (/\b(CANADIAN)\b/.test(r)) return { category: 'Spirit', subcategory: 'Canadian Whisky' };
 
   // Wine
   if (/\b(PROSECCO|CHAMPAGNE|SPARKLING)\b/.test(r)) return { category: 'Wine', subcategory: 'Sparkling' };

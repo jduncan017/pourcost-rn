@@ -15,12 +15,9 @@ import { Ionicons } from '@expo/vector-icons';
 import Toggle from '@/src/components/ui/Toggle';
 import TextInput from '@/src/components/ui/TextInput';
 import Button from '@/src/components/ui/Button';
-import Card from '@/src/components/ui/Card';
 import MetricRow from '@/src/components/ui/MetricRow';
-import SectionDivider from '@/src/components/ui/SectionDivider';
 import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
 import IngredientInputs, {
   IngredientInputValues,
@@ -62,6 +59,7 @@ export default function IngredientFormScreen() {
   const [retailPriceText, setRetailPriceText] = useState(
     (params.retailPrice as string) || '8.00'
   );
+  const [abvText, setAbvText] = useState((params.abv as string) || '');
 
   // Shared input values
   const [inputValues, setInputValues] = useState<IngredientInputValues>(() => {
@@ -157,6 +155,7 @@ export default function IngredientFormScreen() {
 
     setIsSaving(true);
     try {
+      const abvValue = abvText.trim() === '' ? undefined : Number(abvText);
       const data = {
         name: sanitizeName(name),
         productSize: inputValues.productSize,
@@ -167,6 +166,7 @@ export default function IngredientFormScreen() {
         subType: SUBTYPES_BY_TYPE[inputValues.ingredientType]
           ? inputValues.subType || undefined
           : undefined,
+        abv: abvValue != null && !Number.isNaN(abvValue) ? abvValue : undefined,
         notForSale: !forSale,
         description: sanitizeDescription(description) || undefined,
       };
@@ -229,18 +229,8 @@ export default function IngredientFormScreen() {
           keyboardShouldPersistTaps="handled"
           pointerEvents={isSaving ? 'none' : 'auto'}
         >
-          <View className="p-4 pt-6 flex-col gap-6">
-            {/* Name & Description */}
-            <View
-              style={{
-                borderBottomWidth: 1,
-                borderBottomColor: colors.border,
-                paddingBottom: 4,
-              }}
-            >
-              <ScreenTitle title="NAME & DESCRIPTION" variant="group" />
-            </View>
-
+          <View className="px-6 pt-4 pb-6 flex-col gap-8">
+            {/* Identity — Name, Description, ABV, For Sale */}
             <View className="flex-col gap-5">
               <TextInput
                 label="Ingredient Name *"
@@ -255,6 +245,22 @@ export default function IngredientFormScreen() {
                 onChangeText={setDescription}
                 placeholder="Brief description..."
                 multiline
+              />
+
+              <TextInput
+                label="ABV %"
+                value={abvText}
+                onChangeText={(text) => {
+                  const cleaned = text.replace(/[^0-9.]/g, '');
+                  const parts = cleaned.split('.');
+                  const limited =
+                    parts.length > 2
+                      ? `${parts[0]}.${parts.slice(1).join('')}`
+                      : cleaned;
+                  setAbvText(limited);
+                }}
+                placeholder="Optional. e.g., 40"
+                keyboardType="decimal-pad"
               />
 
               <Toggle
@@ -272,36 +278,17 @@ export default function IngredientFormScreen() {
               />
             </View>
 
-            {/* Details */}
-            <View
-              style={{
-                borderBottomWidth: 1,
-                borderBottomColor: colors.border,
-                paddingBottom: 4,
-              }}
-            >
-              <ScreenTitle title="DETAILS" variant="group" />
-            </View>
-
+            {/* Details — type chips, subtype, product size, cost, pour size */}
             <IngredientInputs
               variant="form"
               values={{ ...inputValues, notForSale: !forSale }}
               onChange={handleInputChange}
               hideRetailPrice
+              noCard
             />
 
-            {/* Pricing & Cost Analysis */}
-            <View
-              style={{
-                borderBottomWidth: 1,
-                borderBottomColor: colors.border,
-                paddingBottom: 4,
-              }}
-            >
-              <ScreenTitle title="PRICING & COST ANALYSIS" variant="group" />
-            </View>
-
-            <Card displayClasses="flex flex-col gap-6" padding="large">
+            {/* Pricing — retail + cost analysis */}
+            <View className="flex-col gap-5">
               {forSale && (
                 <>
                   <TextInput
@@ -322,43 +309,38 @@ export default function IngredientFormScreen() {
                     label="Suggested Retail"
                     value={`$${suggestedRetail.toFixed(2)}`}
                   />
-                  <View style={{ height: 1, backgroundColor: colors.border }} />
-                </>
-              )}
-
-              {forSale && (
-                <>
                   <PourCostPerformanceBar
                     pourCostPercentage={pourCostPercentage}
                     noCard
                   />
-                  <View style={{ height: 1, backgroundColor: colors.border }} />
                 </>
               )}
 
-              <Text
-                className="text-lg mb-2"
-                style={{ color: colors.textSecondary, fontWeight: '500' }}
-              >
-                Cost Analysis
-              </Text>
+              <View className="flex-col gap-1">
+                <Text
+                  className="text-[11px] tracking-widest uppercase mb-2"
+                  style={{ color: colors.textTertiary, fontWeight: '600' }}
+                >
+                  Cost Analysis
+                </Text>
 
-              <MetricRow
-                label="Cost per Oz:"
-                value={`$${costPerOz.toFixed(3)}`}
-              />
-              <MetricRow
-                label={`Cost per ${pourLabel}:`}
-                value={formatCurrency(costPerPour)}
-              />
-
-              {forSale && (
                 <MetricRow
-                  label="Margin:"
-                  value={formatCurrency(pourCostMargin)}
+                  label="Cost / Oz:"
+                  value={`$${costPerOz.toFixed(3)}`}
                 />
-              )}
-            </Card>
+                <MetricRow
+                  label={`Cost / ${pourLabel}:`}
+                  value={formatCurrency(costPerPour)}
+                />
+
+                {forSale && (
+                  <MetricRow
+                    label="Margin:"
+                    value={formatCurrency(pourCostMargin)}
+                  />
+                )}
+              </View>
+            </View>
 
             {/* Save button */}
             <Button

@@ -7,13 +7,13 @@ import Animated, {
   LinearTransition,
 } from 'react-native-reanimated';
 import { useRouter, useNavigation, useLocalSearchParams, useFocusEffect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import SearchBar from '@/src/components/ui/SearchBar';
-import Card from '@/src/components/ui/Card';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
+import { ingredientTypeIcon } from '@/src/lib/type-icons';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { SavedIngredient, CocktailIngredient, fraction } from '@/src/types/models';
@@ -110,10 +110,17 @@ export default function IngredientSelectorScreen() {
       headerRight: () => (
         <Pressable
           onPress={handleFinishSelection}
-          className="px-4 py-1.5 rounded-lg"
-          style={{ backgroundColor: colors.go }}
+          // Match cocktail-form save pill so iOS 26 treats it as the button itself
+          style={{
+            backgroundColor: colors.go,
+            paddingHorizontal: 18,
+            paddingVertical: 8,
+            borderRadius: 999,
+            minHeight: 36,
+            justifyContent: 'center',
+          }}
         >
-          <Text style={{ color: palette.N1, fontWeight: '600', fontSize: 16 }}>Save</Text>
+          <Text style={{ color: palette.N1, fontWeight: '600', fontSize: 15 }}>Save</Text>
         </Pressable>
       ),
     });
@@ -241,54 +248,47 @@ export default function IngredientSelectorScreen() {
     [selectedIngredients]
   );
 
-  // Render an ingredient row — suggested flag enables purple accent styling
+  // Render an ingredient row — matches search page row visual with a typed
+  // icon, and an add-circle indicator on the right. Tapping the whole row adds.
   const renderIngredientRow = (ingredient: SavedIngredient, suggested = false, measure = false) => {
     const isFading = fadingIds.has(ingredient.id);
-    const addColor = suggested ? palette.P3 : colors.success;
+    const icon = ingredientTypeIcon(ingredient.type);
+    const addColor = colors.success;
 
     return (
       <FadingRow key={ingredient.id} isFading={isFading}>
-        <View
-          className="flex-row items-center justify-between p-4 bg-n1/50 dark:bg-p3/50 rounded-lg"
-          style={suggested ? { borderWidth: 1, borderColor: palette.P4 } : undefined}
+        <Pressable
+          onPress={() => handleSelectIngredient(ingredient)}
+          disabled={isFading}
+          className="flex-row items-center py-3"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           onLayout={measure && rowHeight === 0 ? (e) => setRowHeight(e.nativeEvent.layout.height) : undefined}
         >
-          <View className="flex-row items-center gap-3 flex-1">
-            <Ionicons name="flask" size={24} color={suggested ? palette.P3 : colors.accent} />
-            <View className="flex-1">
-              <View className="flex-row items-center">
-                <Text
-                  className="text-g4 dark:text-n1"
-                  style={{ fontWeight: '500' }}
-                >
-                  {ingredient.name}
-                </Text>
-                {suggested && (
-                  <Ionicons
-                    name="sparkles"
-                    size={10}
-                    color={palette.P3}
-                    style={{ marginLeft: 4, marginBottom: 6 }}
-                  />
-                )}
-              </View>
-              <Text className="text-sm text-g3 dark:text-g2">
-                {ingredient.type} • ${calculateCostPerOz(ingredient.productSize, ingredient.productCost).toFixed(2)}/oz
+          <MaterialCommunityIcons
+            name={icon.name}
+            size={22}
+            color={icon.color}
+            style={{ marginRight: 12 }}
+          />
+          <View className="flex-1">
+            <View className="flex-row items-center gap-1">
+              <Text
+                className="text-base"
+                style={{ color: colors.text, fontWeight: '500' }}
+                numberOfLines={1}
+              >
+                {ingredient.name}
               </Text>
+              {suggested && (
+                <Ionicons name="sparkles" size={10} color={palette.P2} />
+              )}
             </View>
+            <Text className="text-sm mt-0.5" style={{ color: colors.textTertiary }}>
+              {ingredient.type || 'Other'} • ${calculateCostPerOz(ingredient.productSize, ingredient.productCost).toFixed(2)}/oz
+            </Text>
           </View>
-          <Pressable
-            onPress={() => handleSelectIngredient(ingredient)}
-            disabled={isFading}
-            className="items-center justify-center"
-          >
-            <Ionicons
-              name="add-circle"
-              size={28}
-              color={addColor}
-            />
-          </Pressable>
-        </View>
+          <Ionicons name="add-circle" size={26} color={addColor} />
+        </Pressable>
       </FadingRow>
     );
   };
@@ -304,7 +304,7 @@ export default function IngredientSelectorScreen() {
           contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
           keyboardShouldPersistTaps="handled"
         >
-        <View className="p-4 flex-col gap-4">
+        <View className="px-6 pt-4 pb-6 flex-col gap-6">
           {/* Search Bar */}
           <SearchBar
             placeholder="Search ingredients..."
@@ -312,78 +312,89 @@ export default function IngredientSelectorScreen() {
             onChangeText={handleSearch}
           />
 
-          {/* Selected Ingredients Queue */}
-          <Card>
-            <View className="flex-row items-center justify-between mb-3">
-              <ScreenTitle
-                title={`Selected (${selectedIngredients.length})`}
-                variant="section"
-              />
-              {selectedIngredients.length > 0 && (
+          {/* Selected queue — only when there's something selected */}
+          {selectedIngredients.length > 0 && (
+            <View className="flex-col gap-3">
+              <View className="flex-row items-center justify-between">
+                <ScreenTitle
+                  title={`Selected (${selectedIngredients.length})`}
+                  variant="muted"
+                />
                 <Pressable
                   onPress={() => setSelectedIngredients([])}
-                  className="px-3 py-1.5 rounded-lg"
-                  style={{ backgroundColor: colors.error }}
+                  className="flex-row items-center gap-1 px-2 py-1"
+                  hitSlop={6}
                 >
-                  <Text className="font-medium text-sm" style={{ color: palette.N1 }}>Clear All</Text>
+                  <Ionicons name="trash-outline" size={14} color={colors.error} />
+                  <Text
+                    className="text-sm"
+                    style={{ color: colors.error, fontWeight: '600' }}
+                  >
+                    Clear
+                  </Text>
                 </Pressable>
-              )}
-            </View>
-            {selectedIngredients.length > 0 ? (
+              </View>
               <View className="flex-row flex-wrap gap-2">
                 {selectedIngredients.map((ingredient) => (
                   <View
                     key={ingredient.id}
-                    className="bg-p3/50 dark:bg-p4/50 px-3 py-2 rounded-full flex-row items-center gap-2"
+                    className="flex-row items-center gap-2 px-3 py-1.5 rounded-full"
+                    style={{
+                      backgroundColor: colors.inputBg,
+                      borderWidth: 1,
+                      borderColor: colors.borderSubtle,
+                    }}
                   >
                     <Text
-                      className="text-n1 text-sm font-medium"
+                      className="text-sm"
+                      style={{ color: colors.text, fontWeight: '500' }}
                       numberOfLines={1}
                     >
                       {ingredient.name}
                     </Text>
                     <Pressable
                       onPress={() => handleRemoveFromQueue(ingredient.id)}
-                      className="bg-g3 rounded-full w-5 h-5 items-center justify-center"
+                      hitSlop={6}
                     >
-                      <Ionicons name="close" size={12} color={palette.N1} />
+                      <Ionicons
+                        name="close-circle"
+                        size={16}
+                        color={colors.textTertiary}
+                      />
                     </Pressable>
                   </View>
                 ))}
               </View>
-            ) : (
-              <Text className="text-g3 dark:text-g2 text-sm text-center py-4">
-                No ingredients selected yet
-              </Text>
-            )}
-          </Card>
+            </View>
+          )}
 
           {/* Search Results or Suggested */}
           {hasSearched ? (
-            <Card>
+            <View className="flex-col">
               <ScreenTitle
                 title={`Search Results (${searchResults.filter(i => !isIngredientSelected(i.id) || fadingIds.has(i.id)).length})`}
-                variant="section"
-                className="mb-3"
+                variant="muted"
+                className="mb-1"
               />
 
               {searchResults.filter(i => !isIngredientSelected(i.id) || fadingIds.has(i.id)).length === 0 ? (
                 <View className="py-8 items-center">
-                  <Ionicons name="search" size={48} color={colors.textTertiary} />
+                  <Ionicons name="search" size={40} color={colors.textTertiary} />
                   <Text
-                    className="text-g3 dark:text-n1 text-center mt-3"
-                    style={{ fontWeight: '500' }}
+                    className="text-center mt-3"
+                    style={{ color: colors.text, fontWeight: '500' }}
                   >
                     No ingredients found
                   </Text>
                   <Text
-                    className="text-sm text-g3 dark:text-n1 text-center mt-1"
+                    className="text-sm text-center mt-1"
+                    style={{ color: colors.textTertiary }}
                   >
                     Try a different search term
                   </Text>
                 </View>
               ) : (
-                <Animated.View className="flex flex-col gap-2" layout={LinearTransition.duration(300)}>
+                <Animated.View layout={LinearTransition.duration(300)}>
                   {searchResults
                     .filter(i => !isIngredientSelected(i.id) || fadingIds.has(i.id))
                     .map((ingredient, index) => {
@@ -392,29 +403,28 @@ export default function IngredientSelectorScreen() {
                     })}
                 </Animated.View>
               )}
-            </Card>
+            </View>
           ) : (
-            <>
-              {nonFadingCount > 0 && (
-                <Card>
-                  <View className="flex-row items-center gap-2 mb-3">
-                    <Ionicons name="sparkles" size={14} color={palette.P3} />
-                    <ScreenTitle
-                      title="Suggested"
-                      variant="section"
-                    />
-                  </View>
+            nonFadingCount > 0 && (
+              <View className="flex-col">
+                <View className="flex-row items-center gap-1.5 mb-1">
+                  <Ionicons name="sparkles" size={12} color={palette.P2} />
+                  <ScreenTitle
+                    title="Suggested"
+                    variant="muted"
+                    style={{ color: palette.P2 }}
+                  />
+                </View>
 
-                  <View style={clippedHeight ? { maxHeight: clippedHeight, overflow: 'hidden' } : undefined}>
-                    <Animated.View className="flex flex-col gap-2" layout={LinearTransition.duration(300)}>
-                      {suggestedIngredients.map((item, index) =>
-                        renderIngredientRow(item, true, index === 0)
-                      )}
-                    </Animated.View>
-                  </View>
-                </Card>
-              )}
-            </>
+                <View style={clippedHeight ? { maxHeight: clippedHeight, overflow: 'hidden' } : undefined}>
+                  <Animated.View layout={LinearTransition.duration(300)}>
+                    {suggestedIngredients.map((item, index) =>
+                      renderIngredientRow(item, true, index === 0)
+                    )}
+                  </Animated.View>
+                </View>
+              </View>
+            )
           )}
 
           {/* Create New Ingredient */}

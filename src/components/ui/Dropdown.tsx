@@ -48,11 +48,14 @@ export default function Dropdown<T = any>({
   return (
     <View className={`${className}`}>
       {/* Label */}
-      <View className="flex-row justify-between items-center mb-3">
-        <Text className="text-lg" style={{ color: colors.textSecondary, fontWeight: '500' }}>
+      {label ? (
+        <Text
+          className="text-[11px] tracking-widest uppercase mb-2"
+          style={{ color: colors.textTertiary, fontWeight: '600' }}
+        >
           {label}
         </Text>
-      </View>
+      ) : null}
 
       {/* Trigger Button */}
       <Pressable

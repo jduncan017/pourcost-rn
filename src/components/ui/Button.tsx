@@ -243,8 +243,8 @@ export default function Button({
           size={getIconSize()}
           color={getIconColor()}
           style={{
-            marginRight: iconPosition === 'left' ? 8 : 0,
-            marginLeft: iconPosition === 'right' ? 8 : 0,
+            marginRight: iconPosition === 'left' ? 4 : 0,
+            marginLeft: iconPosition === 'right' ? 4 : 0,
           }}
         />
       );

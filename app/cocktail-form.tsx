@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import MetricRow from '@/src/components/ui/MetricRow';
-import SectionDivider from '@/src/components/ui/SectionDivider';
 import Button from '@/src/components/ui/Button';
 import ChipSelector from '@/src/components/ui/ChipSelector';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,7 +13,6 @@ import EmptyState from '@/src/components/EmptyState';
 import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
 import ActionSheet from '@/src/components/ui/ActionSheet';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { sanitizeName, sanitizeDescription } from '@/src/lib/sanitize';
 import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
@@ -25,7 +23,6 @@ import {
   COCKTAIL_CATEGORIES,
 } from '@/src/constants/appConstants';
 import { CocktailIngredient, CocktailCategory, Volume, volumeLabel } from '@/src/types/models';
-import Card from '@/src/components/ui/Card';
 import { calculateCostPerPour, calculateSuggestedPrice, formatCurrency } from '@/src/services/calculation-service';
 import { FeedbackService } from '@/src/services/feedback-service';
 
@@ -60,9 +57,6 @@ export default function CocktailFormScreen() {
   const [retailPrice, setRetailPrice] = useState(
     (params.retailPrice as string) || defaultRetailPrice.toFixed(2)
   );
-  const [preparationNotes, setPreparationNotes] = useState(
-    (params.preparationNotes as string) || ''
-  );
   const [ingredients, setIngredients] = useState<CocktailIngredient[]>([]);
 
   // Load existing ingredients when editing
@@ -75,13 +69,21 @@ export default function CocktailFormScreen() {
             : params.ingredients;
 
         if (Array.isArray(existingIngredients)) {
+          // Params are JSON-decoded so every field is typed optional. Fill sane
+          // fallbacks so the resulting array satisfies CocktailIngredient[].
+          const DEFAULT_SIZE: Volume = { kind: 'milliliters', ml: 750 };
+          const DEFAULT_POUR: Volume = {
+            kind: 'fractionalOunces',
+            numerator: 3,
+            denominator: 2,
+          };
           const formattedIngredients: CocktailIngredient[] = existingIngredients.map(
             (ingredient: Partial<CocktailIngredient> & { id?: string }) => ({
               ingredientId: ingredient.ingredientId || ingredient.id || '',
-              name: ingredient.name,
-              productSize: ingredient.productSize,
+              name: ingredient.name ?? '',
+              productSize: ingredient.productSize ?? DEFAULT_SIZE,
               productCost: ingredient.productCost || 0,
-              pourSize: ingredient.pourSize,
+              pourSize: ingredient.pourSize ?? DEFAULT_POUR,
               cost: ingredient.cost || 0,
             })
           );
@@ -149,11 +151,10 @@ export default function CocktailFormScreen() {
   };
 
   // Update ingredient pour size (in ounces)
-  const updateIngredientAmount = (ingredientId: string, newOzAmount: number) => {
+  const updateIngredientAmount = (ingredientId: string, newPourSize: Volume) => {
     setIngredients(
       ingredients.map((ing) => {
         if (ing.ingredientId === ingredientId) {
-          const newPourSize: Volume = { kind: 'decimalOunces', ounces: newOzAmount };
           const newCost = calculateCostPerPour(ing.productSize, ing.productCost, newPourSize);
           return { ...ing, pourSize: newPourSize, cost: newCost };
         }
@@ -255,14 +256,11 @@ export default function CocktailFormScreen() {
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
         pointerEvents={isSaving ? 'none' : 'auto'}
       >
-        <View className="p-4 pt-6 flex-col gap-6">
-          {/* Basic Information */}
-          <View className="flex-col gap-4">
+        <View className="px-6 pt-4 pb-6 flex-col gap-8">
+          {/* Identity — Image + Name + Category + Description + Notes */}
+          <View className="flex-col gap-5">
             <View className="flex flex-row gap-4">
-              {/* Image Box */}
               <ImagePlaceholder size="small" />
-
-              {/* Cocktail Name */}
               <View className="flex-1 justify-center">
                 <TextInput
                   label="Cocktail Name *"
@@ -273,7 +271,6 @@ export default function CocktailFormScreen() {
               </View>
             </View>
 
-            {/* Category */}
             <ChipSelector
               label="Category"
               options={COCKTAIL_CATEGORIES.filter((cat) => cat !== 'All')}
@@ -281,25 +278,47 @@ export default function CocktailFormScreen() {
               onSelectionChange={(cat) => setCategory(cat as CocktailCategory)}
               variant="filter"
             />
-          </View>
 
-          {/* Divider */}
-          <SectionDivider />
+            <TextInput
+              label="Description"
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Brief description of the cocktail"
+              multiline
+            />
+
+            <TextInput
+              label="Preparation Notes"
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="e.g., Shake well with ice, strain into a chilled glass"
+              multiline
+            />
+          </View>
 
           {/* Ingredients */}
           <View className="flex-col gap-3">
             <View className="flex-row items-center justify-between">
-              <ScreenTitle
-                title={`Ingredients (${ingredients.length})`}
-                variant="group"
-              />
+              <Text
+                className="text-[11px] tracking-widest uppercase"
+                style={{ color: colors.textTertiary, fontWeight: '600' }}
+              >
+                Ingredients ({ingredients.length})
+              </Text>
               <Pressable
-                onPress={() => router.push({
-                  pathname: '/ingredient-selector',
-                  params: ingredients.length > 0
-                    ? { existingIngredientIds: JSON.stringify(ingredients.map(i => i.ingredientId)) }
-                    : undefined,
-                })}
+                onPress={() =>
+                  router.push({
+                    pathname: '/ingredient-selector',
+                    params:
+                      ingredients.length > 0
+                        ? {
+                            existingIngredientIds: JSON.stringify(
+                              ingredients.map((i) => i.ingredientId)
+                            ),
+                          }
+                        : undefined,
+                  })
+                }
                 className="flex-row items-center gap-2 px-3 py-2 bg-p1 rounded-lg"
               >
                 <Ionicons
@@ -307,7 +326,10 @@ export default function CocktailFormScreen() {
                   size={16}
                   color={palette.N1}
                 />
-                <Text className="text-sm font-medium" style={{ color: palette.N1 }}>
+                <Text
+                  className="text-sm font-medium"
+                  style={{ color: palette.N1 }}
+                >
                   {ingredients.length > 0 ? 'Edit' : 'Add'}
                 </Text>
               </Pressable>
@@ -333,13 +355,8 @@ export default function CocktailFormScreen() {
             )}
           </View>
 
-          {/* Divider */}
-          <SectionDivider />
-
-          {/* Pricing */}
-          <View className="flex-col gap-3">
-            <ScreenTitle title="Pricing" variant="group" className="mb-1" />
-
+          {/* Pricing + Analysis */}
+          <View className="flex-col gap-5">
             <TextInput
               label="Retail Price *"
               value={retailPrice}
@@ -349,14 +366,12 @@ export default function CocktailFormScreen() {
               prefix="$"
             />
 
-            <AiSuggestionRow label="Suggested Price" value={formatCurrency(calculateSuggestedPrice(totalCost, pourCostGoal / 100))} />
-          </View>
-
-          <SectionDivider />
-
-          {/* Cost Analysis */}
-          <View className="flex-col gap-3">
-            <ScreenTitle title="Cost Analysis" variant="group" className="mb-1" />
+            <AiSuggestionRow
+              label="Suggested Price"
+              value={formatCurrency(
+                calculateSuggestedPrice(totalCost, pourCostGoal / 100)
+              )}
+            />
 
             <View className="flex-col">
               {[
@@ -366,41 +381,32 @@ export default function CocktailFormScreen() {
                 <View
                   key={row.label}
                   className="flex-row justify-between items-center py-3"
-                  style={index < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: colors.borderSubtle } : undefined}
+                  style={
+                    index < arr.length - 1
+                      ? {
+                          borderBottomWidth: 1,
+                          borderBottomColor: colors.borderSubtle,
+                        }
+                      : undefined
+                  }
                 >
-                  <Text className="text-base" style={{ color: colors.textSecondary }}>{row.label}</Text>
-                  <Text className="text-base" style={{ color: colors.text, fontWeight: '500' }}>{row.value}</Text>
+                  <Text
+                    className="text-base"
+                    style={{ color: colors.textSecondary }}
+                  >
+                    {row.label}
+                  </Text>
+                  <Text
+                    className="text-base"
+                    style={{ color: colors.text, fontWeight: '500' }}
+                  >
+                    {row.value}
+                  </Text>
                 </View>
               ))}
             </View>
 
-            <PourCostPerformanceBar
-              pourCostPercentage={pourCostPercentage}
-            />
-          </View>
-
-          {/* Divider */}
-          <SectionDivider />
-
-          {/* Details */}
-          <View className="flex-col gap-4">
-            <ScreenTitle title="Details" variant="group" />
-
-            <TextInput
-              label="Description"
-              value={description}
-              onChangeText={setDescription}
-              placeholder="Brief description of the cocktail"
-              multiline
-            />
-
-            <TextInput
-              label="Preparation Notes"
-              value={preparationNotes}
-              onChangeText={setPreparationNotes}
-              placeholder="e.g., Shake well with ice, strain into a chilled glass"
-              multiline
-            />
+            <PourCostPerformanceBar pourCostPercentage={pourCostPercentage} noCard />
           </View>
 
           {/* Delete button at bottom (edit mode only) */}
@@ -410,13 +416,17 @@ export default function CocktailFormScreen() {
               className="flex-row items-center justify-center gap-2 py-3"
             >
               <Ionicons name="trash-outline" size={18} color={colors.error} />
-              <Text style={{ color: colors.error, fontWeight: '500', fontSize: 16 }}>
+              <Text
+                style={{
+                  color: colors.error,
+                  fontWeight: '500',
+                  fontSize: 16,
+                }}
+              >
                 Delete Cocktail
               </Text>
             </Pressable>
           )}
-
-          <View className="h-8" />
         </View>
       </ScrollView>
     </GradientBackground>

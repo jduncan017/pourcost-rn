@@ -96,6 +96,7 @@ export interface SavedIngredient {
   pourSize?: Volume;       // Per-ingredient pour size (overrides global default)
   type?: string;
   subType?: string;        // Spirit subcategory (Vodka, Whiskey, etc.)
+  abv?: number;            // Alcohol by volume as % (e.g. 40 for 40% ABV). Optional.
   notForSale?: boolean;
   description?: string;
   createdAt: Date;

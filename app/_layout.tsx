@@ -211,6 +211,10 @@ function RootLayoutNav() {
             <Stack.Screen name="container-sizes" options={{ title: 'Container Sizes' }} />
             <Stack.Screen name="settings-account" options={{ title: 'Account' }} />
             <Stack.Screen name="settings-calculations" options={{ title: 'Calculations' }} />
+            <Stack.Screen name="settings-glossary" options={{ title: 'Glossary' }} />
+            <Stack.Screen name="settings-pro-tips" options={{ title: 'Pro Tips' }} />
+            <Stack.Screen name="settings-pro-tip" options={{ title: 'Pro Tip' }} />
+            <Stack.Screen name="settings-conversions" options={{ title: 'Conversions' }} />
             <Stack.Screen name="change-password" options={{ title: 'Change Password' }} />
             <Stack.Screen name="invoice-review" options={{ title: 'Review Invoice' }} />
             <Stack.Screen name="invoice-line-edit" options={{ title: 'Edit Line Item' }} />

@@ -17,5 +17,6 @@ export function buildIngredientEditParams(ingredient: SavedIngredient): Record<s
     pourSize: ingredient.pourSize ? JSON.stringify(ingredient.pourSize) : '',
     notForSale: ingredient.notForSale ? 'true' : 'false',
     description: ingredient.description ?? '',
+    abv: ingredient.abv != null ? ingredient.abv.toString() : '',
   };
 }

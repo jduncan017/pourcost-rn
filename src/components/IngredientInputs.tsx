@@ -206,7 +206,7 @@ export default function IngredientInputs({
           selectedOption={subType}
           onSelectionChange={handleSubTypeChange}
           variant="compact"
-        />
+          />
       )}
 
       {isGarnish ? (
@@ -216,7 +216,7 @@ export default function IngredientInputs({
             <View className="flex-1">
               <TextInput
                 label="Product Size"
-                value={garnishAmountText}
+                        value={garnishAmountText}
                 onChangeText={(text) => {
                   if (text === '' || /^\d*\.?\d*$/.test(text)) {
                     setGarnishAmountText(text);
@@ -237,8 +237,8 @@ export default function IngredientInputs({
           </View>
 
           <TextInput
-            label={`Cost per ${garnishProductLabel}`}
-            value={productCostText}
+            label={`Cost / ${garnishProductLabel}`}
+                value={productCostText}
             onChangeText={(text) => {
               if (text === '' || /^\d*\.?\d*$/.test(text)) {
                 setProductCostText(text);
@@ -252,7 +252,7 @@ export default function IngredientInputs({
 
           <TextInput
             label={`Serving Size (${garnishUnitLabel})`}
-            value={servingAmountText}
+                value={servingAmountText}
             onChangeText={(text) => {
               if (text === '' || /^\d*\.?\d*$/.test(text)) {
                 setServingAmountText(text);
@@ -271,7 +271,7 @@ export default function IngredientInputs({
             onValueChange={handleProductSizeChange}
             options={productSizeOptions}
             label={ingredientType === 'Prepped' ? 'Batch Yield' : 'Product Size'}
-            placeholder="Select size"
+                placeholder="Select size"
             sheetHeaderRight={variant === 'form' ? (closeSheet) => (
               <Pressable
                 onPress={() => {
@@ -289,8 +289,8 @@ export default function IngredientInputs({
           <TextInput
             label={ingredientType === 'Prepped'
               ? `Batch Cost (${volumeLabel(productSize)})`
-              : `Cost per ${volumeLabel(productSize)}`}
-            value={productCostText}
+              : `Cost / ${volumeLabel(productSize)}`}
+                value={productCostText}
             onChangeText={(text) => {
               if (text === '' || /^\d*\.?\d*$/.test(text)) {
                 setProductCostText(text);
@@ -305,7 +305,7 @@ export default function IngredientInputs({
           {/* Pour Size chips */}
           <ChipSelector
             label="Pour Size"
-            options={pourChips.map(c => c.label)}
+                options={pourChips.map(c => c.label)}
             selectedOption={selectedPourChip}
             onSelectionChange={(label) => {
               const chip = pourChips.find(c => c.label === label);
@@ -337,7 +337,7 @@ export default function IngredientInputs({
           {variant === 'form' && !notForSale && !hideRetailPrice && (
             <TextInput
               label="Retail Price"
-              value={retailPriceText}
+                    value={retailPriceText}
               onChangeText={(text) => {
                 if (text === '' || /^\d*\.?\d*$/.test(text)) {
                   setRetailPriceText(text);

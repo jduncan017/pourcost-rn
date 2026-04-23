@@ -139,7 +139,12 @@ export default function ChipSelector({
   return (
     <View className={className}>
       {showLabel && label && (
-        <Text className="text-lg mb-2" style={{ color: colors.textSecondary, fontWeight: '500' }}>{label}</Text>
+        <Text
+          className="text-[11px] tracking-widest uppercase mb-2"
+          style={{ color: colors.textTertiary, fontWeight: '600' }}
+        >
+          {label}
+        </Text>
       )}
       {renderChips()}
       {multiple && selectedOptions.length > 0 && (

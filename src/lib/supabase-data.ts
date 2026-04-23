@@ -110,6 +110,7 @@ interface IngredientRow {
   pour_size: Volume | null;
   not_for_sale: boolean;
   description: string | null;
+  abv: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -154,6 +155,7 @@ function rowToIngredient(row: IngredientRow): SavedIngredient {
     pourSize: row.pour_size ?? undefined,
     type: row.type ?? undefined,
     subType: row.sub_type ?? undefined,
+    abv: row.abv != null ? Number(row.abv) : undefined,
     notForSale: row.not_for_sale,
     description: row.description ?? undefined,
     createdAt: new Date(row.created_at),
@@ -223,6 +225,7 @@ export async function insertIngredient(
       pour_size: ingredient.pourSize ?? null,
       type: ingredient.type ?? null,
       sub_type: ingredient.subType ?? null,
+      abv: ingredient.abv ?? null,
       not_for_sale: ingredient.notForSale ?? false,
       description: ingredient.description ?? null,
     })
@@ -245,6 +248,7 @@ export async function updateIngredientById(
   if (updates.pourSize !== undefined) row.pour_size = updates.pourSize;
   if (updates.type !== undefined) row.type = updates.type;
   if (updates.subType !== undefined) row.sub_type = updates.subType;
+  if (updates.abv !== undefined) row.abv = updates.abv ?? null;
   if (updates.notForSale !== undefined) row.not_for_sale = updates.notForSale;
   if (updates.description !== undefined) row.description = updates.description;
 

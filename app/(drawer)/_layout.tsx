@@ -23,7 +23,7 @@ function HamburgerIcon() {
   return (
     <Pressable
       onPress={() => { HapticService.buttonPress(); navigation.dispatch(DrawerActions.toggleDrawer()); }}
-      className="p-2 rounded-lg"
+      className="p-2 ml-2 rounded-lg"
     >
       <Ionicons name="menu" size={24} color={colors.text} />
     </Pressable>
@@ -70,7 +70,7 @@ function SearchIcon() {
   return (
     <Pressable
       onPress={() => { HapticService.buttonPress(); router.push('/search'); }}
-      className="p-2 rounded-lg"
+      className="p-2 mr-2 rounded-lg"
     >
       <Ionicons name="search" size={20} color={colors.text} />
     </Pressable>
@@ -151,10 +151,20 @@ export default function DrawerLayout() {
         <Drawer.Screen
           name="calculator"
           options={{
-            title: 'Quick Calc',
-            drawerLabel: 'Quick Calc',
+            title: 'Quick Calculator',
+            drawerLabel: 'Quick Calculator',
             drawerIcon: ({ color, size }) => (
               <Ionicons name="calculator" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="batch"
+          options={{
+            title: 'Batch',
+            drawerLabel: 'Batch',
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="layers-outline" size={size} color={color} />
             ),
           }}
         />

@@ -302,7 +302,7 @@ export default function InvoiceIngredientSetupScreen() {
               {item.packSize > 1 && (
                 <MetricRow label="Pack Size:" value={`${item.packSize}-pack case`} />
               )}
-              <MetricRow label="Cost per Bottle:" value={formatCurrency(item.perBottlePrice)} />
+              <MetricRow label="Cost / Bottle:" value={formatCurrency(item.perBottlePrice)} />
               {item.sku && (
                 <MetricRow label="SKU:" value={item.sku} />
               )}
@@ -345,8 +345,8 @@ export default function InvoiceIngredientSetupScreen() {
                 Cost Analysis
               </Text>
 
-              <MetricRow label="Cost per Oz:" value={`$${costPerOz.toFixed(3)}`} />
-              <MetricRow label="Cost per Pour:" value={formatCurrency(costPerPour)} />
+              <MetricRow label="Cost / Oz:" value={`$${costPerOz.toFixed(3)}`} />
+              <MetricRow label="Cost / Pour:" value={formatCurrency(costPerPour)} />
               <MetricRow label="Margin:" value={formatCurrency(pourCostMargin)} />
             </Card>
           </View>

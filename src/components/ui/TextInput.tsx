@@ -40,8 +40,8 @@ export default function TextInput({
     <View className={containerClassName}>
       {label && (
         <Text
-          className="text-lg mb-2"
-          style={{ color: colors.textSecondary, fontWeight: '500' }}
+          className="text-[11px] tracking-widest uppercase mb-2"
+          style={{ color: colors.textTertiary, fontWeight: '600' }}
         >
           {label}
           {required && <Text style={{ color: colors.error }}> *</Text>}
