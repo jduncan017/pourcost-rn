@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useMemo } from 'react';
-import { ColorSchemeName, useColorScheme as useRNColorScheme } from 'react-native';
+import { createContext, useContext, useEffect } from 'react';
+import { ColorSchemeName } from 'react-native';
 import { useColorScheme as useNativewindColorScheme } from 'nativewind';
 import { useAppStore, ThemeMode } from '@/src/stores/app-store';
 
@@ -206,12 +206,9 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { themeMode, setThemeMode } = useAppStore();
   const { colorScheme, setColorScheme } = useNativewindColorScheme();
-  const systemColorScheme = useRNColorScheme();
 
-  const isDarkMode = useMemo(() => {
-    if (themeMode === 'auto') return systemColorScheme === 'dark';
-    return themeMode === 'dark';
-  }, [themeMode, systemColorScheme]);
+  // MVP: dark-only. Ignore themeMode/system until toggle re-enabled.
+  const isDarkMode = true;
 
   useEffect(() => {
     setColorScheme(isDarkMode ? 'dark' : 'light');

@@ -21,10 +21,11 @@ export default function SettingsScreen() {
   const { user, isEmailVerified } = useAuth();
   const { saveProfile } = useAppStore();
 
-  const [showThemePicker, setShowThemePicker] = useState(false);
   const [sampleDataPresent, setSampleDataPresent] = useState(false);
   const [clearingSample, setClearingSample] = useState(false);
-  const themeLabel = themeMode === 'dark' ? 'Dark' : themeMode === 'light' ? 'Light' : 'Auto';
+  // MVP: theme picker hidden — re-enable by restoring commented Appearance section + picker sheet.
+  // const [showThemePicker, setShowThemePicker] = useState(false);
+  // const themeLabel = themeMode === 'dark' ? 'Dark' : themeMode === 'light' ? 'Light' : 'Auto';
 
   // Re-check sample-data status on mount + each time the screen regains focus.
   // Once cleared, `hasSampleData` returns false and the card disappears permanently.
@@ -135,7 +136,8 @@ export default function SettingsScreen() {
 
           <SectionDivider />
 
-          {/* Appearance */}
+          {/* Appearance — hidden for MVP (dark-only). Re-enable by uncommenting. */}
+          {/*
           <View className="flex-col gap-3">
             <ScreenTitle variant="group" title="Appearance" />
             <SettingsCard
@@ -149,6 +151,7 @@ export default function SettingsScreen() {
           </View>
 
           <SectionDivider />
+          */}
 
           {/* Support */}
           <View className="flex-col gap-3">
@@ -192,6 +195,7 @@ export default function SettingsScreen() {
         </View>
       </ScrollView>
 
+      {/* MVP: theme picker hidden.
       {showThemePicker && (
         <PickerSheet
           title="Theme"
@@ -205,6 +209,7 @@ export default function SettingsScreen() {
           onClose={() => setShowThemePicker(false)}
         />
       )}
+      */}
     </GradientBackground>
   );
 }
