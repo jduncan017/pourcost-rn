@@ -1,4 +1,5 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,21 +7,35 @@ import GradientBackground from '@/src/components/ui/GradientBackground';
 import { palette } from '@/src/contexts/ThemeContext';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useAppStore } from '@/src/stores/app-store';
+import { seedSampleBar } from '@/src/lib/seed-sample-bar';
+import { FeedbackService } from '@/src/services/feedback-service';
 
 export default function OnboardingComplete() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { clearNewSignUp } = useAuth();
   const saveProfile = useAppStore((s) => s.saveProfile);
+  const [busy, setBusy] = useState(false);
 
-  const handleFinish = async (goToIngredientForm = false) => {
-    await saveProfile();
-    clearNewSignUp();
-    if (goToIngredientForm) {
-      router.replace('/(drawer)/ingredients' as any);
-      setTimeout(() => router.push('/ingredient-form' as any), 100);
-    } else {
+  const handleFinish = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await saveProfile();
+      try {
+        await seedSampleBar();
+      } catch (err) {
+        // Non-fatal — user still lands in the app, just with an empty bar.
+        const msg = err instanceof Error ? err.message : 'Could not load sample bar';
+        FeedbackService.showError(
+          'Sample Bar Unavailable',
+          `${msg}. Starting you with an empty bar — you can add ingredients manually.`
+        );
+      }
+      clearNewSignUp();
       router.replace('/(drawer)/cocktails' as any);
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -28,53 +43,97 @@ export default function OnboardingComplete() {
     <GradientBackground>
       <View
         className="flex-1 justify-center px-6"
-        style={{ paddingTop: insets.top, paddingBottom: insets.bottom + 28 }}
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom + 48 }}
       >
         <View className="items-center flex-1 justify-center">
-          {/* Success Icon */}
           <View
             style={{
-              backgroundColor: palette.Y4 + '15',
-              borderRadius: 40,
+              backgroundColor: palette.G3 + '15',
+              borderRadius: 999,
               padding: 20,
               marginBottom: 24,
             }}
           >
-            <Ionicons name="checkmark-circle" size={56} color={palette.Y4} />
+            <Ionicons name="checkmark-circle" size={56} color={palette.G3} />
           </View>
 
           <Text
             className="text-2xl text-center"
-            style={{ color: palette.Y4, fontWeight: '700' }}
+            style={{ color: palette.N2, fontWeight: '700' }}
           >
             You're All Set!
           </Text>
           <Text
-            className="text-lg text-center mt-3 leading-7 px-4"
+            className="text-base text-center mt-3 leading-6 px-4"
             style={{ color: palette.N3 }}
           >
-            Start by adding your first ingredient — that's the foundation for building accurate cocktail costs.
+            So you can see PourCost in action right away, we'll pre-load your bar with common ingredients and classic cocktails.
           </Text>
-        </View>
 
-        <View className="flex-col gap-4">
-          <Pressable
-            onPress={() => handleFinish(true)}
-            style={styles.primaryButton}
+          {/* Sample bar info card */}
+          <View
+            className="self-stretch flex-col gap-3 mt-8 px-5 py-4 rounded-2xl"
+            style={{
+              backgroundColor: palette.P3 + '12',
+              borderWidth: 1,
+              borderColor: palette.P3 + '40',
+            }}
           >
-            <View className="flex-row items-center gap-2">
-              <Ionicons name="add-circle-outline" size={20} color={palette.N1} />
-              <Text style={styles.primaryButtonText}>Add First Ingredient</Text>
+            <View className="flex-row items-start gap-3">
+              <Ionicons name="sparkles-outline" size={22} color={palette.P3} style={{ marginTop: 2 }} />
+              <View className="flex-1">
+                <Text style={{ color: palette.P3, fontWeight: '600', fontSize: 14 }}>
+                  Sample bar included
+                </Text>
+                <View className="flex-col gap-1 mt-2">
+                  <View className="flex-row items-start gap-2">
+                    <Text style={{ color: palette.P3, fontSize: 13, lineHeight: 18 }}>•</Text>
+                    <Text style={{ color: palette.N3, fontSize: 13, lineHeight: 18, flex: 1 }}>
+                      14 ingredients (Bulleit, Tanqueray, Don Julio…)
+                    </Text>
+                  </View>
+                  <View className="flex-row items-start gap-2">
+                    <Text style={{ color: palette.P3, fontSize: 13, lineHeight: 18 }}>•</Text>
+                    <Text style={{ color: palette.N3, fontSize: 13, lineHeight: 18, flex: 1 }}>
+                      5 cocktails (Old Fashioned, Margarita, Negroni…)
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
-          </Pressable>
+          </View>
 
-          <Pressable
-            onPress={() => handleFinish(false)}
-            style={styles.outlineButton}
+          {/* Edit / clear note */}
+          <View
+            className="self-stretch flex-row items-start gap-3 mt-3 px-5 py-3 rounded-2xl"
+            style={{
+              backgroundColor: palette.G3 + '12',
+              borderWidth: 1,
+              borderColor: palette.G3 + '40',
+            }}
           >
-            <Text style={styles.outlineButtonText}>I'll explore on my own</Text>
-          </Pressable>
+            <Ionicons name="create-outline" size={18} color={palette.G3} style={{ marginTop: 1 }} />
+            <Text className="flex-1" style={{ color: palette.N2, fontSize: 13, lineHeight: 18 }}>
+              Edit them freely. Clear the sample bar anytime from{' '}
+              <Text style={{ color: palette.G3, fontWeight: '600' }}>Settings → Getting Started</Text>.
+            </Text>
+          </View>
         </View>
+
+        <Pressable
+          onPress={handleFinish}
+          disabled={busy}
+          style={[styles.primaryButton, busy && styles.disabled]}
+        >
+          {busy ? (
+            <ActivityIndicator color={palette.N1} />
+          ) : (
+            <View className="flex-row items-center gap-2">
+              <Text style={styles.primaryButtonText}>Start Using PourCost</Text>
+              <Ionicons name="arrow-forward" size={18} color={palette.N1} />
+            </View>
+          )}
+        </Pressable>
       </View>
     </GradientBackground>
   );
@@ -92,16 +151,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  outlineButton: {
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    paddingVertical: 16,
-    borderRadius: 999,
-    alignItems: 'center',
-  },
-  outlineButtonText: {
-    color: palette.N1,
-    fontSize: 16,
-    fontWeight: '500',
+  disabled: {
+    opacity: 0.5,
   },
 });

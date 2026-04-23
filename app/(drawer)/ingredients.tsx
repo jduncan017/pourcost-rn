@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '@/src/stores/app-store';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import IngredientListItem from '@/src/components/IngredientListItem';
@@ -226,16 +227,28 @@ export default function IngredientsScreen() {
                 onAction={handleAddIngredient}
               />
             ) : (
-              filteredIngredients.map((ingredient) => (
-                <IngredientListItem
-                  key={ingredient.id}
-                  ingredient={ingredient}
-                  sortBy={sortBy}
-                  onPress={() => handleIngredientPress(ingredient)}
-                  onEdit={() => handleEditIngredient(ingredient)}
-                  onDelete={() => handleDeleteIngredient(ingredient)}
-                />
-              ))
+              <>
+                <View className="flex-row justify-between items-center" style={{ opacity: 0.45 }}>
+                  <View className="flex-row items-center gap-1">
+                    <Ionicons name="arrow-back" size={11} color={colors.textSecondary} />
+                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>Swipe left to delete</Text>
+                  </View>
+                  <View className="flex-row items-center gap-1">
+                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>Swipe right to edit</Text>
+                    <Ionicons name="arrow-forward" size={11} color={colors.textSecondary} />
+                  </View>
+                </View>
+                {filteredIngredients.map((ingredient) => (
+                  <IngredientListItem
+                    key={ingredient.id}
+                    ingredient={ingredient}
+                    sortBy={sortBy}
+                    onPress={() => handleIngredientPress(ingredient)}
+                    onEdit={() => handleEditIngredient(ingredient)}
+                    onDelete={() => handleDeleteIngredient(ingredient)}
+                  />
+                ))}
+              </>
             )}
           </View>
         </View>

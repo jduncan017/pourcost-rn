@@ -1,25 +1,16 @@
 import { useState, useMemo } from 'react';
-import { View, Text, Image, Pressable, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import TextInput from '@/src/components/ui/TextInput';
+import AuthHeader from '@/src/components/ui/AuthHeader';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { FeedbackService } from '@/src/services/feedback-service';
+import { HapticService } from '@/src/services/haptic-service';
 import { palette } from '@/src/contexts/ThemeContext';
-
-const PASSWORD_RULES = [
-  { label: '8+ characters', test: (pw: string) => pw.length >= 8 },
-  { label: 'Uppercase letter', test: (pw: string) => /[A-Z]/.test(pw) },
-  { label: 'Number', test: (pw: string) => /[0-9]/.test(pw) },
-  { label: 'Symbol', test: (pw: string) => /[^A-Za-z0-9]/.test(pw) },
-  {
-    label: 'Passwords match',
-    test: (_pw: string, confirm: string, pw: string) =>
-      pw.length > 0 && confirm.length > 0 && pw === confirm,
-  },
-];
+import { PASSWORD_RULES } from '@/src/lib/password-rules';
 
 export default function SignUpEmailScreen() {
   const router = useRouter();
@@ -33,11 +24,11 @@ export default function SignUpEmailScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const ruleResults = useMemo(
-    () => PASSWORD_RULES.map((rule) => ({ ...rule, passed: rule.test(password, confirmPassword, password) })),
-    [password, confirmPassword]
+    () => PASSWORD_RULES.map((rule) => ({ ...rule, passed: rule.test(password) })),
+    [password]
   );
-
-  const allRulesPassed = ruleResults.every((r) => r.passed);
+  const passwordsMatch = password.length > 0 && password === confirmPassword;
+  const allRulesPassed = ruleResults.every((r) => r.passed) && passwordsMatch;
   const showRules = password.length > 0 || confirmPassword.length > 0;
 
   const handleSignUp = async () => {
@@ -56,10 +47,13 @@ export default function SignUpEmailScreen() {
     const result = await signUp(email.trim(), password);
 
     if (result.error) {
+      const err = result.error.toLowerCase();
       const isExisting =
-        result.error.toLowerCase().includes('already registered') ||
-        result.error.toLowerCase().includes('already been registered') ||
-        result.error.toLowerCase().includes('user already registered');
+        err.includes('already registered') ||
+        err.includes('already been registered') ||
+        err.includes('user already registered') ||
+        err.includes('user already exists') ||
+        err.includes('already exists');
 
       if (isExisting) {
         FeedbackService.showError(
@@ -70,38 +64,42 @@ export default function SignUpEmailScreen() {
         setError(result.error);
       }
       setIsLoading(false);
-    } else {
-      router.replace('/(auth)/onboarding-profile' as any);
+      return;
     }
+
+    setIsLoading(false);
+
+    if (result.needsConfirmation) {
+      FeedbackService.showSuccess(
+        'Check Your Email',
+        `We sent a confirmation link to ${email.trim()}. Tap the link to finish creating your account, then come back and sign in.`
+      );
+      router.replace('/(auth)/login-email' as any);
+      return;
+    }
+
+    router.replace('/(auth)/onboarding-profile' as any);
   };
 
   return (
     <GradientBackground>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
-        <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingTop: insets.top + 12,
-            paddingBottom: insets.bottom + 28,
-            paddingHorizontal: 24,
-          }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Back */}
-          <Pressable onPress={() => router.back()} className="flex-row items-center py-2 -ml-1">
-            <Ionicons name="chevron-back" size={22} color={palette.N3} />
-            <Text style={{ color: palette.N3, fontSize: 16 }}>Back</Text>
-          </Pressable>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: insets.top + 12,
+          paddingBottom: insets.bottom + 48,
+          paddingHorizontal: 24,
+        }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={false}
+      >
+          <AuthHeader />
 
-          {/* Header */}
-          <View className="items-center mt-8 mb-8">
-            <Image
-              source={require('@/assets/images/PC-Logo-Gold.png')}
-              style={{ width: 160, height: 40, marginBottom: 16 }}
-              resizeMode="contain"
-            />
-            <Text className="text-2xl" style={{ color: palette.N2, fontWeight: '700' }}>
+          {/* Top-aligned content so the keyboard doesn't cover the inputs */}
+          <View className="flex-1">
+          <View className="items-center mt-10 mb-8">
+            <Text className="text-3xl" style={{ color: palette.N2, fontWeight: '700' }}>
               Sign Up with Email
             </Text>
           </View>
@@ -116,6 +114,9 @@ export default function SignUpEmailScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
             />
             <TextInput
               label="Password"
@@ -123,6 +124,9 @@ export default function SignUpEmailScreen() {
               onChangeText={setPassword}
               placeholder="Password"
               secureTextEntry
+              autoComplete="new-password"
+              textContentType="newPassword"
+              returnKeyType="next"
             />
             <TextInput
               label="Confirm Password"
@@ -130,6 +134,10 @@ export default function SignUpEmailScreen() {
               onChangeText={setConfirmPassword}
               placeholder="Re-enter your password"
               secureTextEntry
+              autoComplete="new-password"
+              textContentType="newPassword"
+              returnKeyType="go"
+              onSubmitEditing={handleSignUp}
             />
 
             {/* Password requirements — compact row, only shown once user starts typing */}
@@ -147,6 +155,16 @@ export default function SignUpEmailScreen() {
                     </Text>
                   </View>
                 ))}
+                <View className="flex-row items-center gap-1">
+                  <Ionicons
+                    name={passwordsMatch ? 'checkmark-circle' : 'ellipse-outline'}
+                    size={13}
+                    color={passwordsMatch ? palette.G3 : palette.N4}
+                  />
+                  <Text style={{ fontSize: 12, color: passwordsMatch ? palette.G3 : palette.N4 }}>
+                    Passwords match
+                  </Text>
+                </View>
               </View>
             )}
 
@@ -157,20 +175,21 @@ export default function SignUpEmailScreen() {
             )}
           </View>
 
-          {/* Spacer pushes button to bottom */}
-          <View style={{ flex: 1, minHeight: 24 }} />
+          </View>
 
           <Pressable
-            onPress={handleSignUp}
-            style={[styles.primaryButton, isLoading && styles.disabled]}
+            onPress={() => { HapticService.buttonPress(); handleSignUp(); }}
+            style={[styles.primaryButton, { marginTop: 24 }, isLoading && styles.disabled]}
             disabled={isLoading}
           >
-            <Text style={styles.primaryButtonText}>
-              {isLoading ? 'Creating account...' : 'Create Account'}
-            </Text>
+            <View className="flex-row items-center gap-3">
+              {isLoading && <ActivityIndicator size="small" color={palette.N1} />}
+              <Text style={styles.primaryButtonText}>
+                {isLoading ? 'Creating account…' : 'Create Account'}
+              </Text>
+            </View>
           </Pressable>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </ScrollView>
     </GradientBackground>
   );
 }

@@ -15,6 +15,12 @@ interface CardProps extends ViewProps {
   padding?: 'none' | 'small' | 'medium' | 'large';
   className?: string;
   displayClasses?: string;
+  /** Override the default card background (e.g., tinted variants). */
+  backgroundColor?: string;
+  /** Override the default card border color (e.g., tinted variants). */
+  borderColor?: string;
+  /** Skip the inner gradient overlay (for solid-tinted cards). */
+  disableGradient?: boolean;
 }
 
 export default function Card({
@@ -23,6 +29,9 @@ export default function Card({
   padding = 'medium',
   className = '',
   displayClasses = '',
+  backgroundColor,
+  borderColor,
+  disableGradient = false,
   ...viewProps
 }: CardProps) {
   const colors = useThemeColors();
@@ -44,9 +53,13 @@ export default function Card({
   };
 
   // Dark: blue-tinted gradient. Light: no gradient (clean white)
-  const gradientColors = isDark
-    ? ([palette.B5 + '30', palette.B7 + '40'] as const)
-    : (['transparent', 'transparent'] as const);
+  // Tinted variants (yellow/red/etc.) disable the gradient so their accent color
+  // reads cleanly instead of muddied by the blue overlay.
+  const gradientColors = disableGradient
+    ? (['transparent', 'transparent'] as const)
+    : isDark
+      ? ([palette.B5 + '30', palette.B7 + '40'] as const)
+      : (['transparent', 'transparent'] as const);
 
   const shadowStyle =
     !isDark && Platform.OS !== 'web'
@@ -75,8 +88,8 @@ export default function Card({
   const cardStyle = {
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: borderColor ?? colors.border,
+    backgroundColor: backgroundColor ?? colors.surface,
     overflow: 'hidden' as const,
     ...shadowStyle,
   };

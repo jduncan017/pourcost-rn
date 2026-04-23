@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/ios-dark.png",
-    "scheme": "pourcostrn",
+    "scheme": "pourcost",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -25,6 +25,15 @@
               "com.googleusercontent.apps.985050413872-blhmjb4b6dn8i8335kp9aqkh1l4d3csd"
             ]
           }
+        ],
+        "LSApplicationQueriesSchemes": [
+          "readdle-spark",
+          "ms-outlook",
+          "googlegmail",
+          "ymail",
+          "airmail",
+          "inbox-gmail",
+          "message"
         ]
       },
       "icon": {

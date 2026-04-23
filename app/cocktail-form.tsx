@@ -228,10 +228,19 @@ export default function CocktailFormScreen() {
         <Pressable
           onPress={() => saveRef.current()}
           disabled={!isValid || isSaving}
-          className="px-4 py-1.5 rounded-lg"
-          style={{ backgroundColor: isValid && !isSaving ? colors.go : colors.textMuted, opacity: isSaving ? 0.6 : 1 }}
+          // Full-size pill so iOS 26 treats this as the button itself, rather
+          // than wrapping a smaller inner pill in an extra liquid-glass shell.
+          style={{
+            backgroundColor: isValid && !isSaving ? colors.go : colors.textMuted,
+            opacity: isSaving ? 0.6 : 1,
+            paddingHorizontal: 18,
+            paddingVertical: 8,
+            borderRadius: 999,
+            minHeight: 36,
+            justifyContent: 'center',
+          }}
         >
-          <Text style={{ color: palette.N1, fontWeight: '600', fontSize: 16 }}>
+          <Text style={{ color: palette.N1, fontWeight: '600', fontSize: 15 }}>
             {isSaving ? 'Saving...' : 'Save'}
           </Text>
         </Pressable>

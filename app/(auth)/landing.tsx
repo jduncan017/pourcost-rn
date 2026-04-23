@@ -1,11 +1,14 @@
 import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import Button from '@/src/components/ui/Button';
 import { palette } from '@/src/contexts/ThemeContext';
+import { HapticService } from '@/src/services/haptic-service';
 
 const VALUE_PROPS = [
   { icon: 'pricetags' as const, text: 'Track real ingredient costs' },
@@ -24,6 +27,12 @@ export default function LandingScreen() {
     p.muted = true;
     p.play();
   });
+
+  useFocusEffect(
+    useCallback(() => {
+      player.play();
+    }, [player])
+  );
 
   return (
     <View style={styles.container}>
@@ -45,25 +54,25 @@ export default function LandingScreen() {
       {/* Content — pushed to bottom, everything centered */}
       <View
         className="flex-1 justify-end items-center px-6"
-        style={{ paddingBottom: insets.bottom + 16 }}
+        style={{ paddingBottom: insets.bottom + 48 }}
       >
         {/* Logo */}
         <Image
           source={require('@/assets/images/PC-Logo-Gold.png')}
-          style={{ width: 220, height: 55, marginBottom: 8 }}
+          style={{ width: 220, height: 55, marginBottom: 12 }}
           resizeMode="contain"
         />
 
         {/* Tagline */}
         <Text
-          className="text-lg text-center mb-10"
+          className="text-lg text-center mb-14"
           style={{ color: palette.N3 }}
         >
           The smartest way to manage bar profitability
         </Text>
 
         {/* Value props — fit-width centered box, content left-aligned */}
-        <View className="items-center mb-12">
+        <View className="items-center mb-16">
           <View className="flex-col gap-4">
             {VALUE_PROPS.map((prop, i) => (
               <View key={i} className="flex-row items-center gap-3">
@@ -80,16 +89,16 @@ export default function LandingScreen() {
         </View>
 
         {/* CTAs — full width, pill-shaped */}
-        <View className="flex-col gap-4 w-full" style={{ paddingBottom: 8 }}>
+        <View className="flex-col gap-4 w-full" style={{ paddingBottom: 16 }}>
           <Pressable
-            onPress={() => router.push('/(auth)/onboarding-tour' as any)}
+            onPress={() => { HapticService.buttonPress(); router.push('/(auth)/onboarding-tour' as any); }}
             style={styles.primaryButton}
           >
             <Text style={styles.primaryButtonText}>Get Started</Text>
           </Pressable>
 
           <Pressable
-            onPress={() => router.push('/(auth)/login' as any)}
+            onPress={() => { HapticService.buttonPress(); router.push('/(auth)/login' as any); }}
             style={styles.outlineButton}
           >
             <Text style={styles.outlineButtonText}>I already have an account</Text>

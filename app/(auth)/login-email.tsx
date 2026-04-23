@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { View, Text, Image, Pressable, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import TextInput from '@/src/components/ui/TextInput';
+import AuthHeader from '@/src/components/ui/AuthHeader';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { palette } from '@/src/contexts/ThemeContext';
-import { supabase } from '@/src/lib/supabase';
+import { HapticService } from '@/src/services/haptic-service';
 
 export default function LoginEmailScreen() {
   const router = useRouter();
@@ -18,18 +18,12 @@ export default function LoginEmailScreen() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const handleForgotPassword = async () => {
-    if (!email.trim()) {
-      setError('Enter your email above first');
-      return;
-    }
-    setError(null);
-    await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: 'pourcostrn://reset-password',
+  const handleForgotPassword = () => {
+    router.push({
+      pathname: '/(auth)/forgot-password' as any,
+      params: email.trim() ? { email: email.trim() } : undefined,
     });
-    setSuccessMessage('Check your email for a reset link');
   };
 
   const handleSignIn = async () => {
@@ -46,37 +40,29 @@ export default function LoginEmailScreen() {
 
   return (
     <GradientBackground>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
-        <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingTop: insets.top + 12,
-            paddingBottom: insets.bottom + 28,
-            paddingHorizontal: 24,
-          }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Back */}
-          <Pressable onPress={() => router.back()} className="flex-row items-center py-2 -ml-1">
-            <Ionicons name="chevron-back" size={22} color={palette.N3} />
-            <Text style={{ color: palette.N3, fontSize: 16 }}>Back</Text>
-          </Pressable>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: insets.top + 12,
+          paddingBottom: insets.bottom + 48,
+          paddingHorizontal: 24,
+        }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={false}
+      >
+          <AuthHeader />
 
-          {/* Header */}
-          <View className="items-center mt-8 mb-8">
-            <Image
-              source={require('@/assets/images/PC-Logo-Gold.png')}
-              style={{ width: 160, height: 40, marginBottom: 16 }}
-              resizeMode="contain"
-            />
-            <Text className="text-2xl" style={{ color: palette.Y4, fontWeight: '700' }}>
+          {/* Top-aligned content so the keyboard doesn't cover the inputs */}
+          <View className="flex-1">
+          <View className="items-center mt-10 mb-8">
+            <Text className="text-3xl" style={{ color: palette.N2, fontWeight: '700' }}>
               Sign In with Email
             </Text>
           </View>
 
           {/* Form */}
-          <View className="flex-col gap-4 mb-6">
+          <View className="flex-col gap-4">
             <TextInput
               label="Email"
               value={email}
@@ -85,6 +71,9 @@ export default function LoginEmailScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
             />
             <TextInput
               label="Password"
@@ -92,37 +81,37 @@ export default function LoginEmailScreen() {
               onChangeText={setPassword}
               placeholder="Password"
               secureTextEntry
+              autoComplete="current-password"
+              textContentType="password"
+              returnKeyType="go"
+              onSubmitEditing={handleSignIn}
             />
 
-            <Pressable onPress={handleForgotPassword} className="items-end">
+            <Pressable onPress={() => { HapticService.buttonPress(); handleForgotPassword(); }} className="items-end">
               <Text style={{ color: palette.N3, fontSize: 13 }}>Forgot password?</Text>
             </Pressable>
 
-            {successMessage && (
-              <Text className="text-sm text-center" style={{ color: palette.G3 }}>
-                {successMessage}
-              </Text>
-            )}
             {error && (
               <Text className="text-sm text-center" style={{ color: palette.R3 }}>
                 {error}
               </Text>
             )}
           </View>
-
-          <View style={{ flex: 1, minHeight: 24 }} />
+          </View>
 
           <Pressable
-            onPress={handleSignIn}
-            style={[styles.primaryButton, isLoading && styles.disabled]}
+            onPress={() => { HapticService.buttonPress(); handleSignIn(); }}
+            style={[styles.primaryButton, { marginTop: 24 }, isLoading && styles.disabled]}
             disabled={isLoading}
           >
-            <Text style={styles.primaryButtonText}>
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </Text>
+            <View className="flex-row items-center gap-3">
+              {isLoading && <ActivityIndicator size="small" color={palette.N1} />}
+              <Text style={styles.primaryButtonText}>
+                {isLoading ? 'Signing in…' : 'Sign In'}
+              </Text>
+            </View>
           </Pressable>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </ScrollView>
     </GradientBackground>
   );
 }

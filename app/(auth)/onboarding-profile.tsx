@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Keyboard, View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,12 +22,20 @@ export default function OnboardingProfile() {
   } = useAppStore();
 
   const pourSizeOz = volumeToOunces(defaultPourSize);
+  const canContinue = displayName.trim().length > 0;
 
   return (
     <GradientBackground>
-      <View
-        className="flex-1 justify-between px-6"
-        style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 28 }}
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: insets.top + 12,
+          paddingBottom: insets.bottom + 48,
+          paddingHorizontal: 24,
+        }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={false}
       >
         {/* Back button */}
         <Pressable onPress={() => router.back()} className="flex-row items-center py-2 -ml-1">
@@ -35,12 +43,12 @@ export default function OnboardingProfile() {
           <Text style={{ color: palette.N3, fontSize: 16 }}>Back</Text>
         </Pressable>
 
-        <View className="flex-col gap-8 flex-1 mt-4">
+        <View className="flex-col gap-8 flex-1 mt-10">
           {/* Header */}
           <View>
             <Text
               className="text-2xl"
-              style={{ color: palette.Y4, fontWeight: '700' }}
+              style={{ color: palette.N2, fontWeight: '700' }}
             >
               Set Up Your Profile
             </Text>
@@ -59,6 +67,11 @@ export default function OnboardingProfile() {
             onChangeText={setDisplayName}
             placeholder="Your name or bar name"
             autoCapitalize="words"
+            autoComplete="name"
+            textContentType="name"
+            // Return dismisses the keyboard — don't submit from here, user must tap Continue.
+            returnKeyType="done"
+            onSubmitEditing={Keyboard.dismiss}
           />
 
           {/* Pour Cost Goal — slider 10-30% */}
@@ -89,11 +102,12 @@ export default function OnboardingProfile() {
 
         <Pressable
           onPress={() => router.push('/(auth)/onboarding-complete' as any)}
-          style={styles.primaryButton}
+          disabled={!canContinue}
+          style={[styles.primaryButton, !canContinue && styles.disabled]}
         >
           <Text style={styles.primaryButtonText}>Continue</Text>
         </Pressable>
-      </View>
+      </ScrollView>
     </GradientBackground>
   );
 }
@@ -104,10 +118,14 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 999,
     alignItems: 'center',
+    marginTop: 24,
   },
   primaryButtonText: {
     color: palette.N1,
     fontSize: 16,
     fontWeight: '600',
+  },
+  disabled: {
+    opacity: 0.5,
   },
 });

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { View, Text, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '@/src/stores/app-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import CocktailListItem from '@/src/components/CocktailListItem';
@@ -208,7 +209,18 @@ export default function CocktailsScreen() {
                 onAction={handleAddCocktail}
               />
             ) : (
-              filteredCocktails.map((cocktail) => (
+              <>
+                <View className="flex-row justify-between items-center" style={{ opacity: 0.45 }}>
+                  <View className="flex-row items-center gap-1">
+                    <Ionicons name="arrow-back" size={11} color={colors.textSecondary} />
+                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>Swipe left to delete</Text>
+                  </View>
+                  <View className="flex-row items-center gap-1">
+                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>Swipe right to edit</Text>
+                    <Ionicons name="arrow-forward" size={11} color={colors.textSecondary} />
+                  </View>
+                </View>
+              {filteredCocktails.map((cocktail) => (
                 <CocktailListItem
                   key={cocktail.id}
                   cocktail={cocktail}
@@ -217,7 +229,8 @@ export default function CocktailsScreen() {
                   onEdit={() => handleEditCocktail(cocktail)}
                   onDelete={() => handleDeleteCocktail(cocktail)}
                 />
-              ))
+              ))}
+              </>
             )}
           </View>
         </View>

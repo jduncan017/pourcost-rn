@@ -8,6 +8,7 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { COCKTAIL_CATEGORIES } from '@/src/constants/appConstants';
+import { HapticService } from '@/src/services/haptic-service';
 
 export interface ChipSelectorProps {
   options: readonly string[];
@@ -66,6 +67,7 @@ export default function ChipSelector({
   };
 
   const handleSelection = (option: string) => {
+    HapticService.selection();
     if (multiple && onMultipleSelectionChange) {
       const newSelection = isSelected(option)
         ? selectedOptions.filter((item) => item !== option)

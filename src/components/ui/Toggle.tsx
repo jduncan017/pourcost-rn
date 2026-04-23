@@ -1,4 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
+import { HapticService } from '@/src/services/haptic-service';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -35,7 +36,7 @@ export default function Toggle({
 
   return (
     <Pressable
-      onPress={() => onValueChange(!value)}
+      onPress={() => { HapticService.toggle(); onValueChange(!value); }}
       className={`flex-row items-center gap-3 ${className}`}
     >
       {/* Track */}

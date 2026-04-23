@@ -153,7 +153,14 @@ enabled = true
 # in emails.
 site_url = "http://127.0.0.1:3000"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+# IMPORTANT: keep these in sync with the production project's "Redirect URLs" in the Supabase dashboard.
+# https://www.pourcost.app/reset-password — password reset email link target (web page)
+# Note: native Apple/Google linking uses the custom `link-identity` edge function,
+# not Supabase's browser OAuth — no pourcost:// scheme needed in this allowlist.
+additional_redirect_urls = [
+  "https://127.0.0.1:3000",
+  "https://www.pourcost.app/reset-password",
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to the local API URL (http://127.0.0.1:<port>/auth/v1).
@@ -324,6 +331,36 @@ url = ""
 skip_nonce_check = false
 # If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
 email_optional = false
+
+[auth.external.google]
+enabled = true
+# Google Web OAuth client ID (audience Supabase expects). List both web + iOS client IDs here
+# in prod (dashboard's "Authorized Client IDs" field) so iOS-issued id_tokens are accepted.
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+redirect_uri = ""
+url = ""
+# GoogleSignIn iOS SDK v8 embeds a nonce in the id_token when serverClientID (webClientId)
+# is configured, but the RN v15 wrapper exposes no hook to set a matching nonce client-side.
+# We skip the nonce check here and rely on Google's signed id_token for auth.
+skip_nonce_check = true
+
+# Edge Function auth configuration.
+# We disable the gateway-level JWT check because Supabase's gateway doesn't yet verify
+# our ES256-signed session JWTs reliably ("UNAUTHORIZED_UNSUPPORTED_TOKEN_ALGORITHM").
+# Both functions validate the JWT in-function via admin.auth.getUser(token), which
+# supports ES256, so security is preserved.
+[functions.store-apple-token]
+verify_jwt = false
+
+[functions.link-identity]
+verify_jwt = false
+
+[functions.revoke-apple-token]
+verify_jwt = false
+
+[functions.request-email-verification]
+verify_jwt = false
 
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
 # You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.

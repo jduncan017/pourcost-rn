@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import {
   View,
   Text,
   TextInput as RNTextInput,
   TextInputProps,
+  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
@@ -25,9 +27,14 @@ export default function TextInput({
   containerClassName = '',
   inputClassName = '',
   required = false,
+  secureTextEntry,
   ...textInputProps
 }: CustomTextInputProps) {
   const colors = useThemeColors();
+  const [revealed, setRevealed] = useState(false);
+  const isSecure = !!secureTextEntry;
+  // When `secureTextEntry` is true, render an eye toggle to peek the password.
+  const effectiveSecure = isSecure && !revealed;
 
   return (
     <View className={containerClassName}>
@@ -67,6 +74,7 @@ export default function TextInput({
         <RNTextInput
           className={`flex-1 ${inputClassName}`}
           placeholderTextColor={colors.textMuted}
+          secureTextEntry={effectiveSecure}
           style={{
             color: colors.text,
             fontSize: 15,
@@ -75,6 +83,22 @@ export default function TextInput({
           }}
           {...textInputProps}
         />
+
+        {isSecure && (
+          <Pressable
+            onPress={() => setRevealed((r) => !r)}
+            hitSlop={10}
+            style={{ marginLeft: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={revealed ? 'Hide password' : 'Show password'}
+          >
+            <Ionicons
+              name={revealed ? 'eye-off-outline' : 'eye-outline'}
+              size={20}
+              color={colors.textTertiary}
+            />
+          </Pressable>
+        )}
       </View>
 
       {error && (

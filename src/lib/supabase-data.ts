@@ -77,6 +77,21 @@ export async function updateProfile(profile: Partial<ProfileData>): Promise<void
     .eq('id', user.id);
 
   if (error) throw new Error(error.message);
+
+  // Mirror displayName to auth.users.raw_user_meta_data so dashboards, admin tools,
+  // and server-side flows (e.g. transactional emails) see the current name.
+  // Best-effort: never block the profile write — if offline or the auth call fails,
+  // next save will retry via the same path.
+  if (
+    profile.displayName !== undefined &&
+    user.user_metadata?.full_name !== profile.displayName
+  ) {
+    supabase.auth
+      .updateUser({ data: { full_name: profile.displayName } })
+      .catch((err) => {
+        if (__DEV__) console.warn('updateUser metadata sync failed', err);
+      });
+  }
 }
 
 // ==========================================

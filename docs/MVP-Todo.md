@@ -1,66 +1,63 @@
 # PourCost RN — MVP To-Do
 
-_Last updated 2026-04-21._
+_Last updated 2026-04-22._
 
 ---
 
 ## Pre-submit blockers
 
-### Auth
+1. ~~**Google Sign-In broken**~~ — DONE. Root cause: GoogleSignIn iOS SDK v8 embeds a nonce in the id_token when `serverClientID` (webClientId) is configured; RN wrapper v15 exposes no hook to match it. Fixed by enabling **Skip Nonce Checks** on the Google provider in Supabase dashboard. Security preserved via Google's signed id_token + audience validation.
 
-1. **Google Sign-In broken** — persistent "nonces mismatch" from Supabase despite multiple approaches. Root issue: `@react-native-google-signin/google-signin` v15 doesn't expose nonce control in `signIn()`. Google may be embedding a nonce in the ID token that we can't intercept cleanly. Needs a fresh approach — likely switch to `GoogleOneTapSignIn` (supports custom nonce) or decode the JWT and forward whatever nonce Google embedded.
+2. ~~**Apple token revocation on account delete**~~ — DONE. `store-apple-token` edge function captures Apple's `refresh_token` after SIWA; `delete-account` edge function calls `/auth/revoke` before deleting the user. Requires APPLE_TEAM_ID / APPLE_KEY_ID / APPLE_CLIENT_ID / APPLE_PRIVATE_KEY secrets set in Supabase dashboard.
 
-2. **Sign in with Apple — Apple Developer Portal** (required before device build works end-to-end):
-   - [ ] Enable "Sign In with Apple" capability on App ID `com.joshuaduncan.pourcostdev`
-   - [ ] Create a Services ID with Return URL `https://<project-ref>.supabase.co/auth/v1/callback`
-   - [ ] Create a private key (`.p8`) — download it, note Key ID + Team ID
+3. **Navigation race-condition guard** — rapid double-tap on nav actions can crash. No throttle/lock found anywhere in `app/`. Add guard on entry points.
 
-3. **Sign in with Apple — Supabase Dashboard**:
-   - [ ] Auth → Providers → Apple → enable
-   - [ ] Paste bundle IDs as allowed audiences
-   - [ ] Generate JWT client secret from `.p8` + Key ID + Team ID; paste into Secret Key field
-   - [ ] Calendar reminder to rotate secret every 6 months
-
-4. **Apple token revocation on account delete** (App Store Guideline 5.1.1(v)):
-   - Capture and persist Apple's `refresh_token` at sign-in
-   - Update `supabase/functions/delete-account/index.ts` to POST to `https://appleid.apple.com/auth/revoke` before deleting user
-   - Skip silently for non-Apple users
-
-5. **Deploy delete-account Edge Function** — `supabase functions deploy delete-account`, then smoke test against a throwaway account.
-
-### Submission mechanics
-
-6. **Verify Supabase Auth providers** configured in dashboard:
-   - Facebook App ID `1522826757747836` with Supabase redirect URI in Facebook app settings
-   - Google OAuth client ID
-   - Apple provider (see above)
-
-7. **Verify #18 cascade behavior** — ingredient edits may leave `cocktail_ingredients.cost` stale. Trace the edit-save path in `src/lib/supabase-writes.ts`; fix if snapshot stays stale.
-
-8. **App Store screenshots** — capture at submission time using real RN app.
-
-9. **Paste policy URLs into App Store Connect** at submission time:
-   - Terms: `https://www.pourcost.app/terms`
-   - Privacy: `https://www.pourcost.app/privacy`
-
-### App transfer
-
-The original iOS app was rejected in 2023 and never resubmitted — likely not in "Ready for Sale" status, which blocks transfer.
-
-- **Path A — transfer first**: Donald (Account Holder) initiates. May require resubmitting the Obj-C/Swift app first. High friction.
-- **Path B — new listing**: Ship RN rebuild as fresh listing under `com.pourcost.app` from Joshua's account. Lose 2017 ratings, gain speed. Pursue transfer later.
-
-Path B is the pragmatic launch path given competitive pressure.
+4. ~~**`handle_new_user` trigger diagnostic**~~ — FIXED in migration 007. The production DB was missing the `handle_new_user` trigger entirely, which is why new users had no `profiles` row after signup (root cause of phantom-user bug + sample-bar FK failures). Migration 007 installs the trigger and backfills rows for any existing users that lack them. `seedSampleBar` also has a best-effort upsert as a safety net.
 
 ---
 
 ## UX polish backlog
 
-- Network error states / retry UI — `useNetworkStatus` exists but no retry UX on failed loads/saves.
-- Navigation race condition guard — rapid double-tap on nav actions can crash. Add throttle/lock on entry points.
-- Animations pass — `react-native-reanimated` installed but 0 imports in `app/` or `src/`. Transitions still stock.
+- Design pass — full visual sweep across all screens.
 - Light-mode polish — manual UI sweep needed.
-- Onboarding hex-color spot-check — not exhaustively verified.
+- Onboarding hex-color spot-check.
+
+---
+
+## Account linking — native flow (shipped 2026-04-22)
+
+Both Apple and Google account linking now use native id_tokens (Face ID / Google SDK) instead of Supabase's browser OAuth. Eliminates the web-redirect UX friction, removes dependency on Apple Services IDs, and sidesteps Supabase's redirect-URL matching quirks.
+
+- Edge function `link-identity` verifies the id_token against Apple/Google JWKS, then inserts into `auth.identities` via the `link_user_identity` SECURITY DEFINER RPC
+- Migration `006_link_identity_rpc.sql` defines the RPC
+- Required secrets in Supabase dashboard: `APPLE_CLIENT_ID` (already set), `GOOGLE_WEB_CLIENT_ID`, `GOOGLE_IOS_CLIENT_ID`
+- Deployed with `--no-verify-jwt` (same ES256 gateway issue as other edge functions)
+
+### Post-MVP enhancements
+
+- **Multi-currency with live FX rates** — legacy iOS had a `CurrencyService` with live symbol sync + locale-aware formatting. RN currently only has USD. Plan: connect `profiles.base_currency` to actual rate-applied display, fetch rates from a free API weekly (e.g. `exchangerate.host`), cache in a new `currency_rates` Supabase table, add locale-aware number formatting. ~4-6 hrs. Needed for international expansion.
+
+### Post-MVP account-management features
+
+- **Email app picker on "Open Email"** — iOS has no public API to open the user's default mail app's inbox (the default Mail App setting only affects `mailto:` compose). Current implementation tries Spark → Outlook → Gmail → Apple Mail in a hardcoded order, which is arbitrary for users who don't have those. Better UX: bottom sheet showing installed mail apps (detected via `canOpenURL` against `LSApplicationQueriesSchemes`), let user pick once, persist via AsyncStorage. ~30 min scope.
+- **Add password for social-only users** — Apple/Google users can set a password to also sign in with email. Supabase API: `supabase.auth.updateUser({ password })`. UI: new "Set a Password" row in Settings → Account → Sign-in Methods, only visible when `!hasPasswordIdentity`. After set, row flips to the existing "Change Password" flow. ~15 min scope.
+- **Change email address** — let users update `auth.users.email` via `supabase.auth.updateUser({ email: newEmail })`. Triggers Supabase's double-confirm flow (old email + new email both confirm). Already have the "Change Email" email template wired. UI: make the Email row in Settings → Account tappable → bottom sheet with new email input. ~30-45 min scope. Weirdness note: Apple/Google identity's `identity_data.email` stays on the provider record — users who sign out then back in via social will still find their account via the provider `sub`, but their "auth email" may diverge from their "provider email" cosmetically.
+
+## Onboarding
+
+- ✅ **Pre-seeded sample bar** (2026-04-22) — first-sign-in users can opt into a starter bar with 14 ingredients + 5 classic cocktails. Rows tagged `is_sample = true`; one-tap clear in Settings → Calculations once user has their own data. Migration `005_sample_data_flag.sql`, seed defs in `src/lib/sample-bar.ts`, service in `src/lib/seed-sample-bar.ts`.
+
+### Post-MVP
+
+- **Coachmark tour** — interactive tooltips pointing at real UI elements on first visit per screen (Calculator, Ingredients, Cocktails, cocktail detail, ingredient detail). 5-step guided tour with "Skip Tour" always visible. Fires once per tab lifetime. Planned library: `react-native-copilot` (supports Expo, theme-able overlay, arrow positioning). Rough scope: 1-2 days. Ship after MVP launch once we've observed real first-session drop-off metrics via PostHog.
+- **Empty-state inline hints** — for users who opted out of the sample bar, short one-line prompts on empty Cocktails/Ingredients lists ("Tap + to add your first ingredient"). Low-lift complement to the coachmark tour.
+
+---
+
+## At submission time (no code)
+
+- App Store screenshots (requires design pass first)
+- Paste Terms/Privacy URLs into App Store Connect
 
 ---
 
@@ -75,7 +72,7 @@ Path B is the pragmatic launch path given competitive pressure.
 - [ ] Deposit fee / non-product line filtering
 - [ ] Review screen: show bottle size and pack info clearly
 
-**Schema prerequisite**: `ingredient_configurations` table not yet migrated. New migration needed before wiring.
+**Schema prerequisite**: `ingredient_configurations` table not yet migrated.
 
 ### Round 3: Intelligence & Polish
 
@@ -112,7 +109,6 @@ Schema (`prepped_ingredient_recipes`, `prepped_ingredient_templates`) not yet ap
 
 ## DB migrations — pending
 
-Not yet applied (needed for Round 2.5 and prepped ingredients):
 - `ingredient_configurations` table
 - `prepped_ingredient_recipes` + `prepped_ingredient_templates`
 - `profiles.prep_labor_rate`
@@ -158,5 +154,3 @@ ingredient_configurations (
   UNIQUE(ingredient_id, product_size, pack_size)
 )
 ```
-
-Migration path: current `product_size`/`product_cost` on `ingredients` become the initial default configuration.

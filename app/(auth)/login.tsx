@@ -5,7 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import AppleSignInButton from '@/src/components/ui/AppleSignInButton';
 import GoogleSignInButton from '@/src/components/ui/GoogleSignInButton';
+import AuthHeader from '@/src/components/ui/AuthHeader';
 import { palette } from '@/src/contexts/ThemeContext';
+import { HapticService } from '@/src/services/haptic-service';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -15,22 +17,18 @@ export default function LoginScreen() {
     <GradientBackground>
       <View
         className="flex-1 px-6"
-        style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 28 }}
+        style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 48 }}
       >
-        {/* Back */}
-        <Pressable onPress={() => router.back()} className="flex-row items-center py-2 -ml-1">
-          <Ionicons name="chevron-back" size={22} color={palette.N3} />
-          <Text style={{ color: palette.N3, fontSize: 16 }}>Back</Text>
-        </Pressable>
+        <AuthHeader />
 
-        {/* Header */}
-        <View className="items-center mt-10">
+        {/* Header — vertically centered in available space */}
+        <View className="flex-1 justify-center items-center">
           <Image
             source={require('@/assets/images/PC-Logo-Gold.png')}
-            style={{ width: 160, height: 40, marginBottom: 16 }}
+            style={{ width: 220, height: 55, marginBottom: 24 }}
             resizeMode="contain"
           />
-          <Text className="text-2xl" style={{ color: palette.Y4, fontWeight: '700' }}>
+          <Text className="text-2xl" style={{ color: palette.N2, fontWeight: '700' }}>
             Welcome Back
           </Text>
           <Text className="text-base text-center mt-2" style={{ color: palette.N4 }}>
@@ -38,10 +36,8 @@ export default function LoginScreen() {
           </Text>
         </View>
 
-        <View style={{ flex: 1 }} />
-
         {/* Auth options */}
-        <View className="flex-col gap-3">
+        <View className="flex-col gap-3" style={{ marginTop: 24 }}>
           <AppleSignInButton />
           <GoogleSignInButton />
 
@@ -53,7 +49,7 @@ export default function LoginScreen() {
           </View>
 
           <Pressable
-            onPress={() => router.push('/(auth)/login-email' as any)}
+            onPress={() => { HapticService.buttonPress(); router.push('/(auth)/login-email' as any); }}
             style={styles.emailButton}
           >
             <Ionicons name="mail-outline" size={20} color={palette.N1} />
@@ -64,7 +60,7 @@ export default function LoginScreen() {
         {/* Sign up link */}
         <View className="flex-row justify-center items-center mt-8 gap-1">
           <Text style={{ color: palette.N4, fontSize: 14 }}>Don't have an account?</Text>
-          <Pressable onPress={() => router.replace('/(auth)/signup' as any)}>
+          <Pressable onPress={() => { HapticService.buttonPress(); router.replace('/(auth)/signup' as any); }}>
             <Text style={{ color: palette.Y4, fontSize: 14, fontWeight: '600' }}>Sign Up</Text>
           </Pressable>
         </View>

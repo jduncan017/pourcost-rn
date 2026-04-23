@@ -1,5 +1,29 @@
 // Import global CSS for NativeWind FIRST
 import '../global.css';
+// WebCrypto polyfills for supabase-js PKCE (needs getRandomValues + subtle.digest).
+// react-native-get-random-values ships the former; expo-crypto backs our manual
+// subtle.digest shim below so supabase-js can use SHA256 instead of plain PKCE.
+import 'react-native-get-random-values';
+import * as ExpoCrypto from 'expo-crypto';
+if (typeof globalThis.crypto !== 'undefined' && !(globalThis.crypto as any).subtle) {
+  (globalThis.crypto as any).subtle = {
+    digest: async (
+      algorithm: string | { name: string },
+      data: ArrayBuffer | ArrayBufferView,
+    ): Promise<ArrayBuffer> => {
+      const name = typeof algorithm === 'string' ? algorithm : algorithm.name;
+      const map: Record<string, ExpoCrypto.CryptoDigestAlgorithm> = {
+        'SHA-1': ExpoCrypto.CryptoDigestAlgorithm.SHA1,
+        'SHA-256': ExpoCrypto.CryptoDigestAlgorithm.SHA256,
+        'SHA-384': ExpoCrypto.CryptoDigestAlgorithm.SHA384,
+        'SHA-512': ExpoCrypto.CryptoDigestAlgorithm.SHA512,
+      };
+      const algo = map[name];
+      if (!algo) throw new Error(`Unsupported digest algorithm: ${name}`);
+      return ExpoCrypto.digest(algo, data as ArrayBuffer);
+    },
+  };
+}
 
 import {
   DarkTheme,
@@ -94,8 +118,11 @@ function RootLayoutNav() {
   const router = useRouter();
   const segments = useSegments();
   const [isInitializing, setIsInitializing] = useState(false);
+  // Track which user ID we've loaded data for. Only reload when the user
+  // actually changes — not on every session object refresh (token refresh,
+  // resend email, updateUser, etc.), which would flash the LoadingScreen.
+  const [initializedUserId, setInitializedUserId] = useState<string | null>(null);
 
-  // Initialize user data when session becomes available, clear on sign-out
   const initializeUserData = useCallback(async () => {
     setIsInitializing(true);
     try {
@@ -111,16 +138,21 @@ function RootLayoutNav() {
 
   useEffect(() => {
     if (authLoading) return;
+    const currentUserId = session?.user?.id ?? null;
 
-    if (session && !isNewSignUp) {
-      // Only load data for returning users, not during onboarding
-      initializeUserData();
-    } else if (!session) {
+    if (currentUserId && !isNewSignUp) {
+      // Only reinitialize if this is a different user (cold boot or switch).
+      // Subsequent session refreshes for the same user should be silent.
+      if (currentUserId !== initializedUserId) {
+        initializeUserData().then(() => setInitializedUserId(currentUserId));
+      }
+    } else if (!currentUserId) {
       useAppStore.getState().resetToDefaults();
       useIngredientsStore.getState().reset();
       useCocktailsStore.getState().reset();
+      setInitializedUserId(null);
     }
-  }, [session, authLoading, isNewSignUp, initializeUserData]);
+  }, [session, authLoading, isNewSignUp, initializeUserData, initializedUserId]);
 
   // Redirect based on auth state — wait for initialization to complete
   useEffect(() => {
@@ -153,7 +185,13 @@ function RootLayoutNav() {
               headerShadowVisible: false,
               headerLeft: ({ canGoBack }) =>
                 canGoBack ? (
-                  <Pressable onPress={() => { HapticService.buttonPress(); router.back(); }} className="py-2 pr-4">
+                  <Pressable
+                    onPress={() => { HapticService.buttonPress(); router.back(); }}
+                    // Equal padding so the icon centers inside iOS 26's liquid-glass
+                    // back-button circle. Asymmetric padding shifts it visually off-center.
+                    hitSlop={10}
+                    style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}
+                  >
                     <Ionicons name="arrow-back" size={22} color={colors.text} />
                   </Pressable>
                 ) : null,
@@ -168,6 +206,9 @@ function RootLayoutNav() {
             <Stack.Screen name="ingredient-selector" options={{ title: 'Add Ingredients' }} />
             <Stack.Screen name="search" options={{ title: 'Search' }} />
             <Stack.Screen name="container-sizes" options={{ title: 'Container Sizes' }} />
+            <Stack.Screen name="settings-account" options={{ title: 'Account' }} />
+            <Stack.Screen name="settings-calculations" options={{ title: 'Calculations' }} />
+            <Stack.Screen name="change-password" options={{ title: 'Change Password' }} />
             <Stack.Screen name="invoice-review" options={{ title: 'Review Invoice' }} />
             <Stack.Screen name="invoice-line-edit" options={{ title: 'Edit Line Item' }} />
             <Stack.Screen name="invoice-ingredient-setup" options={{ title: 'Set Up Ingredients' }} />

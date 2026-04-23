@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
+import AuthHeader from '@/src/components/ui/AuthHeader';
 import { palette } from '@/src/contexts/ThemeContext';
 
 const FEATURES = [
@@ -31,13 +32,9 @@ export default function OnboardingTour() {
     <GradientBackground>
       <View
         className="flex-1 justify-between px-6"
-        style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 28 }}
+        style={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 48 }}
       >
-        {/* Back button */}
-        <Pressable onPress={() => router.back()} className="flex-row items-center py-2 -ml-1">
-          <Ionicons name="chevron-back" size={22} color={palette.N3} />
-          <Text style={{ color: palette.N3, fontSize: 16 }}>Back</Text>
-        </Pressable>
+        <AuthHeader />
 
         <View className="flex-col gap-8 flex-1 justify-center">
           {/* Header — centered with logo */}

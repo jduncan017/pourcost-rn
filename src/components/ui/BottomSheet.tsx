@@ -6,6 +6,8 @@ import {
   Modal,
   ScrollView,
   Dimensions,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -89,7 +91,10 @@ export default function BottomSheet({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View className="flex-1">
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         {/* Backdrop */}
         <Pressable
           className="absolute inset-0"
@@ -135,12 +140,13 @@ export default function BottomSheet({
             <ScrollView
               bounces={false}
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
               {children}
             </ScrollView>
           </Animated.View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

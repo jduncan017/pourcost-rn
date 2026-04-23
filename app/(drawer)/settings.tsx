@@ -1,145 +1,79 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { View, Text, TextInput as RNTextInput, ScrollView, Pressable, Image, Alert, Linking, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useAppStore, ThemeMode, IngredientOrderPref } from '@/src/stores/app-store';
-import { useTheme, useThemeColors, palette } from '@/src/contexts/ThemeContext';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Image, ScrollView, Linking, Alert } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { useAppStore, ThemeMode } from '@/src/stores/app-store';
+import { useTheme, useThemeColors } from '@/src/contexts/ThemeContext';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { FeedbackService } from '@/src/services/feedback-service';
-import { Ionicons } from '@expo/vector-icons';
+import { useIngredientsStore } from '@/src/stores/ingredients-store';
+import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import SettingsCard from '@/src/components/ui/SettingsCard';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SectionDivider from '@/src/components/ui/SectionDivider';
-import { US_POUR_SIZES } from '@/src/constants/appConstants';
-import { volumeLabel, Volume } from '@/src/types/models';
-
-// Pour size options: common bartending pours (0.5oz - 3oz fractional only)
-const POUR_SIZE_OPTIONS = US_POUR_SIZES.filter((v) => {
-  if (v.kind !== 'fractionalOunces') return false;
-  const oz = v.numerator / v.denominator;
-  return oz >= 0.5 && oz <= 3;
-});
-
-const pourSizeDropdownOptions = POUR_SIZE_OPTIONS.map((v) => ({
-  value: JSON.stringify(v),
-  label: volumeLabel(v),
-}));
-
-// Pour cost goal options (10% - 50% in 1% steps)
-const pourCostDropdownOptions = Array.from({ length: 41 }, (_, i) => {
-  const val = 10 + i;
-  return { value: val, label: `${val}%` };
-});
-
-// Ingredient order options
-const orderDropdownOptions: { value: IngredientOrderPref; label: string }[] = [
-  { value: 'most-to-least', label: 'Most → Least' },
-  { value: 'least-to-most', label: 'Least → Most' },
-  { value: 'cost-high-low', label: 'Cost High → Low' },
-];
-
+import PickerSheet from '@/src/components/ui/PickerSheet';
+import { clearSampleData, hasSampleData } from '@/src/lib/seed-sample-bar';
+import { FeedbackService } from '@/src/services/feedback-service';
 
 export default function SettingsScreen() {
-  const {
-    pourCostGoal,
-    setPourCostGoal,
-    defaultPourSize,
-    setDefaultPourSize,
-    defaultRetailPrice,
-    setDefaultRetailPrice,
-    ingredientOrderPref,
-    setIngredientOrderPref,
-    displayName,
-    setDisplayName,
-    saveProfile,
-  } = useAppStore();
-
   const router = useRouter();
   const { isDarkMode, themeMode, setThemeMode } = useTheme();
   const colors = useThemeColors();
-  const { user, signOut, deleteAccount, linkedProviders, linkWithApple, linkWithGoogle } = useAuth();
+  const { user, isEmailVerified } = useAuth();
+  const { saveProfile } = useAppStore();
 
-  const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const debouncedSave = useCallback(() => {
-    if (saveTimeout.current) clearTimeout(saveTimeout.current);
-    saveTimeout.current = setTimeout(() => { saveProfile(); }, 1500);
-  }, [saveProfile]);
-
-  // Save on unmount to prevent lost edits from debounce
-  useEffect(() => {
-    return () => {
-      if (saveTimeout.current) {
-        clearTimeout(saveTimeout.current);
-        saveProfile();
-      }
-    };
-  }, []);
-
-  // Current display values
-  const currentPourSizeLabel = volumeLabel(defaultPourSize);
-  const currentOrderLabel = orderDropdownOptions.find((o) => o.value === ingredientOrderPref)?.label ?? 'Manual';
+  const [showThemePicker, setShowThemePicker] = useState(false);
+  const [sampleDataPresent, setSampleDataPresent] = useState(false);
+  const [clearingSample, setClearingSample] = useState(false);
   const themeLabel = themeMode === 'dark' ? 'Dark' : themeMode === 'light' ? 'Light' : 'Auto';
 
-  // Dropdown states
-  const [showPourCostPicker, setShowPourCostPicker] = useState(false);
-  const [showPourSizePicker, setShowPourSizePicker] = useState(false);
-  const [showRetailPricePicker, setShowRetailPricePicker] = useState(false);
-  const [showOrderPicker, setShowOrderPicker] = useState(false);
-  const [showThemePicker, setShowThemePicker] = useState(false);
-  const [showNameEditor, setShowNameEditor] = useState(false);
-  const [nameText, setNameText] = useState(displayName || user?.user_metadata?.full_name || '');
+  // Re-check sample-data status on mount + each time the screen regains focus.
+  // Once cleared, `hasSampleData` returns false and the card disappears permanently.
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      hasSampleData()
+        .then((has) => { if (!cancelled) setSampleDataPresent(has); })
+        .catch(() => {});
+      return () => { cancelled = true; };
+    }, [])
+  );
 
-  // Retail price options
-  const retailPriceOptions = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 25, 30].map((v) => ({
-    value: v,
-    label: `$${v.toFixed(2)}`,
-  }));
-
-  const handleSignOut = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive', onPress: signOut },
-    ]);
-  };
-
-  const handleDeleteAccount = () => {
+  const handleClearSample = () => {
     Alert.alert(
-      'Delete Account',
-      'This permanently deletes your account, ingredients, cocktails, invoices, and saved data. This cannot be undone.',
+      'Clear Sample Bar?',
+      'Removes the 14 sample ingredients and 5 classic cocktails. Your own additions stay. This option will disappear after you clear.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Continue',
+          text: 'Clear',
           style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              'Are you sure?',
-              'This is your last chance to cancel. All of your PourCost data will be permanently deleted.',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Delete Forever',
-                  style: 'destructive',
-                  onPress: async () => {
-                    const { error } = await deleteAccount();
-                    if (error) {
-                      FeedbackService.showError('Delete Failed', error);
-                    } else {
-                      FeedbackService.showSuccess(
-                        'Account Deleted',
-                        'Your account and all data have been removed.'
-                      );
-                    }
-                  },
-                },
-              ]
-            );
+          onPress: async () => {
+            setClearingSample(true);
+            try {
+              await clearSampleData();
+              await Promise.all([
+                useIngredientsStore.getState().loadIngredients(true),
+                useCocktailsStore.getState().loadCocktails(true),
+              ]);
+              setSampleDataPresent(false);
+              FeedbackService.showSuccess('Sample Bar Cleared', 'Your bar is now yours alone.');
+            } catch (err) {
+              const msg = err instanceof Error ? err.message : 'Could not clear sample data';
+              FeedbackService.showError('Clear Failed', msg);
+            } finally {
+              setClearingSample(false);
+            }
           },
         },
       ]
     );
   };
+
+  const accountSubtitle = user
+    ? (isEmailVerified
+        ? (user.email ?? 'Manage sign-in & profile')
+        : 'Email not verified — tap to review')
+    : 'Sign in to sync across devices';
 
   return (
     <GradientBackground>
@@ -156,60 +90,49 @@ export default function SettingsScreen() {
               className="w-[160px] h-[40px] mb-2"
               resizeMode="contain"
             />
-            <Text className="text-g3 dark:text-g2 text-sm">
-              Professional cocktail costing
-            </Text>
           </View>
 
-          {/* Divider */}
           <SectionDivider />
 
-          {/* Calculations */}
+          {/* Sample Data — only shown while the starter bar is still loaded.
+              Disappears permanently once the user clears it. */}
+          {sampleDataPresent && (
+            <>
+              <View className="flex-col gap-3">
+                <ScreenTitle variant="group" title="Getting Started" />
+                <SettingsCard
+                  tone="gold"
+                  title={clearingSample ? 'Clearing…' : 'Clear Sample Bar'}
+                  description="Remove the starter ingredients and cocktails we pre-loaded"
+                  iconName="sparkles-outline"
+                  onPress={handleClearSample}
+                  disabled={clearingSample}
+                />
+              </View>
+              <SectionDivider />
+            </>
+          )}
+
+          {/* Section hubs */}
           <View className="flex-col gap-3">
-            <ScreenTitle variant="group" title="Calculations" />
+            <ScreenTitle variant="group" title="Settings" />
             <SettingsCard
-              title="Pour Cost Goal"
-              description={`${pourCostGoal}%`}
-              iconName="analytics-outline"
-              iconColor={colors.text}
-              onPress={() => setShowPourCostPicker(true)}
+              tone="gold"
+              title="Account"
+              description={accountSubtitle}
+              iconName={user && !isEmailVerified ? 'alert-circle-outline' : 'person-circle-outline'}
+              onPress={() => router.push('/settings-account' as any)}
               showCaret
             />
             <SettingsCard
-              title="Default Pour Size"
-              description={currentPourSizeLabel}
-              iconName="water-outline"
-              iconColor={colors.text}
-              onPress={() => setShowPourSizePicker(true)}
-              showCaret
-            />
-            <SettingsCard
-              title="Default Retail Price"
-              description={`$${defaultRetailPrice.toFixed(2)}`}
-              iconName="pricetag-outline"
-              iconColor={colors.text}
-              onPress={() => setShowRetailPricePicker(true)}
-              showCaret
-            />
-            <SettingsCard
-              title="Ingredient Order"
-              description={currentOrderLabel}
-              iconName="swap-vertical-outline"
-              iconColor={colors.text}
-              onPress={() => setShowOrderPicker(true)}
-              showCaret
-            />
-            <SettingsCard
-              title="Container Sizes"
-              description="Choose visible bottle & keg sizes"
-              iconName="resize-outline"
-              iconColor={colors.text}
-              onPress={() => router.push('/container-sizes' as any)}
+              title="Calculations"
+              description="Pour cost, pour size, defaults"
+              iconName="calculator-outline"
+              onPress={() => router.push('/settings-calculations' as any)}
               showCaret
             />
           </View>
 
-          {/* Divider */}
           <SectionDivider />
 
           {/* Appearance */}
@@ -225,74 +148,6 @@ export default function SettingsScreen() {
             />
           </View>
 
-          {/* Divider */}
-          <SectionDivider />
-
-          {/* Account */}
-          <View className="flex-col gap-3">
-            <ScreenTitle variant="group" title="Account" />
-            {user ? (
-              <>
-                <SettingsCard
-                  title="Your Name"
-                  description={displayName || user?.user_metadata?.full_name || 'Not set'}
-                  iconName="person-outline"
-                  onPress={() => setShowNameEditor(true)}
-                  showCaret
-                />
-                {Platform.OS === 'ios' && (
-                  <SettingsCard
-                    title="Apple Sign-In"
-                    description={linkedProviders.includes('apple') ? 'Linked' : 'Not linked — tap to link'}
-                    iconName={linkedProviders.includes('apple') ? 'checkmark-circle-outline' : 'add-circle-outline'}
-                    iconColor={linkedProviders.includes('apple') ? colors.colors.G3 : colors.text}
-                    onPress={async () => {
-                      if (linkedProviders.includes('apple')) return;
-                      const { error } = await linkWithApple();
-                      if (error) FeedbackService.showError('Link Failed', error);
-                      else FeedbackService.showSuccess('Apple Linked', 'You can now sign in with Apple.');
-                    }}
-                  />
-                )}
-                <SettingsCard
-                  title="Google Sign-In"
-                  description={linkedProviders.includes('google') ? 'Linked' : 'Not linked — tap to link'}
-                  iconName={linkedProviders.includes('google') ? 'checkmark-circle-outline' : 'add-circle-outline'}
-                  iconColor={linkedProviders.includes('google') ? colors.colors.G3 : colors.text}
-                  onPress={async () => {
-                    if (linkedProviders.includes('google')) return;
-                    const { error } = await linkWithGoogle();
-                    if (error) FeedbackService.showError('Link Failed', error);
-                    else FeedbackService.showSuccess('Google Linked', 'You can now sign in with Google.');
-                  }}
-                />
-                <SettingsCard
-                  title="Sign Out"
-                  description={user.email ?? 'Signed in'}
-                  iconName="log-out-outline"
-                  iconColor={colors.colors.R3}
-                  onPress={handleSignOut}
-                />
-                <SettingsCard
-                  title="Delete Account"
-                  description="Permanently remove your account and data"
-                  iconName="trash-outline"
-                  iconColor={colors.colors.R3}
-                  onPress={handleDeleteAccount}
-                />
-              </>
-            ) : (
-              <SettingsCard
-                title="Sign In"
-                description="Sync your data across devices"
-                iconName="person-outline"
-                iconColor={colors.text}
-                onPress={() => {}}
-              />
-            )}
-          </View>
-
-          {/* Divider */}
           <SectionDivider />
 
           {/* Support */}
@@ -333,56 +188,10 @@ export default function SettingsScreen() {
             />
           </View>
 
-          {/* Spacer */}
           <View className="h-8" />
         </View>
       </ScrollView>
 
-      {/* Pour Cost Goal Picker */}
-      {showPourCostPicker && (
-        <PickerSheet
-          title="Pour Cost Goal"
-          options={pourCostDropdownOptions}
-          value={pourCostGoal}
-          onSelect={(val) => { setPourCostGoal(val); debouncedSave(); }}
-          onClose={() => setShowPourCostPicker(false)}
-        />
-      )}
-
-      {/* Pour Size Picker */}
-      {showPourSizePicker && (
-        <PickerSheet
-          title="Default Pour Size"
-          options={pourSizeDropdownOptions}
-          value={JSON.stringify(defaultPourSize)}
-          onSelect={(val) => { try { setDefaultPourSize(JSON.parse(val) as Volume); debouncedSave(); } catch {} }}
-          onClose={() => setShowPourSizePicker(false)}
-        />
-      )}
-
-      {/* Retail Price Picker */}
-      {showRetailPricePicker && (
-        <PickerSheet
-          title="Default Retail Price"
-          options={retailPriceOptions}
-          value={defaultRetailPrice}
-          onSelect={(val) => { setDefaultRetailPrice(val); debouncedSave(); }}
-          onClose={() => setShowRetailPricePicker(false)}
-        />
-      )}
-
-      {/* Order Picker */}
-      {showOrderPicker && (
-        <PickerSheet
-          title="Ingredient Order"
-          options={orderDropdownOptions}
-          value={ingredientOrderPref}
-          onSelect={(val) => { setIngredientOrderPref(val as IngredientOrderPref); debouncedSave(); }}
-          onClose={() => setShowOrderPicker(false)}
-        />
-      )}
-
-      {/* Theme Picker */}
       {showThemePicker && (
         <PickerSheet
           title="Theme"
@@ -392,49 +201,10 @@ export default function SettingsScreen() {
             { value: 'auto' as ThemeMode, label: 'Auto (System)' },
           ]}
           value={themeMode}
-          onSelect={(val) => { setThemeMode(val as ThemeMode); debouncedSave(); }}
+          onSelect={(val) => { setThemeMode(val as ThemeMode); saveProfile(); }}
           onClose={() => setShowThemePicker(false)}
         />
       )}
-
-      {/* Name Editor */}
-      <BottomSheet
-        visible={showNameEditor}
-        onClose={() => setShowNameEditor(false)}
-        title="Your Name"
-      >
-        <View className="px-4 pb-6 flex-col gap-4">
-          <RNTextInput
-            value={nameText}
-            onChangeText={setNameText}
-            placeholder="Enter your name"
-            placeholderTextColor={colors.textMuted}
-            autoFocus
-            className="rounded-lg p-4"
-            style={{
-              backgroundColor: colors.surface,
-              borderWidth: 1,
-              borderColor: colors.border,
-              color: colors.text,
-              fontSize: 16,
-            }}
-          />
-          <Pressable
-            onPress={() => {
-              setDisplayName(nameText.trim());
-              debouncedSave();
-              setShowNameEditor(false);
-            }}
-            className="rounded-lg py-3 items-center"
-            style={{ backgroundColor: colors.go }}
-          >
-            <Text style={{ color: palette.N1, fontWeight: '600', fontSize: 16 }}>Save</Text>
-          </Pressable>
-        </View>
-      </BottomSheet>
     </GradientBackground>
   );
 }
-
-import BottomSheet from '@/src/components/ui/BottomSheet';
-import PickerSheet from '@/src/components/ui/PickerSheet';
