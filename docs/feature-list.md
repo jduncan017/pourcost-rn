@@ -158,3 +158,115 @@ Why: Enterprise bars/hotel groups pay for control, integrations, and premium sup
 • Free → Lite: “Tired of typing in costs? Unlock OCR and dynamic COGS.”
 • Lite → Pro: “Your recipes are costed—now use AI to optimize them and sync to POS.”
 • Pro → Enterprise: “Roll this out chain-wide, integrate with ERP, and get white-label power.”
+
+---
+
+# Deferred from MVP build
+
+Items that were scoped out of the MVP but have concrete implementation notes from the build. Prioritize over the higher-level "shopping list" above — these are closer to ready.
+
+## Multi-size ingredient polish
+
+- **Cocktail picker config selection** — when adding a library ingredient to a recipe, let the user pick which configuration the recipe is costed against. Today the recipe always copies the ingredient's default size. Schema change: add `configuration_id` (nullable) to `cocktail_ingredients`.
+- **Promote alternate to default** — "Set as Default" action in `ingredient-size-form` that swaps the alternate's size+price into the inline ingredient row and demotes the old primary into a configuration.
+- **Pack-size UI** — `pack_size` and `pack_cost` columns exist in `ingredient_configurations` but the size-form doesn't surface them yet. Wire them in once invoice import populates them.
+
+## Delete-ingredient reassign flow
+
+- Replace the MVP-lite `IngredientInUseSheet` blocker with a full reassign-via-search: alert → search picker → pick a replacement → bulk-update all affected `cocktail_ingredients` rows → delete original.
+- Belongs under a future "Bulk Ingredient Management" section in Settings or as a contextual action on the ingredient detail page.
+- Schema: cascading update on `cocktail_ingredients.ingredient_id` + denormalized `ingredient_name` / `product_size` / `product_cost` / recomputed `cost`. Reuse `cascadeIngredientUpdate` logic.
+
+## Invoice scanning — Round 2.5
+
+Depends on multi-size cocktail wiring.
+
+- Product name normalization (strip proof, expand TEQ→Tequila, etc.)
+- Extract bottle size from BPC into `Volume` (`"6 - 1.0L"` → `Volume{ml:1000}, pack_size:6`)
+- Wire `ingredient_configurations` into invoice price update flow (match against existing configs by size, create when new)
+- Match "same product, different size" (750ml / 1.0L / 1.75L → one ingredient, many configurations)
+- Deposit fee / non-product line filtering
+- Review screen: show bottle size + pack info
+
+## Invoice scanning — Round 3 (intelligence + polish)
+
+- Template auto-generation from accumulated LLM extractions (Opus)
+- Verification anti-spam logic (Opus)
+- Multi-pack-size resolution (Opus)
+- Price change alerts UI ("Tito's went up 12% this month")
+- Settings: labor rate toggle
+- `ingredient_configurations` CRUD UI
+
+## Prepped ingredients
+
+1. New ingredient with `type = 'Prepped'`
+2. Template picker (Simple Syrup 1:1, Fresh Lime, Grenadine, …)
+3. Recipe builder: components, quantity, yield
+4. System computes `cost_per_oz` from components
+5. Invoice scan of component → prepped cost auto-recalc → cocktails auto-recalc
+
+Schema (`prepped_ingredient_recipes`, `prepped_ingredient_templates`) not yet applied. Ship 20+ templates at launch.
+
+## Labor cost in prep
+
+- `profiles.prep_labor_rate NUMERIC(10,2)`
+- `prep_time_minutes` on prepped recipes (JSONB)
+- `labor_cost = (prep_time_minutes / 60) × prep_labor_rate`
+- Toggle, default OFF for Free, available Lite+
+
+## Miscellaneous deferred features
+
+- **Multi-currency with live FX rates** — connect `profiles.base_currency` to display, weekly fetch from `exchangerate.host`, cache in `currency_rates` table. ~4-6 hrs.
+- **Email app picker on "Open Email"** — bottom sheet of installed mail apps via `canOpenURL` + `LSApplicationQueriesSchemes`. ~30 min.
+- **Add password for social-only users** — `supabase.auth.updateUser({ password })`. New row visible when `!hasPasswordIdentity`. ~15 min.
+- **Change email address** — `updateUser({ email })` + double-confirm flow. ~30-45 min.
+- **Coachmark tour** — `react-native-copilot`, 5-step guided tour, once per tab. ~1-2 days. Ship after observing PostHog drop-off.
+- **Empty-state inline hints** — for users who opted out of sample bar.
+
+## DB migrations pending
+
+- `prepped_ingredient_recipes` + `prepped_ingredient_templates`
+- `profiles.prep_labor_rate`
+- Optional: `ingredients.canonical_product_id` FK to canonical catalog
+- (`ingredient_configurations` shipped in `001_invoice_scanning.sql`)
+
+---
+
+# Architecture reference — invoice scanning
+
+## Processing pipeline
+
+```
+Photo → Gemini Vision Extraction → Distributor Detection → Pack Size Resolution → Product Matching → User Review → Price Update
+```
+
+## Matching cascade (per line item)
+
+```
+1. Exact SKU lookup in distributor_skus                      → auto-match (confidence 1.0)
+2. Org-level custom mapping (org_product_mappings)           → auto-match (confidence 1.0)
+3. Fuzzy name match against canonical_products (pg_trgm)
+   - similarity > 0.85 → auto-match, save SKU mapping
+   - 0.6–0.85         → suggest to user
+4. Fuzzy match against user's own ingredients
+5. Unmatched                                                 → queue for user review
+```
+
+## `ingredient_configurations` schema (shipped)
+
+```sql
+ingredient_configurations (
+  id UUID PK,
+  ingredient_id UUID FK → ingredients ON DELETE CASCADE,
+  product_size JSONB NOT NULL,
+  product_cost NUMERIC(10,2) NOT NULL,
+  pack_size INTEGER DEFAULT 1,
+  pack_cost NUMERIC(10,2),
+  is_default BOOLEAN DEFAULT false,
+  source TEXT DEFAULT 'manual',          -- manual, invoice, barcode
+  last_invoice_id UUID FK → invoices,
+  last_updated_price_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(ingredient_id, product_size, pack_size)
+)
+```

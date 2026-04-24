@@ -3,7 +3,8 @@ import { Drawer } from 'expo-router/drawer';
 import { DrawerActions } from '@react-navigation/native';
 
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useSegments, useNavigation } from 'expo-router';
+import { useSegments, useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { useNetworkStatus } from '@/src/lib/useNetworkStatus';
 import { HapticService } from '@/src/services/haptic-service';
@@ -58,7 +59,7 @@ function OfflineBadge() {
 
 // Search icon component for header right
 function SearchIcon() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const colors = useThemeColors();
   const segments = useSegments();
 

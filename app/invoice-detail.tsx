@@ -8,7 +8,7 @@
  *   - Gray border  → skipped / credit line
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -20,7 +20,8 @@ import {
   StatusBar,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInvoicesStore } from '@/src/stores/invoices-store';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
@@ -211,7 +212,7 @@ function LineItemCard({ item }: { item: InvoiceLineItem }) {
 
 export default function InvoiceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
+  const router = useGuardedRouter();
   const colors = useThemeColors();
   const { getInvoiceById } = useInvoicesStore();
 

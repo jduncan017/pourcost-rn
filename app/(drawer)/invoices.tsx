@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useState } from 'react';
 import { View, Text, FlatList, Pressable, ActivityIndicator, Alert, RefreshControl, Image } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useInvoicesStore } from '@/src/stores/invoices-store';
@@ -175,7 +175,7 @@ function InvoiceCard({
 // ==========================================
 
 export default function InvoicesScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const colors = useThemeColors();
   const { invoices, isLoading, error, loadInvoices } = useInvoicesStore();
 

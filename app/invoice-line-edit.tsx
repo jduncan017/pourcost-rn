@@ -7,7 +7,8 @@
 
 import { useState, useCallback } from 'react';
 import { View, Text, ScrollView, Alert } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { supabase } from '@/src/lib/supabase';
 import { useInvoicesStore } from '@/src/stores/invoices-store';
@@ -17,7 +18,7 @@ import TextInput from '@/src/components/ui/TextInput';
 import Button from '@/src/components/ui/Button';
 
 export default function InvoiceLineEditScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const colors = useThemeColors();
   const params = useLocalSearchParams<{
     lineItemId: string;

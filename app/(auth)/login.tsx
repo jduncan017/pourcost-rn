@@ -1,5 +1,5 @@
 import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
@@ -10,7 +10,7 @@ import { palette } from '@/src/contexts/ThemeContext';
 import { HapticService } from '@/src/services/haptic-service';
 
 export default function LoginScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const insets = useSafeAreaInsets();
 
   return (

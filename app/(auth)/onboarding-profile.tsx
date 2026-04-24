@@ -1,5 +1,5 @@
 import { Keyboard, View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
@@ -7,10 +7,10 @@ import TextInput from '@/src/components/ui/TextInput';
 import CustomSlider from '@/src/components/ui/CustomSlider';
 import { palette } from '@/src/contexts/ThemeContext';
 import { useAppStore } from '@/src/stores/app-store';
-import { fraction, volumeToOunces } from '@/src/types/models';
+import { volumeToOunces } from '@/src/types/models';
 
 export default function OnboardingProfile() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const insets = useSafeAreaInsets();
   const {
     displayName,

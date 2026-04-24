@@ -1,29 +1,29 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
-import MetricRow from '@/src/components/ui/MetricRow';
-import Button from '@/src/components/ui/Button';
+import HeaderSavePill from '@/src/components/ui/HeaderSavePill';
 import ChipSelector from '@/src/components/ui/ChipSelector';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter, useFocusEffect, useNavigation } from 'expo-router';
+import { useLocalSearchParams, useFocusEffect, useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { useAppStore } from '@/src/stores/app-store';
 import TextInput from '@/src/components/ui/TextInput';
 import EmptyState from '@/src/components/EmptyState';
-import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
-import ActionSheet from '@/src/components/ui/ActionSheet';
+import PourCostHero from '@/src/components/PourCostHero';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { sanitizeName, sanitizeDescription } from '@/src/lib/sanitize';
 import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
+import StatCard from '@/src/components/ui/StatCard';
 import CocktailIngredientItem from '@/src/components/CocktailIngredientItem';
 import ImagePlaceholder from '@/src/components/ui/ImagePlaceholder';
 import { useIngredientSelectionStore } from '@/src/stores/ingredient-selection-store';
 import {
   COCKTAIL_CATEGORIES,
 } from '@/src/constants/appConstants';
-import { CocktailIngredient, CocktailCategory, Volume, volumeLabel } from '@/src/types/models';
-import { calculateCostPerPour, calculateSuggestedPrice, formatCurrency } from '@/src/services/calculation-service';
+import { CocktailIngredient, CocktailCategory, Volume } from '@/src/types/models';
+import { calculateCostPerPour, calculateSuggestedPrice, formatCurrency, roundSuggestedPrice } from '@/src/services/calculation-service';
 import { FeedbackService } from '@/src/services/feedback-service';
 
 /**
@@ -32,12 +32,12 @@ import { FeedbackService } from '@/src/services/feedback-service';
  */
 export default function CocktailFormScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
+  const router = useGuardedRouter();
   const navigation = useNavigation();
   const params = useLocalSearchParams();
   const { selectedIngredient, selectedIngredients, removedIngredientIds, clearSelection } =
     useIngredientSelectionStore();
-  const { defaultRetailPrice, pourCostGoal } = useAppStore();
+  const { defaultRetailPrice, pourCostGoal, suggestedPriceRounding } = useAppStore();
 
   const colors = useThemeColors();
   const [showActions, setShowActions] = useState(false);
@@ -226,25 +226,11 @@ export default function CocktailFormScreen() {
         </Pressable>
       ),
       headerRight: () => (
-        <Pressable
+        <HeaderSavePill
           onPress={() => saveRef.current()}
-          disabled={!isValid || isSaving}
-          // Full-size pill so iOS 26 treats this as the button itself, rather
-          // than wrapping a smaller inner pill in an extra liquid-glass shell.
-          style={{
-            backgroundColor: isValid && !isSaving ? colors.go : colors.textMuted,
-            opacity: isSaving ? 0.6 : 1,
-            paddingHorizontal: 18,
-            paddingVertical: 8,
-            borderRadius: 999,
-            minHeight: 36,
-            justifyContent: 'center',
-          }}
-        >
-          <Text style={{ color: palette.N1, fontWeight: '600', fontSize: 15 }}>
-            {isSaving ? 'Saving...' : 'Save'}
-          </Text>
-        </Pressable>
+          disabled={!isValid}
+          isSaving={isSaving}
+        />
       ),
     });
   }, [isEditing, navigation, colors, isValid, isSaving]);
@@ -253,7 +239,7 @@ export default function CocktailFormScreen() {
     <GradientBackground>
       <ScrollView
         className="FormScroll flex-1"
-        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         pointerEvents={isSaving ? 'none' : 'auto'}
       >
         <View className="px-6 pt-4 pb-6 flex-col gap-8">
@@ -369,44 +355,28 @@ export default function CocktailFormScreen() {
             <AiSuggestionRow
               label="Suggested Price"
               value={formatCurrency(
-                calculateSuggestedPrice(totalCost, pourCostGoal / 100)
+                roundSuggestedPrice(
+                  calculateSuggestedPrice(totalCost, pourCostGoal / 100),
+                  suggestedPriceRounding
+                )
               )}
             />
 
-            <View className="flex-col">
-              {[
-                { label: 'Total Cost', value: formatCurrency(totalCost) },
-                { label: 'Profit Margin', value: formatCurrency(profitMargin) },
-              ].map((row, index, arr) => (
-                <View
-                  key={row.label}
-                  className="flex-row justify-between items-center py-3"
-                  style={
-                    index < arr.length - 1
-                      ? {
-                          borderBottomWidth: 1,
-                          borderBottomColor: colors.borderSubtle,
-                        }
-                      : undefined
-                  }
-                >
-                  <Text
-                    className="text-base"
-                    style={{ color: colors.textSecondary }}
-                  >
-                    {row.label}
-                  </Text>
-                  <Text
-                    className="text-base"
-                    style={{ color: colors.text, fontWeight: '500' }}
-                  >
-                    {row.value}
-                  </Text>
-                </View>
-              ))}
+            <View className="flex-row gap-3">
+              <StatCard
+                label="Total Cost"
+                value={formatCurrency(totalCost)}
+              />
+              <StatCard
+                label="Profit Margin"
+                value={formatCurrency(profitMargin)}
+                infoTermKey="margin"
+              />
             </View>
 
-            <PourCostPerformanceBar pourCostPercentage={pourCostPercentage} noCard />
+            <View className="-mx-6">
+              <PourCostHero pourCostPercentage={pourCostPercentage} />
+            </View>
           </View>
 
           {/* Delete button at bottom (edit mode only) */}

@@ -90,8 +90,8 @@ export type PourSizeScale = 'us' | 'metric';
 export interface SavedIngredient {
   id: string;
   name: string;
-  productSize: Volume;     // Container/bottle size (was bottleSize: number in ml)
-  productCost: number;     // Price paid for the container (was bottlePrice)
+  productSize: Volume;     // Default-configuration size, mirrored on the row for cocktail_ingredients lookups
+  productCost: number;     // Default-configuration cost
   retailPrice?: number;    // Sell price per pour (for pour cost % calculation)
   pourSize?: Volume;       // Per-ingredient pour size (overrides global default)
   type?: string;
@@ -102,6 +102,26 @@ export interface SavedIngredient {
   createdAt: Date;
   updatedAt: Date;
   userId?: string;
+  /** Additional purchase configurations (different bottle sizes / pack deals).
+   *  The default size lives on the row's productSize/productCost. Configurations
+   *  hold the SECONDARY sizes only — adding a second config doesn't duplicate
+   *  the default. Empty / undefined when the ingredient is single-size. */
+  configurations?: IngredientConfiguration[];
+}
+
+/** Alternate purchase size for an ingredient (e.g. Tito's 750ml + 1.75L).
+ *  Schema: ingredient_configurations table (migration 001_invoice_scanning.sql).
+ *  The ingredient's own productSize/productCost is the primary; configurations
+ *  hold any additional sizes the user has loaded into their library. */
+export interface IngredientConfiguration {
+  id: string;
+  ingredientId: string;
+  productSize: Volume;
+  productCost: number;
+  packSize?: number;       // 1 = single bottle; 6 = six-pack; 12 = case
+  packCost?: number;       // Total case/pack price (vs unit productCost)
+  source?: 'manual' | 'invoice' | 'barcode';
+  createdAt: Date;
 }
 
 // ==========================================

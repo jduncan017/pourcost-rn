@@ -6,12 +6,15 @@ import Animated, {
   withTiming,
   LinearTransition,
 } from 'react-native-reanimated';
-import { useRouter, useNavigation, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { useNavigation, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GradientBackground from '@/src/components/ui/GradientBackground';
+import HeaderSavePill from '@/src/components/ui/HeaderSavePill';
 import SearchBar from '@/src/components/ui/SearchBar';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
+import SuggestedTitle from '@/src/components/ui/SuggestedTitle';
 import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { ingredientTypeIcon } from '@/src/lib/type-icons';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
@@ -46,7 +49,7 @@ function FadingRow({ isFading, children }: { isFading: boolean; children: React.
  */
 export default function IngredientSelectorScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
+  const router = useGuardedRouter();
   const navigation = useNavigation();
   const params = useLocalSearchParams();
   const colors = useThemeColors();
@@ -107,22 +110,7 @@ export default function IngredientSelectorScreen() {
           <Text style={{ color: colors.text, fontSize: 16 }}>Cancel</Text>
         </Pressable>
       ),
-      headerRight: () => (
-        <Pressable
-          onPress={handleFinishSelection}
-          // Match cocktail-form save pill so iOS 26 treats it as the button itself
-          style={{
-            backgroundColor: colors.go,
-            paddingHorizontal: 18,
-            paddingVertical: 8,
-            borderRadius: 999,
-            minHeight: 36,
-            justifyContent: 'center',
-          }}
-        >
-          <Text style={{ color: palette.N1, fontWeight: '600', fontSize: 15 }}>Save</Text>
-        </Pressable>
-      ),
+      headerRight: () => <HeaderSavePill onPress={handleFinishSelection} />,
     });
   }, [selectedIngredients.length, navigation, colors]);
 
@@ -407,14 +395,7 @@ export default function IngredientSelectorScreen() {
           ) : (
             nonFadingCount > 0 && (
               <View className="flex-col">
-                <View className="flex-row items-center gap-1.5 mb-1">
-                  <Ionicons name="sparkles" size={12} color={palette.P2} />
-                  <ScreenTitle
-                    title="Suggested"
-                    variant="muted"
-                    style={{ color: palette.P2 }}
-                  />
-                </View>
+                <SuggestedTitle title="Suggested" />
 
                 <View style={clippedHeight ? { maxHeight: clippedHeight, overflow: 'hidden' } : undefined}>
                   <Animated.View layout={LinearTransition.duration(300)}>

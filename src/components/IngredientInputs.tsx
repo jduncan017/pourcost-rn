@@ -15,7 +15,6 @@ import Card from '@/src/components/ui/Card';
 import TextInput from '@/src/components/ui/TextInput';
 import Dropdown from '@/src/components/ui/Dropdown';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
-import { useAppStore } from '@/src/stores/app-store';
 import {
   INGREDIENT_TYPES,
   SUBTYPES_BY_TYPE,
@@ -26,7 +25,7 @@ import {
   getPourChipsForContext,
   type IngredientType,
 } from '@/src/constants/appConstants';
-import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
+import { Volume, volumeLabel } from '@/src/types/models';
 
 // ==========================================
 // CONSTANTS
@@ -70,6 +69,10 @@ interface IngredientInputsProps {
   hideRetailPrice?: boolean;
   /** Render without Card wrapper */
   noCard?: boolean;
+  /** Hide product size + product cost inputs.
+   *  Used by the edit-ingredient form, where sizes/costs live in the
+   *  separate "Sizes" section and per-config edit screen. */
+  hideProductSize?: boolean;
 }
 
 // ==========================================
@@ -83,6 +86,7 @@ export default function IngredientInputs({
   hideOtherType = false,
   hideRetailPrice = false,
   noCard = false,
+  hideProductSize = false,
 }: IngredientInputsProps) {
   const colors = useThemeColors();
   const router = useRouter();
@@ -266,41 +270,45 @@ export default function IngredientInputs({
       ) : (
         <>
           {/* ── STANDARD ── */}
-          <Dropdown
-            value={volumeLabel(productSize)}
-            onValueChange={handleProductSizeChange}
-            options={productSizeOptions}
-            label={ingredientType === 'Prepped' ? 'Batch Yield' : 'Product Size'}
-                placeholder="Select size"
-            sheetHeaderRight={variant === 'form' ? (closeSheet) => (
-              <Pressable
-                onPress={() => {
-                  closeSheet();
-                  router.push('/container-sizes' as any);
-                }}
-                className="flex-row items-center gap-1 p-1"
-              >
-                <Ionicons name="settings-outline" size={18} color={colors.textSecondary} />
-                <Text style={{ color: colors.textSecondary, fontSize: 14 }}>Edit</Text>
-              </Pressable>
-            ) : undefined}
-          />
+          {!hideProductSize && (
+            <Dropdown
+              value={volumeLabel(productSize)}
+              onValueChange={handleProductSizeChange}
+              options={productSizeOptions}
+              label={ingredientType === 'Prepped' ? 'Batch Yield' : 'Product Size'}
+                  placeholder="Select size"
+              sheetHeaderRight={variant === 'form' ? (closeSheet) => (
+                <Pressable
+                  onPress={() => {
+                    closeSheet();
+                    router.push('/container-sizes' as any);
+                  }}
+                  className="flex-row items-center gap-1 p-1"
+                >
+                  <Ionicons name="settings-outline" size={18} color={colors.textSecondary} />
+                  <Text style={{ color: colors.textSecondary, fontSize: 14 }}>Edit</Text>
+                </Pressable>
+              ) : undefined}
+            />
+          )}
 
-          <TextInput
-            label={ingredientType === 'Prepped'
-              ? `Batch Cost (${volumeLabel(productSize)})`
-              : `Cost / ${volumeLabel(productSize)}`}
-                value={productCostText}
-            onChangeText={(text) => {
-              if (text === '' || /^\d*\.?\d*$/.test(text)) {
-                setProductCostText(text);
-                onChange({ productCost: text === '' ? 0 : parseFloat(text) || 0 });
-              }
-            }}
-            placeholder="0.00"
-            keyboardType="decimal-pad"
-            prefix="$"
-          />
+          {!hideProductSize && (
+            <TextInput
+              label={ingredientType === 'Prepped'
+                ? `Batch Cost (${volumeLabel(productSize)})`
+                : `Cost / ${volumeLabel(productSize)}`}
+                  value={productCostText}
+              onChangeText={(text) => {
+                if (text === '' || /^\d*\.?\d*$/.test(text)) {
+                  setProductCostText(text);
+                  onChange({ productCost: text === '' ? 0 : parseFloat(text) || 0 });
+                }
+              }}
+              placeholder="0.00"
+              keyboardType="decimal-pad"
+              prefix="$"
+            />
+          )}
 
           {/* Pour Size chips */}
           <ChipSelector

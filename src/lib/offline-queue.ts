@@ -71,10 +71,6 @@ export async function getQueueLength(): Promise<number> {
   return queue.length;
 }
 
-export async function clearQueue(): Promise<void> {
-  await AsyncStorage.removeItem(QUEUE_KEY);
-}
-
 // ==========================================
 // QUEUE PROCESSING
 // ==========================================

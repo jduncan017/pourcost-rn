@@ -1,6 +1,7 @@
 import { useLayoutEffect, useCallback } from 'react';
 import { View, Text, ScrollView, Pressable, Switch } from 'react-native';
-import { useRouter, useNavigation } from 'expo-router';
+import { useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
@@ -9,7 +10,7 @@ import { PRODUCT_SIZES } from '@/src/constants/appConstants';
 import { volumeLabel } from '@/src/types/models';
 
 export default function ContainerSizesScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
   const { enabledProductSizes, toggleProductSize, setEnabledProductSizes, saveProfile } = useAppStore();

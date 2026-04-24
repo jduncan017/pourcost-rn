@@ -16,13 +16,12 @@ import {
   View,
   Text,
   ScrollView,
-  Pressable,
   KeyboardAvoidingView,
   Platform,
   Alert,
 } from 'react-native';
-import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { useAppStore } from '@/src/stores/app-store';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
@@ -36,13 +35,13 @@ import Card from '@/src/components/ui/Card';
 import MetricRow from '@/src/components/ui/MetricRow';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
-import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
+import PourCostHero from '@/src/components/PourCostHero';
 import ChipSelector from '@/src/components/ui/ChipSelector';
 import {
   SUBTYPES_BY_TYPE,
   type IngredientType,
 } from '@/src/constants/appConstants';
-import { type Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
+import { type Volume, volumeLabel } from '@/src/types/models';
 import {
   calculateCostPerOz,
   calculateCostPerPour,
@@ -70,7 +69,7 @@ interface SetupItem {
 // ==========================================
 
 export default function InvoiceIngredientSetupScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
   const { addIngredient } = useIngredientsStore();
@@ -238,7 +237,7 @@ export default function InvoiceIngredientSetupScreen() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ paddingBottom: 120 }}
         >
-          <View className="p-4 pt-6 flex-col gap-6">
+          <View className="px-6 pt-4 pb-6 flex-col gap-6">
 
             {/* Progress indicator */}
             <View className="flex-row items-center gap-2">
@@ -332,14 +331,10 @@ export default function InvoiceIngredientSetupScreen() {
                 value={formatCurrency(suggestedRetail)}
               />
 
-              <View style={{ height: 1, backgroundColor: colors.border }} />
-
-              <PourCostPerformanceBar
-                pourCostPercentage={pourCostPercentage}
-                noCard
-              />
-
-              <View style={{ height: 1, backgroundColor: colors.border }} />
+              {/* Bleed Hero to card edges — Hero paints its own top/bottom hairlines. */}
+              <View className="-mx-6">
+                <PourCostHero pourCostPercentage={pourCostPercentage} />
+              </View>
 
               <Text className="text-lg mb-2" style={{ color: colors.textSecondary, fontWeight: '500' }}>
                 Cost Analysis

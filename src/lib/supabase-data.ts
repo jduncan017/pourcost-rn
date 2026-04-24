@@ -5,7 +5,7 @@
  */
 
 import { supabase } from './supabase';
-import { SavedIngredient, Cocktail, CocktailIngredient, Volume, fraction } from '@/src/types/models';
+import { SavedIngredient, Cocktail, CocktailIngredient, IngredientConfiguration, Volume, fraction } from '@/src/types/models';
 import type { ThemeMode, IngredientOrderPref } from '@/src/stores/app-store';
 
 // ==========================================
@@ -197,14 +197,102 @@ function rowToCocktail(row: CocktailRow, ingredients: CocktailIngredient[]): Coc
 // INGREDIENTS CRUD
 // ==========================================
 
+interface IngredientConfigurationRow {
+  id: string;
+  ingredient_id: string;
+  product_size: Volume;
+  product_cost: number;
+  pack_size: number | null;
+  pack_cost: number | null;
+  source: string | null;
+  created_at: string;
+}
+
+function rowToConfiguration(row: IngredientConfigurationRow): IngredientConfiguration {
+  return {
+    id: row.id,
+    ingredientId: row.ingredient_id,
+    productSize: row.product_size,
+    productCost: Number(row.product_cost),
+    packSize: row.pack_size ?? undefined,
+    packCost: row.pack_cost != null ? Number(row.pack_cost) : undefined,
+    source: (row.source as IngredientConfiguration['source']) ?? 'manual',
+    createdAt: new Date(row.created_at),
+  };
+}
+
 export async function fetchIngredients(): Promise<SavedIngredient[]> {
+  // Single round-trip: ingredients + their configurations via Supabase nested select.
   const { data, error } = await supabase
     .from('ingredients')
-    .select('*')
+    .select('*, ingredient_configurations(*)')
     .order('created_at', { ascending: false });
 
   if (error) throw new Error(error.message);
-  return (data as IngredientRow[]).map(rowToIngredient);
+  return (data as (IngredientRow & { ingredient_configurations: IngredientConfigurationRow[] })[]).map(
+    (row) => {
+      const ingredient = rowToIngredient(row);
+      const configs = row.ingredient_configurations ?? [];
+      ingredient.configurations = configs.length
+        ? configs.map(rowToConfiguration)
+        : undefined;
+      return ingredient;
+    }
+  );
+}
+
+// ==========================================
+// INGREDIENT CONFIGURATIONS CRUD
+// ==========================================
+
+export async function insertIngredientConfiguration(
+  config: Omit<IngredientConfiguration, 'id' | 'createdAt'>
+): Promise<IngredientConfiguration> {
+  const { data, error } = await supabase
+    .from('ingredient_configurations')
+    .insert({
+      ingredient_id: config.ingredientId,
+      product_size: config.productSize,
+      product_cost: config.productCost,
+      pack_size: config.packSize ?? 1,
+      pack_cost: config.packCost ?? null,
+      source: config.source ?? 'manual',
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return rowToConfiguration(data as IngredientConfigurationRow);
+}
+
+export async function updateIngredientConfiguration(
+  id: string,
+  updates: Partial<Omit<IngredientConfiguration, 'id' | 'ingredientId' | 'createdAt'>>
+): Promise<IngredientConfiguration> {
+  const row: Record<string, unknown> = {};
+  if (updates.productSize !== undefined) row.product_size = updates.productSize;
+  if (updates.productCost !== undefined) row.product_cost = updates.productCost;
+  if (updates.packSize !== undefined) row.pack_size = updates.packSize;
+  if (updates.packCost !== undefined) row.pack_cost = updates.packCost;
+  if (updates.source !== undefined) row.source = updates.source;
+
+  const { data, error } = await supabase
+    .from('ingredient_configurations')
+    .update(row)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return rowToConfiguration(data as IngredientConfigurationRow);
+}
+
+export async function deleteIngredientConfiguration(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('ingredient_configurations')
+    .delete()
+    .eq('id', id);
+  if (error) throw new Error(error.message);
 }
 
 export async function insertIngredient(

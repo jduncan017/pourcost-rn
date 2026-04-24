@@ -2,8 +2,30 @@ import { View, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppStore } from '@/src/stores/app-store';
 import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
-import { getPerformance } from './PourCostPerformanceBar';
+import { PERFORMANCE_DISTANCE_THRESHOLDS } from '@/src/constants/appConstants';
 import InfoIcon from './ui/InfoIcon';
+
+const PERF_COLORS = {
+  onTarget: palette.G3,
+  close: palette.Y3,
+  drifting: palette.O4,
+  bad: palette.R3,
+};
+
+/** Map a pour-cost-to-goal ratio into a color + label (e.g. 1.0 = On Target).
+ *  Exported so other components (e.g. performance badges on detail pages) can
+ *  reuse the same thresholds without duplicating the color math. */
+export function getPerformance(ratio: number) {
+  if (ratio <= 0) return { color: PERF_COLORS.onTarget, label: 'On Target' };
+  const distance = Math.abs(ratio - 1);
+  if (distance <= PERFORMANCE_DISTANCE_THRESHOLDS.ON_TARGET)
+    return { color: PERF_COLORS.onTarget, label: 'On Target' };
+  if (distance <= PERFORMANCE_DISTANCE_THRESHOLDS.CLOSE)
+    return { color: PERF_COLORS.close, label: ratio < 1 ? 'Slight Under' : 'Slight Over' };
+  if (distance <= PERFORMANCE_DISTANCE_THRESHOLDS.DRIFTING)
+    return { color: PERF_COLORS.drifting, label: ratio < 1 ? 'Under' : 'Over' };
+  return { color: PERF_COLORS.bad, label: ratio < 1 ? 'Way Under' : 'Way Over' };
+}
 
 interface PourCostHeroProps {
   pourCostPercentage: number;

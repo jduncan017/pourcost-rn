@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Image } from 'react-native';
-import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useAppStore } from '@/src/stores/app-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
@@ -9,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import ActionSheet from '@/src/components/ui/ActionSheet';
-import InfoIcon from '@/src/components/ui/InfoIcon';
+import LedgerRow from '@/src/components/ui/LedgerRow';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StatCard from '@/src/components/ui/StatCard';
 import DetailLevelToggle from '@/src/components/ui/DetailLevelToggle';
@@ -23,6 +24,7 @@ import {
   calculateCocktailMetrics,
   calculatePourCostPercentage,
   formatCurrency,
+  roundSuggestedPrice,
 } from '@/src/services/calculation-service';
 
 /** Display-friendly pour size: "2oz", "3/4oz", "1 1/2oz" — fractions when possible */
@@ -53,42 +55,16 @@ function pourLabel(v: Volume): string {
   return `${oz % 1 === 0 ? oz : oz.toFixed(1)}oz`;
 }
 
-/** One row in the LEDGER open list — no dividers between rows. */
-function LedgerRow({
-  label,
-  value,
-  valueColor,
-  colors,
-  infoTermKey,
-}: {
-  label: string;
-  value: string;
-  valueColor?: string;
-  colors: any;
-  infoTermKey?: import('@/src/constants/glossary').GlossaryKey;
-}) {
-  return (
-    <View className="flex-row justify-between items-center py-2">
-      <View className="flex-row items-center gap-1">
-        <Text className="text-base" style={{ color: colors.textSecondary }}>
-          {label}
-        </Text>
-        {infoTermKey && <InfoIcon termKey={infoTermKey} size={13} />}
-      </View>
-      <Text
-        className="text-base"
-        style={{ color: valueColor ?? colors.text, fontWeight: '600' }}
-      >
-        {value}
-      </Text>
-    </View>
-  );
-}
 
 export default function CocktailDetailScreen() {
-  const { defaultRetailPrice, ingredientOrderPref, pourCostGoal, detailLevel } =
-    useAppStore();
-  const router = useRouter();
+  const {
+    defaultRetailPrice,
+    ingredientOrderPref,
+    pourCostGoal,
+    detailLevel,
+    suggestedPriceRounding,
+  } = useAppStore();
+  const router = useGuardedRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
   const params = useLocalSearchParams();
@@ -282,7 +258,7 @@ export default function CocktailDetailScreen() {
             {isDetailed && (
               <AiSuggestionRow
                 label="Suggested Price"
-                value={formatCurrency(metrics.suggestedPrice)}
+                value={formatCurrency(roundSuggestedPrice(metrics.suggestedPrice, suggestedPriceRounding))}
                 infoTermKey="suggestedPrice"
               />
             )}
@@ -396,23 +372,19 @@ export default function CocktailDetailScreen() {
                 <LedgerRow
                   label="Cost Of Goods"
                   value={formatCurrency(metrics.totalCost)}
-                  colors={colors}
                   infoTermKey="cogs"
                 />
                 <LedgerRow
                   label="Total Volume"
                   value={`${totalVolume.toFixed(2)} oz`}
-                  colors={colors}
                 />
                 <LedgerRow
                   label="Category"
                   value={cocktail.category || 'Other'}
-                  colors={colors}
                 />
                 <LedgerRow
                   label="Last Updated"
                   value={new Date(cocktail.updatedAt).toLocaleDateString()}
-                  colors={colors}
                 />
               </View>
             </LinearGradient>

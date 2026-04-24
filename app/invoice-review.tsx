@@ -20,7 +20,8 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInvoicesStore } from '@/src/stores/invoices-store';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
@@ -130,7 +131,7 @@ function MappingCard({
         <View className="flex-row items-center gap-1 mt-2">
           <Ionicons name="warning" size={12} color={colors.warning} />
           <Text className="text-xs" style={{ color: colors.warning }}>
-            Low confidence match — verify this is correct
+            Low confidence match. Verify this is correct.
           </Text>
         </View>
       )}
@@ -250,7 +251,7 @@ function IngredientSearchPanel({
 
 export default function InvoiceReviewScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
+  const router = useGuardedRouter();
   const colors = useThemeColors();
 
   const { getInvoiceById, loadLineItems, getLineItemsForInvoice } = useInvoicesStore();

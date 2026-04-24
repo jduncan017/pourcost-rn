@@ -12,7 +12,7 @@
 
 import { supabase } from '@/src/lib/supabase';
 import { PRODUCT_SIZES } from '@/src/constants/appConstants';
-import { Volume, volumeToOunces, volumeLabel } from '@/src/types/models';
+import { Volume, volumeToOunces } from '@/src/types/models';
 import { parseVolumeFromBpc } from './product-normalization-service';
 import type { InvoiceLineItem } from '@/src/types/invoice-models';
 import type { SavedIngredient } from '@/src/types/models';

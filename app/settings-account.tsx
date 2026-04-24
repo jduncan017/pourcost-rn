@@ -1,6 +1,7 @@
 import { useState, useCallback, useLayoutEffect, useRef, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Alert, Platform, TextInput as RNTextInput } from 'react-native';
-import { useRouter, useNavigation } from 'expo-router';
+import { useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import SettingsCard from '@/src/components/ui/SettingsCard';
@@ -13,7 +14,7 @@ import { useAppStore } from '@/src/stores/app-store';
 import { FeedbackService } from '@/src/services/feedback-service';
 
 export default function SettingsAccountScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
   const {
@@ -138,7 +139,7 @@ export default function SettingsAccountScreen() {
   return (
     <GradientBackground>
       <ScrollView className="flex-1">
-        <View className="p-4 pt-6 flex-col gap-6">
+        <View className="px-6 pt-4 pb-6 flex-col gap-6">
           {/* Profile */}
           <View className="flex-col gap-3">
             <ScreenTitle variant="group" title="Profile" />
@@ -183,7 +184,7 @@ export default function SettingsAccountScreen() {
             {Platform.OS === 'ios' && (
               <SettingsCard
                 title="Apple Sign-In"
-                description={hasApple ? 'Linked — tap to unlink' : 'Not linked — tap to link'}
+                description={hasApple ? 'Linked. Tap to unlink' : 'Not linked. Tap to link'}
                 iconName={hasApple ? 'checkmark-circle-outline' : 'add-circle-outline'}
                 iconColor={hasApple ? colors.colors.G3 : colors.text}
                 onPress={() => (hasApple ? handleUnlink('apple') : handleLink('apple'))}
@@ -191,7 +192,7 @@ export default function SettingsAccountScreen() {
             )}
             <SettingsCard
               title="Google Sign-In"
-              description={hasGoogle ? 'Linked — tap to unlink' : 'Not linked — tap to link'}
+              description={hasGoogle ? 'Linked. Tap to unlink' : 'Not linked. Tap to link'}
               iconName={hasGoogle ? 'checkmark-circle-outline' : 'add-circle-outline'}
               iconColor={hasGoogle ? colors.colors.G3 : colors.text}
               onPress={() => (hasGoogle ? handleUnlink('google') : handleLink('google'))}

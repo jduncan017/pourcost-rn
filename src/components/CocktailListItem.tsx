@@ -1,12 +1,14 @@
 /**
  * CocktailListItem Component for PourCost-RN
- * Displays cocktail information in a list format with swipe actions
+ * Displays cocktail information in a list format with swipe actions.
+ * In selection mode, swipe is replaced with a checkbox + tap-to-toggle.
  */
 
 import { useMemo } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import SwipeableCard from './SwipeableCard';
+import Card from './ui/Card';
 import { Cocktail } from '@/src/types/models';
 import { calculateCocktailMetrics, formatCurrency, formatPercentage } from '@/src/services/calculation-service';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
@@ -18,6 +20,9 @@ interface CocktailListItemProps {
   onEdit?: () => void;
   onDelete?: () => void;
   className?: string;
+  selectionMode?: boolean;
+  selected?: boolean;
+  onSelectionToggle?: () => void;
 }
 
 export default function CocktailListItem({
@@ -27,6 +32,9 @@ export default function CocktailListItem({
   onEdit,
   onDelete,
   className = '',
+  selectionMode = false,
+  selected = false,
+  onSelectionToggle,
 }: CocktailListItemProps) {
   if (!cocktail) return null;
 
@@ -60,36 +68,44 @@ export default function CocktailListItem({
 
   const highlight = getHighlight();
 
-  return (
-    <SwipeableCard
-      onPress={onPress}
-      onSwipeLeft={onEdit}
-      onSwipeRight={onDelete}
-      className={className}
-      variant="gradient"
-      padding="medium"
-    >
-      <View className="flex-row items-center gap-3">
-        {/* Left - Name & ingredients */}
-        <View className="flex-1">
-          <Text
-            className="text-base tracking-wide"
-            style={{ color: colors.text, fontWeight: '600' }}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {cocktail.name || 'Unknown Cocktail'}
-          </Text>
-          <Text className="text-sm mt-0.5" style={{ color: colors.textTertiary }} numberOfLines={1}>
-            {cocktail.ingredients
-              ?.map((ing) => ing?.name)
-              .filter(Boolean)
-              .join(', ') || 'No ingredients'}
-          </Text>
+  const body = (
+    <View className="flex-row items-center gap-3">
+      {selectionMode && (
+        <View
+          className="w-6 h-6 rounded-full items-center justify-center"
+          style={{
+            backgroundColor: selected ? colors.accent : 'transparent',
+            borderWidth: 2,
+            borderColor: selected ? colors.accent : colors.border,
+          }}
+        >
+          {selected && (
+            <Ionicons name="checkmark" size={14} color={colors.colors.N1} />
+          )}
         </View>
+      )}
 
-        {/* Right - Metric or chevron */}
-        {highlight ? (
+      {/* Left - Name & ingredients */}
+      <View className="flex-1">
+        <Text
+          className="text-base tracking-wide"
+          style={{ color: colors.text, fontWeight: '600' }}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {cocktail.name || 'Unknown Cocktail'}
+        </Text>
+        <Text className="text-sm mt-0.5" style={{ color: colors.textTertiary }} numberOfLines={1}>
+          {cocktail.ingredients
+            ?.map((ing) => ing?.name)
+            .filter(Boolean)
+            .join(', ') || 'No ingredients'}
+        </Text>
+      </View>
+
+      {/* Right - Metric or chevron. Hidden in selection mode. */}
+      {!selectionMode &&
+        (highlight ? (
           <View className="pl-3.5 items-center" style={{ borderLeftWidth: 1, borderLeftColor: colors.border }}>
             <Text className="text-sm" style={{ color: colors.textTertiary }}>{highlight.label}</Text>
             <Text
@@ -101,8 +117,34 @@ export default function CocktailListItem({
           </View>
         ) : (
           <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
-        )}
-      </View>
+        ))}
+    </View>
+  );
+
+  if (selectionMode) {
+    return (
+      <Pressable
+        onPress={onSelectionToggle}
+        className={className}
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+      >
+        <Card padding="medium">
+          {body}
+        </Card>
+      </Pressable>
+    );
+  }
+
+  return (
+    <SwipeableCard
+      onPress={onPress}
+      onSwipeLeft={onEdit}
+      onSwipeRight={onDelete}
+      className={className}
+      variant="gradient"
+      padding="medium"
+    >
+      {body}
     </SwipeableCard>
   );
 }

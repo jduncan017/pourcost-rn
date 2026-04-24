@@ -32,7 +32,8 @@ import {
 } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { PlayfairDisplay_400Regular_Italic, PlayfairDisplay_600SemiBold_Italic } from '@expo-google-fonts/playfair-display';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useSegments } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState, useCallback } from 'react';
 import 'react-native-reanimated';
@@ -118,7 +119,7 @@ function RootLayoutNav() {
   const colors = useThemeColors();
   const { session, isLoading: authLoading, isNewSignUp } = useAuth();
   const isOnboarding = isNewSignUp && !!session;
-  const router = useRouter();
+  const router = useGuardedRouter();
   const segments = useSegments();
   const [isInitializing, setIsInitializing] = useState(false);
   // Track which user ID we've loaded data for. Only reload when the user
@@ -206,6 +207,7 @@ function RootLayoutNav() {
             <Stack.Screen name="ingredient-detail" options={{ title: '' }} />
             <Stack.Screen name="cocktail-form" options={{ title: '' }} />
             <Stack.Screen name="ingredient-form" options={{ title: '' }} />
+            <Stack.Screen name="ingredient-size-form" options={{ title: '' }} />
             <Stack.Screen name="ingredient-selector" options={{ title: 'Add Ingredients' }} />
             <Stack.Screen name="search" options={{ title: 'Search' }} />
             <Stack.Screen name="container-sizes" options={{ title: 'Container Sizes' }} />

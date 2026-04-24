@@ -13,6 +13,8 @@ import { FeedbackService } from '@/src/services/feedback-service';
 export type ThemeMode = 'dark' | 'light' | 'auto';
 export type IngredientOrderPref = 'manual' | 'most-to-least' | 'least-to-most' | 'cost-high-low';
 export type DetailLevel = 'simple' | 'detailed';
+/** Rounding mode for displayed Suggested Prices across the app. */
+export type PriceRounding = 'off' | '1' | '0.5' | '0.25';
 
 interface AppState {
   // Synced with Supabase profiles
@@ -25,6 +27,7 @@ interface AppState {
 
   // Local-only state
   detailLevel: DetailLevel;
+  suggestedPriceRounding: PriceRounding;
   isFirstLaunch: boolean;
   isLoading: boolean;
   lastSyncDate: Date | null;
@@ -38,6 +41,7 @@ interface AppState {
   setThemeMode: (mode: ThemeMode) => void;
   setDisplayName: (name: string) => void;
   setDetailLevel: (level: DetailLevel) => void;
+  setSuggestedPriceRounding: (r: PriceRounding) => void;
   setFirstLaunch: (isFirst: boolean) => void;
   setLoading: (loading: boolean) => void;
   setEnabledProductSizes: (sizes: string[]) => void;
@@ -73,6 +77,7 @@ export const useAppStore = create<AppState>()(
       themeMode: 'dark',
       displayName: '',
       detailLevel: 'detailed',
+      suggestedPriceRounding: 'off',
       isFirstLaunch: true,
       isLoading: false,
       lastSyncDate: null,
@@ -100,6 +105,8 @@ export const useAppStore = create<AppState>()(
       setDisplayName: (name) => set({ displayName: name }),
 
       setDetailLevel: (level) => set({ detailLevel: level }),
+
+      setSuggestedPriceRounding: (r) => set({ suggestedPriceRounding: r }),
 
       setFirstLaunch: (isFirst) => set({ isFirstLaunch: isFirst }),
 
@@ -171,6 +178,7 @@ export const useAppStore = create<AppState>()(
           themeMode: 'dark',
           displayName: '',
           detailLevel: 'detailed',
+          suggestedPriceRounding: 'off',
           isFirstLaunch: false,
         });
       },

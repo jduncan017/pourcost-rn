@@ -6,15 +6,17 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
-  TextInput as RNTextInput,
 } from 'react-native';
-import { useRouter, useNavigation } from 'expo-router';
+import { useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import SearchBar from '@/src/components/ui/SearchBar';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SectionDivider from '@/src/components/ui/SectionDivider';
+import SuggestedTitle from '@/src/components/ui/SuggestedTitle';
+import ResultRow from '@/src/components/ui/ResultRow';
 import TextInput from '@/src/components/ui/TextInput';
 import Toggle from '@/src/components/ui/Toggle';
 import InfoIcon from '@/src/components/ui/InfoIcon';
@@ -31,8 +33,7 @@ import {
   volumeToOunces,
 } from '@/src/types/models';
 import { ensureDate } from '@/src/lib/ensureDate';
-import { cocktailIcon, ingredientTypeIcon } from '@/src/lib/type-icons';
-import { getProductSizesForType } from '@/src/constants/appConstants';
+import { cocktailIcon } from '@/src/lib/type-icons';
 import { HapticService } from '@/src/services/haptic-service';
 
 // ==========================================
@@ -52,6 +53,11 @@ function roundQuarterOz(oz: number): number {
 /** Format an oz amount at quarter-oz resolution (e.g. 6.76 → "6.75 oz"). */
 function fmtQuarterOz(oz: number): string {
   return `${roundQuarterOz(oz).toFixed(2)} oz`;
+}
+
+/** True when oz is an exact multiple of 0.25 (so no "~" needed on the total). */
+function isQuarterMultiple(oz: number): boolean {
+  return Math.abs(oz * 4 - Math.round(oz * 4)) < 1e-9;
 }
 
 // ==========================================
@@ -77,8 +83,10 @@ interface BatchLine {
   unit: PourUnit;
   /** Per-drink count (for unit-type garnishes; otherwise equal to amount in that unit). */
   amount: number;
-  /** Library ingredient reference, if available (for bottle suggestions). */
+  /** Library ingredient reference, if available. */
   savedIngredient?: SavedIngredient;
+  /** Bottle size the recipe was costed against — used as THE bottle for order guidance. */
+  recipeProductSize?: Volume;
 }
 
 // ==========================================
@@ -117,7 +125,8 @@ function formatBatchAmount(
 function lineFromVolume(
   name: string,
   pourSize: Volume,
-  saved?: SavedIngredient
+  saved?: SavedIngredient,
+  recipeProductSize?: Volume
 ): BatchLine {
   const pourOz = volumeToOunces(pourSize);
   let unit: PourUnit = 'oz';
@@ -135,26 +144,22 @@ function lineFromVolume(
     unit = 'unit';
     amount = pourSize.quantity;
   }
-  return { name, pourOz, unit, amount, savedIngredient: saved };
+  return { name, pourOz, unit, amount, savedIngredient: saved, recipeProductSize };
 }
 
 /** Given a target in oz and the saved ingredient, suggest the min-spare bottle combo. */
+/** How many bottles of the RECIPE'S size are needed to cover the target?
+ *  We use the size the recipe was costed against so the order matches what
+ *  the bar already stocks, not whatever minimizes spare. */
 function suggestBottleCombo(
   targetOz: number,
-  ingredient: SavedIngredient
+  bottleSize: Volume
 ): { count: number; size: Volume; spareOz: number } | null {
-  const available = getProductSizesForType(ingredient.type, ingredient.subType);
-  let best: { count: number; size: Volume; spareOz: number } | null = null;
-  for (const size of available) {
-    const sizeOz = volumeToOunces(size);
-    if (sizeOz <= 0) continue;
-    const count = Math.ceil(targetOz / sizeOz);
-    const spareOz = count * sizeOz - targetOz;
-    if (!best || spareOz < best.spareOz) {
-      best = { count, size, spareOz };
-    }
-  }
-  return best;
+  const sizeOz = volumeToOunces(bottleSize);
+  if (sizeOz <= 0) return null;
+  const count = Math.ceil(targetOz / sizeOz);
+  const spareOz = count * sizeOz - targetOz;
+  return { count, size: bottleSize, spareOz };
 }
 
 // ==========================================
@@ -162,7 +167,7 @@ function suggestBottleCombo(
 // ==========================================
 
 export default function BatchScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -214,7 +219,7 @@ export default function BatchScreen() {
       if (!selectedCocktail) return [];
       return selectedCocktail.ingredients.map((ci: CocktailIngredient) => {
         const saved = savedIngredients.find((s) => s.id === ci.ingredientId);
-        return lineFromVolume(ci.name, ci.pourSize, saved);
+        return lineFromVolume(ci.name, ci.pourSize, saved, ci.productSize);
       });
     }
     return customIngredients
@@ -329,55 +334,17 @@ export default function BatchScreen() {
                 {filteredCocktails.length > 0 ? (
                   <View>
                     {!searchQuery.trim() && (
-                      <View className="flex-row items-center gap-1.5 mb-1">
-                        <Ionicons
-                          name="sparkles"
-                          size={12}
-                          color={palette.P2}
-                        />
-                        <ScreenTitle
-                          title="Suggested Cocktails"
-                          variant="muted"
-                          style={{ color: palette.P2 }}
-                        />
-                      </View>
+                      <SuggestedTitle title="Suggested Cocktails" />
                     )}
                     {filteredCocktails.map((c, index) => (
                       <View key={c.id}>
                         {index > 0 && <SectionDivider />}
-                        <Pressable
+                        <ResultRow
+                          icon={cocktailIcon}
+                          title={c.name}
+                          subtitle={`${c.ingredients.length} ingredients`}
                           onPress={() => handleSelectCocktail(c)}
-                          className="flex-row items-center py-3"
-                          style={({ pressed }) => ({
-                            opacity: pressed ? 0.7 : 1,
-                          })}
-                        >
-                          <MaterialCommunityIcons
-                            name={cocktailIcon.name}
-                            size={22}
-                            color={cocktailIcon.color}
-                            style={{ marginRight: 12 }}
-                          />
-                          <View className="flex-1">
-                            <Text
-                              className="text-base"
-                              style={{ color: colors.text, fontWeight: '500' }}
-                            >
-                              {c.name}
-                            </Text>
-                            <Text
-                              className="text-sm mt-0.5"
-                              style={{ color: colors.textTertiary }}
-                            >
-                              {c.ingredients.length} ingredients
-                            </Text>
-                          </View>
-                          <Ionicons
-                            name="chevron-forward"
-                            size={18}
-                            color={colors.textTertiary}
-                          />
-                        </Pressable>
+                        />
                       </View>
                     ))}
                   </View>
@@ -546,7 +513,7 @@ export default function BatchScreen() {
                   <InfoIcon
                     title="Pre-Dilution"
                     content={
-                      "Ice adds about 20% water to stirred drinks and 20-25% to shaken. If you're serving the batch up or chilled without ice, add that water yourself so it doesn't taste harsh. If you're serving over ice, skip — the ice will dilute at service."
+                      "Ice adds about 20% water to stirred drinks and 20-25% to shaken. If you're serving the batch up or chilled without ice, add that water yourself so it doesn't taste harsh. If you're serving over ice, skip: the ice will dilute at service."
                     }
                     learnMoreTipKey="preDiluteBatches"
                     size={18}
@@ -628,9 +595,12 @@ export default function BatchScreen() {
                     className="text-base"
                     style={{ color: colors.text, fontWeight: '700' }}
                   >
-                    {roundToQuarter
-                      ? `~${fmtQuarterOz(totalBatchVolumeOz + dilutionOz)}`
-                      : `${(totalBatchVolumeOz + dilutionOz).toFixed(2)} oz`}
+                    {(() => {
+                      const total = totalBatchVolumeOz + dilutionOz;
+                      if (!roundToQuarter) return `${total.toFixed(2)} oz`;
+                      const prefix = isQuarterMultiple(total) ? '' : '~';
+                      return `${prefix}${fmtQuarterOz(total)}`;
+                    })()}
                   </Text>
                 </View>
               </View>
@@ -640,7 +610,7 @@ export default function BatchScreen() {
             {mode === 'existing' &&
               batchLines.length > 0 &&
               quantity > 0 &&
-              batchLines.some((l) => l.savedIngredient) && (
+              batchLines.some((l) => l.recipeProductSize) && (
                 <View className="flex-col gap-1">
                   <ScreenTitle
                     title="Order Guidance"
@@ -648,11 +618,11 @@ export default function BatchScreen() {
                     className="mb-1"
                   />
                   {batchLines.map((line, i) => {
-                    if (!line.savedIngredient) return null;
+                    if (!line.recipeProductSize) return null;
                     const targetOz = line.pourOz * quantity;
                     const combo = suggestBottleCombo(
                       targetOz,
-                      line.savedIngredient
+                      line.recipeProductSize
                     );
                     return (
                       <View
@@ -706,7 +676,7 @@ export default function BatchScreen() {
                 className="text-xs italic"
                 style={{ color: colors.textTertiary }}
               >
-                Order guidance is only available in Cocktail mode — custom
+                Order guidance is only available in Cocktail mode. Custom
                 ingredients aren't in your library so we can't match them to
                 bottle sizes.
               </Text>

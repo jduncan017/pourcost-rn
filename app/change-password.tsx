@@ -1,6 +1,7 @@
 import { useState, useLayoutEffect, useMemo } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRouter, useNavigation } from 'expo-router';
+import { useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import TextInput from '@/src/components/ui/TextInput';
@@ -11,7 +12,7 @@ import { PASSWORD_RULES } from '@/src/lib/password-rules';
 import { FeedbackService } from '@/src/services/feedback-service';
 
 export default function ChangePasswordScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const navigation = useNavigation();
   const { user, updatePassword } = useAuth();
 

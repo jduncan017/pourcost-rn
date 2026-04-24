@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
@@ -11,7 +11,7 @@ import { seedSampleBar } from '@/src/lib/seed-sample-bar';
 import { FeedbackService } from '@/src/services/feedback-service';
 
 export default function OnboardingComplete() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const insets = useSafeAreaInsets();
   const { clearNewSignUp } = useAuth();
   const saveProfile = useAppStore((s) => s.saveProfile);
@@ -29,7 +29,7 @@ export default function OnboardingComplete() {
         const msg = err instanceof Error ? err.message : 'Could not load sample bar';
         FeedbackService.showError(
           'Sample Bar Unavailable',
-          `${msg}. Starting you with an empty bar — you can add ingredients manually.`
+          `${msg}. Starting you with an empty bar. You can add ingredients manually.`
         );
       }
       clearNewSignUp();

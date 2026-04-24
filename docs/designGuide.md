@@ -156,7 +156,7 @@ Cards have: `borderRadius: 12`, `colors.surface` bg, `colors.border` border, blu
 - Gold `ScreenTitle variant="group"` for section headers
 - Pricing rows with `borderSubtle` dividers between rows
 - `AiSuggestionRow` for suggested price/retail
-- `PourCostPerformanceBar` in its own Card
+- `PourCostHero` — full-width banded section bleeding to screen edges (wrap in `<View className="-mx-6">` inside a padded container)
 
 ### Form Pages (Create/Edit)
 - Section dividers between groups, no Card wrappers around sections

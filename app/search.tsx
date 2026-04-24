@@ -1,12 +1,15 @@
 import { useState, useMemo, useLayoutEffect } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
-import { useRouter, useNavigation } from 'expo-router';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { View, Text, ScrollView } from 'react-native';
+import { useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
+import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import SearchBar from '@/src/components/ui/SearchBar';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SectionDivider from '@/src/components/ui/SectionDivider';
-import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
+import SuggestedTitle from '@/src/components/ui/SuggestedTitle';
+import ResultRow from '@/src/components/ui/ResultRow';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { volumeLabel } from '@/src/types/models';
@@ -15,52 +18,12 @@ import {
   calculateCocktailMetrics,
   formatCurrency,
 } from '@/src/services/calculation-service';
-import { ingredientTypeIcon, cocktailIcon, TypeIcon } from '@/src/lib/type-icons';
+import { ingredientTypeIcon, cocktailIcon } from '@/src/lib/type-icons';
 import { getIngredientUsageCounts, sortByUsage } from '@/src/lib/ingredientUsage';
 import { ensureDate } from '@/src/lib/ensureDate';
 
-function ResultRow({
-  icon,
-  title,
-  subtitle,
-  onPress,
-}: {
-  icon: TypeIcon;
-  title: string;
-  subtitle: string;
-  onPress: () => void;
-}) {
-  const colors = useThemeColors();
-  return (
-    <Pressable
-      onPress={onPress}
-      className="flex-row items-center py-3"
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-    >
-      <MaterialCommunityIcons
-        name={icon.name}
-        size={22}
-        color={icon.color}
-        style={{ marginRight: 12 }}
-      />
-      <View className="flex-1">
-        <Text
-          className="text-base"
-          style={{ color: colors.text, fontWeight: '500' }}
-        >
-          {title}
-        </Text>
-        <Text className="text-sm mt-0.5" style={{ color: colors.textTertiary }}>
-          {subtitle}
-        </Text>
-      </View>
-      <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
-    </Pressable>
-  );
-}
-
 export default function SearchScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
   const [searchQuery, setSearchQuery] = useState('');
@@ -137,14 +100,7 @@ export default function SearchScreen() {
           {/* Suggested — shown when no search query */}
           {!hasSearched && suggestedIngredients.length > 0 && (
             <View>
-              <View className="flex-row items-center gap-1.5 mb-1">
-                <Ionicons name="sparkles" size={12} color={palette.P2} />
-                <ScreenTitle
-                  title="Suggested Ingredients"
-                  variant="muted"
-                  style={{ color: palette.P2 }}
-                />
-              </View>
+              <SuggestedTitle title="Suggested Ingredients" />
               {suggestedIngredients.map((item, index) => {
                 const costPerOz = calculateCostPerOz(
                   item.productSize,
@@ -167,14 +123,7 @@ export default function SearchScreen() {
 
           {!hasSearched && suggestedCocktails.length > 0 && (
             <View>
-              <View className="flex-row items-center gap-1.5 mb-1">
-                <Ionicons name="sparkles" size={12} color={palette.P2} />
-                <ScreenTitle
-                  title="Suggested Cocktails"
-                  variant="muted"
-                  style={{ color: palette.P2 }}
-                />
-              </View>
+              <SuggestedTitle title="Suggested Cocktails" />
               {suggestedCocktails.map((item, index) => {
                 const metrics = calculateCocktailMetrics(item.ingredients);
                 return (
@@ -238,7 +187,7 @@ export default function SearchScreen() {
             <View>
               <ScreenTitle
                 title={`Ingredients (${searchResults.ingredients.length})`}
-                variant="group"
+                variant="muted"
                 className="mb-2"
               />
               {searchResults.ingredients.map((item, index) => {
@@ -266,7 +215,7 @@ export default function SearchScreen() {
             <View>
               <ScreenTitle
                 title={`Cocktails (${searchResults.cocktails.length})`}
-                variant="group"
+                variant="muted"
                 className="mb-2"
               />
               {searchResults.cocktails.map((item, index) => {

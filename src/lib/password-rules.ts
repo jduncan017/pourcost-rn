@@ -15,7 +15,3 @@ export const PASSWORD_RULES: PasswordRule[] = [
   { label: 'Number', test: (pw) => /[0-9]/.test(pw) },
   { label: 'Symbol', test: (pw) => /[^A-Za-z0-9]/.test(pw) },
 ];
-
-export function passwordPasses(password: string): boolean {
-  return PASSWORD_RULES.every((r) => r.test(password));
-}

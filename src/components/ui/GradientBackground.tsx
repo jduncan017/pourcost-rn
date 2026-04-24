@@ -1,4 +1,3 @@
-import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useThemeColors, useIsDarkMode, palette } from '@/src/contexts/ThemeContext';
 

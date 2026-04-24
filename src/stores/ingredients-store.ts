@@ -7,13 +7,19 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SavedIngredient, Volume } from '@/src/types/models';
+import { SavedIngredient, IngredientConfiguration, Volume } from '@/src/types/models';
 import { calculateIngredientMetrics } from '@/src/services/calculation-service';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { useAppStore } from '@/src/stores/app-store';
 import type { IngredientSortOption } from '@/src/constants/appConstants';
 import { ensureDate } from '@/src/lib/ensureDate';
-import { fetchIngredients, cascadeIngredientUpdate } from '@/src/lib/supabase-data';
+import {
+  fetchIngredients,
+  cascadeIngredientUpdate,
+  insertIngredientConfiguration,
+  updateIngredientConfiguration,
+  deleteIngredientConfiguration,
+} from '@/src/lib/supabase-data';
 import {
   insertIngredient,
   updateIngredientById,
@@ -37,6 +43,17 @@ export interface IngredientsState {
   addIngredient: (ingredient: Omit<SavedIngredient, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => Promise<SavedIngredient>;
   updateIngredient: (id: string, updates: Partial<SavedIngredient>) => Promise<void>;
   deleteIngredient: (id: string) => Promise<void>;
+
+  addConfiguration: (
+    ingredientId: string,
+    config: Omit<IngredientConfiguration, 'id' | 'ingredientId' | 'createdAt'>,
+  ) => Promise<IngredientConfiguration>;
+  updateConfiguration: (
+    ingredientId: string,
+    configId: string,
+    updates: Partial<Omit<IngredientConfiguration, 'id' | 'ingredientId' | 'createdAt'>>,
+  ) => Promise<void>;
+  deleteConfiguration: (ingredientId: string, configId: string) => Promise<void>;
 
   setSearchQuery: (query: string) => void;
   setSelectedType: (type: string) => void;
@@ -177,9 +194,13 @@ export const useIngredientsStore = create<IngredientsState>()(
           try {
             await deleteIngredientById(id);
           } catch (error) {
-            // Re-add on failure
-            set(state => ({ ingredients: [...state.ingredients, ingredient] }));
             const msg = error instanceof Error ? error.message : 'Failed to delete ingredient';
+            // Offline-queued writes are effectively success from the UI's
+            // perspective — the write is durable in the offline queue and
+            // will sync on reconnect. The wrapper already showed a toast.
+            if (msg === 'OFFLINE_QUEUED') return;
+            // Real failure — re-add so the user doesn't lose the row silently.
+            set(state => ({ ingredients: [...state.ingredients, ingredient] }));
             FeedbackService.showError('Delete Failed', msg);
           }
         }, 5000);
@@ -196,6 +217,53 @@ export const useIngredientsStore = create<IngredientsState>()(
             },
           }
         );
+      },
+
+      addConfiguration: async (ingredientId, configData) => {
+        const config = await insertIngredientConfiguration({
+          ...configData,
+          ingredientId,
+        });
+        set((state) => ({
+          ingredients: state.ingredients.map((ing) =>
+            ing.id === ingredientId
+              ? { ...ing, configurations: [...(ing.configurations ?? []), config] }
+              : ing
+          ),
+        }));
+        return config;
+      },
+
+      updateConfiguration: async (ingredientId, configId, updates) => {
+        const updated = await updateIngredientConfiguration(configId, updates);
+        set((state) => ({
+          ingredients: state.ingredients.map((ing) =>
+            ing.id === ingredientId
+              ? {
+                  ...ing,
+                  configurations: (ing.configurations ?? []).map((c) =>
+                    c.id === configId ? updated : c
+                  ),
+                }
+              : ing
+          ),
+        }));
+      },
+
+      deleteConfiguration: async (ingredientId, configId) => {
+        await deleteIngredientConfiguration(configId);
+        set((state) => ({
+          ingredients: state.ingredients.map((ing) =>
+            ing.id === ingredientId
+              ? {
+                  ...ing,
+                  configurations: (ing.configurations ?? []).filter(
+                    (c) => c.id !== configId
+                  ),
+                }
+              : ing
+          ),
+        }));
       },
 
       setSearchQuery: (query) => set({ searchQuery: query }),

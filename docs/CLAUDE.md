@@ -34,7 +34,7 @@ A cocktail costing application that helps users calculate ingredient costs and d
 - **Schema**: `supabase/schema.sql` is the source of truth. Volume stored as JSONB — zero conversion between DB and TypeScript.
 - **Auth**: Facebook + Google via Supabase Auth. Preserve existing Facebook App ID `1522826757747836` for iOS user migration.
 - **RLS Strategy**: MVP uses simple `user_id = auth.uid()` RLS policies with direct client access. This is sufficient while each user only sees their own data. When multi-location, staff roles, or enterprise features are added post-MVP, move authorization logic to Edge Functions (service role key bypasses RLS) and keep RLS as a safety net only. Don't try to encode complex permission logic in SQL policies.
-- **Migration**: DynamoDB → Supabase migration details in `migrationBrief.md`. The Supabase schema in that file is outdated — always use `supabase/schema.sql` instead.
+- **Legacy data**: No port from the old DynamoDB backend. New users start fresh in Supabase; existing auth identities (Facebook/Google) carry over via Supabase Auth provider linking.
 
 ### Archived Code
 - `src/_future/` contains the flexible ingredient system (type-specific forms, multi-retail-config models). Excluded from TypeScript compilation. Intended for post-MVP reimplementation.

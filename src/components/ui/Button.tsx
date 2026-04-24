@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Pressable, Text, View, ActivityIndicator } from 'react-native';
+import { Pressable, Text, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { HapticService } from '@/src/services/haptic-service';
 import { useThemeColors } from '@/src/contexts/ThemeContext';

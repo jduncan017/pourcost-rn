@@ -2,7 +2,7 @@ import { Platform, View, Text, ActivityIndicator, StyleSheet } from 'react-nativ
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useState } from 'react';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { useTheme, palette } from '@/src/contexts/ThemeContext';
+import { useTheme } from '@/src/contexts/ThemeContext';
 import { FeedbackService } from '@/src/services/feedback-service';
 
 interface AppleSignInButtonProps {

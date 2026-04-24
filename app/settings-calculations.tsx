@@ -1,13 +1,14 @@
 import { useCallback, useLayoutEffect, useState, useRef, useEffect } from 'react';
 import { View, ScrollView } from 'react-native';
-import { useRouter, useNavigation } from 'expo-router';
+import { useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import SettingsCard from '@/src/components/ui/SettingsCard';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SectionDivider from '@/src/components/ui/SectionDivider';
 import PickerSheet from '@/src/components/ui/PickerSheet';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
-import { useAppStore, IngredientOrderPref } from '@/src/stores/app-store';
+import { useAppStore, IngredientOrderPref, PriceRounding } from '@/src/stores/app-store';
 import { US_POUR_SIZES } from '@/src/constants/appConstants';
 import { volumeLabel, Volume } from '@/src/types/models';
 
@@ -38,8 +39,15 @@ const retailPriceOptions = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 2
   label: `$${v.toFixed(2)}`,
 }));
 
+const roundingOptions: { value: PriceRounding; label: string }[] = [
+  { value: 'off', label: 'Off (exact)' },
+  { value: '0.25', label: 'Nearest $0.25' },
+  { value: '0.5', label: 'Nearest $0.50' },
+  { value: '1', label: 'Nearest $1' },
+];
+
 export default function SettingsCalculationsScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
   const {
@@ -47,6 +55,7 @@ export default function SettingsCalculationsScreen() {
     defaultPourSize, setDefaultPourSize,
     defaultRetailPrice, setDefaultRetailPrice,
     ingredientOrderPref, setIngredientOrderPref,
+    suggestedPriceRounding, setSuggestedPriceRounding,
     saveProfile,
   } = useAppStore();
 
@@ -73,13 +82,15 @@ export default function SettingsCalculationsScreen() {
   const [showPourSizePicker, setShowPourSizePicker] = useState(false);
   const [showRetailPricePicker, setShowRetailPricePicker] = useState(false);
   const [showOrderPicker, setShowOrderPicker] = useState(false);
+  const [showRoundingPicker, setShowRoundingPicker] = useState(false);
 
   const currentOrderLabel = orderDropdownOptions.find((o) => o.value === ingredientOrderPref)?.label ?? 'Manual';
+  const currentRoundingLabel = roundingOptions.find((o) => o.value === suggestedPriceRounding)?.label ?? 'Off (exact)';
 
   return (
     <GradientBackground>
       <ScrollView className="flex-1">
-        <View className="p-4 pt-6 flex-col gap-6">
+        <View className="px-6 pt-4 pb-6 flex-col gap-6">
           <View className="flex-col gap-3">
             <ScreenTitle variant="group" title="Defaults" />
             <SettingsCard
@@ -108,6 +119,13 @@ export default function SettingsCalculationsScreen() {
               description={currentOrderLabel}
               iconName="swap-vertical-outline"
               onPress={() => setShowOrderPicker(true)}
+              showCaret
+            />
+            <SettingsCard
+              title="Suggested Price Rounding"
+              description={currentRoundingLabel}
+              iconName="calculator-outline"
+              onPress={() => setShowRoundingPicker(true)}
               showCaret
             />
           </View>
@@ -163,6 +181,15 @@ export default function SettingsCalculationsScreen() {
           value={ingredientOrderPref}
           onSelect={(val) => { setIngredientOrderPref(val as IngredientOrderPref); debouncedSave(); }}
           onClose={() => setShowOrderPicker(false)}
+        />
+      )}
+      {showRoundingPicker && (
+        <PickerSheet
+          title="Suggested Price Rounding"
+          options={roundingOptions}
+          value={suggestedPriceRounding}
+          onSelect={(val) => { setSuggestedPriceRounding(val as PriceRounding); }}
+          onClose={() => setShowRoundingPicker(false)}
         />
       )}
     </GradientBackground>

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
@@ -13,7 +13,7 @@ import { palette } from '@/src/contexts/ThemeContext';
 import { PASSWORD_RULES } from '@/src/lib/password-rules';
 
 export default function SignUpEmailScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const insets = useSafeAreaInsets();
   const { signUp } = useAuth();
 

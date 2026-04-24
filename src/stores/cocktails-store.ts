@@ -166,9 +166,10 @@ export const useCocktailsStore = create<CocktailsState>()(
           try {
             await deleteCocktailById(id);
           } catch (error) {
-            // Re-add on failure
-            set(state => ({ cocktails: [...state.cocktails, cocktail] }));
             const msg = error instanceof Error ? error.message : 'Failed to delete cocktail';
+            // Offline-queued writes are effectively success (see ingredients-store).
+            if (msg === 'OFFLINE_QUEUED') return;
+            set(state => ({ cocktails: [...state.cocktails, cocktail] }));
             FeedbackService.showError('Delete Failed', msg);
           }
         }, 5000);

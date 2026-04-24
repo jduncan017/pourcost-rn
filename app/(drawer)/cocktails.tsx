@@ -1,12 +1,13 @@
-import { useEffect } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
 import { useAppStore } from '@/src/stores/app-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import CocktailListItem from '@/src/components/CocktailListItem';
 import SearchBar from '@/src/components/ui/SearchBar';
 import EmptyState from '@/src/components/EmptyState';
-import { useRouter } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { Cocktail } from '@/src/types/models';
 import { ensureDate } from '@/src/lib/ensureDate';
@@ -20,6 +21,7 @@ import { FeedbackService } from '@/src/services/feedback-service';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SkeletonLoader from '@/src/components/ui/SkeletonLoader';
+import SelectionActionBar from '@/src/components/ui/SelectionActionBar';
 
 /**
  * Cocktails management screen
@@ -28,7 +30,7 @@ import SkeletonLoader from '@/src/components/ui/SkeletonLoader';
  */
 export default function CocktailsScreen() {
   const {} = useAppStore();
-  const router = useRouter();
+  const router = useGuardedRouter();
   const toast = useToast();
   const colors = useThemeColors();
 
@@ -115,9 +117,61 @@ export default function CocktailsScreen() {
     );
   };
 
+  // ── Multi-select ──────────────────────────────────────────────────────
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const enterSelectionMode = () => {
+    setSelectionMode(true);
+    setSelectedIds(new Set());
+  };
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  };
+
+  // Reset selection when this tab loses focus — see ingredients.tsx.
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setSelectionMode(false);
+        setSelectedIds(new Set());
+      };
+    }, [])
+  );
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.size === 0) return;
+    const count = selectedIds.size;
+    FeedbackService.showConfirmation({
+      title: `Delete ${count} cocktail${count === 1 ? '' : 's'}?`,
+      message: 'This action cannot be undone.',
+      confirmText: 'Delete',
+      destructive: true,
+      onConfirm: async () => {
+        const ids = Array.from(selectedIds);
+        await Promise.all(ids.map((id) => deleteCocktail(id)));
+        exitSelectionMode();
+      },
+    });
+  };
+
   return (
     <GradientBackground>
-      <ScrollView className="flex-1">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: selectionMode ? 96 : 0 }}
+      >
         <View className="p-4">
           {/* Header */}
           <View className="mb-6 mt-4">
@@ -174,18 +228,37 @@ export default function CocktailsScreen() {
           <View className="flex flex-col gap-3">
             <View className="flex-row items-center justify-between">
               <ScreenTitle
-                title={`Your Cocktails (${filteredCocktails.length})`}
+                title={
+                  selectionMode
+                    ? `${selectedIds.size} Selected`
+                    : `Your Cocktails (${filteredCocktails.length})`
+                }
                 variant="group"
               />
-              {searchQuery && (
-                <Button
-                  onPress={() => setSearchQuery('')}
-                  variant="ghost"
-                  size="small"
-                >
-                  Clear
-                </Button>
-              )}
+              <View className="flex-row items-center gap-2">
+                {searchQuery && !selectionMode && (
+                  <Button
+                    onPress={() => setSearchQuery('')}
+                    variant="ghost"
+                    size="small"
+                  >
+                    Clear
+                  </Button>
+                )}
+                {filteredCocktails.length > 0 && (
+                  <Pressable
+                    onPress={selectionMode ? exitSelectionMode : enterSelectionMode}
+                    hitSlop={6}
+                    className="px-2 py-1"
+                  >
+                    <Text
+                      style={{ color: colors.textSecondary, fontSize: 13, fontWeight: '600' }}
+                    >
+                      {selectionMode ? 'Cancel' : 'Multi-select'}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
             </View>
 
             {isLoading ? (
@@ -210,31 +283,33 @@ export default function CocktailsScreen() {
               />
             ) : (
               <>
-                <View
-                  className="flex-row justify-between items-center"
-                  style={{ opacity: 0.45 }}
-                >
-                  <View className="flex-row items-center gap-1">
-                    <Ionicons
-                      name="arrow-back"
-                      size={11}
-                      color={colors.textSecondary}
-                    />
-                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>
-                      Swipe left to delete
-                    </Text>
+                {!selectionMode && (
+                  <View
+                    className="flex-row justify-between items-center"
+                    style={{ opacity: 0.45 }}
+                  >
+                    <View className="flex-row items-center gap-1">
+                      <Ionicons
+                        name="arrow-back"
+                        size={11}
+                        color={colors.textSecondary}
+                      />
+                      <Text style={{ fontSize: 11, color: colors.textSecondary }}>
+                        Swipe left to delete
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center gap-1">
+                      <Text style={{ fontSize: 11, color: colors.textSecondary }}>
+                        Swipe right to edit
+                      </Text>
+                      <Ionicons
+                        name="arrow-forward"
+                        size={11}
+                        color={colors.textSecondary}
+                      />
+                    </View>
                   </View>
-                  <View className="flex-row items-center gap-1">
-                    <Text style={{ fontSize: 11, color: colors.textSecondary }}>
-                      Swipe right to edit
-                    </Text>
-                    <Ionicons
-                      name="arrow-forward"
-                      size={11}
-                      color={colors.textSecondary}
-                    />
-                  </View>
-                </View>
+                )}
                 {filteredCocktails.map((cocktail) => (
                   <CocktailListItem
                     key={cocktail.id}
@@ -243,6 +318,9 @@ export default function CocktailsScreen() {
                     onPress={() => handleCocktailPress(cocktail)}
                     onEdit={() => handleEditCocktail(cocktail)}
                     onDelete={() => handleDeleteCocktail(cocktail)}
+                    selectionMode={selectionMode}
+                    selected={selectedIds.has(cocktail.id)}
+                    onSelectionToggle={() => toggleSelection(cocktail.id)}
                   />
                 ))}
               </>
@@ -250,6 +328,13 @@ export default function CocktailsScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {selectionMode && selectedIds.size > 0 && (
+        <SelectionActionBar
+          selectedCount={selectedIds.size}
+          onDelete={handleBulkDelete}
+        />
+      )}
     </GradientBackground>
   );
 }

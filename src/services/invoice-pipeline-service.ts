@@ -21,7 +21,6 @@ import { extractLineItems } from './llm-extraction-service';
 import { resolvePackSizesForInvoice } from './pack-size-service';
 import { normalizeProduct } from './product-normalization-service';
 import { matchInvoiceLineItems, type LineItemInput } from './matching-cascade-service';
-import { applyInvoicePriceUpdates, type PriceUpdateInput, type CascadeResult } from './cost-cascade-service';
 import type { Invoice, InvoiceLineItem, MatchStatus } from '@/src/types/invoice-models';
 
 // ==========================================
@@ -36,11 +35,6 @@ export interface ProcessingResult {
   matchedItems: number;
   processingTier: string;
   error?: string;
-}
-
-export interface ConfirmAllResult {
-  cascadeResult: CascadeResult;
-  invoiceId: string;
 }
 
 // ==========================================
@@ -245,141 +239,5 @@ export async function processInvoice(invoice: Invoice): Promise<ProcessingResult
 // ==========================================
 // STEP 2: CONFIRM & APPLY (after user review)
 // ==========================================
-
-/**
- * After the user confirms matches on the review screen, apply all
- * price updates and move the invoice to 'complete'.
- *
- * For matched items: update ingredient price + create/update configuration.
- * For unmatched items (not skipped): create a new ingredient from the line item data.
- */
-export async function confirmAndApplyInvoice(
-  invoiceId: string,
-): Promise<ConfirmAllResult> {
-  const { parseVolumeFromBpc } = await import('./product-normalization-service');
-
-  // Fetch ALL non-skipped, non-credit line items
-  const { data: allItems } = await supabase
-    .from('invoice_line_items')
-    .select('id, matched_ingredient_id, unit_price, total_price, quantity, pack_size, raw_text, product_name, match_status')
-    .eq('invoice_id', invoiceId)
-    .not('match_status', 'in', '("skipped","credit")');
-
-  if (!allItems || allItems.length === 0) {
-    await updateInvoiceStatus(invoiceId, 'complete');
-    return {
-      invoiceId,
-      cascadeResult: {
-        ingredientsUpdated: [],
-        preppedRecalculated: [],
-        cocktailIngredientsUpdated: 0,
-        significantChanges: [],
-      },
-    };
-  }
-
-  // Get user ID
-  const { data: inv } = await supabase
-    .from('invoices')
-    .select('user_id')
-    .eq('id', invoiceId)
-    .single();
-
-  if (!inv) throw new Error('Invoice not found');
-
-  const updates: PriceUpdateInput[] = [];
-  const seen = new Set<string>();
-  let createdCount = 0;
-
-  for (const item of allItems) {
-    // Parse volume from BPC
-    let volume: import('@/src/types/models').Volume | undefined;
-    if (item.raw_text) {
-      const bpcMatch = item.raw_text.match(/BPC:\s*(.+?)(?:\s+\d|$)/i);
-      if (bpcMatch) {
-        const parsed = parseVolumeFromBpc(bpcMatch[1]);
-        if (parsed.volume) volume = parsed.volume;
-      }
-    }
-
-    const packSize = item.pack_size ?? 1;
-    const perBottle = item.unit_price
-      ?? (Number(item.total_price) / Math.max(Number(item.quantity), 1) / packSize);
-    const cost = Math.round(perBottle * 100) / 100;
-
-    // --- UNMATCHED: create a new ingredient ---
-    if (!item.matched_ingredient_id) {
-      const productSize = volume ?? { kind: 'milliliters' as const, ml: 750 }; // default 750ml
-
-      const { data: newIng, error: ingErr } = await supabase
-        .from('ingredients')
-        .insert({
-          user_id: inv.user_id,
-          name: item.product_name ?? 'Unknown',
-          product_cost: cost,
-          product_size: productSize,
-        })
-        .select('id')
-        .single();
-
-      if (ingErr || !newIng) continue;
-
-      // Link the line item to the new ingredient
-      await supabase
-        .from('invoice_line_items')
-        .update({
-          matched_ingredient_id: newIng.id,
-          match_status: 'confirmed',
-          match_method: 'manual',
-          match_confidence: 1.0,
-        })
-        .eq('id', item.id);
-
-      createdCount++;
-
-      // Still run the price update to create configuration
-      if (!seen.has(newIng.id)) {
-        seen.add(newIng.id);
-        updates.push({
-          ingredientId: newIng.id,
-          newProductCost: cost,
-          newProductSize: volume,
-          packSize: packSize > 1 ? packSize : undefined,
-          invoiceLineItemId: item.id,
-          invoiceId,
-        });
-      }
-      continue;
-    }
-
-    // --- MATCHED: update existing ingredient ---
-    if (seen.has(item.matched_ingredient_id)) continue;
-    seen.add(item.matched_ingredient_id);
-
-    updates.push({
-      ingredientId: item.matched_ingredient_id,
-      newProductCost: cost,
-      newProductSize: volume,
-      packSize: packSize > 1 ? packSize : undefined,
-      invoiceLineItemId: item.id,
-      invoiceId,
-    });
-  }
-
-  // Apply the cost cascade
-  const cascadeResult = await applyInvoicePriceUpdates(updates);
-
-  // Update matched count and mark complete
-  await updateInvoiceStatus(invoiceId, 'complete', {
-    matchedItems: allItems.length,
-  });
-
-  // Reload ingredients store to reflect new/updated ingredients
-  import('@/src/stores/ingredients-store').then(({ useIngredientsStore }) => {
-    useIngredientsStore.getState().loadIngredients(true);
-  }).catch(() => {});
-
-  return { invoiceId, cascadeResult };
-}
 
 // OCR helper removed — vision extraction replaces the OCR → text → LLM pipeline.

@@ -8,17 +8,18 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
+import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { useAppStore } from '@/src/stores/app-store';
 import { Ionicons } from '@expo/vector-icons';
 import Toggle from '@/src/components/ui/Toggle';
 import TextInput from '@/src/components/ui/TextInput';
 import Button from '@/src/components/ui/Button';
-import MetricRow from '@/src/components/ui/MetricRow';
-import PourCostPerformanceBar from '@/src/components/PourCostPerformanceBar';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
+import HeaderSavePill from '@/src/components/ui/HeaderSavePill';
+import IngredientInUseSheet from '@/src/components/ui/IngredientInUseSheet';
 import IngredientInputs, {
   IngredientInputValues,
 } from '@/src/components/IngredientInputs';
@@ -26,21 +27,14 @@ import { useThemeColors } from '@/src/contexts/ThemeContext';
 import {
   INITIAL_PRODUCT_SIZE,
   SUBTYPES_BY_TYPE,
-  getPourChipsForContext,
   type IngredientType,
 } from '@/src/constants/appConstants';
 import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
-import {
-  calculateCostPerOz,
-  calculateCostPerPour,
-  calculateSuggestedPrice,
-  formatCurrency,
-} from '@/src/services/calculation-service';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { sanitizeName, sanitizeDescription } from '@/src/lib/sanitize';
 
 export default function IngredientFormScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const navigation = useNavigation();
   const params = useLocalSearchParams();
   const colors = useThemeColors();
@@ -68,7 +62,7 @@ export default function IngredientFormScreen() {
       if (params.productSize)
         productSize = JSON.parse(params.productSize as string) as Volume;
     } catch {
-      FeedbackService.showWarning('Parse Error', 'Could not read product size — using default.');
+      FeedbackService.showWarning('Parse Error', 'Could not read product size. Using default.');
     }
 
     let pourSize = volumeToOunces(useAppStore.getState().defaultPourSize);
@@ -78,7 +72,7 @@ export default function IngredientFormScreen() {
           JSON.parse(params.pourSize as string) as Volume
         );
     } catch {
-      FeedbackService.showWarning('Parse Error', 'Could not read pour size — using default.');
+      FeedbackService.showWarning('Parse Error', 'Could not read pour size. Using default.');
     }
 
     return {
@@ -101,38 +95,22 @@ export default function IngredientFormScreen() {
     if (updates.notForSale !== undefined) setForSale(!updates.notForSale);
   };
 
-  // Calculated values
+  // Pull live ingredient + configurations when editing — the Sizes section
+  // reflects the latest server state without needing a re-mount after returning
+  // from the size-form screen.
+  const liveIngredient = useIngredientsStore((s) =>
+    isEditing ? s.ingredients.find((i) => i.id === ingredientId) : undefined
+  );
+  const configurations = liveIngredient?.configurations ?? [];
+
+  // Pour size for saving — held on the ingredient, consumed by every size's cost analysis.
   const pourSizeVolume: Volume = {
     kind: 'decimalOunces',
     ounces: inputValues.pourSize,
   };
-  const costPerOz = calculateCostPerOz(
-    inputValues.productSize,
-    inputValues.productCost
-  );
-  const costPerPour = calculateCostPerPour(
-    inputValues.productSize,
-    inputValues.productCost,
-    pourSizeVolume
-  );
-  const pourCostPercentage =
-    inputValues.retailPrice > 0
-      ? (costPerPour / inputValues.retailPrice) * 100
-      : 0;
-  const suggestedRetail = calculateSuggestedPrice(costPerPour, 0.2);
-  const pourCostMargin = inputValues.retailPrice - costPerPour;
 
-  // Dynamic pour label
-  const pourChips = getPourChipsForContext(
-    inputValues.ingredientType,
-    inputValues.productSize
-  );
-  const matchedChip = pourChips.find(
-    (c) => Math.abs(c.oz - inputValues.pourSize) < 0.001
-  );
-  const pourLabel = matchedChip?.label ?? `${inputValues.pourSize} oz`;
-
-  // Validation
+  // Validation — retail required when for-sale. Product size+cost still required for CREATE
+  // (first bottle must have a price); edit mode relies on existing values.
   const isValid =
     name.trim().length > 0 &&
     inputValues.productCost > 0 &&
@@ -141,8 +119,17 @@ export default function IngredientFormScreen() {
 
   const { addIngredient, updateIngredient, deleteIngredient } =
     useIngredientsStore();
+  const { cocktails } = useCocktailsStore();
   const [isSaving, setIsSaving] = useState(false);
+  const [showInUseSheet, setShowInUseSheet] = useState(false);
   const saveRef = useRef<() => void>(() => {});
+
+  // Cocktails that reference this ingredient — blocks deletion when non-empty.
+  const affectedCocktails = isEditing
+    ? cocktails.filter((c) =>
+        c.ingredients.some((ci) => ci.ingredientId === ingredientId)
+      )
+    : [];
 
   const handleSave = async () => {
     if (!isValid) {
@@ -188,6 +175,10 @@ export default function IngredientFormScreen() {
   };
 
   const handleDelete = () => {
+    if (affectedCocktails.length > 0) {
+      setShowInUseSheet(true);
+      return;
+    }
     FeedbackService.showDeleteConfirmation(
       name,
       async () => {
@@ -196,6 +187,14 @@ export default function IngredientFormScreen() {
       },
       'ingredient'
     );
+  };
+
+  const handleOpenCocktail = (cocktailId: string) => {
+    setShowInUseSheet(false);
+    router.navigate({
+      pathname: '/cocktail-detail',
+      params: { id: cocktailId },
+    });
   };
 
   saveRef.current = handleSave;
@@ -214,12 +213,26 @@ export default function IngredientFormScreen() {
           </Text>
         </Pressable>
       ),
-      headerRight: undefined,
+      headerRight: () => (
+        <HeaderSavePill
+          onPress={() => saveRef.current()}
+          disabled={!isValid || isSaving}
+          isSaving={isSaving}
+        />
+      ),
     });
-  }, [isEditing, navigation, colors]);
+  }, [isEditing, navigation, colors, isValid, isSaving]);
 
   return (
     <GradientBackground>
+      <IngredientInUseSheet
+        visible={showInUseSheet}
+        onClose={() => setShowInUseSheet(false)}
+        ingredientName={name}
+        cocktails={affectedCocktails}
+        onOpenCocktail={handleOpenCocktail}
+      />
+
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -278,84 +291,107 @@ export default function IngredientFormScreen() {
               />
             </View>
 
-            {/* Details — type chips, subtype, product size, cost, pour size */}
+            {/* Details — type chips, subtype, pour size.
+                Edit mode hides product size + cost (those live in the Sizes section). */}
             <IngredientInputs
               variant="form"
               values={{ ...inputValues, notForSale: !forSale }}
               onChange={handleInputChange}
               hideRetailPrice
+              hideProductSize={isEditing}
               noCard
             />
 
-            {/* Pricing — retail + cost analysis */}
-            <View className="flex-col gap-5">
-              {forSale && (
-                <>
-                  <TextInput
-                    label="Retail Price *"
-                    value={retailPriceText}
-                    onChangeText={(text) => {
-                      if (text === '' || /^\d*\.?\d*$/.test(text)) {
-                        setRetailPriceText(text);
-                        const price = text === '' ? 0 : parseFloat(text) || 0;
-                        handleInputChange({ retailPrice: price });
-                      }
-                    }}
-                    placeholder="0.00"
-                    keyboardType="decimal-pad"
-                    prefix="$"
-                  />
-                  <AiSuggestionRow
-                    label="Suggested Retail"
-                    value={`$${suggestedRetail.toFixed(2)}`}
-                  />
-                  <PourCostPerformanceBar
-                    pourCostPercentage={pourCostPercentage}
-                    noCard
-                  />
-                </>
-              )}
+            {/* Retail Price — set here, referenced on the size page while
+                the user enters bottle costs. Placed BEFORE sizes so the
+                retail anchor exists when they tap through to each bottle. */}
+            {forSale && (
+              <View className="flex-col gap-5">
+                <TextInput
+                  label="Retail Price *"
+                  value={retailPriceText}
+                  onChangeText={(text) => {
+                    if (text === '' || /^\d*\.?\d*$/.test(text)) {
+                      setRetailPriceText(text);
+                      const price = text === '' ? 0 : parseFloat(text) || 0;
+                      handleInputChange({ retailPrice: price });
+                    }
+                  }}
+                  placeholder="0.00"
+                  keyboardType="decimal-pad"
+                  prefix="$"
+                />
+              </View>
+            )}
 
-              <View className="flex-col gap-1">
+            {/* Sizes section — edit mode only. Lists the primary inline size +
+                any configurations. Tap to edit, plus button to add.
+                Cost analysis for each size happens on the size-form screen. */}
+            {isEditing && (
+              <View className="flex-col gap-3">
                 <Text
-                  className="text-[11px] tracking-widest uppercase mb-2"
+                  className="text-[11px] tracking-widest uppercase"
                   style={{ color: colors.textTertiary, fontWeight: '600' }}
                 >
-                  Cost Analysis
+                  Sizes
                 </Text>
 
-                <MetricRow
-                  label="Cost / Oz:"
-                  value={`$${costPerOz.toFixed(3)}`}
-                />
-                <MetricRow
-                  label={`Cost / ${pourLabel}:`}
-                  value={formatCurrency(costPerPour)}
+                {/* Primary (inline) */}
+                <SizeRow
+                  label={volumeLabel(inputValues.productSize)}
+                  cost={inputValues.productCost}
+                  isDefault
+                  onPress={() =>
+                    router.push({
+                      pathname: '/ingredient-size-form',
+                      params: { ingredientId, configId: 'default' },
+                    } as any)
+                  }
                 />
 
-                {forSale && (
-                  <MetricRow
-                    label="Margin:"
-                    value={formatCurrency(pourCostMargin)}
+                {/* Additional configurations */}
+                {configurations.map((c) => (
+                  <SizeRow
+                    key={c.id}
+                    label={volumeLabel(c.productSize)}
+                    cost={c.productCost}
+                    onPress={() =>
+                      router.push({
+                        pathname: '/ingredient-size-form',
+                        params: { ingredientId, configId: c.id },
+                      } as any)
+                    }
                   />
-                )}
-              </View>
-            </View>
+                ))}
 
-            {/* Save button */}
-            <Button
-              variant="primary"
-              fullWidth
-              size="large"
-              disabled={!isValid || isSaving}
-              onPress={() => saveRef.current()}
-            >
-              {isSaving
-                ? 'Saving...'
-                : isEditing
-                  ? 'Save Changes'
-                  : 'Save Ingredient'}
-            </Button>
+                <Pressable
+                  onPress={() =>
+                    router.push({
+                      pathname: '/ingredient-size-form',
+                      params: { ingredientId },
+                    } as any)
+                  }
+                  className="flex-row items-center justify-center gap-2 py-3 rounded-xl"
+                  style={{
+                    backgroundColor: colors.accent + '15',
+                    borderWidth: 1,
+                    borderColor: colors.accent + '99',
+                    borderStyle: 'dashed',
+                  }}
+                >
+                  <Ionicons name="add" size={18} color={colors.accent} />
+                  <Text
+                    style={{
+                      color: colors.accent,
+                      fontWeight: '600',
+                      fontSize: 15,
+                    }}
+                  >
+                    Add Size
+                  </Text>
+                </Pressable>
+              </View>
+            )}
 
             {/* Delete button (edit mode only) */}
             {isEditing && (
@@ -376,10 +412,83 @@ export default function IngredientFormScreen() {
               </Pressable>
             )}
 
+            {/* Save button — create mode only (edit uses HeaderSavePill).
+                Kept for create so first-time users see a clear primary CTA. */}
+            {!isEditing && (
+              <Button
+                variant="primary"
+                fullWidth
+                size="large"
+                disabled={!isValid || isSaving}
+                onPress={() => saveRef.current()}
+              >
+                {isSaving ? 'Saving...' : 'Save Ingredient'}
+              </Button>
+            )}
+
             <View className="h-8" />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </GradientBackground>
+  );
+}
+
+/** A row in the edit-form's Sizes section: size label + cost on the left,
+ *  optional "Default" chip + chevron on the right. */
+function SizeRow({
+  label,
+  cost,
+  isDefault,
+  onPress,
+}: {
+  label: string;
+  cost: number;
+  isDefault?: boolean;
+  onPress: () => void;
+}) {
+  const colors = useThemeColors();
+  return (
+    <Pressable
+      onPress={onPress}
+      className="flex-row items-center py-3 px-4 rounded-xl"
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.7 : 1,
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.borderSubtle,
+      })}
+    >
+      <View className="flex-1">
+        <View className="flex-row items-center gap-2">
+          <Text
+            className="text-base"
+            style={{ color: colors.text, fontWeight: '600' }}
+          >
+            {label}
+          </Text>
+          {isDefault && (
+            <View
+              className="px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: colors.gold + '22' }}
+            >
+              <Text
+                className="text-[10px] tracking-widest uppercase"
+                style={{ color: colors.gold, fontWeight: '700' }}
+              >
+                Default
+              </Text>
+            </View>
+          )}
+        </View>
+        <Text
+          className="text-sm mt-0.5"
+          style={{ color: colors.textTertiary }}
+        >
+          ${cost.toFixed(2)}
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
+    </Pressable>
   );
 }

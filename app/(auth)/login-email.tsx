@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import TextInput from '@/src/components/ui/TextInput';
@@ -10,7 +10,7 @@ import { palette } from '@/src/contexts/ThemeContext';
 import { HapticService } from '@/src/services/haptic-service';
 
 export default function LoginEmailScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const insets = useSafeAreaInsets();
   const { signIn } = useAuth();
 

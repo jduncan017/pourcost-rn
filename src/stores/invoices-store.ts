@@ -11,7 +11,6 @@ import { FeedbackService } from '@/src/services/feedback-service';
 import { ensureDate } from '@/src/lib/ensureDate';
 import {
   fetchInvoices,
-  fetchInvoiceById,
   fetchLineItemsForInvoice,
   insertInvoice,
   updateInvoiceStatus,

@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
-import { useNavigation, useRouter } from 'expo-router';
+import { useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import Card from '@/src/components/ui/Card';
@@ -46,7 +47,7 @@ function TipIndexCard({
 
 export default function SettingsProTipsScreen() {
   const navigation = useNavigation();
-  const router = useRouter();
+  const router = useGuardedRouter();
   const colors = useThemeColors();
 
   useLayoutEffect(() => {

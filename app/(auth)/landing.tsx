@@ -1,12 +1,11 @@
 import { View, Text, Image, StyleSheet, Pressable, AppState } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import Button from '@/src/components/ui/Button';
 import { palette } from '@/src/contexts/ThemeContext';
 import { HapticService } from '@/src/services/haptic-service';
 
@@ -19,7 +18,7 @@ const VALUE_PROPS = [
 const videoSource = require('@/assets/splash-video.mp4');
 
 export default function LandingScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const insets = useSafeAreaInsets();
 
   const player = useVideoPlayer(videoSource, (p) => {

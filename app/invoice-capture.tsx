@@ -15,9 +15,8 @@ import {
   Image,
   Alert,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 // Native document scanner — requires dev build. Falls back gracefully if unavailable.
 let DocumentScanner: any = null;
 let ResponseType: any = {};
@@ -91,7 +90,7 @@ function PageThumbnail({
 // ==========================================
 
 export default function InvoiceCaptureScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const colors = useThemeColors();
   const { createInvoice, isUploading } = useInvoicesStore();
 
@@ -258,7 +257,7 @@ export default function InvoiceCaptureScreen() {
             {/* Tips */}
             <View className="mt-10 gap-3">
               {[
-                { icon: 'scan-outline', text: 'Hold steady — edges are detected automatically' },
+                { icon: 'scan-outline', text: 'Hold steady. Edges are detected automatically' },
                 { icon: 'crop-outline', text: 'Adjust the crop if needed before confirming' },
                 { icon: 'documents-outline', text: 'Multi-page: scan all pages in one session' },
               ].map(({ icon, text }) => (

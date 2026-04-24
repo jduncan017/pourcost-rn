@@ -206,37 +206,6 @@ export async function extractLineItems(
   return result;
 }
 
-/**
- * Legacy: Extract from OCR text (for template parsing in future rounds).
- */
-export async function extractLineItemsFromText(
-  ocrText: string,
-  context?: { distributorName?: string },
-): Promise<ExtractionResult> {
-  const userPrompt = buildUserPrompt(ocrText, context);
-
-  const { data, error } = await supabase.functions.invoke('extract-invoice', {
-    body: {
-      storagePaths: [],
-      systemPrompt: SYSTEM_PROMPT,
-      userPrompt: userPrompt + '\n\n--- BEGIN OCR TEXT ---\n' + ocrText + '\n--- END OCR TEXT ---',
-    },
-  });
-
-  if (error) {
-    throw new Error(`Text extraction failed: ${error.message}`);
-  }
-
-  const result = parseExtractionResponse(data);
-  result.lineItems = validateAndCorrectLineItems(result.lineItems);
-  return result;
-}
-
-/**
- * Extract from an invoice image directly (Tier 4 — vision).
- * Used when OCR text is too garbled or the invoice is handwritten.
- */
-// extractLineItemsFromImage removed — vision is now the default path via extractLineItems()
 
 // ==========================================
 // POST-EXTRACTION VALIDATION

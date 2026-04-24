@@ -1,6 +1,12 @@
 /**
  * Seeds a user's bar with sample ingredients + cocktails on first sign-in.
- * Marks all seeded rows with `is_sample = true` so they can be cleared in one go.
+ * Marks all seeded rows with `is_sample = true` so they can be identified in
+ * analytics (e.g., which starter items do users engage with or delete).
+ *
+ * The flag persists across edits by design — flipping it on interaction would
+ * destroy the "engaged-with-starter-data" signal we need to tune the seed list
+ * post-launch. See `clearSampleData` was removed 2026-04-24 along with the UI
+ * that triggered it; users now manage sample items like any other data.
  *
  * Direct Supabase calls (bypasses the offline queue) — this runs at a point
  * where we know the user is online (right after successful onboarding).
@@ -114,123 +120,4 @@ export async function seedSampleBar(): Promise<void> {
       if (ciErr) throw new Error(`Failed to seed cocktail ingredients: ${ciErr.message}`);
     }
   }
-}
-
-// updated_at gets bumped by an after-insert trigger too (not just edits) on some
-// Postgres setups, so we use a small tolerance to be robust.
-const EDIT_TOLERANCE_MS = 2000;
-
-function isEdited(row: { created_at: string; updated_at: string }): boolean {
-  const created = new Date(row.created_at).getTime();
-  const updated = new Date(row.updated_at).getTime();
-  return updated - created > EDIT_TOLERANCE_MS;
-}
-
-/**
- * Remove sample rows for the current user WITHOUT touching:
- *   - Any user-added ingredients/cocktails (they're never `is_sample=true`)
- *   - Any sample rows the user has edited (updated_at > created_at)
- *   - Any sample ingredients referenced by user-added cocktails
- *
- * The kept rows get "promoted" (is_sample flipped to false) so they're
- * indistinguishable from the user's own data going forward.
- */
-export async function clearSampleData(): Promise<void> {
-  const userId = await currentUserId();
-
-  // --- Ingredients promotion set ------------------------------------------
-  const { data: sampleIngs, error: sampleIngsErr } = await supabase
-    .from('ingredients')
-    .select('id, created_at, updated_at')
-    .eq('user_id', userId)
-    .eq('is_sample', true);
-  if (sampleIngsErr) throw new Error(`Failed to scan sample ingredients: ${sampleIngsErr.message}`);
-
-  const ingIdsToPromote = new Set<string>();
-
-  // Promote any sample ingredient the user has edited.
-  for (const ing of sampleIngs ?? []) {
-    if (isEdited(ing as { created_at: string; updated_at: string })) {
-      ingIdsToPromote.add(ing.id);
-    }
-  }
-
-  // Promote any sample ingredient referenced by a user-added cocktail.
-  const { data: userCocktails, error: userCocktailsErr } = await supabase
-    .from('cocktails')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('is_sample', false);
-  if (userCocktailsErr) throw new Error(`Failed to scan user cocktails: ${userCocktailsErr.message}`);
-
-  const userCocktailIds = (userCocktails ?? []).map((c) => c.id);
-  if (userCocktailIds.length > 0) {
-    const { data: refs, error: refsErr } = await supabase
-      .from('cocktail_ingredients')
-      .select('ingredient_id')
-      .in('cocktail_id', userCocktailIds);
-    if (refsErr) throw new Error(`Failed to scan cocktail ingredients: ${refsErr.message}`);
-    for (const r of refs ?? []) ingIdsToPromote.add(r.ingredient_id);
-  }
-
-  if (ingIdsToPromote.size > 0) {
-    const { error: promoteIngErr } = await supabase
-      .from('ingredients')
-      .update({ is_sample: false })
-      .eq('user_id', userId)
-      .eq('is_sample', true)
-      .in('id', Array.from(ingIdsToPromote));
-    if (promoteIngErr) throw new Error(`Failed to promote ingredients: ${promoteIngErr.message}`);
-  }
-
-  // --- Cocktails promotion set --------------------------------------------
-  const { data: sampleCocktails, error: sampleCocktailsErr } = await supabase
-    .from('cocktails')
-    .select('id, created_at, updated_at')
-    .eq('user_id', userId)
-    .eq('is_sample', true);
-  if (sampleCocktailsErr) throw new Error(`Failed to scan sample cocktails: ${sampleCocktailsErr.message}`);
-
-  const editedCocktailIds = (sampleCocktails ?? [])
-    .filter((c) => isEdited(c as { created_at: string; updated_at: string }))
-    .map((c) => c.id);
-
-  if (editedCocktailIds.length > 0) {
-    const { error: promoteCocktailErr } = await supabase
-      .from('cocktails')
-      .update({ is_sample: false })
-      .eq('user_id', userId)
-      .eq('is_sample', true)
-      .in('id', editedCocktailIds);
-    if (promoteCocktailErr) throw new Error(`Failed to promote cocktails: ${promoteCocktailErr.message}`);
-  }
-
-  // --- Delete remaining sample rows ---------------------------------------
-  const { error: cocktailErr } = await supabase
-    .from('cocktails')
-    .delete()
-    .eq('user_id', userId)
-    .eq('is_sample', true);
-  if (cocktailErr) throw new Error(`Failed to clear sample cocktails: ${cocktailErr.message}`);
-
-  const { error: ingErr } = await supabase
-    .from('ingredients')
-    .delete()
-    .eq('user_id', userId)
-    .eq('is_sample', true);
-  if (ingErr) throw new Error(`Failed to clear sample ingredients: ${ingErr.message}`);
-}
-
-/**
- * Fast yes/no: does the current user have any sample rows left?
- * Used to decide whether to show the "Clear sample data" setting.
- */
-export async function hasSampleData(): Promise<boolean> {
-  const userId = await currentUserId();
-  const { count } = await supabase
-    .from('ingredients')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .eq('is_sample', true);
-  return (count ?? 0) > 0;
 }

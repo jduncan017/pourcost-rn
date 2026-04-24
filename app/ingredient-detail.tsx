@@ -1,8 +1,10 @@
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useMemo, useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
-import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useAppStore } from '@/src/stores/app-store';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
+import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,63 +13,37 @@ import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import ActionSheet from '@/src/components/ui/ActionSheet';
 import StatCard from '@/src/components/ui/StatCard';
-import InfoIcon from '@/src/components/ui/InfoIcon';
+import LedgerRow from '@/src/components/ui/LedgerRow';
 import DetailLevelToggle from '@/src/components/ui/DetailLevelToggle';
 import PourCostHero from '@/src/components/PourCostHero';
 import GradientBackground from '@/src/components/ui/GradientBackground';
+import Dropdown from '@/src/components/ui/Dropdown';
+import IngredientInUseSheet from '@/src/components/ui/IngredientInUseSheet';
 import { FeedbackService } from '@/src/services/feedback-service';
-import { volumeLabel } from '@/src/types/models';
+import { SavedIngredient, Volume, volumeLabel } from '@/src/types/models';
 import { buildIngredientEditParams } from '@/src/lib/buildIngredientEditParams';
 import {
   calculateIngredientMetrics,
   calculateSuggestedPrice,
   formatCurrency,
+  roundSuggestedPrice,
 } from '@/src/services/calculation-service';
 import PriceHistory from '@/src/components/PriceHistory';
 import { ingredientTypeIcon } from '@/src/lib/type-icons';
 
-/** One row in the LEDGER open list — no dividers between rows. */
-function LedgerRow({
-  label,
-  value,
-  valueColor,
-  colors,
-  infoTermKey,
-}: {
-  label: string;
-  value: string;
-  valueColor?: string;
-  colors: any;
-  infoTermKey?: import('@/src/constants/glossary').GlossaryKey;
-}) {
-  return (
-    <View className="flex-row justify-between items-center py-2">
-      <View className="flex-row items-center gap-1">
-        <Text className="text-base" style={{ color: colors.textSecondary }}>
-          {label}
-        </Text>
-        {infoTermKey && <InfoIcon termKey={infoTermKey} size={13} />}
-      </View>
-      <Text
-        className="text-base"
-        style={{ color: valueColor ?? colors.text, fontWeight: '600' }}
-      >
-        {value}
-      </Text>
-    </View>
-  );
-}
 
 export default function IngredientDetailScreen() {
-  const { defaultPourSize, defaultRetailPrice, pourCostGoal, detailLevel } = useAppStore();
-  const router = useRouter();
+  const { defaultPourSize, defaultRetailPrice, pourCostGoal, detailLevel, suggestedPriceRounding } = useAppStore();
+  const router = useGuardedRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const [showActions, setShowActions] = useState(false);
+  const [showInUseSheet, setShowInUseSheet] = useState(false);
 
   const { ingredients, loadIngredients, deleteIngredient } = useIngredientsStore();
+  const { cocktails } = useCocktailsStore();
 
   const ingredientId = params.id as string;
   const ingredient = ingredients.find((ing) => ing.id === ingredientId);
@@ -106,15 +82,46 @@ export default function IngredientDetailScreen() {
   const isNotForSale = ingredient.notForSale === true;
   const effectivePourSize = ingredient.pourSize ?? defaultPourSize;
   const effectiveRetailPrice = ingredient.retailPrice ?? defaultRetailPrice;
+
+  // Selectable size: the inline default + any stored configurations.
+  // Each option is keyed by the volume label (one config per unique size).
+  const sizeOptions = useMemo(() => {
+    const opts: { value: string; label: string; size: Volume; cost: number }[] = [
+      { value: 'default', label: volumeLabel(ingredient.productSize), size: ingredient.productSize, cost: ingredient.productCost },
+    ];
+    for (const c of ingredient.configurations ?? []) {
+      opts.push({ value: c.id, label: volumeLabel(c.productSize), size: c.productSize, cost: c.productCost });
+    }
+    return opts;
+  }, [ingredient]);
+
+  const [selectedSizeKey, setSelectedSizeKey] = useState<string>('default');
+  const selectedOption = sizeOptions.find((o) => o.value === selectedSizeKey) ?? sizeOptions[0];
+
+  // Reset to "default" if the selected config disappears (e.g. user deleted it from edit form).
+  useEffect(() => {
+    if (!sizeOptions.find((o) => o.value === selectedSizeKey)) {
+      setSelectedSizeKey('default');
+    }
+  }, [sizeOptions, selectedSizeKey]);
+
+  // Build a synthetic ingredient pinned to the selected configuration so all
+  // downstream metrics (cost/oz, suggested retail, pour-cost %) reflect THIS bottle.
+  const viewIngredient: SavedIngredient = {
+    ...ingredient,
+    productSize: selectedOption.size,
+    productCost: selectedOption.cost,
+  };
   const metrics = calculateIngredientMetrics(
-    ingredient,
+    viewIngredient,
     effectivePourSize,
     effectiveRetailPrice
   );
-  const suggestedRetail = calculateSuggestedPrice(
-    metrics.costPerPour,
-    pourCostGoal / 100
+  const suggestedRetail = roundSuggestedPrice(
+    calculateSuggestedPrice(metrics.costPerPour, pourCostGoal / 100),
+    suggestedPriceRounding
   );
+  const hasMultipleSizes = sizeOptions.length > 1;
 
   const handleEdit = () => {
     router.navigate({
@@ -123,7 +130,15 @@ export default function IngredientDetailScreen() {
     });
   };
 
+  const affectedCocktails = cocktails.filter((c) =>
+    c.ingredients.some((ci) => ci.ingredientId === ingredient.id)
+  );
+
   const handleDelete = () => {
+    if (affectedCocktails.length > 0) {
+      setShowInUseSheet(true);
+      return;
+    }
     FeedbackService.showDeleteConfirmation(
       ingredient.name,
       async () => {
@@ -132,6 +147,14 @@ export default function IngredientDetailScreen() {
       },
       'ingredient'
     );
+  };
+
+  const handleOpenCocktail = (cocktailId: string) => {
+    setShowInUseSheet(false);
+    router.navigate({
+      pathname: '/cocktail-detail',
+      params: { id: cocktailId },
+    });
   };
 
   return (
@@ -148,6 +171,14 @@ export default function IngredientDetailScreen() {
             destructive: true,
           },
         ]}
+      />
+
+      <IngredientInUseSheet
+        visible={showInUseSheet}
+        onClose={() => setShowInUseSheet(false)}
+        ingredientName={ingredient.name}
+        cocktails={affectedCocktails}
+        onOpenCocktail={handleOpenCocktail}
       />
 
       <ScrollView
@@ -209,6 +240,23 @@ export default function IngredientDetailScreen() {
               ) : null}
             </View>
           </View>
+
+          {/* Bottle size picker — only when multiple sizes exist. Drives all metrics below. */}
+          {hasMultipleSizes && (
+            <View className="px-6">
+              <Dropdown
+                value={selectedSizeKey}
+                onValueChange={setSelectedSizeKey}
+                options={sizeOptions.map((o) => ({
+                  value: o.value,
+                  label: o.label,
+                  sublabel: `$${o.cost.toFixed(2)}`,
+                }))}
+                label="Bottle Size"
+                placeholder="Select size"
+              />
+            </View>
+          )}
 
           {/* Stats group — pushed to bottom. marginTop:auto keeps identity at
               top and anchors stats + hero + history + ledger as one bottom block. */}
@@ -276,39 +324,37 @@ export default function IngredientDetailScreen() {
               <ScreenTitle title="Ledger" variant="muted" className="mb-1" />
               <LedgerRow
                 label="Purchase Price"
-                value={formatCurrency(ingredient.productCost)}
-                colors={colors}
-              />
+                value={formatCurrency(selectedOption.cost)}
+                />
               {isDetailed && (
                 <LedgerRow
                   label="Cost / Oz"
                   value={formatCurrency(metrics.costPerOz)}
-                  colors={colors}
-                />
+                    />
               )}
               <LedgerRow
                 label="Cost / Pour"
                 value={formatCurrency(metrics.costPerPour)}
-                colors={colors}
-              />
+                />
               <LedgerRow
                 label="Pour Size"
                 value={volumeLabel(effectivePourSize)}
-                colors={colors}
-              />
+                />
+              <LedgerRow
+                label="Bottle Size"
+                value={volumeLabel(selectedOption.size)}
+                />
               {isDetailed && !isNotForSale && (
                 <LedgerRow
                   label="Type"
                   value={ingredient.type || 'Other'}
-                  colors={colors}
-                />
+                    />
               )}
               {isDetailed && (
                 <LedgerRow
                   label="Last Updated"
                   value={new Date(ingredient.updatedAt).toLocaleDateString()}
-                  colors={colors}
-                />
+                    />
               )}
             </View>
           </LinearGradient>

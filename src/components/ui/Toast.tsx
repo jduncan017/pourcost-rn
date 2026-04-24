@@ -66,42 +66,24 @@ const Toast: React.FC<ToastProps> = ({ message, onDismiss }) => {
     });
   };
 
-  // Get colors based on message type
-  const getToastColors = (type: FeedbackType) => {
+  // Map feedback type → which icon + tint color to show. The toast background
+  // is always the same opaque neutral (`colors.elevated`) so toasts read as a
+  // single calm system voice; the tiny colored icon is the only accent hint.
+  const getToastAccent = (type: FeedbackType) => {
     switch (type) {
       case 'success':
-        return {
-          background: 'bg-s22/90 dark:bg-s21/90',
-          border: 'border-s22 dark:border-s21',
-          icon: palette.G3,
-          iconName: 'checkmark-circle' as const,
-        };
+        return { icon: palette.G3, iconName: 'checkmark-circle' as const };
       case 'error':
-        return {
-          background: 'bg-e2/90 dark:bg-e3/90',
-          border: 'border-e2 dark:border-e3',
-          icon: palette.R3,
-          iconName: 'close-circle' as const,
-        };
+        return { icon: palette.R3, iconName: 'close-circle' as const };
       case 'warning':
-        return {
-          background: 'bg-s12/90 dark:bg-s11/90',
-          border: 'border-s12 dark:border-s11',
-          icon: palette.O4,
-          iconName: 'warning' as const,
-        };
+        return { icon: palette.O4, iconName: 'warning' as const };
       case 'info':
       default:
-        return {
-          background: 'bg-p1/90 dark:bg-p2/90',
-          border: 'border-p1 dark:border-p2',
-          icon: palette.B5,
-          iconName: 'information-circle' as const,
-        };
+        return { icon: palette.B5, iconName: 'information-circle' as const };
     }
   };
 
-  const toastColors = getToastColors(message.type);
+  const accent = getToastAccent(message.type);
 
   return (
     <Animated.View
@@ -116,12 +98,11 @@ const Toast: React.FC<ToastProps> = ({ message, onDismiss }) => {
       }}
     >
       <View
-        className={`
-          ${toastColors.background} ${toastColors.border}
-          border rounded-xl p-4 shadow-lg
-          flex-row items-start gap-3
-        `}
+        className="rounded-xl p-4 flex-row items-start gap-3"
         style={{
+          backgroundColor: colors.elevated,
+          borderWidth: 1,
+          borderColor: colors.borderSubtle,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.25,
@@ -129,12 +110,12 @@ const Toast: React.FC<ToastProps> = ({ message, onDismiss }) => {
           elevation: 8,
         }}
       >
-        {/* Icon */}
+        {/* Icon — the only colored hint of the message type. */}
         <View className="mt-0.5">
           <Ionicons
-            name={toastColors.iconName}
+            name={accent.iconName}
             size={20}
-            color={toastColors.icon}
+            color={accent.icon}
           />
         </View>
 
@@ -142,18 +123,21 @@ const Toast: React.FC<ToastProps> = ({ message, onDismiss }) => {
         <View className="flex-1">
           {message.title && (
             <Text
-              className="text-white font-medium text-base mb-1"
-              style={{ fontWeight: '600' }}
+              className="text-base mb-1"
+              style={{ color: colors.text, fontWeight: '600' }}
             >
               {message.title}
             </Text>
           )}
           {message.message && (
-            <Text className="text-white/90 text-sm leading-relaxed">
+            <Text
+              className="text-sm leading-relaxed"
+              style={{ color: colors.textSecondary }}
+            >
               {message.message}
             </Text>
           )}
-          
+
           {/* Action Button */}
           {message.action && (
             <Pressable
@@ -164,8 +148,8 @@ const Toast: React.FC<ToastProps> = ({ message, onDismiss }) => {
               className="mt-2 self-start"
             >
               <Text
-                className="text-white font-medium text-sm underline"
-                style={{ fontWeight: '500' }}
+                className="text-sm underline"
+                style={{ color: colors.accent, fontWeight: '600' }}
               >
                 {message.action.label}
               </Text>
@@ -182,7 +166,7 @@ const Toast: React.FC<ToastProps> = ({ message, onDismiss }) => {
           <Ionicons
             name="close"
             size={18}
-            color="rgba(255, 255, 255, 0.8)"
+            color={colors.textTertiary}
           />
         </Pressable>
       </View>

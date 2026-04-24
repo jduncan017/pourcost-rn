@@ -81,6 +81,20 @@ export function calculateSuggestedPrice(
 }
 
 /**
+ * Apply the user's global Suggested Price rounding preference.
+ * 'off' leaves the value untouched; '1' rounds to whole dollars; '0.5' / '0.25'
+ * snap to those increments with standard rounding (e.g. $7.63 → $7.50 at 0.25).
+ */
+export function roundSuggestedPrice(
+  price: number,
+  mode: 'off' | '1' | '0.5' | '0.25',
+): number {
+  if (mode === 'off' || price <= 0) return price;
+  const step = mode === '1' ? 1 : mode === '0.5' ? 0.5 : 0.25;
+  return Math.round(price / step) * step;
+}
+
+/**
  * Calculate pour cost percentage: costPerPour / retailPrice * 100
  */
 export function calculatePourCostPercentage(

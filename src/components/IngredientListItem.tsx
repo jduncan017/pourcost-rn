@@ -1,12 +1,14 @@
 /**
  * IngredientListItem Component for PourCost-RN
- * Displays ingredient information in a list format with swipe actions
+ * Displays ingredient information in a list format with swipe actions.
+ * In selection mode, swipe is replaced with a checkbox + tap-to-toggle.
  */
 
 import { useMemo } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import SwipeableCard from './SwipeableCard';
+import Card from './ui/Card';
 import { SavedIngredient, volumeLabel } from '@/src/types/models';
 import {
   calculateCostPerOz,
@@ -25,6 +27,11 @@ interface IngredientListItemProps {
   onEdit?: () => void;
   onDelete?: () => void;
   className?: string;
+  /** When true, swipe actions are disabled and a checkbox is shown on the left.
+   *  Tap toggles selection via `onSelectionToggle` instead of calling `onPress`. */
+  selectionMode?: boolean;
+  selected?: boolean;
+  onSelectionToggle?: () => void;
 }
 
 export default function IngredientListItem({
@@ -34,6 +41,9 @@ export default function IngredientListItem({
   onEdit,
   onDelete,
   className = '',
+  selectionMode = false,
+  selected = false,
+  onSelectionToggle,
 }: IngredientListItemProps) {
   if (!ingredient) return null;
 
@@ -93,39 +103,47 @@ export default function IngredientListItem({
 
   const highlight = getHighlight();
 
-  return (
-    <SwipeableCard
-      onPress={onPress}
-      onSwipeLeft={onEdit}
-      onSwipeRight={onDelete}
-      className={className}
-      variant="gradient"
-      padding="medium"
-    >
-      <View className="flex-row items-center gap-3">
-        {/* Left - Name & details */}
-        <View className="flex-1">
-          <Text
-            className="text-base tracking-wide"
-            style={{ color: colors.text, fontWeight: '600' }}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {ingredient.name || 'Unknown Ingredient'}
-          </Text>
-          <Text
-            className="text-sm mt-0.5"
-            style={{ color: colors.textTertiary }}
-            numberOfLines={1}
-          >
-            {ingredient.type || 'Unknown'} •{' '}
-            {volumeLabel(ingredient.productSize)} •{' '}
-            {formatCurrency(ingredient.productCost || 0)}
-          </Text>
+  const body = (
+    <View className="flex-row items-center gap-3">
+      {selectionMode && (
+        <View
+          className="w-6 h-6 rounded-full items-center justify-center"
+          style={{
+            backgroundColor: selected ? colors.accent : 'transparent',
+            borderWidth: 2,
+            borderColor: selected ? colors.accent : colors.border,
+          }}
+        >
+          {selected && (
+            <Ionicons name="checkmark" size={14} color={colors.colors.N1} />
+          )}
         </View>
+      )}
 
-        {/* Right - Metric or chevron */}
-        {highlight ? (
+      {/* Left - Name & details */}
+      <View className="flex-1">
+        <Text
+          className="text-base tracking-wide"
+          style={{ color: colors.text, fontWeight: '600' }}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {ingredient.name || 'Unknown Ingredient'}
+        </Text>
+        <Text
+          className="text-sm mt-0.5"
+          style={{ color: colors.textTertiary }}
+          numberOfLines={1}
+        >
+          {ingredient.type || 'Unknown'} •{' '}
+          {volumeLabel(ingredient.productSize)} •{' '}
+          {formatCurrency(ingredient.productCost || 0)}
+        </Text>
+      </View>
+
+      {/* Right - Metric or chevron. Hidden in selection mode — checkbox is the primary indicator. */}
+      {!selectionMode &&
+        (highlight ? (
           <View
             className="pl-3.5 items-center"
             style={{ borderLeftWidth: 1, borderLeftColor: colors.border }}
@@ -146,8 +164,34 @@ export default function IngredientListItem({
             size={18}
             color={colors.textTertiary}
           />
-        )}
-      </View>
+        ))}
+    </View>
+  );
+
+  if (selectionMode) {
+    return (
+      <Pressable
+        onPress={onSelectionToggle}
+        className={className}
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+      >
+        <Card padding="medium">
+          {body}
+        </Card>
+      </Pressable>
+    );
+  }
+
+  return (
+    <SwipeableCard
+      onPress={onPress}
+      onSwipeLeft={onEdit}
+      onSwipeRight={onDelete}
+      className={className}
+      variant="gradient"
+      padding="medium"
+    >
+      {body}
     </SwipeableCard>
   );
 }

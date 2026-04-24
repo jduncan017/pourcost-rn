@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRouter, type Href } from 'expo-router';
+import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { type Href } from 'expo-router';
+import { useGuardedRouter } from '@/src/lib/guarded-router';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import Button from '@/src/components/ui/Button';
@@ -10,14 +11,14 @@ import CustomSlider from '@/src/components/ui/CustomSlider';
 import IngredientInputs, { IngredientInputValues } from '@/src/components/IngredientInputs';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { useAppStore } from '@/src/stores/app-store';
-import { formatCurrency } from '@/src/services/calculation-service';
+import { formatCurrency, roundSuggestedPrice } from '@/src/services/calculation-service';
 import { getPourChipsForContext } from '@/src/constants/appConstants';
 import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
 
 export default function CalculatorScreen() {
-  const router = useRouter();
+  const router = useGuardedRouter();
   const colors = useThemeColors();
-  const { pourCostGoal } = useAppStore();
+  const { pourCostGoal, suggestedPriceRounding } = useAppStore();
 
   const [values, setValues] = useState<IngredientInputValues>({
     ingredientType: 'Spirit',
@@ -47,7 +48,8 @@ export default function CalculatorScreen() {
     : 0;
 
   const costPerPour = isGarnish ? garnishCostPerServing : standardCostPerPour;
-  const suggestedCharge = values.pourCostPct > 0 ? costPerPour / (values.pourCostPct / 100) : 0;
+  const rawSuggested = values.pourCostPct > 0 ? costPerPour / (values.pourCostPct / 100) : 0;
+  const suggestedCharge = roundSuggestedPrice(rawSuggested, suggestedPriceRounding);
   const pourCostMargin = suggestedCharge - costPerPour;
 
   const garnishUnitLabel = isGarnish
