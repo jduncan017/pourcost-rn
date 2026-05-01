@@ -18,6 +18,7 @@ import {
   updateCocktailById,
   deleteCocktailById,
 } from '@/src/lib/supabase-writes';
+import { capture } from '@/src/services/analytics-service';
 
 // ==========================================
 // STORE INTERFACE
@@ -120,10 +121,12 @@ export const useCocktailsStore = create<CocktailsState>()(
       addCocktail: async (cocktailData) => {
         set({ error: null });
         try {
+          const wasEmpty = get().cocktails.length === 0;
           const newCocktail = await insertCocktail(cocktailData);
           set(state => ({
             cocktails: [newCocktail, ...state.cocktails],
           }));
+          if (wasEmpty) capture('first_cocktail_added');
           FeedbackService.showOperationSuccess('create', newCocktail.name);
           return newCocktail;
         } catch (error) {

@@ -36,10 +36,22 @@ export default function LoginScreen() {
           </Text>
         </View>
 
-        {/* Auth options */}
+        {/* Auth options. We pass onSuccess so that even users who arrive via
+            the Login screen (because they don't realize they're new) get
+            routed through onboarding when their auth provider returns
+            isNewUser=true. Without this, brand-new accounts created via
+            OAuth on this screen would bypass onboarding entirely. */}
         <View className="flex-col gap-3" style={{ marginTop: 24 }}>
-          <AppleSignInButton />
-          <GoogleSignInButton />
+          <AppleSignInButton
+            onSuccess={(isNewUser) => {
+              if (isNewUser) router.replace('/(auth)/onboarding-profile' as any);
+            }}
+          />
+          <GoogleSignInButton
+            onSuccess={(isNewUser) => {
+              if (isNewUser) router.replace('/(auth)/onboarding-profile' as any);
+            }}
+          />
 
           {/* Divider */}
           <View className="flex-row items-center gap-3 my-2">

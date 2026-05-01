@@ -70,32 +70,11 @@ export default function SettingsScreen() {
               onPress={() => router.push('/settings-calculations' as any)}
               showCaret
             />
-          </View>
-
-          <SectionDivider />
-
-          {/* Learn */}
-          <View className="flex-col gap-3">
-            <ScreenTitle variant="group" title="Learn" />
             <SettingsCard
-              title="Glossary"
-              description="Bar finance terms: Pour Cost, COGS, Margin, etc."
-              iconName="book-outline"
-              onPress={() => router.push('/settings-glossary' as any)}
-              showCaret
-            />
-            <SettingsCard
-              title="Pro Tips"
-              description="Pricing, pouring, and running the bar"
-              iconName="bulb-outline"
-              onPress={() => router.push('/settings-pro-tips' as any)}
-              showCaret
-            />
-            <SettingsCard
-              title="Conversions"
-              description="Bottle sizes, pours, metric ↔ oz, keg yields"
-              iconName="swap-horizontal-outline"
-              onPress={() => router.push('/settings-conversions' as any)}
+              title="Manage Wells"
+              description="Pick or update your standard house-pour brands"
+              iconName="beer-outline"
+              onPress={() => router.push('/wells-setup' as any)}
               showCaret
             />
           </View>

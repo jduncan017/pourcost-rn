@@ -73,6 +73,13 @@ interface IngredientInputsProps {
    *  Used by the edit-ingredient form, where sizes/costs live in the
    *  separate "Sizes" section and per-config edit screen. */
   hideProductSize?: boolean;
+  /** When set, renders the pour-size section as a collapsed override:
+   *  shows current pour with a "Customize" toggle. Used by ingredient-form
+   *  where the default lives in settings and per-ingredient pour is an
+   *  optional override. Pass the user's global default in oz for the
+   *  "matches default" indicator. */
+  pourSizeOverride?: boolean;
+  defaultPourSizeOz?: number;
 }
 
 // ==========================================
@@ -87,6 +94,8 @@ export default function IngredientInputs({
   hideRetailPrice = false,
   noCard = false,
   hideProductSize = false,
+  pourSizeOverride = false,
+  defaultPourSizeOz,
 }: IngredientInputsProps) {
   const colors = useThemeColors();
   const router = useRouter();
@@ -104,6 +113,14 @@ export default function IngredientInputs({
   const [servingAmountText, setServingAmountText] = useState(servingAmount.toString());
   const [customPourText, setCustomPourText] = useState('');
   const [showCustomPour, setShowCustomPour] = useState(false);
+  // Override pattern: when pourSizeOverride is enabled, the pour size lives
+  // collapsed by default ("Using your default") with a Customize CTA. Users
+  // who don't need a per-ingredient override never see the picker.
+  const matchesDefaultPour =
+    defaultPourSizeOz != null && Math.abs(defaultPourSizeOz - pourSize) < 0.001;
+  const [pourOverrideExpanded, setPourOverrideExpanded] = useState(
+    pourSizeOverride ? !matchesDefaultPour : false
+  );
 
   const isGarnish = ingredientType === 'Garnish';
   const showCalcSubtypes = (CALC_SUBTYPE_TYPES as readonly string[]).includes(ingredientType);
@@ -310,36 +327,96 @@ export default function IngredientInputs({
             />
           )}
 
-          {/* Pour Size chips */}
-          <ChipSelector
-            label="Pour Size"
+          {/* Serving pour size. In form mode (pourSizeOverride=true), starts
+              collapsed showing the user's default with a Customize CTA. In
+              calculator mode, always-visible chip selector (current behavior). */}
+          {pourSizeOverride && !pourOverrideExpanded ? (
+            <View className="flex-col gap-1.5">
+              <Text
+                className="text-xs"
+                style={{ color: colors.textTertiary, letterSpacing: 0.5, fontWeight: '600' }}
+              >
+                SERVING POUR
+              </Text>
+              <Pressable
+                onPress={() => setPourOverrideExpanded(true)}
+                className="flex-row items-center justify-between rounded-xl px-4 py-3"
+                style={{
+                  backgroundColor: colors.inputBg,
+                  borderWidth: 1,
+                  borderColor: colors.borderSubtle,
+                }}
+              >
+                <View className="flex-col">
+                  <Text style={{ color: colors.text, fontWeight: '600', fontSize: 16 }}>
+                    {pourSize} oz
+                  </Text>
+                  <Text style={{ color: colors.textTertiary, fontSize: 12 }}>
+                    {matchesDefaultPour ? 'Using your default pour size' : 'Custom for this ingredient'}
+                  </Text>
+                </View>
+                <Text style={{ color: colors.accent, fontWeight: '600', fontSize: 14 }}>
+                  Customize
+                </Text>
+              </Pressable>
+              <Text className="text-xs" style={{ color: colors.textTertiary }}>
+                How much you sell per drink. Change the default in Settings.
+              </Text>
+            </View>
+          ) : (
+            <View className="flex-col gap-1.5">
+              <ChipSelector
+                label={pourSizeOverride ? 'Serving Pour Size' : 'Pour Size'}
                 options={pourChips.map(c => c.label)}
-            selectedOption={selectedPourChip}
-            onSelectionChange={(label) => {
-              const chip = pourChips.find(c => c.label === label);
-              if (chip) {
-                onChange({ pourSize: chip.oz });
-                setShowCustomPour(false);
-              }
-            }}
-            variant="compact"
-            trailingChip={
-              <CustomPourChip
-                key="custom-pour"
-                isActive={showCustomPour || (!selectedPourChip && !showCustomPour)}
-                value={customPourText}
-                onChangeText={setCustomPourText}
-                onSubmit={() => {
-                  const val = parseFloat(customPourText);
-                  if (!isNaN(val) && val > 0) {
-                    onChange({ pourSize: val });
-                    setShowCustomPour(true);
+                selectedOption={selectedPourChip}
+                onSelectionChange={(label) => {
+                  const chip = pourChips.find(c => c.label === label);
+                  if (chip) {
+                    onChange({ pourSize: chip.oz });
+                    setShowCustomPour(false);
                   }
                 }}
-                colors={colors}
+                variant="compact"
+                trailingChip={
+                  <CustomPourChip
+                    key="custom-pour"
+                    isActive={showCustomPour || (!selectedPourChip && !showCustomPour)}
+                    value={customPourText}
+                    onChangeText={setCustomPourText}
+                    onSubmit={() => {
+                      const val = parseFloat(customPourText);
+                      if (!isNaN(val) && val > 0) {
+                        onChange({ pourSize: val });
+                        setShowCustomPour(true);
+                      }
+                    }}
+                    colors={colors}
+                  />
+                }
               />
-            }
-          />
+              {pourSizeOverride && (
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-xs flex-1" style={{ color: colors.textTertiary }}>
+                    How much you sell per drink. Used for cost-per-pour math.
+                  </Text>
+                  {defaultPourSizeOz != null && !matchesDefaultPour && (
+                    <Pressable
+                      onPress={() => {
+                        onChange({ pourSize: defaultPourSizeOz });
+                        setShowCustomPour(false);
+                        setPourOverrideExpanded(false);
+                      }}
+                      hitSlop={6}
+                    >
+                      <Text style={{ color: colors.accent, fontSize: 12, fontWeight: '600' }}>
+                        Reset to default
+                      </Text>
+                    </Pressable>
+                  )}
+                </View>
+              )}
+            </View>
+          )}
 
           {/* Retail Price — form only, when for sale, unless hidden */}
           {variant === 'form' && !notForSale && !hideRetailPrice && (

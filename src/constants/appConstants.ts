@@ -370,14 +370,14 @@ export function getPourChipsForContext(
 // ==========================================
 
 export const QUICK_POUR_SIZES: { label: string; volume: Volume }[] = [
-  { label: '¼', volume: fraction(1, 4) },
-  { label: '½', volume: fraction(1, 2) },
-  { label: '¾', volume: fraction(3, 4) },
+  { label: '0.25', volume: fraction(1, 4) },
+  { label: '0.5', volume: fraction(1, 2) },
+  { label: '0.75', volume: fraction(3, 4) },
   { label: '1', volume: fraction(1, 1) },
-  { label: '1¼', volume: fraction(5, 4) },
-  { label: '1½', volume: fraction(3, 2) },
+  { label: '1.25', volume: fraction(5, 4) },
+  { label: '1.5', volume: fraction(3, 2) },
   { label: '2', volume: fraction(2, 1) },
-  { label: '2½', volume: fraction(5, 2) },
+  { label: '2.5', volume: fraction(5, 2) },
 ];
 
 /** "Other" pour sizes shown in bottom sheet (dashes, barspoons, larger pours) */
@@ -487,7 +487,7 @@ export type IngredientType = (typeof INGREDIENT_TYPES)[number];
 
 export const SPIRIT_SUBTYPES = [
   'Vodka',
-  'Whiskey', // umbrella — covers bourbon, scotch, rye, Irish, Canadian, etc.
+  'Whiskey', // umbrella, covers bourbon, scotch, rye, Irish, Canadian, etc.
   'Rum',
   'Gin',
   'Tequila',
@@ -496,6 +496,7 @@ export const SPIRIT_SUBTYPES = [
   'Cognac',
   'Absinthe',
   'Liqueur',
+  'Vermouth',
   'Amaro',
   'Cordial',
   'Bitters',
@@ -504,27 +505,51 @@ export const SPIRIT_SUBTYPES = [
 
 export type SpiritSubtype = (typeof SPIRIT_SUBTYPES)[number];
 
+// Beer subtypes are styles, aligned with the canonical_products subcategory
+// values used in seed 004 (so catalog-driven prefill matches the chip).
 export const BEER_SUBTYPES = [
-  'Draft',
-  'Packaged',
+  'Lager',
+  'Pilsner',
+  'IPA',
+  'Pale Ale',
+  'Stout',
+  'Porter',
+  'Wheat',
+  'Sour',
+  'Belgian',
+  'Ale',
+  'Other',
 ] as const;
 
 export type BeerSubtype = (typeof BEER_SUBTYPES)[number];
 
+// Wine subtypes match the canonical wine subcategories. 'Fortified' covers
+// Port / Sherry / Madeira; 'Orange' was dropped because no orange-wine
+// canonicals exist in the seed.
 export const WINE_SUBTYPES = [
   'Red',
   'White',
   'Rosé',
   'Sparkling',
-  'Orange',
+  'Fortified',
+  'Other',
 ] as const;
 
 export type WineSubtype = (typeof WINE_SUBTYPES)[number];
 
+// Non-Alc subtypes are the canonical *category* (not subcategory). The
+// IngredientType "Non-Alc" is a coarse umbrella covering juices, syrups,
+// mixers, garnishes, etc.; each canonical category maps to a chip here.
 export const NA_SUBTYPES = [
-  'Soda (BIB)',
-  'Soda (Canned)',
-  'Tap',
+  'Juice',
+  'Syrup',
+  'Mixer',
+  'Garnish',
+  'Dairy',
+  'Egg',
+  'Spice',
+  'Herb',
+  'Prepped',
   'Other',
 ] as const;
 

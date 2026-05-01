@@ -11,10 +11,11 @@ import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import ActionSheet from '@/src/components/ui/ActionSheet';
 import LedgerRow from '@/src/components/ui/LedgerRow';
+import BottomSheet from '@/src/components/ui/BottomSheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StatCard from '@/src/components/ui/StatCard';
 import DetailLevelToggle from '@/src/components/ui/DetailLevelToggle';
-import PourCostHero from '@/src/components/PourCostHero';
+import PourCostHero, { getPerformance } from '@/src/components/PourCostHero';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FeedbackService } from '@/src/services/feedback-service';
@@ -27,32 +28,12 @@ import {
   roundSuggestedPrice,
 } from '@/src/services/calculation-service';
 
-/** Display-friendly pour size: "2oz", "3/4oz", "1 1/2oz" — fractions when possible */
+/** Display-friendly pour size: "2oz", "0.75oz", "1.5oz". Decimal everywhere. */
 function pourLabel(v: Volume): string {
+  if (v.kind === 'namedOunces' || v.kind === 'unitQuantity') return volumeLabel(v);
   const oz = volumeToOunces(v);
-  const fractions: [number, string][] = [
-    [0.25, '1/4'],
-    [0.5, '1/2'],
-    [0.75, '3/4'],
-    [1, '1'],
-    [1.25, '1 1/4'],
-    [1.5, '1 1/2'],
-    [1.75, '1 3/4'],
-    [2, '2'],
-    [2.25, '2 1/4'],
-    [2.5, '2 1/2'],
-    [2.75, '2 3/4'],
-    [3, '3'],
-    [3.5, '3 1/2'],
-    [4, '4'],
-    [5, '5'],
-    [6, '6'],
-  ];
-  const match = fractions.find(([val]) => Math.abs(val - oz) < 0.001);
-  if (match) return `${match[1]}oz`;
-  if (v.kind === 'namedOunces' || v.kind === 'unitQuantity')
-    return volumeLabel(v);
-  return `${oz % 1 === 0 ? oz : oz.toFixed(1)}oz`;
+  const formatted = oz % 1 === 0 ? oz : Number(oz.toFixed(2));
+  return `${formatted}oz`;
 }
 
 
@@ -69,6 +50,7 @@ export default function CocktailDetailScreen() {
   const colors = useThemeColors();
   const params = useLocalSearchParams();
   const [showActions, setShowActions] = useState(false);
+  const [showLedger, setShowLedger] = useState(false);
 
   const { getCocktailById, loadCocktails, deleteCocktail } =
     useCocktailsStore();
@@ -115,6 +97,14 @@ export default function CocktailDetailScreen() {
     retailPrice > 0
       ? calculatePourCostPercentage(metrics.totalCost, retailPrice)
       : 0;
+  // Hide the Suggested Price row when pour cost is already on target. It's
+  // noise when the user's existing menu price is dialed in; only shows up
+  // when there's a meaningful delta to act on.
+  const performanceLabel =
+    pourCostGoal > 0 && pourCostPct > 0
+      ? getPerformance(pourCostPct / pourCostGoal).label
+      : 'On Target';
+  const isOnTarget = performanceLabel === 'On Target';
   const totalVolume = cocktail.ingredients.reduce(
     (sum, ing) => sum + volumeToOunces(ing.pourSize),
     0
@@ -195,6 +185,32 @@ export default function CocktailDetailScreen() {
         ]}
       />
 
+      <BottomSheet
+        visible={showLedger}
+        onClose={() => setShowLedger(false)}
+        title="The Numbers"
+      >
+        <View className="px-4 pb-6 flex-col gap-1">
+          <LedgerRow
+            label="Cost Of Goods"
+            value={formatCurrency(metrics.totalCost)}
+            infoTermKey="cogs"
+          />
+          <LedgerRow
+            label="Total Volume"
+            value={`${totalVolume.toFixed(2)} oz`}
+          />
+          <LedgerRow
+            label="Category"
+            value={cocktail.category || 'Other'}
+          />
+          <LedgerRow
+            label="Last Updated"
+            value={new Date(cocktail.updatedAt).toLocaleDateString()}
+          />
+        </View>
+      </BottomSheet>
+
       <ScrollView
         className="flex-1"
         bounces={false}
@@ -212,6 +228,17 @@ export default function CocktailDetailScreen() {
               />
             )}
             <View className="flex-1 flex-col gap-1.5">
+              <Text
+                className="text-xs"
+                style={{
+                  color: colors.gold,
+                  letterSpacing: 1.5,
+                  fontWeight: '700',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Cocktail
+              </Text>
               <Text
                 style={{
                   color: colors.text,
@@ -242,20 +269,29 @@ export default function CocktailDetailScreen() {
             </View>
           </View>
 
-          {/* Stats group — twin stat cards + AI suggestion, equal gap */}
+          {/* Pour Cost hero — detailed only, edge-to-edge. Sits at the top
+              of the financial story so managers see the headline performance
+              metric first. Stats below provide the supporting numbers. */}
+          {isDetailed && <PourCostHero pourCostPercentage={pourCostPct} />}
+
+          {/* Stats group — Menu Price always visible. Margin + Suggested Price
+              are cost-derived and only show in detailed mode so simple mode
+              stays focused on the recipe and retail price. */}
           <View className="px-6 flex-col gap-3">
             <View className="flex-row gap-3">
               <StatCard
                 label="Menu Price"
                 value={formatCurrency(retailPrice)}
               />
-              <StatCard
-                label="Margin"
-                value={formatCurrency(metrics.profitMargin)}
-                infoTermKey="margin"
-              />
+              {isDetailed && (
+                <StatCard
+                  label="Margin"
+                  value={formatCurrency(metrics.profitMargin)}
+                  infoTermKey="margin"
+                />
+              )}
             </View>
-            {isDetailed && (
+            {isDetailed && !isOnTarget && (
               <AiSuggestionRow
                 label="Suggested Price"
                 value={formatCurrency(roundSuggestedPrice(metrics.suggestedPrice, suggestedPriceRounding))}
@@ -322,13 +358,16 @@ export default function CocktailDetailScreen() {
                       </Text>
                     ) : null}
                   </View>
-                  {/* Col 3: cost */}
-                  <Text
-                    className="text-base"
-                    style={{ color: colors.text, fontWeight: '600' }}
-                  >
-                    {formatCurrency(ingredient.cost)}
-                  </Text>
+                  {/* Col 3: cost — detailed only. Simple mode stays focused
+                      on the recipe build, not the cost breakdown. */}
+                  {isDetailed && (
+                    <Text
+                      className="text-base"
+                      style={{ color: colors.text, fontWeight: '600' }}
+                    >
+                      {formatCurrency(ingredient.cost)}
+                    </Text>
+                  )}
                 </View>
               );
             })}
@@ -348,46 +387,49 @@ export default function CocktailDetailScreen() {
             </View>
           ) : null}
 
-          {/* Pour Cost hero — detailed only, edge-to-edge. Sits below the recipe. */}
-          {isDetailed && <PourCostHero pourCostPercentage={pourCostPct} />}
-
-          {/* LEDGER — detailed only. Final section: edge-to-edge gradient runs
-              to the bottom of the page. Updated date lives here as the last row. */}
+          {/* LEDGER summary bar — detailed only. Tappable footer that opens
+              the full Ledger in a bottom sheet. Sticks to bottom via marginTop:auto.
+              Future home for price history, margin trends, version history. */}
           {isDetailed && (
-            <LinearGradient
-              colors={[palette.B9 + '50', palette.N9] as const}
-              start={{ x: 0.5, y: 0 }}
-              end={{ x: 0.5, y: 1 }}
+            <Pressable
+              onPress={() => setShowLedger(true)}
               style={{ marginTop: 'auto' }}
             >
-              <View
-                className="px-6 pt-5 flex-col gap-1"
-                style={{
-                  borderTopWidth: 1,
-                  borderTopColor: colors.borderSubtle,
-                  paddingBottom: insets.bottom + 20,
-                }}
+              <LinearGradient
+                colors={[palette.B9 + '50', palette.N9] as const}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
               >
-                <ScreenTitle title="Ledger" variant="muted" className="mb-1" />
-                <LedgerRow
-                  label="Cost Of Goods"
-                  value={formatCurrency(metrics.totalCost)}
-                  infoTermKey="cogs"
-                />
-                <LedgerRow
-                  label="Total Volume"
-                  value={`${totalVolume.toFixed(2)} oz`}
-                />
-                <LedgerRow
-                  label="Category"
-                  value={cocktail.category || 'Other'}
-                />
-                <LedgerRow
-                  label="Last Updated"
-                  value={new Date(cocktail.updatedAt).toLocaleDateString()}
-                />
-              </View>
-            </LinearGradient>
+                <View
+                  className="px-6 pt-4 flex-row items-center justify-between"
+                  style={{
+                    borderTopWidth: 1,
+                    borderTopColor: colors.borderSubtle,
+                    paddingBottom: insets.bottom + 16,
+                  }}
+                >
+                  <View className="flex-col gap-0.5">
+                    <Text
+                      className="text-xs uppercase"
+                      style={{ color: colors.textTertiary, letterSpacing: 1 }}
+                    >
+                      The Numbers
+                    </Text>
+                    <Text
+                      className="text-sm"
+                      style={{ color: colors.textSecondary }}
+                    >
+                      View more details
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-up"
+                    size={20}
+                    color={colors.textSecondary}
+                  />
+                </View>
+              </LinearGradient>
+            </Pressable>
           )}
         </View>
       </ScrollView>

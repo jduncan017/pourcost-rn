@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, type Href } from 'expo-router';
 import { useAppStore } from '@/src/stores/app-store';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
@@ -84,6 +84,32 @@ export default function IngredientsScreen() {
     return base.filter((i) => i.subType === selectedSubType);
   })();
 
+  // Build a header title that reflects active filter + sort. Default reads
+  // "Your Ingredients (24)"; with filters: "Vodka by Cost (4)" or "Spirits (12)".
+  const TYPE_PLURALS: Record<string, string> = {
+    Spirit: 'Spirits',
+    Beer: 'Beers',
+    Wine: 'Wines',
+    'Non-Alc': 'Non-Alcoholic',
+  };
+  const SORT_LABELS_INGREDIENTS: Record<string, string> = {
+    created: 'Recent',
+    cost: 'Cost',
+    pourCost: 'Cost %',
+    margin: 'Margin',
+  };
+  const ingredientListTitle = (() => {
+    let base = 'Your Ingredients';
+    if (selectedSubType !== 'All') {
+      base = selectedSubType;
+    } else if (selectedType !== 'All') {
+      base = TYPE_PLURALS[selectedType] ?? selectedType;
+    }
+    const sortLabel = sortBy === 'name' ? '' : SORT_LABELS_INGREDIENTS[sortBy] ?? '';
+    const suffix = sortLabel ? ` by ${sortLabel}` : '';
+    return `${base}${suffix} (${filteredIngredients.length})`;
+  })();
+
   // Load ingredients on mount - always call loadIngredients, let the store handle the logic
   useEffect(() => {
     loadIngredients();
@@ -106,10 +132,14 @@ export default function IngredientsScreen() {
     });
   };
 
-  // Handle add new ingredient
+  // Handle add new ingredient. Routes to the catalog picker so users see the
+  // catalog search before being dropped into the form. Picker forwards to
+  // /ingredient-form (prefilled or empty) on the user's choice.
+  // Cast required: expo-router's generated route types only refresh when the
+  // dev server is running, so newly added screens don't appear until restart.
   const handleAddIngredient = () => {
     HapticService.navigation();
-    router.push('/ingredient-form');
+    router.push('/ingredient-create' as Href);
   };
 
   // Handle ingredient editing
@@ -278,6 +308,12 @@ export default function IngredientsScreen() {
         <View className="p-4">
           {/* Header */}
           <View className="mb-6 mt-4">
+            <Text
+              className="text-sm mb-3"
+              style={{ color: colors.textTertiary }}
+            >
+              Ingredients in your bar — costs, sizes, and what's prepped.
+            </Text>
             {/* Search Bar + Add Button */}
             <View className="flex-row items-center gap-3">
               <View className="flex-1">
@@ -357,7 +393,7 @@ export default function IngredientsScreen() {
                 title={
                   selectionMode
                     ? `${selectedIds.size} Selected`
-                    : `Your Ingredients (${filteredIngredients.length})`
+                    : ingredientListTitle
                 }
                 variant="group"
               />
@@ -371,7 +407,7 @@ export default function IngredientsScreen() {
                     Clear
                   </Button>
                 )}
-                {filteredIngredients.length > 0 && (
+                {(filteredIngredients.length > 0 || selectionMode) && (
                   <Pressable
                     onPress={selectionMode ? exitSelectionMode : enterSelectionMode}
                     hitSlop={6}
@@ -395,17 +431,25 @@ export default function IngredientsScreen() {
                 title={
                   searchQuery || selectedType !== 'All'
                     ? 'No ingredients found'
-                    : 'No ingredients yet'
+                    : 'My Inventory is empty'
                 }
                 description={
                   searchQuery
                     ? `No ingredients match "${searchQuery}"${selectedType !== 'All' ? ` in ${selectedType}` : ''}`
                     : selectedType !== 'All'
                       ? `No ingredients in ${selectedType} category`
-                      : 'Add your first ingredient to get started'
+                      : "Set up your wells in 60 seconds and we'll add your house pours so you can start building cocktails."
                 }
-                actionLabel="Add Ingredient"
-                onAction={handleAddIngredient}
+                actionLabel={
+                  searchQuery || selectedType !== 'All'
+                    ? 'Add Ingredient'
+                    : 'Set Up Wells'
+                }
+                onAction={
+                  searchQuery || selectedType !== 'All'
+                    ? handleAddIngredient
+                    : () => router.push('/wells-setup' as any)
+                }
               />
             ) : (
               <>

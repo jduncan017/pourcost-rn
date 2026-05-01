@@ -8,6 +8,7 @@ import CustomSlider from '@/src/components/ui/CustomSlider';
 import { palette } from '@/src/contexts/ThemeContext';
 import { useAppStore } from '@/src/stores/app-store';
 import { volumeToOunces } from '@/src/types/models';
+import { capture } from '@/src/services/analytics-service';
 
 export default function OnboardingProfile() {
   const router = useGuardedRouter();
@@ -101,7 +102,13 @@ export default function OnboardingProfile() {
         </View>
 
         <Pressable
-          onPress={() => router.push('/(auth)/onboarding-complete' as any)}
+          onPress={() => {
+            capture('onboarding_profile_complete', {
+              pour_cost_goal: pourCostGoal,
+              default_pour_oz: pourSizeOz,
+            });
+            router.push('/(auth)/onboarding-wells' as any);
+          }}
           disabled={!canContinue}
           style={[styles.primaryButton, !canContinue && styles.disabled]}
         >

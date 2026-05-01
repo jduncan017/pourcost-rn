@@ -25,6 +25,7 @@ import {
   updateIngredientById,
   deleteIngredientById,
 } from '@/src/lib/supabase-writes';
+import { capture } from '@/src/services/analytics-service';
 
 // ==========================================
 // STORE INTERFACE
@@ -138,10 +139,12 @@ export const useIngredientsStore = create<IngredientsState>()(
       addIngredient: async (ingredientData) => {
         set({ error: null });
         try {
+          const wasEmpty = get().ingredients.length === 0;
           const newIngredient = await insertIngredient(ingredientData);
           set(state => ({
             ingredients: [newIngredient, ...state.ingredients],
           }));
+          if (wasEmpty) capture('first_ingredient_added');
           FeedbackService.showOperationSuccess('create', newIngredient.name);
           return newIngredient;
         } catch (error) {

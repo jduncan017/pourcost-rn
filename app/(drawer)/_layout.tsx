@@ -131,8 +131,8 @@ export default function DrawerLayout() {
         <Drawer.Screen
           name="ingredients"
           options={{
-            title: 'Ingredients',
-            drawerLabel: 'Ingredients',
+            title: 'My Inventory',
+            drawerLabel: 'My Inventory',
             drawerIcon: ({ color, size }) => (
               <Ionicons name="flask" size={size} color={color} />
             ),
@@ -166,6 +166,16 @@ export default function DrawerLayout() {
             drawerLabel: 'Batch',
             drawerIcon: ({ color, size }) => (
               <Ionicons name="layers-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="learn"
+          options={{
+            title: 'Learn',
+            drawerLabel: 'Learn',
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="book-outline" size={size} color={color} />
             ),
           }}
         />

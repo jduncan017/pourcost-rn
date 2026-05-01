@@ -16,7 +16,6 @@ import { useAppStore } from '@/src/stores/app-store';
 import { Ionicons } from '@expo/vector-icons';
 import Toggle from '@/src/components/ui/Toggle';
 import TextInput from '@/src/components/ui/TextInput';
-import Button from '@/src/components/ui/Button';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import HeaderSavePill from '@/src/components/ui/HeaderSavePill';
 import IngredientInUseSheet from '@/src/components/ui/IngredientInUseSheet';
@@ -44,6 +43,9 @@ export default function IngredientFormScreen() {
 
   // Form state — name, description, notForSale are form-only
   const [name, setName] = useState((params.name as string) || '');
+  const [canonicalProductId, setCanonicalProductId] = useState<string | undefined>(
+    (params.canonicalProductId as string) || undefined
+  );
   const [forSale, setForSale] = useState(
     params.notForSale === 'true' ? false : true
   );
@@ -94,6 +96,7 @@ export default function IngredientFormScreen() {
     setInputValues((prev) => ({ ...prev, ...updates }));
     if (updates.notForSale !== undefined) setForSale(!updates.notForSale);
   };
+
 
   // Pull live ingredient + configurations when editing — the Sizes section
   // reflects the latest server state without needing a re-mount after returning
@@ -156,6 +159,7 @@ export default function IngredientFormScreen() {
         abv: abvValue != null && !Number.isNaN(abvValue) ? abvValue : undefined,
         notForSale: !forSale,
         description: sanitizeDescription(description) || undefined,
+        canonicalProductId,
       };
 
       if (isEditing) {
@@ -243,13 +247,20 @@ export default function IngredientFormScreen() {
           pointerEvents={isSaving ? 'none' : 'auto'}
         >
           <View className="px-6 pt-4 pb-6 flex-col gap-8">
-            {/* Identity — Name, Description, ABV, For Sale */}
+            {/* Identity — Name, Description, ABV, For Sale.
+                Catalog search lives on the dedicated /ingredient-create
+                picker that routes here with prefill params (or empty for
+                "Create from scratch"). */}
             <View className="flex-col gap-5">
               <TextInput
                 label="Ingredient Name *"
                 value={name}
-                onChangeText={setName}
+                onChangeText={(text) => {
+                  setName(text);
+                  if (canonicalProductId) setCanonicalProductId(undefined);
+                }}
                 placeholder="e.g., Vodka (Premium), Simple Syrup"
+                autoCapitalize="words"
               />
 
               <TextInput
@@ -292,7 +303,9 @@ export default function IngredientFormScreen() {
             </View>
 
             {/* Details — type chips, subtype, pour size.
-                Edit mode hides product size + cost (those live in the Sizes section). */}
+                Edit mode hides product size + cost (those live in the Sizes section).
+                pourSizeOverride collapses the per-ingredient pour size unless the
+                user explicitly customizes it; the global default lives in Settings. */}
             <IngredientInputs
               variant="form"
               values={{ ...inputValues, notForSale: !forSale }}
@@ -300,6 +313,8 @@ export default function IngredientFormScreen() {
               hideRetailPrice
               hideProductSize={isEditing}
               noCard
+              pourSizeOverride
+              defaultPourSizeOz={volumeToOunces(useAppStore.getState().defaultPourSize)}
             />
 
             {/* Retail Price — set here, referenced on the size page while
@@ -410,20 +425,6 @@ export default function IngredientFormScreen() {
                   Delete Ingredient
                 </Text>
               </Pressable>
-            )}
-
-            {/* Save button — create mode only (edit uses HeaderSavePill).
-                Kept for create so first-time users see a clear primary CTA. */}
-            {!isEditing && (
-              <Button
-                variant="primary"
-                fullWidth
-                size="large"
-                disabled={!isValid || isSaving}
-                onPress={() => saveRef.current()}
-              >
-                {isSaving ? 'Saving...' : 'Save Ingredient'}
-              </Button>
             )}
 
             <View className="h-8" />

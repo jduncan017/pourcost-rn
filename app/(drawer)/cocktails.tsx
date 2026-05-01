@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useAppStore } from '@/src/stores/app-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
+import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import CocktailListItem from '@/src/components/CocktailListItem';
 import SearchBar from '@/src/components/ui/SearchBar';
 import EmptyState from '@/src/components/EmptyState';
@@ -33,6 +34,7 @@ export default function CocktailsScreen() {
   const router = useGuardedRouter();
   const toast = useToast();
   const colors = useThemeColors();
+  const ingredientCount = useIngredientsStore((s) => s.ingredients.length);
 
   // Use Zustand store for state management
   const {
@@ -61,6 +63,22 @@ export default function CocktailsScreen() {
 
   // Get filtered cocktails from store
   const filteredCocktails = getFilteredCocktails();
+
+  // Build a header title that reflects active filter + sort. Default state
+  // reads "Your Cocktails (12)"; with filters: "Whiskey Cocktails by Cost (5)".
+  const SORT_LABELS_COCKTAILS: Record<string, string> = {
+    created: 'Recent',
+    cost: 'Cost',
+    costPercent: 'Cost %',
+    profitMargin: 'Margin',
+  };
+  const cocktailListTitle = (() => {
+    const base =
+      selectedCategory === 'All' ? 'Your Cocktails' : `${selectedCategory} Cocktails`;
+    const sortLabel = sortBy === 'name' ? '' : SORT_LABELS_COCKTAILS[sortBy] ?? '';
+    const suffix = sortLabel ? ` by ${sortLabel}` : '';
+    return `${base}${suffix} (${filteredCocktails.length})`;
+  })();
 
   // Load cocktails on mount - always call loadCocktails, let the store handle the logic
   useEffect(() => {
@@ -175,6 +193,12 @@ export default function CocktailsScreen() {
         <View className="p-4">
           {/* Header */}
           <View className="mb-6 mt-4">
+            <Text
+              className="text-sm mb-3"
+              style={{ color: colors.textTertiary }}
+            >
+              Recipes you've built, with live cost and margin.
+            </Text>
             {/* Search Bar + Create Button */}
             <View className="flex-row items-center gap-3">
               <View className="flex-1">
@@ -191,7 +215,7 @@ export default function CocktailsScreen() {
                 size="medium"
                 className="h-full"
               >
-                Create
+                Add
               </Button>
             </View>
           </View>
@@ -231,7 +255,7 @@ export default function CocktailsScreen() {
                 title={
                   selectionMode
                     ? `${selectedIds.size} Selected`
-                    : `Your Cocktails (${filteredCocktails.length})`
+                    : cocktailListTitle
                 }
                 variant="group"
               />
@@ -245,7 +269,7 @@ export default function CocktailsScreen() {
                     Clear
                   </Button>
                 )}
-                {filteredCocktails.length > 0 && (
+                {(filteredCocktails.length > 0 || selectionMode) && (
                   <Pressable
                     onPress={selectionMode ? exitSelectionMode : enterSelectionMode}
                     hitSlop={6}
@@ -264,23 +288,39 @@ export default function CocktailsScreen() {
             {isLoading ? (
               <SkeletonLoader count={6} />
             ) : filteredCocktails.length === 0 ? (
-              <EmptyState
-                icon="wine"
-                title={
-                  searchQuery || selectedCategory !== 'All'
-                    ? 'No cocktails found'
-                    : 'No cocktails yet'
-                }
-                description={
-                  searchQuery
-                    ? `No cocktails match "${searchQuery}"${selectedCategory !== 'All' ? ` in ${selectedCategory}` : ''}`
-                    : selectedCategory !== 'All'
-                      ? `No cocktails in ${selectedCategory} category`
-                      : 'Create your first cocktail recipe to get started'
-                }
-                actionLabel="Create Cocktail"
-                onAction={handleAddCocktail}
-              />
+              (() => {
+                const hasFilter = !!searchQuery || selectedCategory !== 'All';
+                const inventoryEmpty = !hasFilter && ingredientCount === 0;
+                return (
+                  <EmptyState
+                    icon="wine"
+                    title={
+                      hasFilter
+                        ? 'No cocktails found'
+                        : inventoryEmpty
+                          ? 'Set up your bar first'
+                          : 'No cocktails yet'
+                    }
+                    description={
+                      searchQuery
+                        ? `No cocktails match "${searchQuery}"${selectedCategory !== 'All' ? ` in ${selectedCategory}` : ''}`
+                        : selectedCategory !== 'All'
+                          ? `No cocktails in ${selectedCategory} category`
+                          : inventoryEmpty
+                            ? 'Cocktails need ingredients. Set up your wells in 60 seconds, then come back to build your first recipe.'
+                            : 'Create your first cocktail recipe to get started.'
+                    }
+                    actionLabel={
+                      inventoryEmpty ? 'Set Up Wells' : 'Create Cocktail'
+                    }
+                    onAction={
+                      inventoryEmpty
+                        ? () => router.push('/wells-setup' as any)
+                        : handleAddCocktail
+                    }
+                  />
+                );
+              })()
             ) : (
               <>
                 {!selectionMode && (

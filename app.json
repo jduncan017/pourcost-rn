@@ -8,11 +8,6 @@
     "scheme": "pourcost",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/PC-Logo-Gold.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0B1120"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "clutterbuck.PourCostFree",
@@ -57,9 +52,19 @@
     },
     "plugins": [
       "expo-router",
-"expo-video",
+      "expo-video",
       "expo-apple-authentication",
-      "react-native-document-scanner-plugin"
+      "react-native-document-scanner-plugin",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/PC-Logo-Gold.png",
+          "imageWidth": 260,
+          "resizeMode": "contain",
+          "backgroundColor": "#0B1120"
+        }
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true

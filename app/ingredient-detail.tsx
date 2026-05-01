@@ -14,8 +14,9 @@ import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import ActionSheet from '@/src/components/ui/ActionSheet';
 import StatCard from '@/src/components/ui/StatCard';
 import LedgerRow from '@/src/components/ui/LedgerRow';
+import BottomSheet from '@/src/components/ui/BottomSheet';
 import DetailLevelToggle from '@/src/components/ui/DetailLevelToggle';
-import PourCostHero from '@/src/components/PourCostHero';
+import PourCostHero, { getPerformance } from '@/src/components/PourCostHero';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import Dropdown from '@/src/components/ui/Dropdown';
 import IngredientInUseSheet from '@/src/components/ui/IngredientInUseSheet';
@@ -29,6 +30,7 @@ import {
   roundSuggestedPrice,
 } from '@/src/services/calculation-service';
 import PriceHistory from '@/src/components/PriceHistory';
+import EducationPanel from '@/src/components/EducationPanel';
 import { ingredientTypeIcon } from '@/src/lib/type-icons';
 
 
@@ -41,6 +43,7 @@ export default function IngredientDetailScreen() {
   const params = useLocalSearchParams();
   const [showActions, setShowActions] = useState(false);
   const [showInUseSheet, setShowInUseSheet] = useState(false);
+  const [showNumbers, setShowNumbers] = useState(false);
 
   const { ingredients, loadIngredients, deleteIngredient } = useIngredientsStore();
   const { cocktails } = useCocktailsStore();
@@ -121,6 +124,13 @@ export default function IngredientDetailScreen() {
     calculateSuggestedPrice(metrics.costPerPour, pourCostGoal / 100),
     suggestedPriceRounding
   );
+  // Mirror cocktail-detail: only surface a Suggested Retail row when the
+  // current pour cost is outside the target band. On-target = no noise.
+  const ingredientPerformanceLabel =
+    pourCostGoal > 0 && metrics.pourCostPercentage > 0
+      ? getPerformance(metrics.pourCostPercentage / pourCostGoal).label
+      : 'On Target';
+  const isOnTarget = ingredientPerformanceLabel === 'On Target';
   const hasMultipleSizes = sizeOptions.length > 1;
 
   const handleEdit = () => {
@@ -181,6 +191,49 @@ export default function IngredientDetailScreen() {
         onOpenCocktail={handleOpenCocktail}
       />
 
+      <BottomSheet
+        visible={showNumbers}
+        onClose={() => setShowNumbers(false)}
+        title="The Numbers"
+      >
+        <View className="px-4 pb-6 flex-col gap-1">
+          <LedgerRow
+            label="Purchase Price"
+            value={formatCurrency(selectedOption.cost)}
+          />
+          {isDetailed && (
+            <LedgerRow
+              label="Cost / Oz"
+              value={formatCurrency(metrics.costPerOz)}
+            />
+          )}
+          <LedgerRow
+            label="Cost / Pour"
+            value={formatCurrency(metrics.costPerPour)}
+          />
+          <LedgerRow
+            label="Pour Size"
+            value={volumeLabel(effectivePourSize)}
+          />
+          <LedgerRow
+            label="Bottle Size"
+            value={volumeLabel(selectedOption.size)}
+          />
+          {isDetailed && !isNotForSale && (
+            <LedgerRow
+              label="Type"
+              value={ingredient.type || 'Other'}
+            />
+          )}
+          {isDetailed && (
+            <LedgerRow
+              label="Last Updated"
+              value={new Date(ingredient.updatedAt).toLocaleDateString()}
+            />
+          )}
+        </View>
+      </BottomSheet>
+
       <ScrollView
         className="flex-1"
         bounces={false}
@@ -209,6 +262,17 @@ export default function IngredientDetailScreen() {
               })()}
             </View>
             <View className="flex-1 flex-col justify-center gap-1.5">
+              <Text
+                className="text-xs"
+                style={{
+                  color: palette.B5,
+                  letterSpacing: 1.5,
+                  fontWeight: '700',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Ingredient
+              </Text>
               <Text
                 className="text-2xl"
                 style={{ color: colors.text, fontWeight: '700' }}
@@ -258,46 +322,59 @@ export default function IngredientDetailScreen() {
             </View>
           )}
 
-          {/* Stats group — pushed to bottom. marginTop:auto keeps identity at
-              top and anchors stats + hero + history + ledger as one bottom block. */}
-          <View className="px-6 flex-col gap-3" style={{ marginTop: 'auto' }}>
-            {!isNotForSale ? (
-              <View className="flex-row gap-3">
-                <StatCard
-                  label="Retail Price"
-                  value={formatCurrency(effectiveRetailPrice)}
+          {/* Stats group — placed near top (after identity + size picker) to
+              match cocktail-detail's information hierarchy. The Numbers footer
+              + price history anchor the bottom of the page. Simple mode hides
+              the whole stats group for not-for-sale items where every value
+              is cost-derived. */}
+          {(isDetailed || !isNotForSale) && (
+            <View className="px-6 flex-col gap-3">
+              {!isNotForSale ? (
+                <View className="flex-row gap-3">
+                  <StatCard
+                    label="Retail Price"
+                    value={formatCurrency(effectiveRetailPrice)}
+                  />
+                  {isDetailed && (
+                    <StatCard
+                      label="Margin"
+                      value={formatCurrency(metrics.pourCostMargin)}
+                      infoTermKey="margin"
+                    />
+                  )}
+                </View>
+              ) : (
+                <View className="flex-row gap-3">
+                  <StatCard
+                    label="Purchase Price"
+                    value={formatCurrency(ingredient.productCost)}
+                  />
+                  <StatCard
+                    label="Cost / Pour"
+                    value={formatCurrency(metrics.costPerPour)}
+                  />
+                </View>
+              )}
+              {isDetailed && !isNotForSale && !isOnTarget && (
+                <AiSuggestionRow
+                  label="Suggested Retail"
+                  value={formatCurrency(suggestedRetail)}
+                  infoTermKey="suggestedPrice"
                 />
-                <StatCard
-                  label="Margin"
-                  value={formatCurrency(metrics.pourCostMargin)}
-                  infoTermKey="margin"
-                />
-              </View>
-            ) : (
-              <View className="flex-row gap-3">
-                <StatCard
-                  label="Purchase Price"
-                  value={formatCurrency(ingredient.productCost)}
-                />
-                <StatCard
-                  label="Cost / Pour"
-                  value={formatCurrency(metrics.costPerPour)}
-                />
-              </View>
-            )}
-            {isDetailed && !isNotForSale && (
-              <AiSuggestionRow
-                label="Suggested Retail"
-                value={formatCurrency(suggestedRetail)}
-                infoTermKey="suggestedPrice"
-              />
-            )}
-          </View>
+              )}
+            </View>
+          )}
 
           {/* Pour Cost hero — detailed + for-sale only */}
           {isDetailed && !isNotForSale && (
             <PourCostHero pourCostPercentage={metrics.pourCostPercentage} />
           )}
+
+          {/* About — canonical-driven product education. Renders nothing when
+              the ingredient isn't linked to a canonical (user-typed entries
+              without a catalog match). Tier 1 fields appear immediately;
+              Tier 2 fields populate as the enrichment job runs. */}
+          <EducationPanel canonicalProductId={ingredient.canonicalProductId} />
 
           {/* Price History — detailed only (self-wraps in Card when non-empty).
               Placed before Ledger so Ledger can anchor the bottom of the page. */}
@@ -307,57 +384,49 @@ export default function IngredientDetailScreen() {
             </View>
           )}
 
-          {/* LEDGER — final section of the bottom-anchored group. */}
-          <LinearGradient
-            colors={[palette.B9 + '50', palette.N9] as const}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-          >
-            <View
-              className="px-6 pt-5 flex-col gap-1"
-              style={{
-                borderTopWidth: 1,
-                borderTopColor: colors.borderSubtle,
-                paddingBottom: insets.bottom + 20,
-              }}
+          {/* THE NUMBERS summary bar — detailed only, since the sheet content
+              is mostly cost/pour data which simple mode hides. */}
+          {isDetailed && (
+            <Pressable
+              onPress={() => setShowNumbers(true)}
+              style={{ marginTop: 'auto' }}
             >
-              <ScreenTitle title="Ledger" variant="muted" className="mb-1" />
-              <LedgerRow
-                label="Purchase Price"
-                value={formatCurrency(selectedOption.cost)}
-                />
-              {isDetailed && (
-                <LedgerRow
-                  label="Cost / Oz"
-                  value={formatCurrency(metrics.costPerOz)}
-                    />
-              )}
-              <LedgerRow
-                label="Cost / Pour"
-                value={formatCurrency(metrics.costPerPour)}
-                />
-              <LedgerRow
-                label="Pour Size"
-                value={volumeLabel(effectivePourSize)}
-                />
-              <LedgerRow
-                label="Bottle Size"
-                value={volumeLabel(selectedOption.size)}
-                />
-              {isDetailed && !isNotForSale && (
-                <LedgerRow
-                  label="Type"
-                  value={ingredient.type || 'Other'}
-                    />
-              )}
-              {isDetailed && (
-                <LedgerRow
-                  label="Last Updated"
-                  value={new Date(ingredient.updatedAt).toLocaleDateString()}
-                    />
-              )}
-            </View>
-          </LinearGradient>
+              <LinearGradient
+                colors={[palette.B9 + '50', palette.N9] as const}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+              >
+                <View
+                  className="px-6 pt-4 flex-row items-center justify-between"
+                  style={{
+                    borderTopWidth: 1,
+                    borderTopColor: colors.borderSubtle,
+                    paddingBottom: insets.bottom + 16,
+                  }}
+                >
+                  <View className="flex-col gap-0.5">
+                    <Text
+                      className="text-xs uppercase"
+                      style={{ color: colors.textTertiary, letterSpacing: 1 }}
+                    >
+                      The Numbers
+                    </Text>
+                    <Text
+                      className="text-sm"
+                      style={{ color: colors.textSecondary }}
+                    >
+                      View more details
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-up"
+                    size={20}
+                    color={colors.textSecondary}
+                  />
+                </View>
+              </LinearGradient>
+            </Pressable>
+          )}
         </View>
       </ScrollView>
     </GradientBackground>

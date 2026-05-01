@@ -223,6 +223,69 @@ Schema (`prepped_ingredient_recipes`, `prepped_ingredient_templates`) not yet ap
 - **Coachmark tour** — `react-native-copilot`, 5-step guided tour, once per tab. ~1-2 days. Ship after observing PostHog drop-off.
 - **Empty-state inline hints** — for users who opted out of sample bar.
 
+## Canonical library expansion
+
+Builds on the canonical foundation shipped in MVP (see `MVP-Todo.md` — "Canonical library foundation"). All additive, no schema rewrites required.
+
+### Organizations + multi-user accounts
+
+- `organizations` table (id, name, type='restaurant'|'distributor'|'brand', metadata)
+- `memberships` table (user_id, org_id, role)
+- Backfill single-user accounts to single-member orgs of one
+- `ingredients.org_id` nullable FK; null = personal inventory, set = shared org inventory
+- `cocktails.org_id` same pattern
+- RLS policies updated to include org membership alongside user ownership
+- Wire `canonical_products.owner_org_id` to `organizations.id` (FK already staged)
+
+### Brand / distributor-owned canonicals
+
+- Distributor or brand org accounts can create and edit `canonical_products` they own (`owner_type = 'distributor' | 'brand'`, `owner_org_id` set)
+- Admin review queue for new canonicals to prevent spam / naming conflicts
+- PourCost retains override rights on any canonical for moderation
+- Brand-owned canonicals tagged visibly in library to disclose promotional content (FTC consideration)
+
+### Rep sharing workflow
+
+- Rep builds a recipe inside their distributor org account using canonical ingredients from their portfolio
+- "Share to bar manager" action: creates a `received_recipes` row targeting the recipient user, `source = 'rep'`, `source_metadata` includes rep identity and brand attribution
+- In-app inbox for received recipes
+- Deep link / QR / email delivery for off-platform recipient (auto-creates an account for them on adoption)
+
+### Shareable recipe image cards
+
+- Server-side (or client-side) renderer that turns a `received_recipes` row into a standalone cocktail card image
+- Brand-attribution variant (logo, rep contact) vs. clean variant
+- Export to Instagram, iMessage, email
+
+### User ingredient to canonical promotion
+
+- User creates a custom ingredient (e.g. a small-batch product). Review flow proposes it for promotion to canonical.
+- LLM similarity check against existing canonicals to avoid duplicates
+- PourCost moderator approves / merges / rejects
+- On promotion, `ingredients.canonical_product_id` backfills for all users who already had a matching custom ingredient
+
+### Locale-aware canonical pricing stats
+
+Separate derived-data layer. Canonicals themselves stay price-free. Pricing context is aggregated from real invoice scans and surfaced as a "regional market rate" reference, never used for the user's own costing.
+
+- `canonical_pricing_stats` table (canonical_product_id, region, distributor_id nullable, median_price, p25, p75, sample_count, last_updated_at)
+- Region = state code at minimum; city-level if sample counts support it
+- Populated by a scheduled job that rolls up `invoice_line_items` by canonical + region
+- Confidence thresholds: hide stats with sample_count < N to avoid misleading early numbers
+- Searchable pricing guide UI: "what does Tito's 750ml typically cost in Colorado?"
+- "Your price vs regional median" indicator on ingredient detail
+- Potential standalone monetizable product (API for distributors, subscription tier for bar groups)
+- Does NOT replace user ingredient pricing. Account ingredient remains the source of truth for COGS.
+
+### Prebuilt library growth
+
+- Ongoing curation of canonical catalog as invoice data identifies new SKUs
+- Seasonal / trending recipe additions to library
+- Category-specific collections (tiki, low-ABV, classics, brunch)
+- User submissions pipeline (opt-in to contribute their recipes to public library, moderation queue)
+
+---
+
 ## DB migrations pending
 
 - `prepped_ingredient_recipes` + `prepped_ingredient_templates`

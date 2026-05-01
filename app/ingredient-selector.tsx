@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
-import { View, Text, ScrollView, Pressable, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   LinearTransition,
 } from 'react-native-reanimated';
-import { useNavigation, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { useNavigation, useLocalSearchParams, useFocusEffect, type Href } from 'expo-router';
 import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -61,8 +61,6 @@ export default function IngredientSelectorScreen() {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedIngredients, setSelectedIngredients] = useState<SavedIngredient[]>([]);
   const [initialExistingIds, setInitialExistingIds] = useState<string[]>([]);
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [fadingIds, setFadingIds] = useState<Set<string>>(new Set());
 
   // Track ingredient count to detect newly created ingredients
@@ -113,22 +111,6 @@ export default function IngredientSelectorScreen() {
       headerRight: () => <HeaderSavePill onPress={handleFinishSelection} />,
     });
   }, [selectedIngredients.length, navigation, colors]);
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (event) => {
-      setKeyboardVisible(true);
-      setKeyboardHeight(event.endCoordinates.height);
-    });
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboardVisible(false);
-      setKeyboardHeight(0);
-    });
-
-    return () => {
-      keyboardDidShowListener?.remove();
-      keyboardDidHideListener?.remove();
-    };
-  }, []);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -366,19 +348,19 @@ export default function IngredientSelectorScreen() {
               />
 
               {searchResults.filter(i => !isIngredientSelected(i.id) || fadingIds.has(i.id)).length === 0 ? (
-                <View className="py-8 items-center">
+                <View className="py-8 items-center flex-col gap-2">
                   <Ionicons name="search" size={40} color={colors.textTertiary} />
                   <Text
-                    className="text-center mt-3"
+                    className="text-center"
                     style={{ color: colors.text, fontWeight: '500' }}
                   >
-                    No ingredients found
+                    Nothing in My Inventory yet
                   </Text>
                   <Text
-                    className="text-sm text-center mt-1"
+                    className="text-sm text-center"
                     style={{ color: colors.textTertiary }}
                   >
-                    Try a different search term
+                    Tap "Don't see it?" below to search the Spirit Database or create a custom ingredient.
                   </Text>
                 </View>
               ) : (
@@ -408,37 +390,29 @@ export default function IngredientSelectorScreen() {
             )
           )}
 
-          {/* Create New Ingredient */}
+          {/* Catalog or custom ingredient CTA. Routes to /ingredient-create
+              (the catalog picker) so the user lands on a clearly-framed
+              search-first screen with a "Create from scratch" option below.
+              Newly created ingredients are auto-selected on return via the
+              useFocusEffect at the top of this screen. */}
           <Pressable
-            onPress={() => router.push('/ingredient-form')}
+            onPress={() => router.push('/ingredient-create' as Href)}
             className="flex-row items-center justify-center gap-2 py-3 rounded-xl"
             style={{ backgroundColor: colors.accent }}
           >
-            <Ionicons name="add-circle-outline" size={20} color={palette.N1} />
+            <Ionicons name="search" size={18} color={palette.N1} />
             <Text style={{ color: palette.N1, fontWeight: '600', fontSize: 16 }}>
-              Create New Ingredient
+              Don't See It? Search Spirit Database
             </Text>
           </Pressable>
+          <Text
+            className="text-xs text-center"
+            style={{ color: colors.textTertiary }}
+          >
+            Adds to My Inventory before adding to this recipe.
+          </Text>
         </View>
         </ScrollView>
-
-        {/* Keyboard Dismiss Button - Only show when keyboard is open */}
-        {keyboardVisible && (
-          <Pressable
-            onPress={() => Keyboard.dismiss()}
-            className="absolute right-4 bg-g4/90 rounded-full w-12 h-12 items-center justify-center z-50"
-            style={{
-              bottom: keyboardHeight + 20,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.25,
-              shadowRadius: 4,
-              elevation: 5,
-            }}
-          >
-            <Ionicons name="chevron-down" size={24} color={palette.N1} />
-          </Pressable>
-        )}
       </KeyboardAvoidingView>
     </GradientBackground>
   );

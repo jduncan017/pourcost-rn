@@ -42,11 +42,11 @@ export function volumeLabel(v: Volume): string {
   if (!v?.kind) return '—';
   switch (v.kind) {
     case 'fractionalOunces': {
-      const whole = Math.floor(v.numerator / v.denominator);
-      const remainder = v.numerator % v.denominator;
-      if (remainder === 0) return `${whole} oz`;
-      if (whole === 0) return `${v.numerator}/${v.denominator} oz`;
-      return `${whole} ${remainder}/${v.denominator} oz`;
+      // Render fractional ounces as a decimal so the whole app reads
+      // consistently. Common pour-size denominators (2, 4, 8, 16) all
+      // produce exact decimals so rounding isn't needed.
+      const oz = v.numerator / v.denominator;
+      return `${oz} oz`;
     }
     case 'decimalOunces':
       return `${v.ounces} oz`;
@@ -99,9 +99,18 @@ export interface SavedIngredient {
   abv?: number;            // Alcohol by volume as % (e.g. 40 for 40% ABV). Optional.
   notForSale?: boolean;
   description?: string;
+  /** True for ingredients seeded by the wells onboarding picker. The cocktail
+   *  picker substitutes a generic recipe slot ("any vodka") with the user's
+   *  well brand of that subtype. Defaults to false for normal ingredients. */
+  isWell?: boolean;
   createdAt: Date;
   updatedAt: Date;
   userId?: string;
+  /** Link to the global canonical_products catalog. Set when the user chose
+   *  this ingredient via catalog autocomplete or via invoice scan match.
+   *  Drives the education panel on ingredient-detail and unlocks library
+   *  recipe matching. Null = user typed the ingredient by hand. */
+  canonicalProductId?: string;
   /** Additional purchase configurations (different bottle sizes / pack deals).
    *  The default size lives on the row's productSize/productCost. Configurations
    *  hold the SECONDARY sizes only — adding a second config doesn't duplicate

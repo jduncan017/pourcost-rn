@@ -111,6 +111,8 @@ interface IngredientRow {
   not_for_sale: boolean;
   description: string | null;
   abv: number | null;
+  canonical_product_id: string | null;
+  is_well: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -158,6 +160,8 @@ function rowToIngredient(row: IngredientRow): SavedIngredient {
     abv: row.abv != null ? Number(row.abv) : undefined,
     notForSale: row.not_for_sale,
     description: row.description ?? undefined,
+    isWell: row.is_well ?? false,
+    canonicalProductId: row.canonical_product_id ?? undefined,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
     userId: row.user_id,
@@ -316,6 +320,8 @@ export async function insertIngredient(
       abv: ingredient.abv ?? null,
       not_for_sale: ingredient.notForSale ?? false,
       description: ingredient.description ?? null,
+      is_well: ingredient.isWell ?? false,
+      canonical_product_id: ingredient.canonicalProductId ?? null,
     })
     .select()
     .single();
@@ -339,6 +345,9 @@ export async function updateIngredientById(
   if (updates.abv !== undefined) row.abv = updates.abv ?? null;
   if (updates.notForSale !== undefined) row.not_for_sale = updates.notForSale;
   if (updates.description !== undefined) row.description = updates.description;
+  if (updates.isWell !== undefined) row.is_well = updates.isWell;
+  if (updates.canonicalProductId !== undefined)
+    row.canonical_product_id = updates.canonicalProductId ?? null;
 
   const { data, error } = await supabase
     .from('ingredients')

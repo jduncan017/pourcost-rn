@@ -50,6 +50,8 @@ import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { initNetworkMonitor } from '@/src/lib/network-monitor';
 import { initOfflineQueue } from '@/src/lib/offline-queue';
+import { getPostHog, setAnalyticsUser } from '@/src/services/analytics-service';
+import { PostHogProvider } from 'posthog-react-native';
 
 export {
   ErrorBoundary,
@@ -92,12 +94,24 @@ export default function RootLayout() {
     return null;
   }
 
-  return (
+  // Singleton PostHog client. Returns null when EXPO_PUBLIC_POSTHOG_KEY isn't
+  // set, in which case PostHogProvider becomes a passthrough.
+  const posthogClient = getPostHog();
+
+  const tree = (
     <AuthProvider>
       <ThemeProvider>
         <RootLayoutNav />
       </ThemeProvider>
     </AuthProvider>
+  );
+
+  return posthogClient ? (
+    <PostHogProvider client={posthogClient} autocapture={{ captureTouches: true, captureScreens: true }}>
+      {tree}
+    </PostHogProvider>
+  ) : (
+    tree
   );
 }
 
@@ -139,6 +153,10 @@ function RootLayoutNav() {
       setIsInitializing(false);
     }
   }, []);
+
+  useEffect(() => {
+    setAnalyticsUser(session?.user?.id ?? null);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -207,6 +225,8 @@ function RootLayoutNav() {
             <Stack.Screen name="ingredient-detail" options={{ title: '' }} />
             <Stack.Screen name="cocktail-form" options={{ title: '' }} />
             <Stack.Screen name="ingredient-form" options={{ title: '' }} />
+            <Stack.Screen name="ingredient-create" options={{ title: 'Add Ingredient' }} />
+            <Stack.Screen name="wells-setup" options={{ title: 'Manage Wells' }} />
             <Stack.Screen name="ingredient-size-form" options={{ title: '' }} />
             <Stack.Screen name="ingredient-selector" options={{ title: 'Add Ingredients' }} />
             <Stack.Screen name="search" options={{ title: 'Search' }} />

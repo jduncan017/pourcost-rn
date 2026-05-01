@@ -9,6 +9,7 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { useAppStore } from '@/src/stores/app-store';
 import { seedSampleBar } from '@/src/lib/seed-sample-bar';
 import { FeedbackService } from '@/src/services/feedback-service';
+import { capture } from '@/src/services/analytics-service';
 
 export default function OnboardingComplete() {
   const router = useGuardedRouter();
@@ -32,6 +33,7 @@ export default function OnboardingComplete() {
           `${msg}. Starting you with an empty bar. You can add ingredients manually.`
         );
       }
+      capture('onboarding_complete');
       clearNewSignUp();
       router.replace('/(drawer)/cocktails' as any);
     } finally {

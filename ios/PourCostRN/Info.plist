@@ -4,6 +4,8 @@
   <dict>
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>
+    <key>CFBundleAllowMixedLocalizations</key>
+    <true/>
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
@@ -27,11 +29,18 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>pourcost</string>
           <string>com.googleusercontent.apps.985050413872-blhmjb4b6dn8i8335kp9aqkh1l4d3csd</string>
         </array>
       </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>exp+pourcost</string>
+        </array>
+      </dict>
     </array>
+    <key>CFBundleVersion</key>
+    <string>1</string>
     <key>LSApplicationQueriesSchemes</key>
     <array>
       <string>readdle-spark</string>
@@ -42,8 +51,6 @@
       <string>inbox-gmail</string>
       <string>message</string>
     </array>
-    <key>CFBundleVersion</key>
-    <string>1</string>
     <key>LSMinimumSystemVersion</key>
     <string>12.0</string>
     <key>LSRequiresIPhoneOS</key>

@@ -253,6 +253,7 @@ export default function CocktailFormScreen() {
                   value={name}
                   onChangeText={setName}
                   placeholder="e.g., Classic Margarita"
+                  autoCapitalize="words"
                 />
               </View>
             </View>
