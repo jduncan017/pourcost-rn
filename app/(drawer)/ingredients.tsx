@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, FlatList, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, type Href } from 'expo-router';
 import { useAppStore } from '@/src/stores/app-store';
@@ -36,35 +36,23 @@ import {
  * Includes add functionality and navigation to detail views
  */
 export default function IngredientsScreen() {
-  const {} = useAppStore();
   const router = useGuardedRouter();
   const toast = useToast();
   const colors = useThemeColors();
 
-  // Use Zustand store for state management
-  const {
-    // Data
-    isLoading,
-    error,
-
-    // UI State
-    searchQuery,
-    selectedType,
-    sortBy,
-
-    // Actions
-    loadIngredients,
-    deleteIngredient,
-    setSearchQuery,
-    setSelectedType,
-    setSortBy,
-
-    // Computed state
-    getFilteredIngredients,
-
-    // Utilities
-    clearError,
-  } = useIngredientsStore();
+  // Narrow selectors per CLAUDE.md "Zustand selector style".
+  const isLoading = useIngredientsStore((s) => s.isLoading);
+  const searchQuery = useIngredientsStore((s) => s.searchQuery);
+  const selectedType = useIngredientsStore((s) => s.selectedType);
+  const sortBy = useIngredientsStore((s) => s.sortBy);
+  const loadIngredients = useIngredientsStore((s) => s.loadIngredients);
+  const deleteIngredient = useIngredientsStore((s) => s.deleteIngredient);
+  const setSearchQuery = useIngredientsStore((s) => s.setSearchQuery);
+  const setSelectedType = useIngredientsStore((s) => s.setSelectedType);
+  const setSortBy = useIngredientsStore((s) => s.setSortBy);
+  const getFilteredIngredients = useIngredientsStore((s) => s.getFilteredIngredients);
+  const error = useIngredientsStore((s) => s.error);
+  const clearError = useIngredientsStore((s) => s.clearError);
 
   const [selectedSubType, setSelectedSubType] = useState('All');
   const [inUseIngredient, setInUseIngredient] = useState<SavedIngredient | null>(null);
@@ -74,7 +62,7 @@ export default function IngredientsScreen() {
    *  still referenced in cocktails. Shown in a follow-up sheet so the user knows
    *  what didn't get deleted and which cocktails to edit. */
   const [blockedIngredients, setBlockedIngredients] = useState<SavedIngredient[]>([]);
-  const { cocktails } = useCocktailsStore();
+  const cocktails = useCocktailsStore((s) => s.cocktails);
 
   // Get filtered ingredients from store, then apply subtype filter locally
   const hasSubtypes = !!SUBTYPES_BY_TYPE[selectedType];
@@ -301,109 +289,100 @@ export default function IngredientsScreen() {
           router.navigate({ pathname: '/cocktail-detail', params: { id } });
         }}
       />
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: selectionMode ? 96 : 0 }}
-      >
-        <View className="p-4">
-          {/* Header */}
-          <View className="mb-6 mt-4">
-            <Text
-              className="text-sm mb-3"
-              style={{ color: colors.textTertiary }}
-            >
-              Ingredients in your bar — costs, sizes, and what's prepped.
-            </Text>
-            {/* Search Bar + Add Button */}
-            <View className="flex-row items-center gap-3">
-              <View className="flex-1">
-                <SearchBar
-                  placeholder="Search by name or type..."
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
+      <FlatList
+        data={filteredIngredients}
+        keyExtractor={(i) => i.id}
+        renderItem={({ item }) => (
+          <IngredientListItem
+            ingredient={item}
+            sortBy={sortBy}
+            onPress={() => handleIngredientPress(item)}
+            onEdit={() => handleEditIngredient(item)}
+            onDelete={() => handleDeleteIngredient(item)}
+            selectionMode={selectionMode}
+            selected={selectedIds.has(item.id)}
+            onSelectionToggle={() => toggleSelection(item.id)}
+          />
+        )}
+        ListHeaderComponent={
+          <View>
+            <View className="mb-6 mt-4">
+              <Text className="text-sm mb-3" style={{ color: colors.textTertiary }}>
+                Ingredients in your bar — costs, sizes, and what's prepped.
+              </Text>
+              <View className="flex-row items-center gap-3">
+                <View className="flex-1">
+                  <SearchBar
+                    placeholder="Search by name or type..."
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                  />
+                </View>
+                <Button
+                  onPress={handleAddIngredient}
+                  variant="primary"
+                  icon="add"
+                  size="medium"
+                  className="h-full"
+                >
+                  Add
+                </Button>
+              </View>
+            </View>
+
+            <View className="mb-6">
+              <View className="mb-4">
+                <ScreenTitle title="Type" variant="group" className="mb-2" />
+                <IngredientTypeSelector
+                  selectedType={selectedType}
+                  onTypeChange={(t) => {
+                    setSelectedType(t);
+                    if (t !== 'Spirit') setSelectedSubType('All');
+                  }}
+                  showLabel={false}
                 />
               </View>
-              <Button
-                onPress={handleAddIngredient}
-                variant="primary"
-                icon="add"
-                size="medium"
-                className="h-full"
-              >
-                Add
-              </Button>
-            </View>
-          </View>
 
-          {/* Filters */}
-          <View className="mb-6">
-            {/* Type Filter */}
-            <View className="mb-4">
-              <ScreenTitle title="Type" variant="group" className="mb-2" />
-              <IngredientTypeSelector
-                selectedType={selectedType}
-                onTypeChange={(t) => {
-                  setSelectedType(t);
-                  if (t !== 'Spirit') setSelectedSubType('All');
-                }}
+              {hasSubtypes && (
+                <View className="mb-4">
+                  <ScreenTitle
+                    title={`${selectedType} Type`}
+                    variant="group"
+                    className="mb-2"
+                  />
+                  <ChipSelector
+                    options={['All', ...SUBTYPES_BY_TYPE[selectedType]]}
+                    selectedOption={selectedSubType}
+                    onSelectionChange={setSelectedSubType}
+                    showLabel={false}
+                    variant="filter"
+                  />
+                </View>
+              )}
+
+              <ScreenTitle title="Sort By" variant="group" className="mb-2" />
+              <SortSelector
+                sortOptions={[
+                  { key: 'name', label: 'Name' },
+                  { key: 'created', label: 'Recent' },
+                  { key: 'cost', label: 'Cost' },
+                  { key: 'pourCost', label: 'Cost %' },
+                  { key: 'margin', label: 'Margin' },
+                ]}
+                selectedSort={sortBy}
+                onSortChange={(sortKey) => setSortBy(sortKey as IngredientSortOption)}
                 showLabel={false}
               />
             </View>
 
-            {/* Subtype Filter — shows for any type with subtypes */}
-            {hasSubtypes && (
-              <View className="mb-4">
-                <ScreenTitle
-                  title={`${selectedType} Type`}
-                  variant="group"
-                  className="mb-2"
-                />
-                <ChipSelector
-                  options={['All', ...SUBTYPES_BY_TYPE[selectedType]]}
-                  selectedOption={selectedSubType}
-                  onSelectionChange={setSelectedSubType}
-                  showLabel={false}
-                  variant="filter"
-                />
-              </View>
-            )}
-
-            {/* Sort Options */}
-            <ScreenTitle title="Sort By" variant="group" className="mb-2" />
-            <SortSelector
-              sortOptions={[
-                { key: 'name', label: 'Name' },
-                { key: 'created', label: 'Recent' },
-                { key: 'cost', label: 'Cost' },
-                { key: 'pourCost', label: 'Cost %' },
-                { key: 'margin', label: 'Margin' },
-              ]}
-              selectedSort={sortBy}
-              onSortChange={(sortKey) =>
-                setSortBy(sortKey as IngredientSortOption)
-              }
-              showLabel={false}
-            />
-          </View>
-
-          {/* Ingredients List */}
-          <View className="flex flex-col gap-3">
-            <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center justify-between mb-3">
               <ScreenTitle
-                title={
-                  selectionMode
-                    ? `${selectedIds.size} Selected`
-                    : ingredientListTitle
-                }
+                title={selectionMode ? `${selectedIds.size} Selected` : ingredientListTitle}
                 variant="group"
               />
               <View className="flex-row items-center gap-2">
                 {searchQuery && !selectionMode && (
-                  <Button
-                    onPress={() => setSearchQuery('')}
-                    variant="ghost"
-                    size="small"
-                  >
+                  <Button onPress={() => setSearchQuery('')} variant="ghost" size="small">
                     Clear
                   </Button>
                 )}
@@ -413,9 +392,7 @@ export default function IngredientsScreen() {
                     hitSlop={6}
                     className="px-2 py-1"
                   >
-                    <Text
-                      style={{ color: colors.textSecondary, fontSize: 13, fontWeight: '600' }}
-                    >
+                    <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: '600' }}>
                       {selectionMode ? 'Cancel' : 'Multi-select'}
                     </Text>
                   </Pressable>
@@ -423,81 +400,64 @@ export default function IngredientsScreen() {
               </View>
             </View>
 
-            {isLoading ? (
-              <SkeletonLoader count={6} />
-            ) : filteredIngredients.length === 0 ? (
-              <EmptyState
-                icon="flask"
-                title={
-                  searchQuery || selectedType !== 'All'
-                    ? 'No ingredients found'
-                    : 'My Inventory is empty'
-                }
-                description={
-                  searchQuery
-                    ? `No ingredients match "${searchQuery}"${selectedType !== 'All' ? ` in ${selectedType}` : ''}`
-                    : selectedType !== 'All'
-                      ? `No ingredients in ${selectedType} category`
-                      : "Set up your wells in 60 seconds and we'll add your house pours so you can start building cocktails."
-                }
-                actionLabel={
-                  searchQuery || selectedType !== 'All'
-                    ? 'Add Ingredient'
-                    : 'Set Up Wells'
-                }
-                onAction={
-                  searchQuery || selectedType !== 'All'
-                    ? handleAddIngredient
-                    : () => router.push('/wells-setup' as any)
-                }
-              />
-            ) : (
-              <>
-                {!selectionMode && (
-                  <View
-                    className="flex-row justify-between items-center"
-                    style={{ opacity: 0.45 }}
-                  >
-                    <View className="flex-row items-center gap-1">
-                      <Ionicons
-                        name="arrow-back"
-                        size={11}
-                        color={colors.textSecondary}
-                      />
-                      <Text style={{ fontSize: 11, color: colors.textSecondary }}>
-                        Swipe left to delete
-                      </Text>
-                    </View>
-                    <View className="flex-row items-center gap-1">
-                      <Text style={{ fontSize: 11, color: colors.textSecondary }}>
-                        Swipe right to edit
-                      </Text>
-                      <Ionicons
-                        name="arrow-forward"
-                        size={11}
-                        color={colors.textSecondary}
-                      />
-                    </View>
-                  </View>
-                )}
-                {filteredIngredients.map((ingredient) => (
-                  <IngredientListItem
-                    key={ingredient.id}
-                    ingredient={ingredient}
-                    sortBy={sortBy}
-                    onPress={() => handleIngredientPress(ingredient)}
-                    onEdit={() => handleEditIngredient(ingredient)}
-                    onDelete={() => handleDeleteIngredient(ingredient)}
-                    selectionMode={selectionMode}
-                    selected={selectedIds.has(ingredient.id)}
-                    onSelectionToggle={() => toggleSelection(ingredient.id)}
-                  />
-                ))}
-              </>
+            {!selectionMode && filteredIngredients.length > 0 && (
+              <View
+                className="flex-row justify-between items-center mb-3"
+                style={{ opacity: 0.45 }}
+              >
+                <View className="flex-row items-center gap-1">
+                  <Ionicons name="arrow-back" size={11} color={colors.textSecondary} />
+                  <Text style={{ fontSize: 11, color: colors.textSecondary }}>
+                    Swipe left to delete
+                  </Text>
+                </View>
+                <View className="flex-row items-center gap-1">
+                  <Text style={{ fontSize: 11, color: colors.textSecondary }}>
+                    Swipe right to edit
+                  </Text>
+                  <Ionicons name="arrow-forward" size={11} color={colors.textSecondary} />
+                </View>
+              </View>
             )}
           </View>
-        </View>
-      </ScrollView>
+        }
+        ListEmptyComponent={
+          isLoading ? (
+            <SkeletonLoader count={6} />
+          ) : (
+            <EmptyState
+              icon="flask"
+              title={
+                searchQuery || selectedType !== 'All'
+                  ? 'No ingredients found'
+                  : 'My Inventory is empty'
+              }
+              description={
+                searchQuery
+                  ? `No ingredients match "${searchQuery}"${selectedType !== 'All' ? ` in ${selectedType}` : ''}`
+                  : selectedType !== 'All'
+                    ? `No ingredients in ${selectedType} category`
+                    : "Set up your wells in 60 seconds and we'll add your house pours so you can start building cocktails."
+              }
+              actionLabel={
+                searchQuery || selectedType !== 'All' ? 'Add Ingredient' : 'Set Up Wells'
+              }
+              onAction={
+                searchQuery || selectedType !== 'All'
+                  ? handleAddIngredient
+                  : () => router.push('/wells-setup' as any)
+              }
+            />
+          )
+        }
+        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+        contentContainerStyle={{ padding: 16, paddingBottom: selectionMode ? 96 : 24 }}
+        windowSize={11}
+        initialNumToRender={12}
+        maxToRenderPerBatch={8}
+        removeClippedSubviews
+        keyboardShouldPersistTaps="handled"
+      />
 
       {selectionMode && selectedIds.size > 0 && (
         <SelectionActionBar

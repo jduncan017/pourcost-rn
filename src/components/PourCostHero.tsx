@@ -29,6 +29,10 @@ export function getPerformance(ratio: number) {
 
 interface PourCostHeroProps {
   pourCostPercentage: number;
+  /** Override the bar-wide pourCostGoal — used by ingredient-detail to
+   *  compare against the tier-appropriate target instead of the bar's
+   *  global default. When omitted, falls back to the store's pourCostGoal. */
+  targetGoal?: number;
   className?: string;
 }
 
@@ -44,12 +48,13 @@ interface PourCostHeroProps {
  */
 export default function PourCostHero({
   pourCostPercentage,
+  targetGoal,
   className = '',
 }: PourCostHeroProps) {
   const { pourCostGoal } = useAppStore();
   const colors = useThemeColors();
 
-  const goal = pourCostGoal || 20;
+  const goal = targetGoal ?? pourCostGoal ?? 20;
   const ratio = pourCostPercentage > 0 ? pourCostPercentage / goal : 0;
   const perf = getPerformance(ratio);
   const delta = pourCostPercentage - goal;
@@ -61,7 +66,6 @@ export default function PourCostHero({
     Math.max((pourCostPercentage / maxScale) * 100, 0),
     100
   );
-  const goalPercent = 50;
 
   // Wash uses perf.color — shifts red→orange→yellow→green by severity.
   const washColors = [
@@ -140,43 +144,85 @@ export default function PourCostHero({
             </View>
           </View>
 
-          {/* Bar — thin */}
-          <View className="relative">
-            <View
-              className="rounded-full overflow-hidden"
-              style={{ height: 4, backgroundColor: colors.inputBg }}
-            >
-              <View
-                className="h-full rounded-full"
-                style={{
-                  width: `${Math.max(fillPercent, 1)}%`,
-                  backgroundColor: perf.color,
-                }}
-              />
-            </View>
-            {/* Goal marker */}
-            <View
-              className="absolute"
-              style={{
-                left: `${goalPercent}%`,
-                top: -2,
-                bottom: -2,
-                marginLeft: -1,
-              }}
-            >
-              <View
-                style={{
-                  width: 2,
-                  height: '100%',
-                  backgroundColor: colors.text,
-                  opacity: 0.35,
-                  borderRadius: 1,
-                }}
-              />
-            </View>
+          {/* Single-color fill capsule. Track is a darkened capsule, fill is
+              left-to-right at the user's pour-cost position, color tied to
+              perf state (green/yellow/orange/red). Neon glow shadow + glass
+              top sheen + a subtle hairline marker at the goal position give
+              the "you're here vs target" read at a glance — without rainbow
+              busyness. Inspired by the original PourCost design, polished. */}
+          <View className="flex-col">
+            <PerformanceBar fillPercent={fillPercent} perfColor={perf.color} />
           </View>
         </View>
       </LinearGradient>
+    </View>
+  );
+}
+
+// ============================================================
+// PerformanceBar — single-color fill capsule with neon glow
+// ============================================================
+
+function PerformanceBar({ fillPercent, perfColor }: { fillPercent: number; perfColor: string }) {
+  // Goal sits at 50% of bar width (bar spans 0 → 2× goal).
+  const goalPercent = 50;
+
+  return (
+    <View style={{ height: 14, justifyContent: 'center' }}>
+      {/* Track — dark capsule with subtle white border */}
+      <View
+        style={{
+          height: 10,
+          borderRadius: 5,
+          backgroundColor: 'rgba(255,255,255,0.06)',
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.14)',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Single-color fill, neon-glow tinted to perf state */}
+        <View
+          style={{
+            width: `${Math.max(fillPercent, 2)}%`,
+            height: '100%',
+            backgroundColor: perfColor,
+            borderRadius: 5,
+            // Neon glow that pulses with state — same color as the fill so
+            // the tint reinforces the perf signal.
+            shadowColor: perfColor,
+            shadowOpacity: 0.85,
+            shadowRadius: 6,
+            shadowOffset: { width: 0, height: 0 },
+            elevation: 4,
+          }}
+        >
+          {/* Glass top sheen — bright at top, soft mid, slight darkening at
+              bottom. Sits on top of the fill so the capsule reads as glassy. */}
+          <LinearGradient
+            colors={['rgba(255,255,255,0.45)', 'rgba(255,255,255,0.05)', 'rgba(0,0,0,0.18)']}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 5 }}
+            pointerEvents="none"
+          />
+        </View>
+      </View>
+
+      {/* Goal marker — thin hairline at center (50% = goal), neutral so it
+          doesn't compete with the perf-tinted fill. */}
+      <View
+        style={{
+          position: 'absolute',
+          left: `${goalPercent}%`,
+          marginLeft: -0.5,
+          top: 1,
+          bottom: 1,
+          width: 1,
+          backgroundColor: 'rgba(255,255,255,0.45)',
+        }}
+        pointerEvents="none"
+      />
     </View>
   );
 }

@@ -225,6 +225,17 @@ When a bar lacks the specified subcategory, the system suggests alternatives in 
 
 The system surfaces a "substituted" indicator so the bartender knows the drink will taste different. This is **suggestions, not enforcement.** Users can always override.
 
+### Onboarding adoption matching (current implementation)
+
+The onboarding cocktail picker uses the same logic when adopting library recipes into the user's bar (`src/lib/library-recipes.ts` → `resolveIngredient` + `src/lib/wells.ts` → `subTypeMatches`):
+
+1. **Exact canonical match** — user has the exact `canonical_product_id` the recipe references
+2. **Subcategory match via `subTypeMatches`** — runs even when canonical_product_id is set, so brand-specific recipes still resolve to the user's same-subcategory product (e.g., Manhattan referencing Carpano Antica matches the user's Sweet Vermouth well)
+3. **Family fallback** — Whiskey family ([Whiskey, Bourbon, Rye, Scotch, Irish, Japanese, Canadian]) and Rum family ([Rum, White Rum, ..., Overproof Rum]) are interchangeable for adoption purposes. Tequila and Mezcal are siblings but NOT auto-substituted.
+4. **Vermouth aliases** — `subTypeMatches` bridges canonical `subcategory='Sweet'` to user `sub_type='Sweet Vermouth'` (and `'Vermouth'` generic). Same for Dry. This is a **temporary alias map** — should disappear when SPIRIT_SUBTYPES + wells.ts subTypes align with the locked taxonomy below.
+5. **Staple fallback** — items in `STAPLE_NAMES` (lime juice, simple syrup, angostura, club soda, etc.) auto-add at $0
+6. **needsPrice** — anything else surfaces in the missing-ingredients screen for the user to price
+
 ### Wells
 
 Wells are configured at the bar level, not stored as a flag on canonical_products. Each bar has:
@@ -235,6 +246,10 @@ Wells are configured at the bar level, not stored as a flag on canonical_product
 - (etc.)
 
 If a bar wants to use Pappy as their well, that's their call. The system does not gatekeep what counts as well-eligible.
+
+**Current implementation:** wells are stored as `ingredients.is_well = true` rows (migration 012). Each row's `sub_type` declares what category that well fills (`Vodka`, `Whiskey`, etc.). Family fallbacks (above) decide which recipe slots a given well can satisfy.
+
+**Default well categories shown in onboarding** (the 5 universal ones — Vodka, Gin, Rum, Tequila, Whiskey). Bourbon, Rye, Scotch, Irish, Japanese, and the rum subtypes live behind the "Add more wells" expander for bars that differentiate. **Whiskey covers bourbon for default-only bars** via the family fallback — they don't need a separate Bourbon well unless they actually stock one.
 
 ---
 
@@ -378,3 +393,9 @@ This is post-V1 work but worth designing the schema for.
 | 2026-04-30 | NC ABC chosen as primary external source                | Clean structured data; PLCB is PDF-only                                           |
 | 2026-04-30 | Subcategory is suggestion, not constraint               | Substitution should help, not block                                               |
 | 2026-04-30 | Mezcal separate from Tequila (with own subcategories)   | Different product class; bartenders treat them differently                        |
+| 2026-04-30 | Bourbon NOT a default well — Whiskey covers it          | Most bars don't differentiate at the well level; family fallback handles bourbon recipes from a Whiskey well. Bourbon stays available behind "Add more wells" for bars that do differentiate. |
+| 2026-04-30 | Family fallback enabled for adoption (not strict mode)  | Onboarding shouldn't ask the user to add a Bourbon when they already have a Whiskey well. Substitutions surface a "substituted" indicator post-V1.1. |
+| 2026-04-30 | Library recipes prefer generic canonicals               | Manhattan asks for "Sweet Vermouth" not "Carpano Antica Formula"; brand specifics only when the brand IS the recipe (Sazerac requires Peychaud's). Seed 006 patches existing recipes. |
+| 2026-04-30 | Bloody Mary deferred until prep builder ships          | Bloody Mary cost depends on whether bar mixes from scratch or buys mix; can't price honestly without the prep builder. Hidden from picker via `HIDDEN_RECIPE_NAMES` + removed in seed 006. |
+| 2026-04-30 | TEMPORARY: vermouth subType aliases                    | Wells use sub_type='Sweet Vermouth'/'Dry Vermouth'; canonical uses subcategory='Sweet'/'Dry'. `SUBTYPE_ALIASES` map bridges them. Should disappear when SPIRIT_SUBTYPES + wells.ts align with the locked taxonomy below. |
+| 2026-04-30 | TEMPORARY: nameKeyword filter for wells search         | Wells rows for Bourbon/Rye/Scotch/Irish/Japanese filter `subcategory='Whiskey' AND name ILIKE '%bourbon%'` (etc.) until canonical re-seed splits Whiskey into the locked taxonomy subcategories. Same for rum subtypes. |

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View, Image, ScrollView, Linking } from 'react-native';
 import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { useTheme, useThemeColors } from '@/src/contexts/ThemeContext';
@@ -6,13 +7,27 @@ import SettingsCard from '@/src/components/ui/SettingsCard';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SectionDivider from '@/src/components/ui/SectionDivider';
+import PickerSheet from '@/src/components/ui/PickerSheet';
 import { FeedbackService } from '@/src/services/feedback-service';
+import { useAppStore, DefaultLandingScreen } from '@/src/stores/app-store';
+
+const LANDING_SCREEN_OPTIONS: { value: DefaultLandingScreen; label: string }[] = [
+  { value: 'cocktails', label: 'Cocktails' },
+  { value: 'ingredients', label: 'My Inventory' },
+  { value: 'calculator', label: 'Quick Calculator' },
+];
 
 export default function SettingsScreen() {
   const router = useGuardedRouter();
   const { isDarkMode } = useTheme();
   const colors = useThemeColors();
   const { user, isEmailVerified } = useAuth();
+  const defaultLandingScreen = useAppStore((s) => s.defaultLandingScreen);
+  const setDefaultLandingScreen = useAppStore((s) => s.setDefaultLandingScreen);
+  const saveProfile = useAppStore((s) => s.saveProfile);
+  const [showLandingPicker, setShowLandingPicker] = useState(false);
+
+  const landingLabel = LANDING_SCREEN_OPTIONS.find((o) => o.value === defaultLandingScreen)?.label ?? 'Cocktails';
 
   // MVP: theme picker hidden — re-enable by restoring commented Appearance section + picker sheet.
   // const [showThemePicker, setShowThemePicker] = useState(false);
@@ -52,21 +67,34 @@ export default function SettingsScreen() {
             />
           </View>
 
+          {/* Email verification banner — sits ABOVE the section hubs so it's
+              the first thing the user sees when something needs attention.
+              Account card stays neutral so we don't double-emphasize. */}
+          {accountNeedsAttention && (
+            <SettingsCard
+              tone="gold"
+              title="Verify Your Email"
+              description="Tap to confirm your email and unlock cross-device sync"
+              iconName="alert-circle-outline"
+              onPress={() => router.push('/settings-account' as any)}
+              showCaret
+            />
+          )}
+
           {/* Section hubs */}
           <View className="flex-col gap-3">
             <ScreenTitle variant="group" title="Settings" />
             <SettingsCard
-              tone={accountNeedsAttention ? 'gold' : 'default'}
               title="Account"
               description={accountSubtitle}
-              iconName={accountNeedsAttention ? 'alert-circle-outline' : 'person-circle-outline'}
+              iconName="person-circle-outline"
               onPress={() => router.push('/settings-account' as any)}
               showCaret
             />
             <SettingsCard
-              title="Calculations"
-              description="Pour cost, pour size, defaults"
-              iconName="calculator-outline"
+              title="Pricing"
+              description="Pour cost targets, defaults, floors"
+              iconName="cash-outline"
               onPress={() => router.push('/settings-calculations' as any)}
               showCaret
             />
@@ -75,6 +103,13 @@ export default function SettingsScreen() {
               description="Pick or update your standard house-pour brands"
               iconName="beer-outline"
               onPress={() => router.push('/wells-setup' as any)}
+              showCaret
+            />
+            <SettingsCard
+              title="Default Screen"
+              description={landingLabel}
+              iconName="phone-portrait-outline"
+              onPress={() => setShowLandingPicker(true)}
               showCaret
             />
           </View>
@@ -132,6 +167,17 @@ export default function SettingsScreen() {
           <View className="h-8" />
         </View>
       </ScrollView>
+
+      {showLandingPicker && (
+        <PickerSheet
+          title="Default Screen"
+          subtitle="Where you land after opening the app. Pick whichever you use most."
+          options={LANDING_SCREEN_OPTIONS}
+          value={defaultLandingScreen}
+          onSelect={(val) => { setDefaultLandingScreen(val as DefaultLandingScreen); saveProfile(); }}
+          onClose={() => setShowLandingPicker(false)}
+        />
+      )}
 
       {/* MVP: theme picker hidden.
       {showThemePicker && (

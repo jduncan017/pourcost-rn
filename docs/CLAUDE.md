@@ -28,6 +28,34 @@ A cocktail costing application that helps users calculate ingredient costs and d
 - `SavedIngredient` uses `productSize: Volume` and `productCost: number` — NOT bottleSize/bottlePrice.
 - `CocktailIngredient` uses `ingredientId`, `pourSize: Volume`, `cost` — NOT amount/unit.
 - Stores hold base types only (`SavedIngredient[]`, `Cocktail[]`). Metrics are computed on-demand via `calculateIngredientMetrics()` and `calculateCocktailMetrics()` from `calculation-service.ts`.
+
+### Zustand selector style (perf)
+
+**Always use narrow selectors when reading from a store, not full destructure.**
+
+```ts
+// ❌ Bad — re-renders on ANY state change in the store
+const { ingredients, isLoading, addIngredient } = useIngredientsStore();
+
+// ✅ Good — each subscription is independent; unrelated state changes don't fan out
+const ingredients = useIngredientsStore((s) => s.ingredients);
+const isLoading = useIngredientsStore((s) => s.isLoading);
+const addIngredient = useIngredientsStore((s) => s.addIngredient);
+```
+
+Why: `useStore()` without a selector returns the whole state object. Zustand uses reference equality, so any `set()` call rerenders every component that destructures the store. Narrow selectors subscribe to one slice; only that slice changing fires a rerender.
+
+Action references (e.g. `addIngredient`, `setSearchQuery`) are stable in Zustand, so subscribing to them is essentially free.
+
+For grouped reads, use `useShallow`:
+```ts
+import { useShallow } from 'zustand/react/shallow';
+const { searchQuery, sortBy } = useIngredientsStore(useShallow((s) => ({
+  searchQuery: s.searchQuery, sortBy: s.sortBy,
+})));
+```
+
+This pattern is enforced on the heavy list screens (`(drawer)/cocktails.tsx`, `(drawer)/ingredients.tsx`) where rerender cost compounds across many rows. Apply it everywhere new code reads from a store.
 - Calculation constants match iOS exactly: `ml * 0.033814 = oz`, default margin 18%.
 
 ### Backend (Supabase)

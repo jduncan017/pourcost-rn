@@ -1,6 +1,6 @@
 # PourCost RN — MVP To-Do
 
-_Last updated 2026-04-25._
+_Last updated 2026-05-01._
 
 Remaining work before the first submission. Delete a line when it's done; if it changes scope to post-MVP, move it to `feature-list.md` instead.
 
@@ -8,13 +8,38 @@ Remaining work before the first submission. Delete a line when it's done; if it 
 
 ## Outstanding
 
+### Pre-launch action items (Joshua)
+
+- [ ] **PostHog production setup**. SDK is wired (autocapture + offline queue), funnel events fire (`onboarding_profile_complete`, `wells_picker_complete`, `onboarding_complete`, `first_ingredient_added`, `first_cocktail_added`, `cocktail_picker_complete`, `onboarding_cocktails_adopted`, `wells_intro_continue|skip`, `cocktails_intro_continue|skip`). Requires `EXPO_PUBLIC_POSTHOG_KEY` in `.env` (and `EXPO_PUBLIC_POSTHOG_HOST` if not US cloud) before launch — capture is a silent no-op without it. Project lives under DigitalNova Studio org, default project (id 315696). Confirm dashboard funnel renders end-to-end after first real install.
 - [ ] **App Store screenshots**. Capture against the final dark theme. Requires the design to be frozen.
 - [ ] **Final QA pass on the new size-form flow**. Add, edit, delete cycle, multi-size detail dropdown, "Bottle Size" ledger row, delete-in-use blocker, multi-select bulk delete.
 - [ ] **App Store Connect closeout**. Paste Terms + Privacy URLs, set app version, screenshot upload.
-- [ ] **Library browse UI**. Read-only list/grid of `received_recipes WHERE source = 'library'`. Filter by spirit type, tap to view full recipe with canonical-level ingredient data. Entry point: drawer item or tab on Cocktails page (TBD). No adopt button yet (ship as preview-only in V1, adopt is V1.1).
+
+### Detail page polish
+
+- [ ] **Cocktail detail restructure** (mirror of ingredient-detail). SPECS / NUMBERS toggle (vs INFO / NUMBERS). Hero with icon + 3 lines (eyebrow, name, type subinfo); full-width below. Specs tab = recipe build, description, glass/garnish/technique. Numbers tab = StatCards, PourCostHero, suggested price with Apply, More Details list (replaces bottom drawer). Same primitives as ingredient page (Card, StatCard, ScreenTitle, DetailRow). ~30 min.
+- [ ] **"Set as default size" affordance for ingredient configurations**. Schema already supports `is_default` on `ingredient_configurations` but no UI to switch which size is the primary. Two implementation paths proposed: (a) swap pattern — primary inline + configs as alternates, "Make this default" button swaps the values (no migration); (b) pointer pattern — add `default_configuration_id` column on ingredients (more flexible, requires migration). Lean (a) — simpler, fits existing model.
+
+### Onboarding extras (deferred)
+
+- [ ] **Goal selector + 3-screen app tour** (Phase B from the cocktail picker work). Optional first-run goal question ("What brought you here? Cost out drinks / Set menu prices / Just curious") that drives a 3-screen swipe tour explaining My Inventory, Cocktails, Quick Calculator. Hold until cocktail picker telemetry tells us where users actually drop off — could be unnecessary friction.
+- [ ] **Inventory page filter chips: only show subtypes the user has**. Currently shows all `SPIRIT_SUBTYPES`/etc. regardless of usage. Should derive from current inventory so empty options don't appear.
+
+### Architecture debt to pay
+
+- [ ] **Subtype taxonomy alignment**. `SPIRIT_SUBTYPES` (in-app chips), `wells.ts` subTypes, and canonical's locked taxonomy are not consistent. Two TEMPORARY workarounds shipped, both logged in `database_decisions.md` Decision Log: (1) `nameKeyword` filter on Bourbon/Rye/Scotch wells (filters `subcategory='Whiskey' AND name ILIKE '%bourbon%'`); (2) `SUBTYPE_ALIASES` map for vermouth (Sweet ↔ Sweet Vermouth). Both go away when the canonical re-seed splits Whiskey into Bourbon/Rye/Scotch/Irish/Japanese and adds proper Vermouth subtypes. Coordinated cross-file change: `wells.ts`, `appConstants.ts SPIRIT_SUBTYPES`, sample-bar.ts (or its removal), library recipes, resolver.
+- [ ] **Library recipe slot specificity update** (after canonical re-seed). Once finer subcategories land, the 30 library recipes need each slot rechecked: Sazerac → Rye Whiskey, Daiquiri → White Rum, Manhattan → Rye OR Bourbon, etc. Per `database_decisions.md` "Recipe Slot Specificity" section.
 - [ ] **Build canonical enrichment job** (Tier 2 education data). Gemini 2.5 Flash + grounded search, populates `education_data JSONB` and queryable Tier 2 columns per category template (spirits / beer / wine / ingredients each have own structure). Flips `enrichment_status` to 'complete' on success. ~$13 for the 250-row bootstrap pass; pennies/month for ongoing trickle from invoice scans. Can ship after launch since Tier 1 carries the bartender-facing detail and education-mode UI degrades gracefully when Tier 2 fields are null.
-- [ ] **Adopt flow UI** (likely V1.1). Per-ingredient prompt: "use existing inventory match / substitute from your inventory / add this ingredient to my library / skip". On confirm, creates a `cocktails` row and `cocktail_ingredients` rows using the user's real ingredient IDs. The original `received_recipes` row stays intact as the source reference (`adopted_cocktail_id` gets set). Heaviest remaining item; library can ship preview-only without it.
+
+### Library + adoption (mostly V1.1)
+
+- [ ] **Library browse UI**. Read-only list/grid of `received_recipes WHERE source = 'library'`. Filter by spirit type, tap to view full recipe with canonical-level ingredient data. Entry point: drawer item or tab on Cocktails page (TBD). No adopt button yet (ship as preview-only in V1, adopt is V1.1). NOTE: onboarding cocktail picker already does adoption; this is for the in-app browse flow.
+- [ ] **Adopt flow UI** (V1.1). Per-ingredient prompt: "use existing inventory match / substitute from your inventory / add this ingredient to my library / skip". On confirm, creates a `cocktails` row and `cocktail_ingredients` rows using the user's real ingredient IDs. The original `received_recipes` row stays intact as the source reference (`adopted_cocktail_id` gets set). Heaviest remaining item; library can ship preview-only without it.
 - [ ] **Page-confusion fix** (deferred until specifics known). Friend testing surfaced confusion between cocktail vs ingredient detail screens. Eyebrow labels ("COCKTAIL" / "INGREDIENT" in distinct colors) added; further fixes pending a clip from another testing session.
+
+### Polish ideas (defer to feature-list when ready)
+
+- [ ] **Std-dev pour cost bar zones**. Replace the current ratio-distance color zones with proper std-dev-based bands so the bar's color zones reflect statistical distance from target instead of arbitrary buckets. Strong UX improvement; post-MVP per Joshua.
 
 ## Completed
 

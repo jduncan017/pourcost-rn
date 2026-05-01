@@ -39,6 +39,16 @@ const retailPriceOptions = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 2
   label: `$${v.toFixed(2)}`,
 }));
 
+const minCocktailPriceOptions = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 20, 25].map((v) => ({
+  value: v,
+  label: `$${v.toFixed(2)}`,
+}));
+
+const minIngredientPriceOptions = [4, 5, 6, 7, 8, 9, 10, 12, 15].map((v) => ({
+  value: v,
+  label: `$${v.toFixed(2)}`,
+}));
+
 const roundingOptions: { value: PriceRounding; label: string }[] = [
   { value: 'off', label: 'Off (exact)' },
   { value: '0.25', label: 'Nearest $0.25' },
@@ -51,9 +61,13 @@ export default function SettingsCalculationsScreen() {
   const navigation = useNavigation();
   const colors = useThemeColors();
   const {
-    pourCostGoal, setPourCostGoal,
+    pourCostGoal,
+    beerPourCostGoal,
+    winePourCostGoal,
     defaultPourSize, setDefaultPourSize,
     defaultRetailPrice, setDefaultRetailPrice,
+    minCocktailPrice, setMinCocktailPrice,
+    minIngredientPrice, setMinIngredientPrice,
     ingredientOrderPref, setIngredientOrderPref,
     suggestedPriceRounding, setSuggestedPriceRounding,
     saveProfile,
@@ -75,12 +89,13 @@ export default function SettingsCalculationsScreen() {
   }, [saveProfile]);
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: 'Calculations' });
+    navigation.setOptions({ title: 'Pricing' });
   }, [navigation]);
 
-  const [showPourCostPicker, setShowPourCostPicker] = useState(false);
   const [showPourSizePicker, setShowPourSizePicker] = useState(false);
   const [showRetailPricePicker, setShowRetailPricePicker] = useState(false);
+  const [showMinCocktailPicker, setShowMinCocktailPicker] = useState(false);
+  const [showMinIngredientPicker, setShowMinIngredientPicker] = useState(false);
   const [showOrderPicker, setShowOrderPicker] = useState(false);
   const [showRoundingPicker, setShowRoundingPicker] = useState(false);
 
@@ -92,14 +107,24 @@ export default function SettingsCalculationsScreen() {
       <ScrollView className="flex-1">
         <View className="px-6 pt-4 pb-6 flex-col gap-6">
           <View className="flex-col gap-3">
-            <ScreenTitle variant="group" title="Defaults" />
+            <ScreenTitle variant="group" title="Targets" />
+            {/* Pour Cost Targets is now a dedicated page — shows the cocktail
+                goal, beer goal, wine goal, and the spirits tier ladder all in
+                one place. Visible to everyone; tier editing is gated by
+                Pro Mode (admin-only for now, paid post-launch). */}
             <SettingsCard
-              title="Pour Cost Goal"
-              description={`${pourCostGoal}%`}
+              title="Pour Cost Targets"
+              description={`Cocktails ${pourCostGoal}%, Beer ${beerPourCostGoal}%, Wine ${winePourCostGoal}%, Spirits tiered`}
               iconName="analytics-outline"
-              onPress={() => setShowPourCostPicker(true)}
+              onPress={() => router.push('/settings-tiers' as any)}
               showCaret
             />
+          </View>
+
+          <SectionDivider />
+
+          <View className="flex-col gap-3">
+            <ScreenTitle variant="group" title="Defaults" />
             <SettingsCard
               title="Default Pour Size"
               description={volumeLabel(defaultPourSize)}
@@ -133,6 +158,26 @@ export default function SettingsCalculationsScreen() {
           <SectionDivider />
 
           <View className="flex-col gap-3">
+            <ScreenTitle variant="group" title="Pricing Floors" />
+            <SettingsCard
+              title="Minimum Cocktail Price"
+              description={`$${minCocktailPrice.toFixed(2)}`}
+              iconName="trending-up-outline"
+              onPress={() => setShowMinCocktailPicker(true)}
+              showCaret
+            />
+            <SettingsCard
+              title="Minimum Spirit Pour Price"
+              description={`$${minIngredientPrice.toFixed(2)}`}
+              iconName="wine-outline"
+              onPress={() => setShowMinIngredientPicker(true)}
+              showCaret
+            />
+          </View>
+
+          <SectionDivider />
+
+          <View className="flex-col gap-3">
             <ScreenTitle variant="group" title="Inventory" />
             <SettingsCard
               title="Container Sizes"
@@ -147,18 +192,10 @@ export default function SettingsCalculationsScreen() {
         </View>
       </ScrollView>
 
-      {showPourCostPicker && (
-        <PickerSheet
-          title="Pour Cost Goal"
-          options={pourCostDropdownOptions}
-          value={pourCostGoal}
-          onSelect={(val) => { setPourCostGoal(val); debouncedSave(); }}
-          onClose={() => setShowPourCostPicker(false)}
-        />
-      )}
       {showPourSizePicker && (
         <PickerSheet
           title="Default Pour Size"
+          subtitle="Pre-fills the pour size when you build a cocktail or look at an ingredient's per-pour math."
           options={pourSizeDropdownOptions}
           value={JSON.stringify(defaultPourSize)}
           onSelect={(val) => { try { setDefaultPourSize(JSON.parse(val) as Volume); debouncedSave(); } catch {} }}
@@ -168,6 +205,7 @@ export default function SettingsCalculationsScreen() {
       {showRetailPricePicker && (
         <PickerSheet
           title="Default Retail Price"
+          subtitle="Pre-fills the retail price field when you create a new ingredient or cocktail. Override per-item anytime."
           options={retailPriceOptions}
           value={defaultRetailPrice}
           onSelect={(val) => { setDefaultRetailPrice(val); debouncedSave(); }}
@@ -177,6 +215,7 @@ export default function SettingsCalculationsScreen() {
       {showOrderPicker && (
         <PickerSheet
           title="Ingredient Order"
+          subtitle="How ingredient pours are sorted in the cocktail Build column on detail pages."
           options={orderDropdownOptions}
           value={ingredientOrderPref}
           onSelect={(val) => { setIngredientOrderPref(val as IngredientOrderPref); debouncedSave(); }}
@@ -186,10 +225,31 @@ export default function SettingsCalculationsScreen() {
       {showRoundingPicker && (
         <PickerSheet
           title="Suggested Price Rounding"
+          subtitle="Always rounds UP to the next increment so suggested prices hit (or beat) your pour cost goal."
           options={roundingOptions}
           value={suggestedPriceRounding}
           onSelect={(val) => { setSuggestedPriceRounding(val as PriceRounding); }}
           onClose={() => setShowRoundingPicker(false)}
+        />
+      )}
+      {showMinCocktailPicker && (
+        <PickerSheet
+          title="Minimum Cocktail Price"
+          subtitle="Suggested cocktail prices won't go below this. Stops cheap recipes from suggesting sub-floor prices no bar would actually charge."
+          options={minCocktailPriceOptions}
+          value={minCocktailPrice}
+          onSelect={(val) => { setMinCocktailPrice(val); debouncedSave(); }}
+          onClose={() => setShowMinCocktailPicker(false)}
+        />
+      )}
+      {showMinIngredientPicker && (
+        <PickerSheet
+          title="Minimum Spirit Pour Price"
+          subtitle="Suggested per-pour ingredient prices won't go below this — wells and call brands stay realistically priced."
+          options={minIngredientPriceOptions}
+          value={minIngredientPrice}
+          onSelect={(val) => { setMinIngredientPrice(val); debouncedSave(); }}
+          onClose={() => setShowMinIngredientPicker(false)}
         />
       )}
     </GradientBackground>

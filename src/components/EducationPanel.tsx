@@ -60,7 +60,7 @@ export default function EducationPanel({ canonicalProductId }: EducationPanelPro
       <ScreenTitle title="About" variant="muted" className="mb-1" />
 
       {detail.description ? (
-        <Text className="text-sm leading-5" style={{ color: colors.textSecondary }}>
+        <Text className="text-base leading-6" style={{ color: colors.textSecondary }}>
           {detail.description}
         </Text>
       ) : null}
@@ -91,27 +91,23 @@ export default function EducationPanel({ canonicalProductId }: EducationPanelPro
         ) : null}
       </View>
 
-      {/* Flavor notes */}
+      {/* Flavor notes — same header treatment as the About title via
+          ScreenTitle so the section hierarchy reads consistently. */}
       {detail.flavorNotes.length > 0 ? (
-        <View className="flex-col gap-1.5">
-          <Text
-            className="text-xs uppercase"
-            style={{ color: colors.textTertiary, letterSpacing: 1 }}
-          >
-            Flavor Notes
-          </Text>
-          <View className="flex-row flex-wrap gap-1.5">
+        <View className="flex-col gap-2">
+          <ScreenTitle title="Flavor Notes" variant="muted" />
+          <View className="flex-row flex-wrap gap-2">
             {detail.flavorNotes.map((note) => (
               <View
                 key={note}
-                className="rounded-full px-2.5 py-1"
+                className="rounded-full px-3 py-1.5"
                 style={{
                   backgroundColor: palette.B9 + '60',
                   borderWidth: 1,
                   borderColor: colors.borderSubtle,
                 }}
               >
-                <Text className="text-xs" style={{ color: colors.text }}>
+                <Text className="text-sm" style={{ color: colors.text }}>
                   {note}
                 </Text>
               </View>
@@ -140,14 +136,6 @@ export default function EducationPanel({ canonicalProductId }: EducationPanelPro
         </View>
       ) : null}
 
-      {isPending ? (
-        <Text
-          className="text-xs italic"
-          style={{ color: colors.textTertiary }}
-        >
-          Detailed product info coming soon.
-        </Text>
-      ) : null}
     </View>
   );
 }
@@ -161,7 +149,7 @@ interface FactChipProps {
 function FactChip({ label, value, colors }: FactChipProps) {
   return (
     <View
-      className="FactChip rounded-md px-2.5 py-1.5"
+      className="FactChip rounded-lg px-3 py-2"
       style={{
         backgroundColor: colors.elevated,
         borderWidth: 1,
@@ -174,7 +162,7 @@ function FactChip({ label, value, colors }: FactChipProps) {
       >
         {label}
       </Text>
-      <Text className="text-sm" style={{ color: colors.text, fontWeight: '600' }}>
+      <Text className="text-base" style={{ color: colors.text, fontWeight: '600' }}>
         {value}
       </Text>
     </View>

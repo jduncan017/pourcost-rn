@@ -16,19 +16,29 @@ interface ProfileRow {
   id: string;
   display_name: string | null;
   pour_cost_goal: number;
+  beer_pour_cost_goal: number | null;
+  wine_pour_cost_goal: number | null;
   default_pour_size: Volume | null;
   default_retail_price: number;
+  min_cocktail_price: number | null;
+  min_ingredient_price: number | null;
   ingredient_order_pref: string;
   theme_mode: string;
+  default_landing_screen: string | null;
 }
 
 export interface ProfileData {
   pourCostGoal: number;
+  beerPourCostGoal: number;
+  winePourCostGoal: number;
   defaultPourSize: Volume;
   defaultRetailPrice: number;
+  minCocktailPrice: number;
+  minIngredientPrice: number;
   ingredientOrderPref: IngredientOrderPref;
   themeMode: ThemeMode;
   displayName: string;
+  defaultLandingScreen: 'cocktails' | 'ingredients' | 'calculator';
   enabledProductSizes: string[];
 }
 
@@ -40,7 +50,7 @@ export async function fetchProfile(): Promise<ProfileData | null> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, display_name, pour_cost_goal, default_pour_size, default_retail_price, ingredient_order_pref, theme_mode, enabled_product_sizes')
+    .select('id, display_name, pour_cost_goal, beer_pour_cost_goal, wine_pour_cost_goal, default_pour_size, default_retail_price, min_cocktail_price, min_ingredient_price, ingredient_order_pref, theme_mode, default_landing_screen, enabled_product_sizes')
     .eq('id', user.id)
     .single();
 
@@ -49,11 +59,18 @@ export async function fetchProfile(): Promise<ProfileData | null> {
 
   return {
     pourCostGoal: Math.round(Number(row.pour_cost_goal) * 100), // DB stores 0.18, app uses 18
+    beerPourCostGoal:
+      row.beer_pour_cost_goal != null ? Math.round(Number(row.beer_pour_cost_goal) * 100) : 22,
+    winePourCostGoal:
+      row.wine_pour_cost_goal != null ? Math.round(Number(row.wine_pour_cost_goal) * 100) : 25,
     defaultPourSize: row.default_pour_size ?? DEFAULT_POUR_SIZE,
     defaultRetailPrice: Number(row.default_retail_price),
+    minCocktailPrice: row.min_cocktail_price != null ? Number(row.min_cocktail_price) : 10,
+    minIngredientPrice: row.min_ingredient_price != null ? Number(row.min_ingredient_price) : 7,
     ingredientOrderPref: (row.ingredient_order_pref as IngredientOrderPref) ?? 'manual',
     themeMode: (row.theme_mode as ThemeMode) ?? 'dark',
     displayName: row.display_name ?? '',
+    defaultLandingScreen: (row.default_landing_screen as ProfileData['defaultLandingScreen']) ?? 'cocktails',
     enabledProductSizes: (row as any).enabled_product_sizes ?? [],
   };
 }
@@ -64,11 +81,16 @@ export async function updateProfile(profile: Partial<ProfileData>): Promise<void
 
   const row: Record<string, unknown> = {};
   if (profile.pourCostGoal !== undefined) row.pour_cost_goal = profile.pourCostGoal / 100; // app 18 → DB 0.18
+  if (profile.beerPourCostGoal !== undefined) row.beer_pour_cost_goal = profile.beerPourCostGoal / 100;
+  if (profile.winePourCostGoal !== undefined) row.wine_pour_cost_goal = profile.winePourCostGoal / 100;
   if (profile.defaultPourSize !== undefined) row.default_pour_size = profile.defaultPourSize;
   if (profile.defaultRetailPrice !== undefined) row.default_retail_price = profile.defaultRetailPrice;
+  if (profile.minCocktailPrice !== undefined) row.min_cocktail_price = profile.minCocktailPrice;
+  if (profile.minIngredientPrice !== undefined) row.min_ingredient_price = profile.minIngredientPrice;
   if (profile.ingredientOrderPref !== undefined) row.ingredient_order_pref = profile.ingredientOrderPref;
   if (profile.themeMode !== undefined) row.theme_mode = profile.themeMode;
   if (profile.displayName !== undefined) row.display_name = profile.displayName;
+  if (profile.defaultLandingScreen !== undefined) row.default_landing_screen = profile.defaultLandingScreen;
   if (profile.enabledProductSizes !== undefined) row.enabled_product_sizes = profile.enabledProductSizes;
 
   const { error } = await supabase

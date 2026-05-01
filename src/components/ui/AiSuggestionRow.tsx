@@ -1,33 +1,41 @@
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { palette } from '@/src/contexts/ThemeContext';
 import InfoIcon from './InfoIcon';
 import { GlossaryKey } from '@/src/constants/glossary';
+import { HapticService } from '@/src/services/haptic-service';
 
 interface AiSuggestionRowProps {
   label: string;
   value: string;
   /** Optional glossary term — adds a small info icon next to the label. */
   infoTermKey?: GlossaryKey;
+  /** When provided, renders an Apply button on the right. Tapping fires the
+   *  callback (typically writes the suggested value back to the row's
+   *  underlying field, e.g. cocktail.retail_price). */
+  onApply?: () => void;
+  /** Disabled state for the Apply button (e.g. while a save is in flight). */
+  applyDisabled?: boolean;
   className?: string;
 }
 
 /**
  * Glass-style suggestion card — transparent → bottom-right purple gradient.
- * Passive (no actions). Matches the design-pass glassmorphism direction.
+ * Optionally actionable via the Apply button when `onApply` is set.
  */
 export default function AiSuggestionRow({
   label,
   value,
   infoTermKey,
+  onApply,
+  applyDisabled,
   className = '',
 }: AiSuggestionRowProps) {
-  // BR purple → TL fully transparent. TR stays ~40% alpha via biased stops.
   const gradientColors = [
-    palette.P3 + '00', // BR strong
-    palette.P3 + '10', // mid — keeps TR lit
-    palette.P3 + '20', // TL fully transparent
+    palette.P3 + '00',
+    palette.P3 + '10',
+    palette.P3 + '20',
   ] as const;
 
   return (
@@ -44,7 +52,7 @@ export default function AiSuggestionRow({
         start={{ x: 1, y: 1 }}
         end={{ x: 0, y: 0 }}
       >
-        <View className="flex-row justify-between items-center p-4">
+        <View className="flex-row justify-between items-center p-4 gap-3">
           <View className="flex-row items-center gap-2 flex-1">
             <Ionicons name="sparkles" size={16} color={palette.P2} />
             <Text
@@ -62,6 +70,25 @@ export default function AiSuggestionRow({
           >
             {value}
           </Text>
+          {onApply && (
+            <Pressable
+              onPress={() => {
+                if (applyDisabled) return;
+                HapticService.buttonPress();
+                onApply();
+              }}
+              disabled={applyDisabled}
+              className="px-3 py-1.5 rounded-full"
+              style={{
+                backgroundColor: palette.P2,
+                opacity: applyDisabled ? 0.4 : 1,
+              }}
+            >
+              <Text style={{ color: palette.N1, fontSize: 13, fontWeight: '600' }}>
+                Apply
+              </Text>
+            </Pressable>
+          )}
         </View>
       </LinearGradient>
     </View>

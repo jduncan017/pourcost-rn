@@ -23,7 +23,7 @@ import {
   COCKTAIL_CATEGORIES,
 } from '@/src/constants/appConstants';
 import { CocktailIngredient, CocktailCategory, Volume } from '@/src/types/models';
-import { calculateCostPerPour, calculateSuggestedPrice, formatCurrency, roundSuggestedPrice } from '@/src/services/calculation-service';
+import { calculateCostPerPour, calculateSuggestedPrice, formatCurrency, roundSuggestedPrice, applyPriceFloor } from '@/src/services/calculation-service';
 import { FeedbackService } from '@/src/services/feedback-service';
 
 /**
@@ -37,7 +37,7 @@ export default function CocktailFormScreen() {
   const params = useLocalSearchParams();
   const { selectedIngredient, selectedIngredients, removedIngredientIds, clearSelection } =
     useIngredientSelectionStore();
-  const { defaultRetailPrice, pourCostGoal, suggestedPriceRounding } = useAppStore();
+  const { defaultRetailPrice, pourCostGoal, suggestedPriceRounding, minCocktailPrice } = useAppStore();
 
   const colors = useThemeColors();
   const [showActions, setShowActions] = useState(false);
@@ -356,9 +356,12 @@ export default function CocktailFormScreen() {
             <AiSuggestionRow
               label="Suggested Price"
               value={formatCurrency(
-                roundSuggestedPrice(
-                  calculateSuggestedPrice(totalCost, pourCostGoal / 100),
-                  suggestedPriceRounding
+                applyPriceFloor(
+                  roundSuggestedPrice(
+                    calculateSuggestedPrice(totalCost, pourCostGoal / 100),
+                    suggestedPriceRounding,
+                  ),
+                  minCocktailPrice,
                 )
               )}
             />

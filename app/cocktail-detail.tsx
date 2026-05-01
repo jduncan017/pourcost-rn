@@ -26,6 +26,7 @@ import {
   calculatePourCostPercentage,
   formatCurrency,
   roundSuggestedPrice,
+  applyPriceFloor,
 } from '@/src/services/calculation-service';
 
 /** Display-friendly pour size: "2oz", "0.75oz", "1.5oz". Decimal everywhere. */
@@ -44,6 +45,7 @@ export default function CocktailDetailScreen() {
     pourCostGoal,
     detailLevel,
     suggestedPriceRounding,
+    minCocktailPrice,
   } = useAppStore();
   const router = useGuardedRouter();
   const navigation = useNavigation();
@@ -52,7 +54,7 @@ export default function CocktailDetailScreen() {
   const [showActions, setShowActions] = useState(false);
   const [showLedger, setShowLedger] = useState(false);
 
-  const { getCocktailById, loadCocktails, deleteCocktail } =
+  const { getCocktailById, loadCocktails, deleteCocktail, updateCocktail } =
     useCocktailsStore();
   const { ingredients: allIngredients } = useIngredientsStore();
   const cocktailId = params.id as string;
@@ -76,7 +78,7 @@ export default function CocktailDetailScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: () => <DetailLevelToggle />,
+      headerTitle: () => <DetailLevelToggle simpleLabel="SPECS" detailedLabel="NUMBERS" />,
       headerTitleAlign: 'center',
       headerRight: () => (
         <Pressable onPress={() => setShowActions(true)} className="p-2">
@@ -291,13 +293,24 @@ export default function CocktailDetailScreen() {
                 />
               )}
             </View>
-            {isDetailed && !isOnTarget && (
-              <AiSuggestionRow
-                label="Suggested Price"
-                value={formatCurrency(roundSuggestedPrice(metrics.suggestedPrice, suggestedPriceRounding))}
-                infoTermKey="suggestedPrice"
-              />
-            )}
+            {isDetailed && !isOnTarget && (() => {
+              const suggested = applyPriceFloor(
+                roundSuggestedPrice(metrics.suggestedPrice, suggestedPriceRounding),
+                minCocktailPrice,
+              );
+              return (
+                <AiSuggestionRow
+                  label="Suggested Price"
+                  value={formatCurrency(suggested)}
+                  infoTermKey="suggestedPrice"
+                  onApply={
+                    suggested > 0
+                      ? () => updateCocktail(cocktail.id, { retailPrice: suggested })
+                      : undefined
+                  }
+                />
+              );
+            })()}
           </View>
 
           {/* THE BUILD — open 3-col list. Page anchor for both bartender and manager. */}

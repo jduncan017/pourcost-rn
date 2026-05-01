@@ -10,6 +10,9 @@ import BottomSheet from './BottomSheet';
 
 interface PickerSheetProps<T> {
   title: string;
+  /** Optional explanation rendered under the sheet title — tells the user
+   *  what this setting actually controls. */
+  subtitle?: string;
   options: { value: T; label: string }[];
   value: T;
   onSelect: (value: T) => void;
@@ -18,6 +21,7 @@ interface PickerSheetProps<T> {
 
 export default function PickerSheet<T>({
   title,
+  subtitle,
   options,
   value,
   onSelect,
@@ -26,6 +30,14 @@ export default function PickerSheet<T>({
   const colors = useThemeColors();
   return (
     <BottomSheet visible onClose={onClose} title={title}>
+      {subtitle && (
+        <Text
+          className="px-4 pt-2 pb-3 text-sm leading-5"
+          style={{ color: colors.textSecondary }}
+        >
+          {subtitle}
+        </Text>
+      )}
       <View className="pb-4">
         {options.map((option, index) => {
           const isSelected = option.value === value;
@@ -39,7 +51,13 @@ export default function PickerSheet<T>({
                 className={`px-4 py-3 flex-row justify-between items-center ${isSelected ? '' : 'active:opacity-80'}`}
                 style={isSelected ? { backgroundColor: colors.accent + '15' } : undefined}
               >
-                <Text className={`text-base font-medium ${isSelected ? 'text-p1 dark:text-s11' : 'text-g4 dark:text-n1'}`}>
+                <Text
+                  className="text-base"
+                  style={{
+                    color: isSelected ? colors.accent : colors.text,
+                    fontWeight: isSelected ? '600' : '500',
+                  }}
+                >
                   {option.label}
                 </Text>
                 {isSelected && <Ionicons name="checkmark" size={20} color={colors.accent} />}

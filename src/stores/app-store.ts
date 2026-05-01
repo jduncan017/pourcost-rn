@@ -5,6 +5,7 @@ import { Volume, fraction } from '@/src/types/models';
 import { fetchProfile } from '@/src/lib/supabase-data';
 import { updateProfile } from '@/src/lib/supabase-writes';
 import { FeedbackService } from '@/src/services/feedback-service';
+import { PourCostTier, DEFAULT_TIERS } from '@/src/lib/pour-cost-tiers';
 
 // ==========================================
 // TYPES
@@ -15,15 +16,29 @@ export type IngredientOrderPref = 'manual' | 'most-to-least' | 'least-to-most' |
 export type DetailLevel = 'simple' | 'detailed';
 /** Rounding mode for displayed Suggested Prices across the app. */
 export type PriceRounding = 'off' | '1' | '0.5' | '0.25';
+/** Which drawer screen the user lands on after sign-in. */
+export type DefaultLandingScreen = 'cocktails' | 'ingredients' | 'calculator';
 
 interface AppState {
   // Synced with Supabase profiles
   pourCostGoal: number;
+  /** Bar-wide pour cost target for beer pours. Beer is priced as a category
+   *  (not by bottle cost) so it gets its own goal separate from spirits. */
+  beerPourCostGoal: number;
+  /** Bar-wide pour cost target for wine by the glass. */
+  winePourCostGoal: number;
   defaultPourSize: Volume;
   defaultRetailPrice: number;
+  /** Minimum allowed Suggested Price for cocktails. Floor wins when raw
+   *  pour-cost math suggests less than this. Default $10. */
+  minCocktailPrice: number;
+  /** Minimum allowed Suggested Retail for individual ingredient pours
+   *  (spirits sold straight, beer, wine by glass). Default $7. */
+  minIngredientPrice: number;
   ingredientOrderPref: IngredientOrderPref;
   themeMode: ThemeMode;
   displayName: string;
+  defaultLandingScreen: DefaultLandingScreen;
 
   // Local-only state
   detailLevel: DetailLevel;
@@ -33,19 +48,33 @@ interface AppState {
   lastSyncDate: Date | null;
   enabledProductSizes: string[]; // Volume labels of enabled container sizes (empty = all enabled)
 
+  /** Pro Mode unlocks custom pour-cost tiers. Currently admin-gated for
+   *  testing; will become a paid feature post-launch. */
+  proModeEnabled: boolean;
+  /** User's custom tier ladder — used when proModeEnabled. Empty array
+   *  falls back to DEFAULT_TIERS even when Pro Mode is on. */
+  pourCostTiers: PourCostTier[];
+
   // Actions
   setPourCostGoal: (goal: number) => void;
+  setBeerPourCostGoal: (goal: number) => void;
+  setWinePourCostGoal: (goal: number) => void;
   setDefaultPourSize: (size: Volume) => void;
   setDefaultRetailPrice: (price: number) => void;
+  setMinCocktailPrice: (price: number) => void;
+  setMinIngredientPrice: (price: number) => void;
   setIngredientOrderPref: (pref: IngredientOrderPref) => void;
   setThemeMode: (mode: ThemeMode) => void;
   setDisplayName: (name: string) => void;
+  setDefaultLandingScreen: (screen: DefaultLandingScreen) => void;
   setDetailLevel: (level: DetailLevel) => void;
   setSuggestedPriceRounding: (r: PriceRounding) => void;
   setFirstLaunch: (isFirst: boolean) => void;
   setLoading: (loading: boolean) => void;
   setEnabledProductSizes: (sizes: string[]) => void;
   toggleProductSize: (sizeLabel: string) => void;
+  setProModeEnabled: (enabled: boolean) => void;
+  setPourCostTiers: (tiers: PourCostTier[]) => void;
 
   // Supabase sync
   loadProfile: () => Promise<void>;
@@ -71,23 +100,36 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       // Defaults
       pourCostGoal: 18,
+      beerPourCostGoal: 22,
+      winePourCostGoal: 25,
       defaultPourSize: fraction(3, 2), // 1.5 oz
       defaultRetailPrice: 10.0,
+      minCocktailPrice: 10.0,
+      minIngredientPrice: 7.0,
       ingredientOrderPref: 'manual',
       themeMode: 'dark',
       displayName: '',
+      defaultLandingScreen: 'cocktails',
       detailLevel: 'detailed',
-      suggestedPriceRounding: 'off',
+      suggestedPriceRounding: '1',
       isFirstLaunch: true,
       isLoading: false,
       lastSyncDate: null,
       enabledProductSizes: [], // empty = all enabled
+      proModeEnabled: false,
+      pourCostTiers: DEFAULT_TIERS,
 
       // Setters
       setPourCostGoal: (goal) => {
-        if (goal >= 10 && goal <= 50) {
-          set({ pourCostGoal: goal });
-        }
+        if (goal >= 5 && goal <= 60) set({ pourCostGoal: goal });
+      },
+
+      setBeerPourCostGoal: (goal) => {
+        if (goal >= 5 && goal <= 60) set({ beerPourCostGoal: goal });
+      },
+
+      setWinePourCostGoal: (goal) => {
+        if (goal >= 5 && goal <= 60) set({ winePourCostGoal: goal });
       },
 
       setDefaultPourSize: (size) => set({ defaultPourSize: size }),
@@ -98,11 +140,21 @@ export const useAppStore = create<AppState>()(
         }
       },
 
+      setMinCocktailPrice: (price) => {
+        if (price >= 0 && price <= 100) set({ minCocktailPrice: price });
+      },
+
+      setMinIngredientPrice: (price) => {
+        if (price >= 0 && price <= 100) set({ minIngredientPrice: price });
+      },
+
       setIngredientOrderPref: (pref) => set({ ingredientOrderPref: pref }),
 
       setThemeMode: (mode) => set({ themeMode: mode }),
 
       setDisplayName: (name) => set({ displayName: name }),
+
+      setDefaultLandingScreen: (screen) => set({ defaultLandingScreen: screen }),
 
       setDetailLevel: (level) => set({ detailLevel: level }),
 
@@ -123,6 +175,9 @@ export const useAppStore = create<AppState>()(
         }
       },
 
+      setProModeEnabled: (enabled) => set({ proModeEnabled: enabled }),
+      setPourCostTiers: (tiers) => set({ pourCostTiers: tiers }),
+
       // Load profile from Supabase → store
       loadProfile: async () => {
         try {
@@ -131,11 +186,16 @@ export const useAppStore = create<AppState>()(
 
           set({
             pourCostGoal: profile.pourCostGoal,
+            beerPourCostGoal: profile.beerPourCostGoal,
+            winePourCostGoal: profile.winePourCostGoal,
             defaultPourSize: profile.defaultPourSize,
             defaultRetailPrice: profile.defaultRetailPrice,
+            minCocktailPrice: profile.minCocktailPrice,
+            minIngredientPrice: profile.minIngredientPrice,
             ingredientOrderPref: profile.ingredientOrderPref,
             themeMode: profile.themeMode,
             displayName: profile.displayName,
+            defaultLandingScreen: profile.defaultLandingScreen,
             enabledProductSizes: profile.enabledProductSizes ?? [],
             lastSyncDate: new Date(),
           });
@@ -153,11 +213,16 @@ export const useAppStore = create<AppState>()(
           const state = get();
           await updateProfile({
             pourCostGoal: state.pourCostGoal,
+            beerPourCostGoal: state.beerPourCostGoal,
+            winePourCostGoal: state.winePourCostGoal,
             defaultPourSize: state.defaultPourSize,
             defaultRetailPrice: state.defaultRetailPrice,
+            minCocktailPrice: state.minCocktailPrice,
+            minIngredientPrice: state.minIngredientPrice,
             ingredientOrderPref: state.ingredientOrderPref,
             themeMode: state.themeMode,
             displayName: state.displayName,
+            defaultLandingScreen: state.defaultLandingScreen,
             enabledProductSizes: state.enabledProductSizes,
           });
           set({ lastSyncDate: new Date() });
@@ -172,14 +237,21 @@ export const useAppStore = create<AppState>()(
       resetToDefaults: () => {
         set({
           pourCostGoal: 18,
+          beerPourCostGoal: 22,
+          winePourCostGoal: 25,
           defaultPourSize: fraction(3, 2),
           defaultRetailPrice: 10.0,
+          minCocktailPrice: 10.0,
+          minIngredientPrice: 7.0,
           ingredientOrderPref: 'manual',
           themeMode: 'dark',
           displayName: '',
+          defaultLandingScreen: 'cocktails',
           detailLevel: 'detailed',
-          suggestedPriceRounding: 'off',
+          suggestedPriceRounding: '1',
           isFirstLaunch: false,
+          proModeEnabled: false,
+          pourCostTiers: DEFAULT_TIERS,
         });
       },
     }),

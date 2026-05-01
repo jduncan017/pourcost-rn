@@ -82,8 +82,10 @@ export function calculateSuggestedPrice(
 
 /**
  * Apply the user's global Suggested Price rounding preference.
- * 'off' leaves the value untouched; '1' rounds to whole dollars; '0.5' / '0.25'
- * snap to those increments with standard rounding (e.g. $7.63 → $7.50 at 0.25).
+ *
+ * Always rounds UP to the next increment — bars want to exceed their target
+ * pour cost, not undershoot it. Example at mode '1': $7.10 → $8, not $7.
+ * 'off' leaves the value untouched.
  */
 export function roundSuggestedPrice(
   price: number,
@@ -91,7 +93,21 @@ export function roundSuggestedPrice(
 ): number {
   if (mode === 'off' || price <= 0) return price;
   const step = mode === '1' ? 1 : mode === '0.5' ? 0.5 : 0.25;
-  return Math.round(price / step) * step;
+  return Math.ceil(price / step) * step;
+}
+
+/**
+ * Apply a minimum-price floor to a Suggested Price. Bars set this in
+ * Settings (or onboarding) so cheap recipes never suggest sub-floor prices
+ * — e.g. a $1.50-cost daiquiri at 18% suggests $9, but the bar's floor is
+ * $11, so the user sees $11.
+ *
+ * Returns the larger of price or floor. Negative or zero floors are ignored
+ * (treats them as "no floor").
+ */
+export function applyPriceFloor(price: number, floor: number): number {
+  if (floor <= 0) return price;
+  return Math.max(price, floor);
 }
 
 /**

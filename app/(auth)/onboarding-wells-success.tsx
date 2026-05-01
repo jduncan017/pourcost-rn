@@ -86,7 +86,7 @@ export default function OnboardingWellsSuccess() {
         </View>
 
         <Pressable
-          onPress={() => router.replace('/(auth)/onboarding-complete' as any)}
+          onPress={() => router.replace('/(auth)/onboarding-cocktails-intro' as any)}
           style={styles.primaryButton}
         >
           <Text style={styles.primaryButtonText}>Continue</Text>

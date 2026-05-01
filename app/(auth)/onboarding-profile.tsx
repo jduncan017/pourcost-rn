@@ -18,8 +18,16 @@ export default function OnboardingProfile() {
     setDisplayName,
     pourCostGoal,
     setPourCostGoal,
+    beerPourCostGoal,
+    setBeerPourCostGoal,
+    winePourCostGoal,
+    setWinePourCostGoal,
     defaultPourSize,
     setDefaultPourSize,
+    minCocktailPrice,
+    setMinCocktailPrice,
+    minIngredientPrice,
+    setMinIngredientPrice,
   } = useAppStore();
 
   const pourSizeOz = volumeToOunces(defaultPourSize);
@@ -75,13 +83,44 @@ export default function OnboardingProfile() {
             onSubmitEditing={Keyboard.dismiss}
           />
 
-          {/* Pour Cost Goal — slider 10-30% */}
+          {/* Pour Cost Goals — cocktails, beer, wine each have their own
+              target since bars price these categories differently. Spirits
+              use a tier ladder (visible later in Settings → Pour Cost Targets). */}
+          <View className="flex-col gap-1">
+            <Text style={{ color: palette.N3, fontSize: 13, fontWeight: '500' }}>
+              Pour Cost Goals
+            </Text>
+            <Text style={{ color: palette.N4, fontSize: 12, lineHeight: 16 }}>
+              Your bar-wide target pour cost percentages. Adjust per category in Settings later if you need to.
+            </Text>
+          </View>
+
           <CustomSlider
-            label="Target Pour Cost"
+            label="Cocktails"
             value={pourCostGoal}
             onValueChange={(val) => setPourCostGoal(Math.round(val))}
             minValue={10}
             maxValue={30}
+            step={1}
+            formatValue={(v) => `${Math.round(v)}%`}
+          />
+
+          <CustomSlider
+            label="Beer"
+            value={beerPourCostGoal}
+            onValueChange={(val) => setBeerPourCostGoal(Math.round(val))}
+            minValue={10}
+            maxValue={35}
+            step={1}
+            formatValue={(v) => `${Math.round(v)}%`}
+          />
+
+          <CustomSlider
+            label="Wine"
+            value={winePourCostGoal}
+            onValueChange={(val) => setWinePourCostGoal(Math.round(val))}
+            minValue={10}
+            maxValue={40}
             step={1}
             formatValue={(v) => `${Math.round(v)}%`}
           />
@@ -99,6 +138,37 @@ export default function OnboardingProfile() {
             step={0.25}
             formatValue={(v) => `${v % 1 === 0 ? v.toFixed(0) : v.toFixed(2)} oz`}
           />
+
+          {/* Floor pricing — clamps Suggested Price so cheap cocktails / pours
+              don't suggest sub-floor prices that no bar would actually charge. */}
+          <View className="flex-col gap-1">
+            <Text style={{ color: palette.N3, fontSize: 13, fontWeight: '500' }}>
+              Pricing Floors
+            </Text>
+            <Text style={{ color: palette.N4, fontSize: 12, lineHeight: 16 }}>
+              The lowest price you'll ever charge. Suggested prices won't go below these.
+            </Text>
+          </View>
+
+          <CustomSlider
+            label="Minimum Cocktail Price"
+            value={minCocktailPrice}
+            onValueChange={(val) => setMinCocktailPrice(Math.round(val))}
+            minValue={5}
+            maxValue={25}
+            step={1}
+            formatValue={(v) => `$${Math.round(v)}`}
+          />
+
+          <CustomSlider
+            label="Minimum Spirit Pour Price"
+            value={minIngredientPrice}
+            onValueChange={(val) => setMinIngredientPrice(Math.round(val))}
+            minValue={4}
+            maxValue={15}
+            step={1}
+            formatValue={(v) => `$${Math.round(v)}`}
+          />
         </View>
 
         <Pressable
@@ -107,7 +177,7 @@ export default function OnboardingProfile() {
               pour_cost_goal: pourCostGoal,
               default_pour_oz: pourSizeOz,
             });
-            router.push('/(auth)/onboarding-wells' as any);
+            router.push('/(auth)/onboarding-wells-intro' as any);
           }}
           disabled={!canContinue}
           style={[styles.primaryButton, !canContinue && styles.disabled]}

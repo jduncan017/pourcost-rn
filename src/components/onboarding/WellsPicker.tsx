@@ -304,8 +304,10 @@ export default function WellsPicker({
   const sizePickerPicked = sizePickerKey != null ? picks[sizePickerKey] : null;
   const sizePickerOptions = useMemo<{ value: Volume; label: string }[]>(() => {
     if (!sizePickerPicked) return COMMON_WELL_SIZES;
-    if (sizePickerPicked.availableSizes && sizePickerPicked.availableSizes.length > 0) {
-      // Canonical pick: scope to that product's real sizes, ascending.
+    // Only constrain to canonical sizes when the catalog has 2+ entries —
+    // single-size canonicals (common for generics) shouldn't trap the user
+    // into one option.
+    if (sizePickerPicked.availableSizes && sizePickerPicked.availableSizes.length >= 2) {
       return sizePickerPicked.availableSizes
         .slice()
         .sort((a, b) => sizeMl(a) - sizeMl(b))
@@ -378,6 +380,12 @@ export default function WellsPicker({
               style={{ color: palette.N3 }}
             >
               {subtitle}
+            </Text>
+            <Text
+              className="text-xs mt-3 leading-5"
+              style={{ color: palette.N4 }}
+            >
+              Estimate costs for now, you can update anytime from My Inventory.
             </Text>
           </View>
 
@@ -511,9 +519,12 @@ export default function WellsPicker({
             category={sizePickerCategory}
             value={sizePickerPicked.productSize}
             options={sizePickerOptions}
-            // Hide the "Other sizes" expander when we already scoped to a
-            // canonical's real sizes — there's nothing more meaningful to show.
-            allowExtended={!sizePickerPicked.availableSizes}
+            // Allow extended sizes when we're showing COMMON (no canonical
+            // constraint or only a single canonical size). Hide expander
+            // when canonical sizes are authoritative (2+ entries).
+            allowExtended={
+              !sizePickerPicked.availableSizes || sizePickerPicked.availableSizes.length < 2
+            }
             onSelect={(size) => {
               setPickedSize(sizePickerCategory.key, size);
               setSizePickerKey(null);

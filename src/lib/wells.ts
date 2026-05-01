@@ -81,6 +81,56 @@ export function familyFallbacks(subType: string): string[] {
   return [];
 }
 
+/**
+ * Vermouth subcategory aliases. The canonical taxonomy stores vermouth
+ * with category='Vermouth' subcategory='Sweet'/'Dry'. The user's ingredient
+ * row uses sub_type='Sweet Vermouth'/'Dry Vermouth'/'Vermouth' (the in-app
+ * SPIRIT_SUBTYPES vocabulary). This map bridges the two so a recipe asking
+ * for 'Sweet' (canonical) matches a user well with subType 'Sweet Vermouth'.
+ *
+ * Bidirectional: 'Sweet' canonical matches user 'Sweet Vermouth'/'Vermouth',
+ * and 'Sweet Vermouth' user-side matches recipes asking for 'Sweet'.
+ */
+const SUBTYPE_ALIASES: Record<string, string[]> = {
+  Sweet: ['Sweet', 'Sweet Vermouth', 'Vermouth'],
+  Dry: ['Dry', 'Dry Vermouth', 'Vermouth'],
+  'Sweet Vermouth': ['Sweet', 'Sweet Vermouth', 'Vermouth'],
+  'Dry Vermouth': ['Dry', 'Dry Vermouth', 'Vermouth'],
+  Vermouth: ['Vermouth', 'Sweet', 'Dry', 'Sweet Vermouth', 'Dry Vermouth'],
+};
+
+/**
+ * Does a recipe slot's subcategory accept this user-inventory subType?
+ *
+ * Match priority:
+ *   1. Exact equality
+ *   2. Vermouth alias (Sweet ↔ Sweet Vermouth, etc.)
+ *   3. Family fallback (Bourbon recipe accepts Whiskey well, etc.)
+ *
+ * Used by the cocktail adopter to resolve recipe ingredients against the
+ * user's wells and inventory. Aliases + fallbacks are intentional during
+ * adoption — user said "use whiskey as the well bourbon as the well whiskey
+ * as a default."
+ */
+export function subTypeMatches(
+  recipeSubcategory: string,
+  userSubType: string,
+): boolean {
+  if (recipeSubcategory === userSubType) return true;
+
+  const aliases = SUBTYPE_ALIASES[recipeSubcategory];
+  if (aliases?.includes(userSubType)) return true;
+
+  // Family fallback (siblings + the parent generic).
+  for (const family of Object.values(SPIRIT_FAMILIES)) {
+    if (family.includes(recipeSubcategory) && family.includes(userSubType)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 const bottle = (ml: number): Volume => ({ kind: 'milliliters', ml });
 
 export const WELL_CATEGORIES: WellCategory[] = [
@@ -150,13 +200,17 @@ export const WELL_CATEGORIES: WellCategory[] = [
       { name: 'Dewar’s White Label', productSize: bottle(1000) },
     ],
   },
+  // ---- ADD MORE WELLS (granular, opt-in) ----
+  // Most bars don't differentiate bourbon from whiskey at the well level —
+  // their well whiskey *is* their bourbon, used in any whiskey recipe.
+  // Bars that do differentiate can opt-in here.
   {
     key: 'bourbon',
     label: 'Well Bourbon',
     subType: 'Bourbon',
     canonicalSubcategories: ['Whiskey'],
     nameKeyword: 'bourbon',
-    defaultExpanded: true,
+    defaultExpanded: false,
     quickPicks: [
       { name: 'Jim Beam Bourbon', productSize: bottle(1000) },
       { name: 'Evan Williams Bourbon', productSize: bottle(1000) },
@@ -164,7 +218,6 @@ export const WELL_CATEGORIES: WellCategory[] = [
       { name: 'Wild Turkey 81 Bourbon', productSize: bottle(1000) },
     ],
   },
-  // ---- ADD MORE WELLS (granular, opt-in) ----
   {
     key: 'rye',
     label: 'Well Rye',

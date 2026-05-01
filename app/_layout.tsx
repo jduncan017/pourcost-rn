@@ -176,9 +176,13 @@ function RootLayoutNav() {
     }
   }, [session, authLoading, isNewSignUp, initializeUserData, initializedUserId]);
 
-  // Redirect based on auth state — wait for initialization to complete
+  // Redirect based on auth state. We DON'T wait for data initialization —
+  // the app renders as soon as auth is settled, and each screen shows its
+  // own skeleton (SkeletonLoader on the lists) while ingredients/cocktails
+  // fetch in the background. Faster perceived boot than blocking on a
+  // full LoadingScreen.
   useEffect(() => {
-    if (authLoading || isInitializing) return;
+    if (authLoading) return;
 
     const inAuthGroup = (segments[0] as string) === '(auth)';
 
@@ -186,11 +190,22 @@ function RootLayoutNav() {
       router.replace('/(auth)/landing' as any);
     } else if (session && inAuthGroup && !isOnboarding) {
       // Only redirect out of auth when not mid-onboarding
-      router.replace('/(drawer)/cocktails' as any);
+      const landing = useAppStore.getState().defaultLandingScreen;
+      const route =
+        landing === 'ingredients'
+          ? '/(drawer)/ingredients'
+          : landing === 'calculator'
+            ? '/(drawer)/calculator'
+            : '/(drawer)/cocktails';
+      router.replace(route as any);
     }
   }, [session, authLoading, isInitializing, isOnboarding, segments]);
 
-  const isReady = !authLoading && !isInitializing;
+  // Only block render on auth check — data initialization runs in parallel
+  // and screens handle their own loading states. Means the user lands inside
+  // the app instantly after auth and sees skeletons fill in vs staring at a
+  // blank loader for the full data round-trip.
+  const isReady = !authLoading;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -232,7 +247,8 @@ function RootLayoutNav() {
             <Stack.Screen name="search" options={{ title: 'Search' }} />
             <Stack.Screen name="container-sizes" options={{ title: 'Container Sizes' }} />
             <Stack.Screen name="settings-account" options={{ title: 'Account' }} />
-            <Stack.Screen name="settings-calculations" options={{ title: 'Calculations' }} />
+            <Stack.Screen name="settings-calculations" options={{ title: 'Pricing' }} />
+            <Stack.Screen name="settings-tiers" options={{ title: 'Pour Cost Targets' }} />
             <Stack.Screen name="settings-glossary" options={{ title: 'Glossary' }} />
             <Stack.Screen name="settings-pro-tips" options={{ title: 'Pro Tips' }} />
             <Stack.Screen name="settings-pro-tip" options={{ title: 'Pro Tip' }} />

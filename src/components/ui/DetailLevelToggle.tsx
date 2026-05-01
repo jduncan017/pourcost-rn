@@ -4,21 +4,35 @@ import { useAppStore, DetailLevel } from '@/src/stores/app-store';
 import { HapticService } from '@/src/services/haptic-service';
 
 interface DetailLevelToggleProps {
+  /** Label for the "simple" detailLevel value. Defaults to INFO. */
+  simpleLabel?: string;
+  /** Label for the "detailed" detailLevel value. Defaults to NUMBERS. */
+  detailedLabel?: string;
   className?: string;
 }
 
-const OPTIONS: { value: DetailLevel; label: string }[] = [
-  { value: 'simple', label: 'SIMPLE' },
-  { value: 'detailed', label: 'DETAIL' },
-];
-
 /**
- * Small inline pill toggle — matches mockup #1 sizing (not full-width).
- * Caller controls placement (usually right-aligned in a header row).
+ * Two-state pill toggle controlling the global `detailLevel`. Same shared
+ * state is used across detail pages, but labels differ per surface:
+ *   - Ingredient detail uses INFO / NUMBERS
+ *   - Cocktail detail uses SPECS / NUMBERS
+ *
+ * The underlying enum values stay 'simple' / 'detailed' (semantic ≈ info /
+ * numbers) — labels are cosmetic per page.
  */
-export default function DetailLevelToggle({ className = '' }: DetailLevelToggleProps) {
+export default function DetailLevelToggle({
+  simpleLabel = 'INFO',
+  detailedLabel = 'NUMBERS',
+  className = '',
+}: DetailLevelToggleProps) {
   const colors = useThemeColors();
-  const { detailLevel, setDetailLevel } = useAppStore();
+  const detailLevel = useAppStore((s) => s.detailLevel);
+  const setDetailLevel = useAppStore((s) => s.setDetailLevel);
+
+  const options: { value: DetailLevel; label: string }[] = [
+    { value: 'simple', label: simpleLabel },
+    { value: 'detailed', label: detailedLabel },
+  ];
 
   return (
     <View
@@ -29,7 +43,7 @@ export default function DetailLevelToggle({ className = '' }: DetailLevelToggleP
         borderColor: colors.borderSubtle,
       }}
     >
-      {OPTIONS.map((opt) => {
+      {options.map((opt) => {
         const active = detailLevel === opt.value;
         return (
           <Pressable

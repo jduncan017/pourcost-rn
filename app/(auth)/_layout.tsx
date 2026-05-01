@@ -11,8 +11,13 @@ export default function AuthLayout() {
       <Stack.Screen name="onboarding-tour" />
       <Stack.Screen name="signup" />
       <Stack.Screen name="onboarding-profile" />
+      <Stack.Screen name="onboarding-wells-intro" />
       <Stack.Screen name="onboarding-wells" />
       <Stack.Screen name="onboarding-wells-success" />
+      <Stack.Screen name="onboarding-cocktails-intro" />
+      <Stack.Screen name="onboarding-cocktails" />
+      <Stack.Screen name="onboarding-cocktails-prices" />
+      <Stack.Screen name="onboarding-adopting" />
       <Stack.Screen name="onboarding-complete" />
     </Stack>
   );

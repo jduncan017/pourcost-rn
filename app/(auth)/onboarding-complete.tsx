@@ -7,10 +7,17 @@ import GradientBackground from '@/src/components/ui/GradientBackground';
 import { palette } from '@/src/contexts/ThemeContext';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useAppStore } from '@/src/stores/app-store';
-import { seedSampleBar } from '@/src/lib/seed-sample-bar';
-import { FeedbackService } from '@/src/services/feedback-service';
 import { capture } from '@/src/services/analytics-service';
 
+/**
+ * Final onboarding screen — saves the user's profile preferences, fires the
+ * onboarding_complete event, and drops them into the app.
+ *
+ * The sample bar that previously seeded here is gone — the wells picker +
+ * cocktail picker now populate the bar from the user's actual choices.
+ * Users who skip both wells and cocktails land in an empty bar; the empty
+ * states on My Inventory and Cocktails route them back into setup.
+ */
 export default function OnboardingComplete() {
   const router = useGuardedRouter();
   const insets = useSafeAreaInsets();
@@ -23,16 +30,6 @@ export default function OnboardingComplete() {
     setBusy(true);
     try {
       await saveProfile();
-      try {
-        await seedSampleBar();
-      } catch (err) {
-        // Non-fatal — user still lands in the app, just with an empty bar.
-        const msg = err instanceof Error ? err.message : 'Could not load sample bar';
-        FeedbackService.showError(
-          'Sample Bar Unavailable',
-          `${msg}. Starting you with an empty bar. You can add ingredients manually.`
-        );
-      }
       capture('onboarding_complete');
       clearNewSignUp();
       router.replace('/(drawer)/cocktails' as any);
@@ -44,10 +41,10 @@ export default function OnboardingComplete() {
   return (
     <GradientBackground>
       <View
-        className="flex-1 justify-center px-6"
-        style={{ paddingTop: insets.top, paddingBottom: insets.bottom + 48 }}
+        className="flex-1 justify-between px-6"
+        style={{ paddingTop: insets.top + 24, paddingBottom: insets.bottom + 32 }}
       >
-        <View className="items-center flex-1 justify-center">
+        <View className="flex-1 items-center justify-center">
           <View
             style={{
               backgroundColor: palette.G3 + '15',
@@ -59,67 +56,15 @@ export default function OnboardingComplete() {
             <Ionicons name="checkmark-circle" size={56} color={palette.G3} />
           </View>
 
-          <Text
-            className="text-2xl text-center"
-            style={{ color: palette.N2, fontWeight: '700' }}
-          >
+          <Text className="text-2xl text-center" style={{ color: palette.N2, fontWeight: '700' }}>
             You're All Set!
           </Text>
           <Text
             className="text-base text-center mt-3 leading-6 px-4"
             style={{ color: palette.N3 }}
           >
-            So you can see PourCost in action right away, we'll pre-load your bar with common ingredients and classic cocktails.
+            Your bar is ready. Open Cocktails to see live cost and margin on every recipe, or jump into My Inventory to add more.
           </Text>
-
-          {/* Sample bar info card */}
-          <View
-            className="self-stretch flex-col gap-3 mt-8 px-5 py-4 rounded-2xl"
-            style={{
-              backgroundColor: palette.P3 + '12',
-              borderWidth: 1,
-              borderColor: palette.P3 + '40',
-            }}
-          >
-            <View className="flex-row items-start gap-3">
-              <Ionicons name="sparkles-outline" size={22} color={palette.P3} style={{ marginTop: 2 }} />
-              <View className="flex-1">
-                <Text style={{ color: palette.P3, fontWeight: '600', fontSize: 14 }}>
-                  Sample bar included
-                </Text>
-                <View className="flex-col gap-1 mt-2">
-                  <View className="flex-row items-start gap-2">
-                    <Text style={{ color: palette.P3, fontSize: 13, lineHeight: 18 }}>•</Text>
-                    <Text style={{ color: palette.N3, fontSize: 13, lineHeight: 18, flex: 1 }}>
-                      14 ingredients (Bulleit, Tanqueray, Don Julio…)
-                    </Text>
-                  </View>
-                  <View className="flex-row items-start gap-2">
-                    <Text style={{ color: palette.P3, fontSize: 13, lineHeight: 18 }}>•</Text>
-                    <Text style={{ color: palette.N3, fontSize: 13, lineHeight: 18, flex: 1 }}>
-                      5 cocktails (Old Fashioned, Margarita, Negroni…)
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </View>
-
-          {/* Edit / clear note */}
-          <View
-            className="self-stretch flex-row items-start gap-3 mt-3 px-5 py-3 rounded-2xl"
-            style={{
-              backgroundColor: palette.G3 + '12',
-              borderWidth: 1,
-              borderColor: palette.G3 + '40',
-            }}
-          >
-            <Ionicons name="create-outline" size={18} color={palette.G3} style={{ marginTop: 1 }} />
-            <Text className="flex-1" style={{ color: palette.N2, fontSize: 13, lineHeight: 18 }}>
-              Edit them freely. Clear the sample bar anytime from{' '}
-              <Text style={{ color: palette.G3, fontWeight: '600' }}>Settings → Getting Started</Text>.
-            </Text>
-          </View>
         </View>
 
         <Pressable
