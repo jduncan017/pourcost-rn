@@ -135,6 +135,14 @@ interface IngredientRow {
   abv: number | null;
   canonical_product_id: string | null;
   is_well: boolean;
+  brand: string | null;
+  origin: string | null;
+  flavor_notes: string[] | null;
+  parent_company: string | null;
+  founded_year: number | null;
+  production_region: string | null;
+  aging_years: number | null;
+  education_data: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
@@ -184,6 +192,14 @@ function rowToIngredient(row: IngredientRow): SavedIngredient {
     description: row.description ?? undefined,
     isWell: row.is_well ?? false,
     canonicalProductId: row.canonical_product_id ?? undefined,
+    brand: row.brand ?? undefined,
+    origin: row.origin ?? undefined,
+    flavorNotes: row.flavor_notes ?? undefined,
+    parentCompany: row.parent_company ?? undefined,
+    foundedYear: row.founded_year ?? undefined,
+    productionRegion: row.production_region ?? undefined,
+    agingYears: row.aging_years != null ? Number(row.aging_years) : undefined,
+    educationData: row.education_data ?? undefined,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
     userId: row.user_id,
@@ -344,6 +360,14 @@ export async function insertIngredient(
       description: ingredient.description ?? null,
       is_well: ingredient.isWell ?? false,
       canonical_product_id: ingredient.canonicalProductId ?? null,
+      brand: ingredient.brand ?? null,
+      origin: ingredient.origin ?? null,
+      flavor_notes: ingredient.flavorNotes ?? null,
+      parent_company: ingredient.parentCompany ?? null,
+      founded_year: ingredient.foundedYear ?? null,
+      production_region: ingredient.productionRegion ?? null,
+      aging_years: ingredient.agingYears ?? null,
+      education_data: ingredient.educationData ?? null,
     })
     .select()
     .single();
@@ -370,6 +394,14 @@ export async function updateIngredientById(
   if (updates.isWell !== undefined) row.is_well = updates.isWell;
   if (updates.canonicalProductId !== undefined)
     row.canonical_product_id = updates.canonicalProductId ?? null;
+  if (updates.brand !== undefined) row.brand = updates.brand ?? null;
+  if (updates.origin !== undefined) row.origin = updates.origin ?? null;
+  if (updates.flavorNotes !== undefined) row.flavor_notes = updates.flavorNotes ?? null;
+  if (updates.parentCompany !== undefined) row.parent_company = updates.parentCompany ?? null;
+  if (updates.foundedYear !== undefined) row.founded_year = updates.foundedYear ?? null;
+  if (updates.productionRegion !== undefined) row.production_region = updates.productionRegion ?? null;
+  if (updates.agingYears !== undefined) row.aging_years = updates.agingYears ?? null;
+  if (updates.educationData !== undefined) row.education_data = updates.educationData ?? null;
 
   const { data, error } = await supabase
     .from('ingredients')

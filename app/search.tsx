@@ -124,20 +124,12 @@ export default function SearchScreen() {
     };
   }, [searchQuery, showDatabase]);
 
+  // Tap a canonical → preview-detail; preview Save replaces preview with
+  // the form, save in form pops back here.
   const goToFormWithCanonical = (product: CanonicalProductSummary) => {
-    const { ingredientType, subType } = mapCanonicalToType(product);
-    const firstSize = product.defaultSizes[0];
     router.push({
-      pathname: '/ingredient-form',
-      params: {
-        canonicalProductId: product.id,
-        name: product.name,
-        description: product.description ?? undefined,
-        abv: product.abv != null ? String(product.abv) : undefined,
-        type: ingredientType,
-        subType: subType || undefined,
-        productSize: firstSize ? JSON.stringify(firstSize) : undefined,
-      },
+      pathname: '/ingredient-preview',
+      params: { canonicalId: product.id },
     });
   };
 

@@ -373,7 +373,19 @@ export default function IngredientDetailScreen() {
                 </View>
               ) : null}
 
-              <EducationPanel canonicalProductId={ingredient.canonicalProductId} />
+              <EducationPanel
+                canonicalProductId={ingredient.canonicalProductId}
+                overrides={{
+                  brand: ingredient.brand,
+                  origin: ingredient.origin,
+                  flavorNotes: ingredient.flavorNotes,
+                  parentCompany: ingredient.parentCompany,
+                  foundedYear: ingredient.foundedYear,
+                  productionRegion: ingredient.productionRegion,
+                  agingYears: ingredient.agingYears,
+                  educationData: ingredient.educationData,
+                }}
+              />
             </>
           )}
 

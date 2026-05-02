@@ -8,6 +8,10 @@ interface EmptyStateProps {
   description: string;
   actionLabel?: string;
   onAction?: () => void;
+  /** Optional secondary action rendered as a muted text link below the
+   *  primary button. Used for the "or do this other thing" affordance. */
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
   className?: string;
 }
 
@@ -17,6 +21,8 @@ export default function EmptyState({
   description,
   actionLabel,
   onAction,
+  secondaryActionLabel,
+  onSecondaryAction,
   className = '',
 }: EmptyStateProps) {
   const theme = useThemeColors();
@@ -45,6 +51,14 @@ export default function EmptyState({
         >
           <Text className="text-white font-semibold text-base">
             {actionLabel}
+          </Text>
+        </Pressable>
+      )}
+
+      {secondaryActionLabel && onSecondaryAction && (
+        <Pressable onPress={onSecondaryAction} className="mt-3 px-3 py-2" hitSlop={6}>
+          <Text className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+            {secondaryActionLabel}
           </Text>
         </Pressable>
       )}

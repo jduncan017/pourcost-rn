@@ -33,6 +33,7 @@ Below is a "shopping list" of feature ideas you can cherry-pick from as PourCost
    - [ ] Regional price benchmarking (compare to peer bars)
    - [ ] Dynamic happy-hour pricing engine
    - [ ] KPI dashboard: labor %, pour cost, prime cost, RevPASH
+   - [ ] **Canonical data quality feedback loop**. Aggregate user overrides on `ingredients.{brand,origin,flavor_notes,parent_company,founded_year,production_region,aging_years,education_data}` columns. When N users override the same canonical field with the same value, flag for AI verification (Gemini Flash + grounded search) and auto-update or queue for admin review. Schema already supports it: any non-NULL override column = "user disagreed with canonical here." Build = scheduled aggregation job + Gemini verification pipeline + admin review UI + role gates. Estimated 1-2 weeks of focused work. Best to ship after enough user volume (~hundreds of saved ingredients) makes the signal meaningful.
 
 4. Staff Training & Ops
    - [ ] Study-guide generation & quizzes (you have)

@@ -1,6 +1,6 @@
 # PourCost RN — MVP To-Do
 
-_Last updated 2026-05-01._
+_Last updated 2026-05-02._
 
 Remaining work before the first submission. Delete a line when it's done; if it changes scope to post-MVP, move it to `feature-list.md` instead.
 
@@ -27,14 +27,18 @@ Remaining work before the first submission. Delete a line when it's done; if it 
 
 ### Architecture debt to pay
 
-- [ ] **Subtype taxonomy alignment**. `SPIRIT_SUBTYPES` (in-app chips), `wells.ts` subTypes, and canonical's locked taxonomy are not consistent. Two TEMPORARY workarounds shipped, both logged in `database_decisions.md` Decision Log: (1) `nameKeyword` filter on Bourbon/Rye/Scotch wells (filters `subcategory='Whiskey' AND name ILIKE '%bourbon%'`); (2) `SUBTYPE_ALIASES` map for vermouth (Sweet ↔ Sweet Vermouth). Both go away when the canonical re-seed splits Whiskey into Bourbon/Rye/Scotch/Irish/Japanese and adds proper Vermouth subtypes. Coordinated cross-file change: `wells.ts`, `appConstants.ts SPIRIT_SUBTYPES`, sample-bar.ts (or its removal), library recipes, resolver.
-- [ ] **Library recipe slot specificity update** (after canonical re-seed). Once finer subcategories land, the 30 library recipes need each slot rechecked: Sazerac → Rye Whiskey, Daiquiri → White Rum, Manhattan → Rye OR Bourbon, etc. Per `database_decisions.md` "Recipe Slot Specificity" section.
+- [ ] **Canonical re-seed (Joshua)**. Splits `canonical_products` Whiskey rows into Bourbon / Rye / Scotch / Irish / Japanese subcategories, adds proper Vermouth subtypes. Joshua handling the larger seed before launch. After it lands: (1) update `SPIRIT_SUBTYPES` in `appConstants.ts` to expose the new whiskey styles as form chips, (2) retire the `nameKeyword` workaround in the wells picker (filters `subcategory='Whiskey' AND name ILIKE '%bourbon%'`), (3) retire `SUBTYPE_ALIASES` map for vermouth (Sweet ↔ Sweet Vermouth), (4) recheck the 30 library recipe slots: Sazerac → Rye, Daiquiri → White Rum, Manhattan → Rye or Bourbon, etc.
 - [ ] **Build canonical enrichment job** (Tier 2 education data). Gemini 2.5 Flash + grounded search, populates `education_data JSONB` and queryable Tier 2 columns per category template (spirits / beer / wine / ingredients each have own structure). Flips `enrichment_status` to 'complete' on success. ~$13 for the 250-row bootstrap pass; pennies/month for ongoing trickle from invoice scans. Can ship after launch since Tier 1 carries the bartender-facing detail and education-mode UI degrades gracefully when Tier 2 fields are null.
 
-### Library + adoption (mostly V1.1)
+### Onboarding & cocktail flow polish
 
-- [ ] **Library browse UI**. Read-only list/grid of `received_recipes WHERE source = 'library'`. Filter by spirit type, tap to view full recipe with canonical-level ingredient data. Entry point: drawer item or tab on Cocktails page (TBD). No adopt button yet (ship as preview-only in V1, adopt is V1.1). NOTE: onboarding cocktail picker already does adoption; this is for the in-app browse flow.
-- [ ] **Adopt flow UI** (V1.1). Per-ingredient prompt: "use existing inventory match / substitute from your inventory / add this ingredient to my library / skip". On confirm, creates a `cocktails` row and `cocktail_ingredients` rows using the user's real ingredient IDs. The original `received_recipes` row stays intact as the source reference (`adopted_cocktail_id` gets set). Heaviest remaining item; library can ship preview-only without it.
+- [ ] **Perfect onboarding + cocktail addition flow**. Open-ended punch list — turn into specifics as friction surfaces during QA. Likely items: copy polish on intro screens, double-check skip paths, verify the library browse → adoption flow lands correctly outside onboarding (just shipped as `cocktails-browse` / `cocktails-browse-prices` / `cocktails-browse-adopting`), audit haptics + animation timings, ensure `Bar Inventory` rename is consistent across all surfaces. ~2-4h once specifics are known.
+- [ ] **Tutorial section in Learn tab** (cut from full multi-screen plan). Single "Getting Started" tutorial — 2-3 minute optional walkthrough of the 5 core screens (Cocktails, Bar Inventory, Calculator, Search, Settings). Highlighted as a green tab in Learn (matches the gold-tab pattern used elsewhere). Optional + dismissible. Skip the per-feature tutorials for V1.1 — once telemetry shows where users drop off, build tutorials targeted at those specific screens. ~3-4h.
+
+### Library + adoption (V1.1 carryovers — most landed in MVP)
+
+- [x] **Library browse UI** (post-onboarding). Shipped as the `cocktails-browse` flow reachable from the Cocktails Add chooser + empty-state CTA. Reuses the onboarding `CocktailPicker` + `MissingIngredientsForm` + adopting loader.
+- [x] **Adopt flow UI**. Adopt flow shipped as part of the post-onboarding browse. User picks recipes → `analyzeRecipe` + `collectMissing` against current inventory → priced via `MissingIngredientsForm` → `adoptLibraryRecipes` writes the cocktails + missing ingredients.
 - [ ] **Page-confusion fix** (deferred until specifics known). Friend testing surfaced confusion between cocktail vs ingredient detail screens. Eyebrow labels ("COCKTAIL" / "INGREDIENT" in distinct colors) added; further fixes pending a clip from another testing session.
 
 ### Polish ideas (defer to feature-list when ready)

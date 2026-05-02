@@ -111,20 +111,13 @@ export default function IngredientSelectorScreen() {
     };
   }, [searchQuery, showDatabase]);
 
+  // Tapping a canonical opens the preview screen first (read-only "is this
+  // the right product?" view); the preview's Save button replaces preview
+  // with the form, so saving the form pops back here for auto-select.
   const goToFormWithCanonical = (product: CanonicalProductSummary) => {
-    const { ingredientType, subType } = mapCanonicalToType(product);
-    const firstSize = product.defaultSizes[0];
     router.push({
-      pathname: '/ingredient-form',
-      params: {
-        canonicalProductId: product.id,
-        name: product.name,
-        description: product.description ?? undefined,
-        abv: product.abv != null ? String(product.abv) : undefined,
-        type: ingredientType,
-        subType: subType || undefined,
-        productSize: firstSize ? JSON.stringify(firstSize) : undefined,
-      },
+      pathname: '/ingredient-preview',
+      params: { canonicalId: product.id },
     });
   };
 

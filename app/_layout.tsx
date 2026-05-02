@@ -241,6 +241,10 @@ function RootLayoutNav() {
             <Stack.Screen name="cocktail-form" options={{ title: '' }} />
             <Stack.Screen name="ingredient-form" options={{ title: '' }} />
             <Stack.Screen name="ingredient-create" options={{ title: 'Add Ingredient' }} />
+            <Stack.Screen name="ingredient-preview" options={{ title: '' }} />
+            <Stack.Screen name="cocktails-browse" options={{ title: 'Browse Library' }} />
+            <Stack.Screen name="cocktails-browse-prices" options={{ title: 'Set Prices', headerShown: false }} />
+            <Stack.Screen name="cocktails-browse-adopting" options={{ headerShown: false }} />
             <Stack.Screen name="wells-setup" options={{ title: 'Manage Wells' }} />
             <Stack.Screen name="ingredient-size-form" options={{ title: '' }} />
             <Stack.Screen name="ingredient-selector" options={{ title: 'Add Ingredients' }} />

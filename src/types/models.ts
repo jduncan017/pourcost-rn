@@ -111,6 +111,17 @@ export interface SavedIngredient {
    *  Drives the education panel on ingredient-detail and unlocks library
    *  recipe matching. Null = user typed the ingredient by hand. */
   canonicalProductId?: string;
+  /** Per-user overrides on canonical-derived fields. Display falls back to
+   *  the linked canonical_products row when the override is null. Surfaced
+   *  via the Detailed-mode toggle on ingredient-form. */
+  brand?: string;
+  origin?: string;
+  flavorNotes?: string[];
+  parentCompany?: string;
+  foundedYear?: number;
+  productionRegion?: string;
+  agingYears?: number;
+  educationData?: Record<string, unknown>;
   /** Additional purchase configurations (different bottle sizes / pack deals).
    *  The default size lives on the row's productSize/productCost. Configurations
    *  hold the SECONDARY sizes only — adding a second config doesn't duplicate

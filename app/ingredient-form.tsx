@@ -15,6 +15,7 @@ import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { useAppStore } from '@/src/stores/app-store';
 import { Ionicons } from '@expo/vector-icons';
 import Toggle from '@/src/components/ui/Toggle';
+import DetailLevelToggle from '@/src/components/ui/DetailLevelToggle';
 import TextInput from '@/src/components/ui/TextInput';
 import type { TextInput as RNTextInput } from 'react-native';
 import GradientBackground from '@/src/components/ui/GradientBackground';
@@ -32,6 +33,10 @@ import {
 } from '@/src/constants/appConstants';
 import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
 import { FeedbackService } from '@/src/services/feedback-service';
+import {
+  getCanonicalProductDetail,
+  type CanonicalProductDetail,
+} from '@/src/lib/canonical-products';
 import { sanitizeName, sanitizeDescription } from '@/src/lib/sanitize';
 
 export default function IngredientFormScreen() {
@@ -124,6 +129,86 @@ export default function IngredientFormScreen() {
 
   const { addIngredient, updateIngredient, deleteIngredient } =
     useIngredientsStore();
+
+  // Override fields — render only in Detailed form mode. All optional;
+  // empty string / null = no override, canonical fallback applies on display.
+  const [brand, setBrand] = useState(liveIngredient?.brand ?? '');
+  const [origin, setOrigin] = useState(liveIngredient?.origin ?? '');
+  const [productionRegion, setProductionRegion] = useState(
+    liveIngredient?.productionRegion ?? '',
+  );
+  const [parentCompany, setParentCompany] = useState(
+    liveIngredient?.parentCompany ?? '',
+  );
+  const [foundedYearText, setFoundedYearText] = useState(
+    liveIngredient?.foundedYear?.toString() ?? '',
+  );
+  const [agingYearsText, setAgingYearsText] = useState(
+    liveIngredient?.agingYears?.toString() ?? '',
+  );
+  const [flavorNotesText, setFlavorNotesText] = useState(
+    (liveIngredient?.flavorNotes ?? []).join(', '),
+  );
+
+  // Form mode local state (independent of the detail-screen detailLevel).
+  // Default to Detailed when there's a canonical link OR any saved override
+  // — those signal the user is working with a database-backed product.
+  const hasAnyOverride =
+    !!liveIngredient?.brand ||
+    !!liveIngredient?.origin ||
+    !!liveIngredient?.productionRegion ||
+    !!liveIngredient?.parentCompany ||
+    liveIngredient?.foundedYear != null ||
+    liveIngredient?.agingYears != null ||
+    (liveIngredient?.flavorNotes && liveIngredient.flavorNotes.length > 0);
+  const [formMode, setFormMode] = useState<'simple' | 'detailed'>(
+    canonicalProductId || hasAnyOverride ? 'detailed' : 'simple',
+  );
+
+  // Fetch the linked canonical so Detailed-mode inputs can prefill with its
+  // values (UX: users see the data is already there). On save we compare each
+  // input back to the canonical — matching values save as undefined (NULL),
+  // so the linking-fallback stays clean and only intentional edits become
+  // overrides in the DB.
+  const canonicalRef = useRef<CanonicalProductDetail | null>(null);
+  // `prefillReady` is state (not a ref) so the dirty-tracking effect below
+  // can wait for prefill to finish before capturing its initial snapshot.
+  // Otherwise canonical-prefill writes count as user changes and pop the
+  // unsaved-changes guard on innocent back-presses.
+  const [prefillReady, setPrefillReady] = useState(!canonicalProductId);
+  useEffect(() => {
+    if (!canonicalProductId || prefillReady) return;
+    let cancelled = false;
+    getCanonicalProductDetail(canonicalProductId).then((c) => {
+      if (cancelled) return;
+      canonicalRef.current = c;
+      if (c) {
+        // Only prefill fields the user hasn't already saved an override for.
+        // Reading liveIngredient gives us the persisted state; if a column is
+        // null there, fall back to canonical for the form display.
+        if (!liveIngredient?.brand && c.brand) setBrand(c.brand);
+        if (!liveIngredient?.origin && c.origin) setOrigin(c.origin);
+        if (!liveIngredient?.productionRegion && c.productionRegion)
+          setProductionRegion(c.productionRegion);
+        if (!liveIngredient?.parentCompany && c.parentCompany)
+          setParentCompany(c.parentCompany);
+        if (liveIngredient?.foundedYear == null && c.foundedYear)
+          setFoundedYearText(String(c.foundedYear));
+        if (liveIngredient?.agingYears == null && c.agingYears != null)
+          setAgingYearsText(String(c.agingYears));
+        if (
+          (!liveIngredient?.flavorNotes || liveIngredient.flavorNotes.length === 0) &&
+          c.flavorNotes.length > 0
+        ) {
+          setFlavorNotesText(c.flavorNotes.join(', '));
+        }
+      }
+      setPrefillReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [canonicalProductId, liveIngredient, prefillReady]);
   const { cocktails } = useCocktailsStore();
   const [isSaving, setIsSaving] = useState(false);
   const [showInUseSheet, setShowInUseSheet] = useState(false);
@@ -139,14 +224,21 @@ export default function IngredientFormScreen() {
   const currentSnapshot = useMemo(
     () => JSON.stringify({
       name, canonicalProductId, forSale, description, retailPriceText, abvText, inputValues,
+      brand, origin, productionRegion, parentCompany, foundedYearText, agingYearsText, flavorNotesText,
     }),
-    [name, canonicalProductId, forSale, description, retailPriceText, abvText, inputValues],
+    [
+      name, canonicalProductId, forSale, description, retailPriceText, abvText, inputValues,
+      brand, origin, productionRegion, parentCompany, foundedYearText, agingYearsText, flavorNotesText,
+    ],
   );
   useEffect(() => {
-    if (initialSnapshotRef.current === null) {
-      initialSnapshotRef.current = currentSnapshot;
-    }
-  }, [currentSnapshot]);
+    if (initialSnapshotRef.current !== null) return;
+    // Wait until canonical-driven prefill has settled (or there's no
+    // canonical to wait for) so the snapshot reflects the user's true
+    // starting state — not the empty-then-prefilled flicker.
+    if (!prefillReady) return;
+    initialSnapshotRef.current = currentSnapshot;
+  }, [currentSnapshot, prefillReady]);
   const isDirty =
     initialSnapshotRef.current !== null &&
     currentSnapshot !== initialSnapshotRef.current;
@@ -171,6 +263,36 @@ export default function IngredientFormScreen() {
     setIsSaving(true);
     try {
       const abvValue = abvText.trim() === '' ? undefined : Number(abvText);
+      const foundedYearValue =
+        foundedYearText.trim() === '' ? undefined : parseInt(foundedYearText, 10);
+      const agingYearsValue =
+        agingYearsText.trim() === '' ? undefined : Number(agingYearsText);
+      const flavorNotesValue = flavorNotesText
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      // When a canonical is linked, compare each override input back to the
+      // canonical's value. If they match, save undefined so the column stays
+      // NULL — display falls back to the canonical and stays in sync if the
+      // canonical is later updated. Only typed-and-different values become
+      // real overrides in the DB.
+      const canonical = canonicalRef.current;
+      const overrideOrUndefined = <T,>(input: T | undefined, canonicalValue: T | null | undefined): T | undefined => {
+        if (input === undefined || input === null) return undefined;
+        if (typeof input === 'string' && input === '') return undefined;
+        if (canonical && input === canonicalValue) return undefined;
+        return input;
+      };
+      const flavorNotesMatchCanonical = (): boolean => {
+        if (!canonical) return false;
+        const cn = canonical.flavorNotes ?? [];
+        if (cn.length !== flavorNotesValue.length) return false;
+        const a = [...cn].map((s) => s.trim().toLowerCase()).sort();
+        const b = [...flavorNotesValue].map((s) => s.trim().toLowerCase()).sort();
+        return a.every((v, i) => v === b[i]);
+      };
+
       const data = {
         name: sanitizeName(name),
         productSize: inputValues.productSize,
@@ -185,6 +307,18 @@ export default function IngredientFormScreen() {
         notForSale: !forSale,
         description: sanitizeDescription(description) || undefined,
         canonicalProductId,
+        // Override fields — undefined whenever input matches canonical OR is
+        // empty, so the column stays NULL and inheritance applies on display.
+        brand: overrideOrUndefined(brand.trim(), canonical?.brand),
+        origin: overrideOrUndefined(origin.trim(), canonical?.origin),
+        productionRegion: overrideOrUndefined(productionRegion.trim(), canonical?.productionRegion),
+        parentCompany: overrideOrUndefined(parentCompany.trim(), canonical?.parentCompany),
+        foundedYear: overrideOrUndefined(foundedYearValue, canonical?.foundedYear),
+        agingYears: overrideOrUndefined(agingYearsValue, canonical?.agingYears),
+        flavorNotes:
+          flavorNotesValue.length === 0 || flavorNotesMatchCanonical()
+            ? undefined
+            : flavorNotesValue,
       };
 
       if (isEditing) {
@@ -267,6 +401,18 @@ export default function IngredientFormScreen() {
           pointerEvents={isSaving ? 'none' : 'auto'}
         >
           <View className="px-6 pt-4 pb-6 flex-col gap-8">
+            {/* Form mode toggle — Simple keeps the form short; Detailed
+                exposes override fields (brand, origin, flavor notes, etc.)
+                that live alongside the linked canonical product. */}
+            <View className="flex-row justify-center">
+              <DetailLevelToggle
+                simpleLabel="SIMPLE"
+                detailedLabel="DETAILED"
+                value={formMode}
+                onChange={(v) => setFormMode(v)}
+              />
+            </View>
+
             {/* Identity — Name, Description, ABV, For Sale.
                 Catalog search lives on the dedicated /ingredient-create
                 picker that routes here with prefill params (or empty for
@@ -285,14 +431,6 @@ export default function IngredientFormScreen() {
                 returnKeyType="next"
                 onSubmitEditing={() => abvInputRef.current?.focus()}
                 blurOnSubmit={false}
-              />
-
-              <TextInput
-                label="Description"
-                value={description}
-                onChangeText={setDescription}
-                placeholder="Brief description..."
-                multiline
               />
 
               <TextInput
@@ -326,6 +464,90 @@ export default function IngredientFormScreen() {
                 }
               />
             </View>
+
+            {/* Detailed-mode fields — per-ingredient overrides for the
+                canonical-style identity attributes. Empty values keep the
+                canonical fallback in place; typed values override on display. */}
+            {formMode === 'detailed' && (
+              <View className="flex-col gap-5">
+                <Text
+                  className="text-[11px] tracking-widest uppercase"
+                  style={{ color: colors.textTertiary, fontWeight: '600' }}
+                >
+                  Identity Details
+                </Text>
+
+                <TextInput
+                  label="Brand"
+                  value={brand}
+                  onChangeText={setBrand}
+                  placeholder="e.g., Tito's"
+                  autoCapitalize="words"
+                />
+
+                <TextInput
+                  label="Description"
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder="Brief description…"
+                  multiline
+                />
+
+                <TextInput
+                  label="Origin"
+                  value={origin}
+                  onChangeText={setOrigin}
+                  placeholder="e.g., Austin, TX, USA"
+                  autoCapitalize="words"
+                />
+
+                <TextInput
+                  label="Production Region"
+                  value={productionRegion}
+                  onChangeText={setProductionRegion}
+                  placeholder="e.g., Cognac, France"
+                  autoCapitalize="words"
+                />
+
+                <TextInput
+                  label="Parent Company"
+                  value={parentCompany}
+                  onChangeText={setParentCompany}
+                  placeholder="e.g., Diageo"
+                  autoCapitalize="words"
+                />
+
+                <View className="flex-row gap-3">
+                  <View className="flex-1">
+                    <TextInput
+                      label="Founded"
+                      value={foundedYearText}
+                      onChangeText={(t) => setFoundedYearText(t.replace(/[^0-9]/g, ''))}
+                      placeholder="e.g., 1997"
+                      keyboardType="number-pad"
+                      maxLength={4}
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <TextInput
+                      label="Aging (years)"
+                      value={agingYearsText}
+                      onChangeText={(t) => setAgingYearsText(t.replace(/[^0-9.]/g, ''))}
+                      placeholder="e.g., 12"
+                      keyboardType="decimal-pad"
+                    />
+                  </View>
+                </View>
+
+                <TextInput
+                  label="Flavor Notes (comma-separated)"
+                  value={flavorNotesText}
+                  onChangeText={setFlavorNotesText}
+                  placeholder="e.g., clean, peppery, citrus"
+                  autoCapitalize="none"
+                />
+              </View>
+            )}
 
             {/* Details — type chips, subtype, pour size.
                 Edit mode hides product size + cost (those live in the Sizes section).

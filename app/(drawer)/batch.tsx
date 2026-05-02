@@ -1,4 +1,4 @@
-import { useState, useMemo, useLayoutEffect } from 'react';
+import { useEffect, useState, useMemo, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -187,6 +187,21 @@ export default function BatchScreen() {
   const [customIngredients, setCustomIngredients] = useState<
     CustomIngredient[]
   >([]);
+
+  // When the user flips to Custom mode and there are no rows yet, seed one
+  // empty row so they can start typing immediately. The first row gets
+  // autoFocus on mount, opening the keyboard right away.
+  useEffect(() => {
+    if (mode === 'custom' && customIngredients.length === 0) {
+      setCustomIngredients([
+        {
+          id: Math.random().toString(36).slice(2),
+          name: '',
+          pourVolume: { kind: 'fractionalOunces', numerator: 3, denominator: 2 },
+        },
+      ]);
+    }
+  }, [mode, customIngredients.length]);
   const [quantityText, setQuantityText] = useState('10');
   const [preDilute, setPreDilute] = useState(false);
   const [roundToQuarter, setRoundToQuarter] = useState(true);
@@ -287,7 +302,7 @@ export default function BatchScreen() {
           <View className="px-6 pt-4 flex-col gap-6">
             {/* Mode toggle */}
             <View
-              className="flex-row rounded-full self-start p-0.5"
+              className="flex-row rounded-full self-center p-0.5"
               style={{
                 backgroundColor: colors.inputBg,
                 borderWidth: 1,
@@ -330,6 +345,7 @@ export default function BatchScreen() {
                   placeholder="Search your cocktails..."
                   value={searchQuery}
                   onChangeText={setSearchQuery}
+                  autoFocus
                 />
                 {filteredCocktails.length > 0 ? (
                   <View>
@@ -403,34 +419,31 @@ export default function BatchScreen() {
               <View className="flex-col gap-3">
                 <ScreenTitle title="Ingredients" variant="muted" />
 
-                {customIngredients.length === 0 ? (
-                  <Text
-                    className="text-sm py-4"
-                    style={{ color: colors.textTertiary }}
+                {customIngredients.map((ci, idx) => (
+                  <View
+                    key={ci.id}
+                    className="flex-col gap-2 py-3"
+                    style={{
+                      borderTopWidth: idx > 0 ? 1 : 0,
+                      borderTopColor: colors.borderSubtle,
+                    }}
                   >
-                    Tap "Add Ingredient" below to start building.
-                  </Text>
-                ) : (
-                  customIngredients.map((ci, idx) => (
-                    <View
-                      key={ci.id}
-                      className="flex-col gap-2 py-3"
-                      style={{
-                        borderTopWidth: idx > 0 ? 1 : 0,
-                        borderTopColor: colors.borderSubtle,
-                      }}
-                    >
-                      <View className="flex-row items-center gap-2">
-                        <View className="flex-1">
-                          <TextInput
-                            label=""
-                            value={ci.name}
-                            onChangeText={(t) =>
-                              handleUpdateCustomName(ci.id, t)
-                            }
-                            placeholder="e.g., Rye Whiskey"
-                          />
-                        </View>
+                    <View className="flex-row items-center gap-2">
+                      <View className="flex-1">
+                        <TextInput
+                          label=""
+                          value={ci.name}
+                          onChangeText={(t) =>
+                            handleUpdateCustomName(ci.id, t)
+                          }
+                          placeholder="e.g., Rye Whiskey"
+                          autoFocus={idx === 0}
+                        />
+                      </View>
+                      {/* Trash hidden on the first row — there's always at
+                          least one ingredient, so the first one isn't
+                          deletable. Adding more rows reveals the trash. */}
+                      {idx > 0 && (
                         <Pressable
                           onPress={() => handleRemoveCustomIngredient(ci.id)}
                           hitSlop={8}
@@ -442,14 +455,14 @@ export default function BatchScreen() {
                             color={colors.error}
                           />
                         </Pressable>
-                      </View>
-                      <PourSizePicker
-                        value={ci.pourVolume}
-                        onChange={(v) => handleUpdateCustomVolume(ci.id, v)}
-                      />
+                      )}
                     </View>
-                  ))
-                )}
+                    <PourSizePicker
+                      value={ci.pourVolume}
+                      onChange={(v) => handleUpdateCustomVolume(ci.id, v)}
+                    />
+                  </View>
+                ))}
 
                 <Pressable
                   onPress={handleAddCustomIngredient}

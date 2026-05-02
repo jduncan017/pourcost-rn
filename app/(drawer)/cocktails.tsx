@@ -23,6 +23,7 @@ import { useThemeColors } from '@/src/contexts/ThemeContext';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SkeletonLoader from '@/src/components/ui/SkeletonLoader';
 import SelectionActionBar from '@/src/components/ui/SelectionActionBar';
+import ActionSheet from '@/src/components/ui/ActionSheet';
 
 /**
  * Cocktails management screen
@@ -92,8 +93,17 @@ export default function CocktailsScreen() {
     });
   };
 
-  // Handle add new cocktail
+  // Add chooser — taps the Add button to open a sheet with two paths:
+  // browse the curated library (auto-adopts recipes + missing ingredients)
+  // or start a blank recipe.
+  const [showAddChooser, setShowAddChooser] = useState(false);
   const handleAddCocktail = () => {
+    setShowAddChooser(true);
+  };
+  const handleBrowseLibrary = () => {
+    router.push('/cocktails-browse' as any);
+  };
+  const handleCreateFromScratch = () => {
     router.push('/cocktail-form');
   };
 
@@ -310,13 +320,31 @@ export default function CocktailsScreen() {
               ? `No cocktails in ${selectedCategory} category`
               : inventoryEmpty
                 ? 'Cocktails need ingredients. Set up your wells in 60 seconds, then come back to build your first recipe.'
-                : 'Create your first cocktail recipe to get started.'
+                : "Browse classic recipes to get started, or build your own from scratch."
         }
-        actionLabel={inventoryEmpty ? 'Set Up Wells' : 'Create Cocktail'}
-        onAction={inventoryEmpty ? () => router.push('/wells-setup' as any) : handleAddCocktail}
+        actionLabel={
+          hasFilter
+            ? 'Create Cocktail'
+            : inventoryEmpty
+              ? 'Set Up Wells'
+              : 'Browse Classics'
+        }
+        onAction={
+          hasFilter
+            ? handleCreateFromScratch
+            : inventoryEmpty
+              ? () => router.push('/wells-setup' as any)
+              : handleBrowseLibrary
+        }
+        secondaryActionLabel={
+          !hasFilter && !inventoryEmpty ? 'Create From Scratch' : undefined
+        }
+        onSecondaryAction={
+          !hasFilter && !inventoryEmpty ? handleCreateFromScratch : undefined
+        }
       />
     );
-  }, [isLoading, searchQuery, selectedCategory, ingredientCount, handleAddCocktail, router]);
+  }, [isLoading, searchQuery, selectedCategory, ingredientCount, router]);
 
   return (
     <GradientBackground>
@@ -353,6 +381,24 @@ export default function CocktailsScreen() {
           onDelete={handleBulkDelete}
         />
       )}
+
+      <ActionSheet
+        visible={showAddChooser}
+        onClose={() => setShowAddChooser(false)}
+        title="Add Cocktail"
+        actions={[
+          {
+            label: 'Browse Classics',
+            icon: 'library-outline',
+            onPress: handleBrowseLibrary,
+          },
+          {
+            label: 'Create From Scratch',
+            icon: 'create-outline',
+            onPress: handleCreateFromScratch,
+          },
+        ]}
+      />
     </GradientBackground>
   );
 }

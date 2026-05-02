@@ -12,9 +12,23 @@ interface EducationPanelProps {
    *  the panel renders nothing — caller can decide whether to prompt the
    *  user to relink via the form. */
   canonicalProductId?: string;
+  /** Optional per-ingredient overrides. When present, these take precedence
+   *  over the canonical's values. Lets a user customize brand / flavor notes
+   *  for their specific bottle without forking the canonical. */
+  overrides?: {
+    description?: string;
+    brand?: string;
+    origin?: string;
+    flavorNotes?: string[];
+    parentCompany?: string;
+    foundedYear?: number;
+    productionRegion?: string;
+    agingYears?: number;
+    educationData?: Record<string, unknown>;
+  };
 }
 
-export default function EducationPanel({ canonicalProductId }: EducationPanelProps) {
+export default function EducationPanel({ canonicalProductId, overrides }: EducationPanelProps) {
   const colors = useThemeColors();
   const [detail, setDetail] = useState<CanonicalProductDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,9 +51,36 @@ export default function EducationPanel({ canonicalProductId }: EducationPanelPro
     };
   }, [canonicalProductId]);
 
-  if (!canonicalProductId) return null;
+  // Resolve display values — override wins, canonical fallback. Allows the
+  // panel to render with overrides alone (no canonical link) for fully
+  // user-typed ingredients that still want education-style metadata.
+  const description = overrides?.description ?? detail?.description ?? null;
+  const brand = overrides?.brand ?? detail?.brand ?? null;
+  const origin = overrides?.origin ?? detail?.origin ?? null;
+  const productionRegion = overrides?.productionRegion ?? detail?.productionRegion ?? null;
+  const foundedYear = overrides?.foundedYear ?? detail?.foundedYear ?? null;
+  const parentCompany = overrides?.parentCompany ?? detail?.parentCompany ?? null;
+  const agingYears = overrides?.agingYears ?? detail?.agingYears ?? null;
+  const flavorNotes =
+    overrides?.flavorNotes && overrides.flavorNotes.length > 0
+      ? overrides.flavorNotes
+      : detail?.flavorNotes ?? [];
+  const educationData = overrides?.educationData ?? detail?.educationData ?? {};
 
-  if (loading) {
+  const hasAnyContent =
+    !!description ||
+    !!brand ||
+    !!origin ||
+    !!productionRegion ||
+    foundedYear != null ||
+    !!parentCompany ||
+    agingYears != null ||
+    flavorNotes.length > 0 ||
+    Object.keys(educationData).length > 0;
+
+  if (!canonicalProductId && !hasAnyContent) return null;
+
+  if (loading && !overrides) {
     return (
       <View className="EducationPanel px-6 flex-row items-center gap-2">
         <ActivityIndicator size="small" color={colors.textSecondary} />
@@ -50,42 +91,39 @@ export default function EducationPanel({ canonicalProductId }: EducationPanelPro
     );
   }
 
-  if (!detail) return null;
-
-  const educationData = detail.educationData ?? {};
-  const isPending = detail.enrichmentStatus === 'pending';
+  if (!hasAnyContent) return null;
 
   return (
     <View className="EducationPanel px-6 flex-col gap-4">
       <ScreenTitle title="About" variant="muted" className="mb-1" />
 
-      {detail.description ? (
+      {description ? (
         <Text className="text-base leading-6" style={{ color: colors.textSecondary }}>
-          {detail.description}
+          {description}
         </Text>
       ) : null}
 
       {/* Identity facts row — origin, region, parent company. Wraps. */}
       <View className="flex-row flex-wrap gap-2">
-        {detail.brand ? (
-          <FactChip label="Brand" value={detail.brand} colors={colors} />
+        {brand ? (
+          <FactChip label="Brand" value={brand} colors={colors} />
         ) : null}
-        {detail.origin ? (
-          <FactChip label="Origin" value={detail.origin} colors={colors} />
+        {origin ? (
+          <FactChip label="Origin" value={origin} colors={colors} />
         ) : null}
-        {detail.productionRegion ? (
-          <FactChip label="Region" value={detail.productionRegion} colors={colors} />
+        {productionRegion ? (
+          <FactChip label="Region" value={productionRegion} colors={colors} />
         ) : null}
-        {detail.foundedYear ? (
-          <FactChip label="Founded" value={String(detail.foundedYear)} colors={colors} />
+        {foundedYear ? (
+          <FactChip label="Founded" value={String(foundedYear)} colors={colors} />
         ) : null}
-        {detail.parentCompany ? (
-          <FactChip label="Owner" value={detail.parentCompany} colors={colors} />
+        {parentCompany ? (
+          <FactChip label="Owner" value={parentCompany} colors={colors} />
         ) : null}
-        {detail.agingYears != null ? (
+        {agingYears != null ? (
           <FactChip
             label="Aging"
-            value={`${detail.agingYears} year${detail.agingYears === 1 ? '' : 's'}`}
+            value={`${agingYears} year${agingYears === 1 ? '' : 's'}`}
             colors={colors}
           />
         ) : null}
@@ -93,11 +131,11 @@ export default function EducationPanel({ canonicalProductId }: EducationPanelPro
 
       {/* Flavor notes — same header treatment as the About title via
           ScreenTitle so the section hierarchy reads consistently. */}
-      {detail.flavorNotes.length > 0 ? (
+      {flavorNotes.length > 0 ? (
         <View className="flex-col gap-2">
           <ScreenTitle title="Flavor Notes" variant="muted" />
           <View className="flex-row flex-wrap gap-2">
-            {detail.flavorNotes.map((note) => (
+            {flavorNotes.map((note) => (
               <View
                 key={note}
                 className="rounded-full px-3 py-1.5"

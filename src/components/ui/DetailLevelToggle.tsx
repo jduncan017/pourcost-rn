@@ -8,26 +8,34 @@ interface DetailLevelToggleProps {
   simpleLabel?: string;
   /** Label for the "detailed" detailLevel value. Defaults to NUMBERS. */
   detailedLabel?: string;
+  /** When provided, the toggle becomes controlled — uses these instead of
+   *  the global detailLevel store. Used by ingredient-form so the form's
+   *  Simple/Detailed mode is local, not tied to the detail-screen toggle. */
+  value?: DetailLevel;
+  onChange?: (next: DetailLevel) => void;
   className?: string;
 }
 
 /**
- * Two-state pill toggle controlling the global `detailLevel`. Same shared
- * state is used across detail pages, but labels differ per surface:
- *   - Ingredient detail uses INFO / NUMBERS
- *   - Cocktail detail uses SPECS / NUMBERS
- *
- * The underlying enum values stay 'simple' / 'detailed' (semantic ≈ info /
- * numbers) — labels are cosmetic per page.
+ * Two-state pill toggle. Defaults to the global `detailLevel` store but
+ * accepts controlled props for screens that want local state (forms).
+ * Labels differ per surface:
+ *   - Ingredient detail: INFO / NUMBERS
+ *   - Cocktail detail: SPECS / NUMBERS
+ *   - Ingredient form: SIMPLE / DETAILED
  */
 export default function DetailLevelToggle({
   simpleLabel = 'INFO',
   detailedLabel = 'NUMBERS',
+  value,
+  onChange,
   className = '',
 }: DetailLevelToggleProps) {
   const colors = useThemeColors();
-  const detailLevel = useAppStore((s) => s.detailLevel);
-  const setDetailLevel = useAppStore((s) => s.setDetailLevel);
+  const globalDetailLevel = useAppStore((s) => s.detailLevel);
+  const setGlobalDetailLevel = useAppStore((s) => s.setDetailLevel);
+  const detailLevel = value ?? globalDetailLevel;
+  const setDetailLevel = onChange ?? setGlobalDetailLevel;
 
   const options: { value: DetailLevel; label: string }[] = [
     { value: 'simple', label: simpleLabel },

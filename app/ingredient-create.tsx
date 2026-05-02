@@ -92,24 +92,13 @@ export default function IngredientCreateScreen() {
     };
   }, [query]);
 
-  // router.replace removes this picker screen from the stack, so when the
-  // form's save handler calls router.back() it returns to the screen that
-  // launched the picker (drawer or cocktail-selector), not back here.
+  // router.replace swaps this picker out for the preview-detail screen.
+  // Preview's Save then replaces with the form; saving the form pops the
+  // user back to the drawer (whoever launched the picker), not back here.
   const goToFormWithCanonical = (product: CanonicalProductSummary) => {
-    const { ingredientType, subType } = mapCanonicalToType(product);
-    const firstSize = product.defaultSizes[0];
-
     router.replace({
-      pathname: '/ingredient-form',
-      params: {
-        canonicalProductId: product.id,
-        name: product.name,
-        description: product.description ?? undefined,
-        abv: product.abv != null ? String(product.abv) : undefined,
-        type: ingredientType,
-        subType: subType || undefined,
-        productSize: firstSize ? JSON.stringify(firstSize) : undefined,
-      },
+      pathname: '/ingredient-preview',
+      params: { canonicalId: product.id },
     });
   };
 
