@@ -27,6 +27,7 @@ import { useAppStore } from '@/src/stores/app-store';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { supabase } from '@/src/lib/supabase';
 import { updateInvoiceStatus } from '@/src/lib/invoice-data';
+import { useHeroTargetForIngredient } from '@/src/lib/useHeroTarget';
 import { FeedbackService } from '@/src/services/feedback-service';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import TextInput from '@/src/components/ui/TextInput';
@@ -73,7 +74,7 @@ export default function InvoiceIngredientSetupScreen() {
   const navigation = useNavigation();
   const colors = useThemeColors();
   const { addIngredient } = useIngredientsStore();
-  const { defaultPourSize, pourCostGoal } = useAppStore();
+  const { defaultPourSize } = useAppStore();
 
   const params = useLocalSearchParams<{ invoiceId: string; items: string }>();
   const invoiceId = params.invoiceId;
@@ -147,7 +148,11 @@ export default function InvoiceIngredientSetupScreen() {
   const costPerOz = calculateCostPerOz(item.volume, item.perBottlePrice);
   const costPerPour = calculateCostPerPour(item.volume, item.perBottlePrice, pourSizeVolume);
   const pourCostPercentage = retailPrice > 0 ? (costPerPour / retailPrice) * 100 : 0;
-  const suggestedRetail = calculateSuggestedPrice(costPerPour, 0.2);
+  const { targetGoal: targetPct, targetLabel } = useHeroTargetForIngredient({
+    type: ingredientType,
+    productCost: item.perBottlePrice,
+  });
+  const suggestedRetail = calculateSuggestedPrice(costPerPour, targetPct / 100);
   const pourCostMargin = retailPrice - costPerPour;
 
   const subtypes = SUBTYPES_BY_TYPE[ingredientType] ?? [];
@@ -333,7 +338,11 @@ export default function InvoiceIngredientSetupScreen() {
 
               {/* Bleed Hero to card edges — Hero paints its own top/bottom hairlines. */}
               <View className="-mx-6">
-                <PourCostHero pourCostPercentage={pourCostPercentage} />
+                <PourCostHero
+                  pourCostPercentage={pourCostPercentage}
+                  targetGoal={targetPct}
+                  targetLabel={targetLabel ?? undefined}
+                />
               </View>
 
               <Text className="text-lg mb-2" style={{ color: colors.textSecondary, fontWeight: '500' }}>

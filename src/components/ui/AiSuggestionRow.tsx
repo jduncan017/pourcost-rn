@@ -52,24 +52,26 @@ export default function AiSuggestionRow({
         start={{ x: 1, y: 1 }}
         end={{ x: 0, y: 0 }}
       >
-        <View className="flex-row justify-between items-center p-4 gap-3">
-          <View className="flex-row items-center gap-2 flex-1">
+        <View className="flex-row items-center p-4 gap-3 flex-1 justify-between">
+          <View className="flex-row items-center gap-2">
             <Ionicons name="sparkles" size={16} color={palette.P2} />
             <Text
               className="text-base"
               style={{ color: palette.P2, fontWeight: '500' }}
               numberOfLines={1}
             >
-              {label}
+              {`${label}  -`}
             </Text>
-            {infoTermKey && <InfoIcon termKey={infoTermKey} size={13} color={palette.P2} />}
+            <Text
+              className="text-base"
+              style={{ color: palette.P2, fontWeight: '700' }}
+            >
+              {value}
+            </Text>
+            {infoTermKey && (
+              <InfoIcon termKey={infoTermKey} size={18} color={palette.P2} />
+            )}
           </View>
-          <Text
-            className="text-base"
-            style={{ color: palette.P2, fontWeight: '700' }}
-          >
-            {value}
-          </Text>
           {onApply && (
             <Pressable
               onPress={() => {
@@ -78,13 +80,15 @@ export default function AiSuggestionRow({
                 onApply();
               }}
               disabled={applyDisabled}
-              className="px-3 py-1.5 rounded-full"
+              className="px-5 py-1.5 rounded-md"
               style={{
-                backgroundColor: palette.P2,
+                backgroundColor: palette.P4,
                 opacity: applyDisabled ? 0.4 : 1,
               }}
             >
-              <Text style={{ color: palette.N1, fontSize: 13, fontWeight: '600' }}>
+              <Text
+                style={{ color: palette.N1, fontSize: 13, fontWeight: '600' }}
+              >
                 Apply
               </Text>
             </Pressable>

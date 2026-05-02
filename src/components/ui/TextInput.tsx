@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Ref, useState } from 'react';
 import {
   View,
   Text,
@@ -17,6 +17,10 @@ interface CustomTextInputProps extends Omit<TextInputProps, 'style'> {
   containerClassName?: string;
   inputClassName?: string;
   required?: boolean;
+  /** Forwarded to the underlying RN TextInput. React 19 ref-as-prop pattern —
+   *  no forwardRef needed and avoids the NativeWind cssInterop incompatibility
+   *  with ForwardRefExoticComponent objects. */
+  ref?: Ref<RNTextInput>;
 }
 
 export default function TextInput({
@@ -28,6 +32,7 @@ export default function TextInput({
   inputClassName = '',
   required = false,
   secureTextEntry,
+  ref,
   ...textInputProps
 }: CustomTextInputProps) {
   const colors = useThemeColors();
@@ -72,6 +77,7 @@ export default function TextInput({
         )}
 
         <RNTextInput
+          ref={ref}
           className={`flex-1 ${inputClassName}`}
           placeholderTextColor={colors.textMuted}
           secureTextEntry={effectiveSecure}

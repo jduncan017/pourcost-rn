@@ -57,7 +57,7 @@ export const EmptyIngredients = ({ onAdd }: { onAdd?: () => void }) => (
   <EmptyState
     icon="wine-outline"
     title="No Ingredients Yet"
-    description="Start by adding your first ingredient to calculate cocktail costs and build out My Inventory."
+    description="Start by adding your first ingredient to calculate cocktail costs and build out your Bar Inventory."
     actionLabel="Add Ingredient"
     onAction={onAdd}
   />

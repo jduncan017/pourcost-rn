@@ -14,7 +14,7 @@ import ActionSheet from '@/src/components/ui/ActionSheet';
 import StatCard from '@/src/components/ui/StatCard';
 import DetailLevelToggle from '@/src/components/ui/DetailLevelToggle';
 import PourCostHero, { getPerformance } from '@/src/components/PourCostHero';
-import { getTargetForIngredient } from '@/src/lib/pour-cost-tiers';
+import { useHeroTargetForIngredient } from '@/src/lib/useHeroTarget';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import Dropdown from '@/src/components/ui/Dropdown';
 import IngredientInUseSheet from '@/src/components/ui/IngredientInUseSheet';
@@ -101,14 +101,9 @@ export default function IngredientDetailScreen() {
   const {
     defaultPourSize,
     defaultRetailPrice,
-    pourCostGoal,
-    beerPourCostGoal,
-    winePourCostGoal,
     detailLevel,
     suggestedPriceRounding,
     minIngredientPrice,
-    proModeEnabled,
-    pourCostTiers,
   } = useAppStore();
   const router = useGuardedRouter();
   const navigation = useNavigation();
@@ -193,18 +188,12 @@ export default function IngredientDetailScreen() {
     effectivePourSize,
     effectiveRetailPrice
   );
-  // Type-aware target: spirits use the tier ladder, beer + wine use their
-  // own bar-wide goals, everything else falls back to the cocktail goal.
-  const tieredTarget = getTargetForIngredient(
-    { type: viewIngredient.type, productCost: Number(viewIngredient.productCost) || 0 },
-    {
-      pourCostGoal,
-      beerPourCostGoal,
-      winePourCostGoal,
-      pourCostTiers,
-      proModeEnabled,
-    },
-  );
+  // Tier + pricing-mode-aware target. Free mode = bar-wide goal, no label.
+  // Pro mode = tier ladder for spirits + per-category goals + tier label.
+  const { targetGoal: tieredTarget, targetLabel } = useHeroTargetForIngredient({
+    type: viewIngredient.type,
+    productCost: Number(viewIngredient.productCost) || 0,
+  });
   const suggestedRetail = applyPriceFloor(
     roundSuggestedPrice(
       calculateSuggestedPrice(metrics.costPerPour, tieredTarget / 100),
@@ -214,11 +203,14 @@ export default function IngredientDetailScreen() {
   );
   // Mirror cocktail-detail: only surface a Suggested Retail row when the
   // current pour cost is outside the target band. On-target = no noise.
-  const ingredientPerformanceLabel =
+  const ingredientPerf =
     tieredTarget > 0 && metrics.pourCostPercentage > 0
-      ? getPerformance(metrics.pourCostPercentage / tieredTarget).label
-      : 'On Target';
-  const isOnTarget = ingredientPerformanceLabel === 'On Target';
+      ? getPerformance(
+          metrics.pourCostPercentage / tieredTarget,
+          metrics.pourCostPercentage - tieredTarget,
+        )
+      : { tier: 'onTarget' as const, label: 'On Target' };
+  const isOnTarget = ingredientPerf.tier === 'onTarget';
   const hasMultipleSizes = sizeOptions.length > 1;
 
   const handleEdit = () => {
@@ -440,6 +432,7 @@ export default function IngredientDetailScreen() {
                 <PourCostHero
                   pourCostPercentage={metrics.pourCostPercentage}
                   targetGoal={tieredTarget}
+                  targetLabel={targetLabel ?? undefined}
                 />
               )}
 

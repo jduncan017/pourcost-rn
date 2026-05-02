@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -16,8 +16,10 @@ import { useAppStore } from '@/src/stores/app-store';
 import { Ionicons } from '@expo/vector-icons';
 import Toggle from '@/src/components/ui/Toggle';
 import TextInput from '@/src/components/ui/TextInput';
+import type { TextInput as RNTextInput } from 'react-native';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import HeaderSavePill from '@/src/components/ui/HeaderSavePill';
+import FormSaveBar from '@/src/components/ui/FormSaveBar';
+import { useUnsavedChangesGuard } from '@/src/lib/useUnsavedChangesGuard';
 import IngredientInUseSheet from '@/src/components/ui/IngredientInUseSheet';
 import IngredientInputs, {
   IngredientInputValues,
@@ -127,6 +129,29 @@ export default function IngredientFormScreen() {
   const [showInUseSheet, setShowInUseSheet] = useState(false);
   const saveRef = useRef<() => void>(() => {});
 
+  // Refs for the keyboard "Next" chain. Description is multiline (return =
+  // newline) and ABV/Retail are decimal-pad (no return key), so the realistic
+  // chain is just Name → ABV. Description gets filled later or via tap.
+  const abvInputRef = useRef<RNTextInput>(null);
+
+  // Dirty tracking — capture initial form state once, compare on every render.
+  const initialSnapshotRef = useRef<string | null>(null);
+  const currentSnapshot = useMemo(
+    () => JSON.stringify({
+      name, canonicalProductId, forSale, description, retailPriceText, abvText, inputValues,
+    }),
+    [name, canonicalProductId, forSale, description, retailPriceText, abvText, inputValues],
+  );
+  useEffect(() => {
+    if (initialSnapshotRef.current === null) {
+      initialSnapshotRef.current = currentSnapshot;
+    }
+  }, [currentSnapshot]);
+  const isDirty =
+    initialSnapshotRef.current !== null &&
+    currentSnapshot !== initialSnapshotRef.current;
+  const guard = useUnsavedChangesGuard(isDirty);
+
   // Cocktails that reference this ingredient — blocks deletion when non-empty.
   const affectedCocktails = isEditing
     ? cocktails.filter((c) =>
@@ -167,6 +192,7 @@ export default function IngredientFormScreen() {
       } else {
         await addIngredient(data);
       }
+      guard.bypass();
       router.back();
     } catch (error) {
       Alert.alert(
@@ -187,6 +213,7 @@ export default function IngredientFormScreen() {
       name,
       async () => {
         await deleteIngredient(ingredientId);
+        guard.bypass();
         router.back();
       },
       'ingredient'
@@ -217,15 +244,8 @@ export default function IngredientFormScreen() {
           </Text>
         </Pressable>
       ),
-      headerRight: () => (
-        <HeaderSavePill
-          onPress={() => saveRef.current()}
-          disabled={!isValid || isSaving}
-          isSaving={isSaving}
-        />
-      ),
     });
-  }, [isEditing, navigation, colors, isValid, isSaving]);
+  }, [isEditing, navigation, colors]);
 
   return (
     <GradientBackground>
@@ -261,6 +281,10 @@ export default function IngredientFormScreen() {
                 }}
                 placeholder="e.g., Vodka (Premium), Simple Syrup"
                 autoCapitalize="words"
+                autoFocus={!isEditing}
+                returnKeyType="next"
+                onSubmitEditing={() => abvInputRef.current?.focus()}
+                blurOnSubmit={false}
               />
 
               <TextInput
@@ -272,6 +296,7 @@ export default function IngredientFormScreen() {
               />
 
               <TextInput
+                ref={abvInputRef}
                 label="ABV %"
                 value={abvText}
                 onChangeText={(text) => {
@@ -407,6 +432,12 @@ export default function IngredientFormScreen() {
                 </Pressable>
               </View>
             )}
+
+            <FormSaveBar
+              onPress={() => saveRef.current()}
+              disabled={!isValid || isSaving}
+              isSaving={isSaving}
+            />
 
             {/* Delete button (edit mode only) */}
             {isEditing && (

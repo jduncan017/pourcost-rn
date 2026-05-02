@@ -15,6 +15,7 @@ import Card from '@/src/components/ui/Card';
 import TextInput from '@/src/components/ui/TextInput';
 import Dropdown from '@/src/components/ui/Dropdown';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useAppStore } from '@/src/stores/app-store';
 import {
   INGREDIENT_TYPES,
   SUBTYPES_BY_TYPE,
@@ -99,12 +100,14 @@ export default function IngredientInputs({
 }: IngredientInputsProps) {
   const colors = useThemeColors();
   const router = useRouter();
+  const enabledProductSizes = useAppStore((s) => s.enabledProductSizes);
 
   const {
     ingredientType, subType, productSize, productCost,
     pourSize, retailPrice, pourCostPct, notForSale,
     garnishAmount, garnishUnit, servingAmount,
   } = values;
+  const currentSizeLabel = volumeLabel(productSize);
 
   // Local text state for numeric inputs
   const [productCostText, setProductCostText] = useState(productCost.toString());
@@ -184,7 +187,7 @@ export default function IngredientInputs({
   };
 
   const handleProductSizeChange = (selectedLabel: string) => {
-    const match = getProductSizesForType(ingredientType, subType || undefined)
+    const match = getProductSizesForType(ingredientType, subType || undefined, enabledProductSizes, currentSizeLabel)
       .find(s => volumeLabel(s) === selectedLabel);
     if (match) {
       const chips = getPourChipsForContext(ingredientType, match);
@@ -197,7 +200,7 @@ export default function IngredientInputs({
     }
   };
 
-  const productSizeOptions = getProductSizesForType(ingredientType, subType || undefined).map((size) => ({
+  const productSizeOptions = getProductSizesForType(ingredientType, subType || undefined, enabledProductSizes, currentSizeLabel).map((size) => ({
     value: volumeLabel(size),
     label: volumeLabel(size),
     section: getProductSizeSection(size),
@@ -409,7 +412,7 @@ export default function IngredientInputs({
                       hitSlop={6}
                     >
                       <Text style={{ color: colors.accent, fontSize: 12, fontWeight: '600' }}>
-                        Reset to default
+                        Reset To Default
                       </Text>
                     </Pressable>
                   )}

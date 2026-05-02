@@ -6,6 +6,7 @@ import { fetchProfile } from '@/src/lib/supabase-data';
 import { updateProfile } from '@/src/lib/supabase-writes';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { PourCostTier, DEFAULT_TIERS } from '@/src/lib/pour-cost-tiers';
+import { DEFAULT_ENABLED_PRODUCT_SIZE_LABELS } from '@/src/constants/appConstants';
 
 // ==========================================
 // TYPES
@@ -46,7 +47,7 @@ interface AppState {
   isFirstLaunch: boolean;
   isLoading: boolean;
   lastSyncDate: Date | null;
-  enabledProductSizes: string[]; // Volume labels of enabled container sizes (empty = all enabled)
+  enabledProductSizes: string[]; // Volume labels of enabled container sizes
 
   /** Pro Mode unlocks custom pour-cost tiers. Currently admin-gated for
    *  testing; will become a paid feature post-launch. */
@@ -115,7 +116,7 @@ export const useAppStore = create<AppState>()(
       isFirstLaunch: true,
       isLoading: false,
       lastSyncDate: null,
-      enabledProductSizes: [], // empty = all enabled
+      enabledProductSizes: DEFAULT_ENABLED_PRODUCT_SIZE_LABELS,
       proModeEnabled: false,
       pourCostTiers: DEFAULT_TIERS,
 
@@ -196,7 +197,13 @@ export const useAppStore = create<AppState>()(
             themeMode: profile.themeMode,
             displayName: profile.displayName,
             defaultLandingScreen: profile.defaultLandingScreen,
-            enabledProductSizes: profile.enabledProductSizes ?? [],
+            // Profiles persisted before the curated default landed have
+            // either an empty array or the legacy "all enabled" sentinel —
+            // give them the curated set so dropdowns aren't empty.
+            enabledProductSizes:
+              profile.enabledProductSizes && profile.enabledProductSizes.length > 0
+                ? profile.enabledProductSizes
+                : DEFAULT_ENABLED_PRODUCT_SIZE_LABELS,
             lastSyncDate: new Date(),
           });
         } catch (error) {

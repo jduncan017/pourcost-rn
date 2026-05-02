@@ -13,7 +13,7 @@ import { useAppStore, DefaultLandingScreen } from '@/src/stores/app-store';
 
 const LANDING_SCREEN_OPTIONS: { value: DefaultLandingScreen; label: string }[] = [
   { value: 'cocktails', label: 'Cocktails' },
-  { value: 'ingredients', label: 'My Inventory' },
+  { value: 'ingredients', label: 'Bar Inventory' },
   { value: 'calculator', label: 'Quick Calculator' },
 ];
 
@@ -92,16 +92,17 @@ export default function SettingsScreen() {
               showCaret
             />
             <SettingsCard
-              title="Pricing"
+              title="Calculations"
               description="Pour cost targets, defaults, floors"
-              iconName="cash-outline"
+              iconName="calculator-outline"
               onPress={() => router.push('/settings-calculations' as any)}
               showCaret
             />
             <SettingsCard
               title="Manage Wells"
               description="Pick or update your standard house-pour brands"
-              iconName="beer-outline"
+              iconName="bottle-wine-outline"
+              iconFamily="mci"
               onPress={() => router.push('/wells-setup' as any)}
               showCaret
             />

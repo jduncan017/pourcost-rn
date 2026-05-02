@@ -106,3 +106,9 @@ This pattern is enforced on the heavy list screens (`(drawer)/cocktails.tsx`, `(
   - Example: `<View className="flex-col gap-4">` ✅
   - Example: `<View className="space-y-4">` ❌ (unreliable)
   - This ensures consistent spacing across all platforms
+
+- **Button labels**: Always Title Case — every word capitalized, including short prepositions ("To", "A", "For", "With", "Of")
+  - Example: `Show Spirit Database Results` ✅, `Sign In With Email` ✅, `Skip For Now` ✅
+  - Example: `Show Spirit Database results` ❌, `Sign in with email` ❌
+  - Applies to: `<Button>` children, `<Pressable><Text>...</Text></Pressable>`, `label` / `primaryLabel` / `secondaryLabel` / `skipLabel` props, Alert.alert button text
+  - Doesn't apply to: paragraph copy, help text, field labels, placeholder text — those use sentence case

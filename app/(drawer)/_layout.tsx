@@ -131,8 +131,8 @@ export default function DrawerLayout() {
         <Drawer.Screen
           name="ingredients"
           options={{
-            title: 'My Inventory',
-            drawerLabel: 'My Inventory',
+            title: 'Bar Inventory',
+            drawerLabel: 'Bar Inventory',
             drawerIcon: ({ color, size }) => (
               <Ionicons name="flask" size={size} color={color} />
             ),

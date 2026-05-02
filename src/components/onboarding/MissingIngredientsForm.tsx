@@ -193,7 +193,7 @@ export default function MissingIngredientsForm({
               Set Up Missing Ingredients
             </Text>
             <Text className="text-base mt-2 leading-6" style={{ color: palette.N3 }}>
-              These are needed for the cocktails you picked. Estimate costs for now, you can update anytime from My Inventory.
+              These are needed for the cocktails you picked. Estimate costs for now, you can update anytime from Bar Inventory.
             </Text>
           </View>
 
@@ -284,7 +284,7 @@ export default function MissingIngredientsForm({
             style={{ color: palette.N4 }}
           >
             Estimate for now, change later. We'll auto-include {stapleCount}{' '}
-            {stapleCount === 1 ? 'pantry staple' : 'pantry staples'} (lime juice, simple syrup, cherries, etc.) using typical wholesale prices. Adjust from My Inventory if your costs differ.
+            {stapleCount === 1 ? 'pantry staple' : 'pantry staples'} (lime juice, simple syrup, cherries, etc.) using typical wholesale prices. Adjust from Bar Inventory if your costs differ.
           </Text>
         </ScrollView>
 

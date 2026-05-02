@@ -63,7 +63,7 @@ export default function OnboardingComplete() {
             className="text-base text-center mt-3 leading-6 px-4"
             style={{ color: palette.N3 }}
           >
-            Your bar is ready. Open Cocktails to see live cost and margin on every recipe, or jump into My Inventory to add more.
+            Your bar is ready. Open Cocktails to see live cost and margin on every recipe, or jump into Bar Inventory to add more.
           </Text>
         </View>
 

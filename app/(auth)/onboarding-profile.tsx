@@ -103,6 +103,7 @@ export default function OnboardingProfile() {
             maxValue={30}
             step={1}
             formatValue={(v) => `${Math.round(v)}%`}
+            commitOn="release"
           />
 
           <CustomSlider
@@ -113,6 +114,7 @@ export default function OnboardingProfile() {
             maxValue={35}
             step={1}
             formatValue={(v) => `${Math.round(v)}%`}
+            commitOn="release"
           />
 
           <CustomSlider
@@ -123,6 +125,7 @@ export default function OnboardingProfile() {
             maxValue={40}
             step={1}
             formatValue={(v) => `${Math.round(v)}%`}
+            commitOn="release"
           />
 
           {/* Default Pour Size — slider 1-3 oz */}
@@ -137,6 +140,7 @@ export default function OnboardingProfile() {
             maxValue={3}
             step={0.25}
             formatValue={(v) => `${v % 1 === 0 ? v.toFixed(0) : v.toFixed(2)} oz`}
+            commitOn="release"
           />
 
           {/* Floor pricing — clamps Suggested Price so cheap cocktails / pours
@@ -158,6 +162,7 @@ export default function OnboardingProfile() {
             maxValue={25}
             step={1}
             formatValue={(v) => `$${Math.round(v)}`}
+            commitOn="release"
           />
 
           <CustomSlider
@@ -168,6 +173,7 @@ export default function OnboardingProfile() {
             maxValue={15}
             step={1}
             formatValue={(v) => `$${Math.round(v)}`}
+            commitOn="release"
           />
         </View>
 

@@ -93,6 +93,10 @@ function rowToDetail(row: CanonicalDetailRow): CanonicalProductDetail {
  * Search canonical products by name. Uses ILIKE for the MVP; later this
  * should hit the pg_trgm fuzzy-match RPC for better tolerance to typos.
  *
+ * Excludes generic canonicals (brand IS NULL) since those exist purely as
+ * recipe-side references for "any vodka" / "any whiskey" matching and are
+ * not useful library items for end users.
+ *
  * Returns up to `limit` results, ordered alphabetically.
  */
 export async function searchCanonicalProducts(
@@ -105,6 +109,7 @@ export async function searchCanonicalProducts(
   const { data, error } = await supabase
     .from('canonical_products')
     .select('id, name, brand, category, subcategory, default_sizes, abv, origin, description, flavor_notes, image_url')
+    .not('brand', 'is', null)
     .or(`name.ilike.%${trimmed}%,brand.ilike.%${trimmed}%`)
     .order('name')
     .limit(limit);
@@ -146,6 +151,7 @@ export async function searchCanonicalBySubcategory(
     .select('id, name, brand, category, subcategory, default_sizes, abv, origin, description, flavor_notes, image_url')
     .eq('category', category)
     .in('subcategory', filter.subcategories)
+    .not('brand', 'is', null)
     .order('name')
     .limit(limit);
 

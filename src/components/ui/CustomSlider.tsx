@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { View, Text } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
@@ -20,6 +20,15 @@ interface CustomSliderProps {
    * `stat` — uppercase tracked label + big number, slider below (matches StatCard).
    */
   variant?: 'default' | 'stat';
+  /**
+   * When the parent's `onValueChange` fires.
+   *  - `change` (default) — every drag tick. Use when downstream UI must
+   *    update live (calculator preview, hero %, etc).
+   *  - `release` — only on slide complete. Use on settings/onboarding screens
+   *    where nothing reacts to the value during the drag — avoids a full
+   *    parent re-render on every native tick, which is the lag source.
+   */
+  commitOn?: 'change' | 'release';
 }
 
 export default function CustomSlider({
@@ -32,15 +41,36 @@ export default function CustomSlider({
   step = 0.1,
   formatValue,
   variant = 'default',
+  commitOn = 'change',
 }: CustomSliderProps) {
   const colors = useThemeColors();
 
-  const handleValueChange = (rawValue: number) => {
-    const steppedValue = Math.round(rawValue / step) * step;
-    onValueChange(Math.max(minValue, Math.min(maxValue, steppedValue)));
+  // Local drag state — keeps the displayed value glued to the thumb during a
+  // drag, independent of how slow the parent re-render is. When dragValue is
+  // non-null we're mid-drag and should display it instead of the prop value.
+  const [dragValue, setDragValue] = useState<number | null>(null);
+
+  const clampStep = (raw: number) => {
+    const stepped = Math.round(raw / step) * step;
+    return Math.max(minValue, Math.min(maxValue, stepped));
   };
 
-  const formatted = formatValue ? formatValue(value) : `${value.toFixed(2)}${unit}`;
+  const handleValueChange = (rawValue: number) => {
+    const clamped = clampStep(rawValue);
+    setDragValue(clamped);
+    if (commitOn === 'change') onValueChange(clamped);
+  };
+
+  const handleSlidingComplete = (rawValue: number) => {
+    const clamped = clampStep(rawValue);
+    if (commitOn === 'release') onValueChange(clamped);
+    setDragValue(null);
+  };
+
+  const displayValue = dragValue ?? value;
+  const formatted = formatValue
+    ? formatValue(displayValue)
+    : `${displayValue.toFixed(2)}${unit}`;
 
   return (
     <View>
@@ -61,10 +91,16 @@ export default function CustomSlider({
         </View>
       ) : (
         <View className="flex-row justify-between items-center mb-1">
-          <Text className="text-lg" style={{ color: colors.textSecondary, fontWeight: '500' }}>
+          <Text
+            className="text-lg"
+            style={{ color: colors.textSecondary, fontWeight: '500' }}
+          >
             {label}
           </Text>
-          <Text className="text-base" style={{ color: colors.text, fontWeight: '600' }}>
+          <Text
+            className="text-base"
+            style={{ color: colors.text, fontWeight: '600' }}
+          >
             {formatted}
           </Text>
         </View>
@@ -76,9 +112,10 @@ export default function CustomSlider({
         maximumValue={maxValue}
         step={step}
         onValueChange={handleValueChange}
+        onSlidingComplete={handleSlidingComplete}
         minimumTrackTintColor={colors.accent}
         maximumTrackTintColor={colors.border}
-        thumbTintColor={colors.accent}
+        thumbTintColor="rgba(255,255,255,0.7)"
         style={{ height: 40 }}
       />
     </View>

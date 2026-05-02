@@ -181,8 +181,9 @@ export default function CalculatorScreen() {
                 fullWidth
                 size="large"
                 onPress={handleSaveIngredient}
+                className="rounded-full"
               >
-                Save as Ingredient
+                Save As Ingredient
               </Button>
             </View>
           </View>

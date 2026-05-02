@@ -27,16 +27,14 @@ import { FeedbackService } from '@/src/services/feedback-service';
 import { HapticService } from '@/src/services/haptic-service';
 
 /**
- * Pour Cost Targets — single page covering:
- *   - Cocktail bar-wide pour cost goal
- *   - Beer bar-wide pour cost goal
- *   - Wine bar-wide pour cost goal
- *   - Spirits tier ladder (defaults shown to all; editable in Pro Mode,
- *     which is admin-gated for now and will become a paid feature)
+ * Pour Cost Targets.
  *
- * Visible to every user. Non-admins see the spirits ladder read-only with
- * a "Custom tiers coming soon" note. Admins see the Pro Mode toggle + the
- * inline editor (was previously the standalone admin Pro Mode page).
+ * Non-admin (free tier): single Cocktail pour cost goal. Beer / Wine / spirit
+ * tier ladder all run on hardcoded defaults silently. Per-category goals and
+ * the tier ladder are gated behind admin (will flip to paid post-launch).
+ *
+ * Admin: full page — cocktail / beer / wine bar-wide goals, spirit tier ladder
+ * with Pro Mode toggle + inline tier editor.
  */
 export default function SettingsTiersScreen() {
   const router = useGuardedRouter();
@@ -78,8 +76,8 @@ export default function SettingsTiersScreen() {
   }, [saveProfile]);
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: 'Pour Cost Targets' });
-  }, [navigation]);
+    navigation.setOptions({ title: isAdmin ? 'Pour Cost Targets' : 'Pour Cost Target' });
+  }, [navigation, isAdmin]);
 
   // Re-sync local draft when store changes externally.
   useEffect(() => {
@@ -158,6 +156,50 @@ export default function SettingsTiersScreen() {
   const tiersDirty = JSON.stringify(draft) !== JSON.stringify(pourCostTiers);
   const tiersEditable = isAdmin && proModeEnabled;
 
+  // Non-admin (free tier): single Cocktail pour cost goal. Per-category +
+  // spirit tier controls hidden until paid tier ships.
+  if (!isAdmin) {
+    return (
+      <GradientBackground>
+        <ScrollView className="flex-1">
+          <View className="px-6 pt-4 pb-8 flex-col gap-5">
+            <View className="flex-col gap-4">
+              <ScreenTitle variant="group" title="Pour Cost Goal" />
+              <Text className="text-sm leading-5" style={{ color: palette.N3 }}>
+                The target pour cost % we use when calculating Suggested Prices and the pour cost performance bar.
+              </Text>
+
+              <CustomSlider
+                label="Pour Cost Goal"
+                value={pourCostGoal}
+                onValueChange={(v) => { setPourCostGoal(Math.round(v)); debouncedSave(); }}
+                commitOn="release"
+                minValue={5}
+                maxValue={40}
+                step={1}
+                formatValue={(v) => `${Math.round(v)}%`}
+              />
+            </View>
+
+            <View
+              className="rounded-2xl p-3 flex-row items-start gap-2"
+              style={{
+                backgroundColor: palette.Y4 + '0E',
+                borderWidth: 1,
+                borderColor: palette.Y4 + '40',
+              }}
+            >
+              <Ionicons name="lock-closed" size={16} color={palette.Y4} style={{ marginTop: 2 }} />
+              <Text className="flex-1" style={{ color: palette.N2, fontSize: 13, lineHeight: 18 }}>
+                Per-category goals (beer, wine) and the spirit tier ladder are coming soon as a paid feature. Sensible defaults apply to your bar today.
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+      </GradientBackground>
+    );
+  }
+
   return (
     <GradientBackground>
       <ScrollView className="flex-1">
@@ -173,6 +215,7 @@ export default function SettingsTiersScreen() {
               label="Cocktails Pour Cost Goal"
               value={pourCostGoal}
               onValueChange={(v) => { setPourCostGoal(Math.round(v)); debouncedSave(); }}
+              commitOn="release"
               minValue={5}
               maxValue={40}
               step={1}
@@ -183,6 +226,7 @@ export default function SettingsTiersScreen() {
               label="Beer Pour Cost Goal"
               value={beerPourCostGoal}
               onValueChange={(v) => { setBeerPourCostGoal(Math.round(v)); debouncedSave(); }}
+              commitOn="release"
               minValue={10}
               maxValue={40}
               step={1}
@@ -193,6 +237,7 @@ export default function SettingsTiersScreen() {
               label="Wine Pour Cost Goal"
               value={winePourCostGoal}
               onValueChange={(v) => { setWinePourCostGoal(Math.round(v)); debouncedSave(); }}
+              commitOn="release"
               minValue={10}
               maxValue={45}
               step={1}
@@ -224,7 +269,7 @@ export default function SettingsTiersScreen() {
                     PRO MODE (ADMIN)
                   </Text>
                   <Text style={{ color: palette.N2, fontSize: 14, fontWeight: '600', marginTop: 4 }}>
-                    Edit custom tiers
+                    Edit Custom Tiers
                   </Text>
                   <Text style={{ color: palette.N4, fontSize: 12, marginTop: 2 }}>
                     Toggle on to override the defaults below
@@ -291,7 +336,7 @@ export default function SettingsTiersScreen() {
                 </Pressable>
                 <Pressable onPress={handleResetTiers} className="py-3 items-center">
                   <Text style={{ color: palette.N4, fontSize: 14 }}>
-                    Reset to Defaults
+                    Reset To Defaults
                   </Text>
                 </Pressable>
               </View>
@@ -392,7 +437,7 @@ function TierRow({ tier, index, isLast, editable, onChange, onRemove }: TierRowP
             onChangeText={setLabelText}
             onBlur={commitLabel}
             onSubmitEditing={commitLabel}
-            placeholder="e.g. Wells"
+            placeholder="e.g. Well Priced"
             placeholderTextColor={palette.N4 + '80'}
             style={[inputStyle, { flex: 1 }]}
           />

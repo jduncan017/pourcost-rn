@@ -8,6 +8,7 @@ import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SectionDivider from '@/src/components/ui/SectionDivider';
 import PickerSheet from '@/src/components/ui/PickerSheet';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { useAppStore, IngredientOrderPref, PriceRounding } from '@/src/stores/app-store';
 import { US_POUR_SIZES } from '@/src/constants/appConstants';
 import { volumeLabel, Volume } from '@/src/types/models';
@@ -60,6 +61,7 @@ export default function SettingsCalculationsScreen() {
   const router = useGuardedRouter();
   const navigation = useNavigation();
   const colors = useThemeColors();
+  const { isAdmin } = useAuth();
   const {
     pourCostGoal,
     beerPourCostGoal,
@@ -89,7 +91,7 @@ export default function SettingsCalculationsScreen() {
   }, [saveProfile]);
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: 'Pricing' });
+    navigation.setOptions({ title: 'Calculations' });
   }, [navigation]);
 
   const [showPourSizePicker, setShowPourSizePicker] = useState(false);
@@ -113,9 +115,14 @@ export default function SettingsCalculationsScreen() {
                 one place. Visible to everyone; tier editing is gated by
                 Pro Mode (admin-only for now, paid post-launch). */}
             <SettingsCard
-              title="Pour Cost Targets"
-              description={`Cocktails ${pourCostGoal}%, Beer ${beerPourCostGoal}%, Wine ${winePourCostGoal}%, Spirits tiered`}
-              iconName="analytics-outline"
+              title={isAdmin ? 'Pour Cost Targets' : 'Pour Cost Goal'}
+              description={
+                isAdmin
+                  ? `Cocktails ${pourCostGoal}%, Beer ${beerPourCostGoal}%, Wine ${winePourCostGoal}%, Spirits tiered`
+                  : `${pourCostGoal}%`
+              }
+              iconName="target"
+              iconFamily="mci"
               onPress={() => router.push('/settings-tiers' as any)}
               showCaret
             />
@@ -149,7 +156,7 @@ export default function SettingsCalculationsScreen() {
             <SettingsCard
               title="Suggested Price Rounding"
               description={currentRoundingLabel}
-              iconName="calculator-outline"
+              iconName="arrow-up-circle-outline"
               onPress={() => setShowRoundingPicker(true)}
               showCaret
             />
@@ -162,14 +169,16 @@ export default function SettingsCalculationsScreen() {
             <SettingsCard
               title="Minimum Cocktail Price"
               description={`$${minCocktailPrice.toFixed(2)}`}
-              iconName="trending-up-outline"
+              iconName="glass-cocktail"
+              iconFamily="mci"
               onPress={() => setShowMinCocktailPicker(true)}
               showCaret
             />
             <SettingsCard
               title="Minimum Spirit Pour Price"
               description={`$${minIngredientPrice.toFixed(2)}`}
-              iconName="wine-outline"
+              iconName="bottle-tonic-outline"
+              iconFamily="mci"
               onPress={() => setShowMinIngredientPicker(true)}
               showCaret
             />
@@ -182,7 +191,8 @@ export default function SettingsCalculationsScreen() {
             <SettingsCard
               title="Container Sizes"
               description="Choose visible bottle & keg sizes"
-              iconName="resize-outline"
+              iconName="package-variant-closed"
+              iconFamily="mci"
               onPress={() => router.push('/container-sizes' as any)}
               showCaret
             />

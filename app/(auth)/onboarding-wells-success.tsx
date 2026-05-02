@@ -80,7 +80,7 @@ export default function OnboardingWellsSuccess() {
             className="text-base text-center mt-3 leading-6 px-4"
             style={{ color: palette.N3 }}
           >
-            Your house pours are in My Inventory. You can update or add more anytime from{' '}
+            Your house pours are in Bar Inventory. You can update or add more anytime from{' '}
             <Text style={{ color: palette.Y4, fontWeight: '600' }}>Settings → Manage Wells</Text>.
           </Text>
         </View>

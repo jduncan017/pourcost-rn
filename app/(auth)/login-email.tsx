@@ -88,7 +88,7 @@ export default function LoginEmailScreen() {
             />
 
             <Pressable onPress={() => { HapticService.buttonPress(); handleForgotPassword(); }} className="items-end">
-              <Text style={{ color: palette.N3, fontSize: 13 }}>Forgot password?</Text>
+              <Text style={{ color: palette.N3, fontSize: 13 }}>Forgot Password?</Text>
             </Pressable>
 
             {error && (
@@ -107,7 +107,7 @@ export default function LoginEmailScreen() {
             <View className="flex-row items-center gap-3">
               {isLoading && <ActivityIndicator size="small" color={palette.N1} />}
               <Text style={styles.primaryButtonText}>
-                {isLoading ? 'Signing in…' : 'Sign In'}
+                {isLoading ? 'Signing In…' : 'Sign In'}
               </Text>
             </View>
           </Pressable>

@@ -100,7 +100,7 @@ export default function WellsPicker({
   onFinish,
   skippable = true,
   title = 'Set Up Your Wells',
-  subtitle = "Pick the house-pour brand for each category. We'll add them to My Inventory so you can start building cocktails right away.",
+  subtitle = "Pick the house-pour brand for each category. We'll add them to Bar Inventory so you can start building cocktails right away.",
   showBack = true,
   mode = 'onboarding',
 }: WellsPickerProps) {
@@ -198,7 +198,7 @@ export default function WellsPicker({
       const msg = err instanceof Error ? err.message : 'Could not save wells';
       FeedbackService.showError(
         'Wells Setup Failed',
-        `${msg}. You can add these later from My Inventory.`
+        `${msg}. You can add these later from Bar Inventory.`
       );
     }
   };
@@ -385,7 +385,7 @@ export default function WellsPicker({
               className="text-xs mt-3 leading-5"
               style={{ color: palette.N4 }}
             >
-              Estimate costs for now, you can update anytime from My Inventory.
+              Estimate costs for now, you can update anytime from Bar Inventory.
             </Text>
           </View>
 
@@ -455,7 +455,7 @@ export default function WellsPicker({
                 disabled={busy}
                 className="py-2 items-center"
               >
-                <Text style={{ color: palette.N4, fontSize: 13 }}>Skip wells setup</Text>
+                <Text style={{ color: palette.N4, fontSize: 13 }}>Skip Wells Setup</Text>
               </Pressable>
             )}
           </View>
@@ -546,7 +546,7 @@ interface WellTileProps {
   picked: PickedValue | undefined;
   /** When true, hide the editable cost input (existing well — already saved
    *  with a real cost; if user wants to change cost, they edit the ingredient
-   *  directly from My Inventory). */
+   *  directly from Bar Inventory). */
   readonlyCost?: boolean;
   onTap: () => void;
   onClear: () => void;
@@ -800,14 +800,14 @@ function PickerSheetModal({
           onChangeText={setQuery}
         />
 
-        {/* From My Inventory — settings mode only */}
+        {/* From Bar Inventory — settings mode only */}
         {showInventory && (
           <View className="flex-col gap-2">
             <Text
               className="text-xs uppercase"
               style={{ color: colors.textTertiary, letterSpacing: 1 }}
             >
-              From My Inventory
+              From Bar Inventory
             </Text>
             <View
               className="rounded-lg overflow-hidden"
@@ -992,7 +992,7 @@ function PickerSheetModal({
             <Ionicons name="information-circle-outline" size={18} color={palette.Y4} style={{ marginTop: 1 }} />
             <Text className="flex-1" style={{ color: palette.N2, fontSize: 13, lineHeight: 18 }}>
               Don't see your brand? You can add custom brands from{' '}
-              <Text style={{ color: palette.Y4, fontWeight: '600' }}>My Inventory</Text> after wells setup.
+              <Text style={{ color: palette.Y4, fontWeight: '600' }}>Bar Inventory</Text> after wells setup.
             </Text>
           </View>
         )}

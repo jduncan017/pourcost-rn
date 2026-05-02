@@ -42,7 +42,7 @@ export default function OnboardingIntro({
   bullets,
   primaryLabel,
   onPrimary,
-  skipLabel = 'Skip for Now',
+  skipLabel = 'Skip For Now',
   onSkip,
 }: OnboardingIntroProps) {
   const insets = useSafeAreaInsets();

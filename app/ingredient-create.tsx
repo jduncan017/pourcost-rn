@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { useGuardedRouter } from '@/src/lib/guarded-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import SearchBar from '@/src/components/ui/SearchBar';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
-import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
+import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { ingredientTypeIcon } from '@/src/lib/type-icons';
 import { useKeyboardHeight } from '@/src/lib/useKeyboardHeight';
 import {
   searchCanonicalProducts,
@@ -38,7 +39,6 @@ export default function IngredientCreateScreen() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<CanonicalProductSummary[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Track keyboard height so we can extend the ScrollView's content past it.
   // The keyboard does not auto-push content (no KeyboardAvoidingView here);
@@ -46,16 +46,36 @@ export default function IngredientCreateScreen() {
   // can scroll up to see results that would otherwise be hidden behind it.
   const keyboardHeight = useKeyboardHeight();
 
-  useEffect(() => {
-    navigation.setOptions({ title: 'Add Ingredient' });
-  }, [navigation]);
+  // Header right Create button mirrors the ingredient-selector pattern so
+  // the two "add an ingredient" entry points feel like the same screen.
+  // Ref stays current with searchQuery without re-setting nav options on
+  // every keystroke.
+  const createRef = useRef<() => void>(() => {});
+  createRef.current = () => goToFormEmpty();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: 'Add Ingredient',
+      headerRight: () => (
+        <Pressable
+          onPress={() => createRef.current()}
+          className="flex-row items-center gap-1 px-3 py-1.5"
+          hitSlop={6}
+        >
+          <Ionicons name="add" size={16} color={colors.text} />
+          <Text style={{ color: colors.text, fontSize: 15, fontWeight: '600' }}>
+            Create
+          </Text>
+        </Pressable>
+      ),
+    });
+  }, [navigation, colors]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
     if (query.trim().length < 2) {
       setResults([]);
-      setSearched(false);
       setLoading(false);
       return;
     }
@@ -64,7 +84,6 @@ export default function IngredientCreateScreen() {
     debounceRef.current = setTimeout(async () => {
       const found = await searchCanonicalProducts(query);
       setResults(found);
-      setSearched(true);
       setLoading(false);
     }, DEBOUNCE_MS);
 
@@ -106,162 +125,97 @@ export default function IngredientCreateScreen() {
         keyboardDismissMode="on-drag"
         contentContainerStyle={{ flexGrow: 1, paddingBottom: keyboardHeight }}
       >
-        <View className="px-6 pt-4 pb-8 flex-col gap-5">
-          {/* Helper copy — frames the database as the recommended path */}
+        <View className="px-6 pt-4 pb-8 flex-col gap-6">
+          {/* Helper — points the user at the header Create button when their
+              ingredient isn't in the Spirit Database. Mirrors the wording on
+              ingredient-selector for consistency. */}
           <Text
             className="text-sm leading-5"
             style={{ color: colors.textSecondary }}
           >
-            Search the Spirit Database for the product you want to add. Picking
-            a result fills in the details for you and saves it to My Inventory.
-            If you don't find it, you can create one from scratch.
+            Search the Spirit Database or create a new one above.
           </Text>
 
           <SearchBar
             placeholder="e.g., Tito's, Cointreau, lime juice"
             value={query}
             onChangeText={setQuery}
+            autoFocus
           />
 
           {loading && (
             <View className="flex-row items-center gap-2">
               <ActivityIndicator size="small" color={colors.textSecondary} />
               <Text className="text-sm" style={{ color: colors.textTertiary }}>
-                Searching Spirit Database...
+                Searching Spirit Database…
               </Text>
             </View>
           )}
 
           {results.length > 0 && (
-            <View className="flex-col gap-2">
+            <View className="flex-col">
               <ScreenTitle
                 title={`Spirit Database (${results.length})`}
                 variant="muted"
+                className="mb-1"
               />
-              <View
-                className="ResultsList rounded-lg overflow-hidden"
-                style={{
-                  backgroundColor: colors.elevated,
-                  borderWidth: 1,
-                  borderColor: colors.borderSubtle,
-                }}
-              >
-                {results.map((product, index) => {
-                  const subtitle = [
-                    product.brand,
-                    product.subcategory ?? product.category,
-                  ]
-                    .filter((s) => s && s !== product.name)
-                    .join(' · ');
-                  return (
-                    <Pressable
-                      key={product.id}
-                      onPress={() => goToFormWithCanonical(product)}
-                      className="ResultRow flex-row items-center justify-between px-4 py-3"
-                      style={
-                        index < results.length - 1
-                          ? {
-                              borderBottomWidth: 1,
-                              borderBottomColor: colors.borderSubtle,
-                            }
-                          : undefined
-                      }
-                    >
-                      <View className="flex-1 flex-col gap-0.5 pr-3">
+              {results.map((product) => {
+                const { ingredientType } = mapCanonicalToType(product);
+                const icon = ingredientTypeIcon(ingredientType);
+                const subtitle = [
+                  product.brand,
+                  product.subcategory ?? product.category,
+                ]
+                  .filter((s) => s && s !== product.name)
+                  .join(' · ');
+                return (
+                  <Pressable
+                    key={product.id}
+                    onPress={() => goToFormWithCanonical(product)}
+                    className="flex-row items-center py-3"
+                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                  >
+                    <MaterialCommunityIcons
+                      name={icon.name}
+                      size={22}
+                      color={icon.color}
+                      style={{ marginRight: 12 }}
+                    />
+                    <View className="flex-1">
+                      <Text
+                        className="text-base"
+                        style={{ color: colors.text, fontWeight: '500' }}
+                        numberOfLines={1}
+                      >
+                        {product.name}
+                      </Text>
+                      {subtitle ? (
                         <Text
-                          className="text-base"
-                          style={{ color: colors.text, fontWeight: '600' }}
+                          className="text-sm mt-0.5"
+                          style={{ color: colors.textTertiary }}
                           numberOfLines={1}
                         >
-                          {product.name}
+                          {subtitle}
                         </Text>
-                        {subtitle ? (
-                          <Text
-                            className="text-xs"
-                            style={{ color: colors.textTertiary }}
-                            numberOfLines={1}
-                          >
-                            {subtitle}
-                          </Text>
-                        ) : null}
-                      </View>
-                      <Ionicons
-                        name="chevron-forward"
-                        size={20}
-                        color={colors.textSecondary}
-                      />
-                    </Pressable>
-                  );
-                })}
-              </View>
+                      ) : null}
+                    </View>
+                    <Ionicons name="add-circle" size={26} color={colors.success} />
+                  </Pressable>
+                );
+              })}
             </View>
           )}
 
-          {searched && !loading && results.length === 0 && (
-            <View
-              className="rounded-lg px-4 py-6 items-center flex-col gap-2"
-              style={{
-                backgroundColor: colors.elevated,
-                borderWidth: 1,
-                borderColor: colors.borderSubtle,
-              }}
-            >
-              <Ionicons name="search" size={28} color={colors.textTertiary} />
-              <Text
-                className="text-center"
-                style={{ color: colors.text, fontWeight: '500' }}
-              >
-                Not in the Spirit Database yet
-              </Text>
-              <Text
-                className="text-sm text-center"
-                style={{ color: colors.textTertiary }}
-              >
-                Try a different search term, or create one from scratch below.
-              </Text>
-            </View>
-          )}
-
-          {/* Always-available "Create from scratch" CTA */}
-          <View className="flex-col gap-2 pt-2">
+          {!loading && results.length === 0 && query.length > 0 && (
             <Text
-              className="text-xs uppercase"
-              style={{ color: colors.textTertiary, letterSpacing: 1 }}
-            >
-              Don't see it?
-            </Text>
-            <Pressable
-              onPress={goToFormEmpty}
-              className="flex-row items-center justify-center gap-2 py-3.5 rounded-xl"
-              style={{
-                backgroundColor: colors.elevated,
-                borderWidth: 1,
-                borderColor: colors.borderSubtle,
-              }}
-            >
-              <Ionicons
-                name="create-outline"
-                size={20}
-                color={palette.N2}
-              />
-              <Text
-                style={{
-                  color: palette.N2,
-                  fontWeight: '600',
-                  fontSize: 16,
-                }}
-              >
-                Create From Scratch
-              </Text>
-            </Pressable>
-            <Text
-              className="text-xs"
+              className="text-sm py-2"
               style={{ color: colors.textTertiary }}
             >
-              For house-made syrups, prepped ingredients, and items not yet in
-              the Spirit Database.
+              {query.trim().length < 2
+                ? 'Type at least 2 characters to search the Spirit Database.'
+                : 'No matches in the Spirit Database.'}
             </Text>
-          </View>
+          )}
         </View>
       </ScrollView>
     </GradientBackground>

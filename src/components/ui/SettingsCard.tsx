@@ -1,12 +1,16 @@
 import { View, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import Card from './Card';
 
 interface SettingsCardProps {
   title: string;
   description: string;
-  iconName: keyof typeof Ionicons.glyphMap;
+  iconName:
+    | keyof typeof Ionicons.glyphMap
+    | keyof typeof MaterialCommunityIcons.glyphMap;
+  /** Switch icon family. MCI gives access to bottle/liquor icons Ionicons lacks. */
+  iconFamily?: 'ionicons' | 'mci';
   iconColor?: string;
   onPress?: () => void;
   /**
@@ -26,6 +30,7 @@ export default function SettingsCard({
   title,
   description,
   iconName,
+  iconFamily = 'ionicons',
   iconColor,
   onPress,
   tone = 'default',
@@ -61,7 +66,19 @@ export default function SettingsCard({
       className={`${disabled ? 'opacity-50' : ''} ${className}`}
     >
       <View className="flex-row items-center gap-3">
-        <Ionicons name={iconName} size={22} color={resolvedIconColor} />
+        {iconFamily === 'mci' ? (
+          <MaterialCommunityIcons
+            name={iconName as keyof typeof MaterialCommunityIcons.glyphMap}
+            size={22}
+            color={resolvedIconColor}
+          />
+        ) : (
+          <Ionicons
+            name={iconName as keyof typeof Ionicons.glyphMap}
+            size={22}
+            color={resolvedIconColor}
+          />
+        )}
         <View className="flex-1">
           <Text className="text-base" style={{ color: colors.text, fontWeight: '500' }}>
             {title}

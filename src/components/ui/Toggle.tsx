@@ -24,10 +24,12 @@ export default function Toggle({
   className = '',
 }: ToggleProps) {
   const colors = useThemeColors();
-  const translateX = useSharedValue(value ? 20 : 0);
+  // Track 52x30, thumb 26x26 → between the previous custom toggle (48x28)
+  // and iOS native Switch (51x31). Translation = inner range minus thumb.
+  const translateX = useSharedValue(value ? 22 : 0);
 
   useEffect(() => {
-    translateX.value = withTiming(value ? 20 : 0, { duration: 200 });
+    translateX.value = withTiming(value ? 22 : 0, { duration: 200 });
   }, [value]);
 
   const thumbStyle = useAnimatedStyle(() => ({
@@ -41,7 +43,7 @@ export default function Toggle({
     >
       {/* Track */}
       <View
-        className="w-[48px] h-7 rounded-full justify-center px-0.5"
+        className="w-[52px] h-[30px] rounded-full justify-center px-0.5"
         style={{
           backgroundColor: value ? palette.G3 : colors.inputBg,
           borderWidth: 1,
@@ -50,7 +52,7 @@ export default function Toggle({
       >
         <Animated.View
           style={[thumbStyle]}
-          className="w-6 h-6 rounded-full bg-white"
+          className="w-[26px] h-[26px] rounded-full bg-white"
         />
       </View>
 

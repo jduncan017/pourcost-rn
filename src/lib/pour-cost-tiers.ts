@@ -4,17 +4,17 @@
  * Bar-wide pour cost goals (typically 16-18%) work for the middle of the
  * inventory but break at the extremes:
  *
- *   - Wells ($12 well vodka sold at $7) sit at ~6-9% pour cost. Looks "way
- *     under target" against an 18% goal but it's correct — wells are pure
- *     margin engines.
+ *   - Well-priced spirits ($12 well vodka sold at $7) sit at ~6-9% pour cost.
+ *     Looks "way under target" against an 18% goal but it's correct —
+ *     well-priced bottles are pure margin engines.
  *   - Premium spirits ($300 Pappy at 18% pour cost = $20 pour) is wildly
  *     unrealistic. Real bars charge $80-150/pour, which lands the bottle
  *     at 30-50% pour cost.
  *
  * Tiered targets fix this. The default ladder below was sanity-checked
  * against Denver bar program norms (per Joshua, 2026-04-30):
- *   - 10% on wells
- *   - 18% on $20-40 bottles (call brands)
+ *   - 10% on well-priced bottles
+ *   - 18% on $20-40 bottles (call-priced brands)
  *   - tiered up from there
  *
  * Bottle cost = `ingredients.product_cost` (the user's purchase price for
@@ -38,8 +38,8 @@ export interface PourCostTier {
 }
 
 export const DEFAULT_TIERS: PourCostTier[] = [
-  { minBottleCost: 0, maxBottleCost: 25, targetPourCostPct: 10, label: 'Wells' },
-  { minBottleCost: 25, maxBottleCost: 45, targetPourCostPct: 18, label: 'Call' },
+  { minBottleCost: 0, maxBottleCost: 25, targetPourCostPct: 10, label: 'Well Priced' },
+  { minBottleCost: 25, maxBottleCost: 45, targetPourCostPct: 18, label: 'Call Priced' },
   { minBottleCost: 45, maxBottleCost: 80, targetPourCostPct: 22, label: 'Premium' },
   { minBottleCost: 80, maxBottleCost: 150, targetPourCostPct: 25, label: 'Top Shelf' },
   { minBottleCost: 150, maxBottleCost: null, targetPourCostPct: 30, label: 'Allocated' },
@@ -107,6 +107,93 @@ export function getTargetForIngredient(
     return targetForBottleCost(ingredient.productCost, tiers, goals.pourCostGoal);
   }
   return goals.pourCostGoal;
+}
+
+/**
+ * Resolve the matching tier for a spirit. Returns null for non-spirits or
+ * when no tier matches (defensive — shouldn't happen with the default ladder).
+ * Used for surfacing the tier label (e.g. "Well Priced", "Call Priced") in the UI.
+ */
+export function getTierForIngredient(
+  ingredient: IngredientLikeForTarget,
+  goals: PourCostGoals,
+): PourCostTier | null {
+  if (ingredient.type !== 'Spirit') return null;
+  const tiers = getActiveTiers(goals.proModeEnabled, goals.pourCostTiers);
+  for (const t of tiers) {
+    const aboveMin = ingredient.productCost >= t.minBottleCost;
+    const belowMax = t.maxBottleCost == null || ingredient.productCost < t.maxBottleCost;
+    if (aboveMin && belowMax) return t;
+  }
+  return null;
+}
+
+/**
+ * Resolve the human-readable target label for an ingredient. Used as the
+ * prefix on the PourCostHero target readout (e.g. "Well Priced Target 10%",
+ * "Beer Target 22%"). Returns null when no specific category applies and
+ * the hero should fall back to the generic "target" wording.
+ */
+export function getTargetLabelForIngredient(
+  ingredient: IngredientLikeForTarget,
+  goals: PourCostGoals,
+): string | null {
+  const type = ingredient.type ?? '';
+  if (type === 'Beer') return 'Beer';
+  if (type === 'Wine') return 'Wine';
+  if (type === 'Spirit') {
+    return getTierForIngredient(ingredient, goals)?.label ?? null;
+  }
+  return null;
+}
+
+// ============================================================
+// Pricing-mode-aware hero target resolvers
+// ============================================================
+
+/** Free tier = single bar-wide goal applies to everything (no tier label).
+ *  Pro tier = per-category goals + spirit tier ladder + tier label. */
+export type PricingMode = 'free' | 'pro';
+
+export interface HeroTargetInfo {
+  /** Target pour cost % to feed PourCostHero's `targetGoal`. */
+  targetGoal: number;
+  /** Target label prefix (e.g. "Well Priced", "Beer", "Cocktail"). Null
+   *  collapses to the hero's generic "target" wording — used in free mode
+   *  where no category distinction exists. */
+  targetLabel: string | null;
+}
+
+/**
+ * Single helper that maps an ingredient to PourCostHero props. Free mode
+ * returns the bar-wide goal with no label; pro mode runs through the tier
+ * ladder + per-category goals.
+ */
+export function getHeroTargetForIngredient(
+  ingredient: IngredientLikeForTarget,
+  goals: PourCostGoals,
+  mode: PricingMode,
+): HeroTargetInfo {
+  if (mode === 'free') {
+    return { targetGoal: goals.pourCostGoal, targetLabel: null };
+  }
+  return {
+    targetGoal: getTargetForIngredient(ingredient, goals),
+    targetLabel: getTargetLabelForIngredient(ingredient, goals),
+  };
+}
+
+/** Cocktails always use the bar-wide pourCostGoal (no tier ladder); the only
+ *  difference between free and pro is whether we surface the "Cocktail"
+ *  category label on the hero. */
+export function getHeroTargetForCocktail(
+  goals: Pick<PourCostGoals, 'pourCostGoal'>,
+  mode: PricingMode,
+): HeroTargetInfo {
+  return {
+    targetGoal: goals.pourCostGoal,
+    targetLabel: mode === 'pro' ? 'Cocktail' : null,
+  };
 }
 
 /**

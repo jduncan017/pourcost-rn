@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
-import HeaderSavePill from '@/src/components/ui/HeaderSavePill';
+import FormSaveBar from '@/src/components/ui/FormSaveBar';
+import { useUnsavedChangesGuard } from '@/src/lib/useUnsavedChangesGuard';
 import ChipSelector from '@/src/components/ui/ChipSelector';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useFocusEffect, useNavigation } from 'expo-router';
@@ -10,14 +11,14 @@ import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { useAppStore } from '@/src/stores/app-store';
 import TextInput from '@/src/components/ui/TextInput';
 import EmptyState from '@/src/components/EmptyState';
-import PourCostHero from '@/src/components/PourCostHero';
+import PourCostHero, { getPerformance } from '@/src/components/PourCostHero';
+import { useHeroTargetForCocktail } from '@/src/lib/useHeroTarget';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { sanitizeName, sanitizeDescription } from '@/src/lib/sanitize';
 import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
 import StatCard from '@/src/components/ui/StatCard';
 import CocktailIngredientItem from '@/src/components/CocktailIngredientItem';
-import ImagePlaceholder from '@/src/components/ui/ImagePlaceholder';
 import { useIngredientSelectionStore } from '@/src/stores/ingredient-selection-store';
 import {
   COCKTAIL_CATEGORIES,
@@ -38,6 +39,7 @@ export default function CocktailFormScreen() {
   const { selectedIngredient, selectedIngredients, removedIngredientIds, clearSelection } =
     useIngredientSelectionStore();
   const { defaultRetailPrice, pourCostGoal, suggestedPriceRounding, minCocktailPrice } = useAppStore();
+  const { targetLabel: cocktailTargetLabel } = useHeroTargetForCocktail();
 
   const colors = useThemeColors();
   const [showActions, setShowActions] = useState(false);
@@ -139,6 +141,31 @@ export default function CocktailFormScreen() {
       ? (totalCost / retailPriceNum) * 100
       : 0;
 
+  // Suggested retail derived from cost + bar-wide pour cost goal, with the
+  // user's rounding preference and the cocktail price floor applied.
+  const suggestedPrice =
+    totalCost > 0
+      ? applyPriceFloor(
+          roundSuggestedPrice(
+            calculateSuggestedPrice(totalCost, pourCostGoal / 100),
+            suggestedPriceRounding,
+          ),
+          minCocktailPrice,
+        )
+      : 0;
+
+  // Mirror cocktail-detail: only surface the Suggested Price row when the
+  // current pour cost is outside the target band. On-target = no noise.
+  const performance =
+    pourCostGoal > 0 && pourCostPercentage > 0
+      ? getPerformance(
+          pourCostPercentage / pourCostGoal,
+          pourCostPercentage - pourCostGoal,
+        )
+      : { tier: 'onTarget' as const };
+  const isOnTarget = performance.tier === 'onTarget';
+  const showSuggestedPrice = totalCost > 0 && !isOnTarget && suggestedPrice > 0;
+
   // Validation
   const isValid =
     name.trim().length > 0 &&
@@ -169,6 +196,24 @@ export default function CocktailFormScreen() {
 
   const saveRef = useRef<() => void>(() => {});
 
+  // Dirty tracking — capture initial state once (after async ingredient load
+  // settles on edit). Snapshot mismatch = user has unsaved edits.
+  const initialSnapshotRef = useRef<string | null>(null);
+  const currentSnapshot = useMemo(
+    () => JSON.stringify({ name, description, category, notes, retailPrice, ingredients }),
+    [name, description, category, notes, retailPrice, ingredients],
+  );
+  useEffect(() => {
+    if (initialSnapshotRef.current !== null) return;
+    // On edit, wait until ingredients have populated from params before snapshotting.
+    if (isEditing && params.ingredients && ingredients.length === 0) return;
+    initialSnapshotRef.current = currentSnapshot;
+  }, [isEditing, params.ingredients, ingredients.length, currentSnapshot]);
+  const isDirty =
+    initialSnapshotRef.current !== null &&
+    currentSnapshot !== initialSnapshotRef.current;
+  const guard = useUnsavedChangesGuard(isDirty);
+
   // Handle save
   const handleSave = async () => {
     if (!isValid) {
@@ -193,6 +238,7 @@ export default function CocktailFormScreen() {
       } else {
         await addCocktail(cocktailData);
       }
+      guard.bypass();
       router.back();
     } catch (error) {
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to save cocktail');
@@ -207,6 +253,7 @@ export default function CocktailFormScreen() {
       name,
       async () => {
         await deleteCocktail(cocktailId);
+        guard.bypass();
         router.back();
       },
       'cocktail'
@@ -225,15 +272,8 @@ export default function CocktailFormScreen() {
           <Text style={{ color: colors.textSecondary, fontSize: 16 }}>Cancel</Text>
         </Pressable>
       ),
-      headerRight: () => (
-        <HeaderSavePill
-          onPress={() => saveRef.current()}
-          disabled={!isValid}
-          isSaving={isSaving}
-        />
-      ),
     });
-  }, [isEditing, navigation, colors, isValid, isSaving]);
+  }, [isEditing, navigation, colors]);
 
   return (
     <GradientBackground>
@@ -243,20 +283,15 @@ export default function CocktailFormScreen() {
         pointerEvents={isSaving ? 'none' : 'auto'}
       >
         <View className="px-6 pt-4 pb-6 flex-col gap-8">
-          {/* Identity — Image + Name + Category + Description + Notes */}
+          {/* Identity — Name + Category + Description + Notes */}
           <View className="flex-col gap-5">
-            <View className="flex flex-row gap-4">
-              <ImagePlaceholder size="small" />
-              <View className="flex-1 justify-center">
-                <TextInput
-                  label="Cocktail Name *"
-                  value={name}
-                  onChangeText={setName}
-                  placeholder="e.g., Classic Margarita"
-                  autoCapitalize="words"
-                />
-              </View>
-            </View>
+            <TextInput
+              label="Cocktail Name *"
+              value={name}
+              onChangeText={setName}
+              placeholder="e.g., Classic Margarita"
+              autoCapitalize="words"
+            />
 
             <ChipSelector
               label="Category"
@@ -342,46 +377,55 @@ export default function CocktailFormScreen() {
             )}
           </View>
 
-          {/* Pricing + Analysis */}
-          <View className="flex-col gap-5">
-            <TextInput
-              label="Retail Price *"
-              value={retailPrice}
-              onChangeText={setRetailPrice}
-              placeholder="0.00"
-              keyboardType="decimal-pad"
-              prefix="$"
-            />
+          {/* Pricing + Analysis — hidden until at least one ingredient is
+              added. Without ingredients there's no cost, so retail price,
+              margin, suggested price, and the pour-cost bar are all
+              unanchored noise. */}
+          {ingredients.length > 0 && (
+            <View className="flex-col gap-5">
+              <View className="flex-row gap-3">
+                <StatCard
+                  label="Total Cost"
+                  value={formatCurrency(totalCost)}
+                />
+                <StatCard
+                  label="Profit Margin"
+                  value={formatCurrency(profitMargin)}
+                  infoTermKey="margin"
+                />
+              </View>
 
-            <AiSuggestionRow
-              label="Suggested Price"
-              value={formatCurrency(
-                applyPriceFloor(
-                  roundSuggestedPrice(
-                    calculateSuggestedPrice(totalCost, pourCostGoal / 100),
-                    suggestedPriceRounding,
-                  ),
-                  minCocktailPrice,
-                )
+              <TextInput
+                label="Retail Price *"
+                value={retailPrice}
+                onChangeText={setRetailPrice}
+                placeholder="0.00"
+                keyboardType="decimal-pad"
+                prefix="$"
+              />
+
+              {showSuggestedPrice && (
+                <AiSuggestionRow
+                  label="Suggested Price"
+                  value={formatCurrency(suggestedPrice)}
+                  onApply={() => setRetailPrice(suggestedPrice.toFixed(2))}
+                />
               )}
-            />
 
-            <View className="flex-row gap-3">
-              <StatCard
-                label="Total Cost"
-                value={formatCurrency(totalCost)}
-              />
-              <StatCard
-                label="Profit Margin"
-                value={formatCurrency(profitMargin)}
-                infoTermKey="margin"
-              />
+              <View className="-mx-6">
+                <PourCostHero
+                  pourCostPercentage={pourCostPercentage}
+                  targetLabel={cocktailTargetLabel ?? undefined}
+                />
+              </View>
             </View>
+          )}
 
-            <View className="-mx-6">
-              <PourCostHero pourCostPercentage={pourCostPercentage} />
-            </View>
-          </View>
+          <FormSaveBar
+            onPress={() => saveRef.current()}
+            disabled={!isValid}
+            isSaving={isSaving}
+          />
 
           {/* Delete button at bottom (edit mode only) */}
           {isEditing && (

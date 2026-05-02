@@ -57,7 +57,7 @@ export default function AppleSignInButton({ onSuccess, mode = 'sign-in' }: Apple
     return (
       <View style={[styles.loadingPill, { backgroundColor: bg, opacity: 0.8 }]}>
         <ActivityIndicator size="small" color={fg} />
-        <Text style={[styles.loadingText, { color: fg }]}>Signing in…</Text>
+        <Text style={[styles.loadingText, { color: fg }]}>Signing In…</Text>
       </View>
     );
   }

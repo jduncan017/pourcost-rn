@@ -64,7 +64,7 @@ export default function SignUpScreen() {
             style={styles.emailButton}
           >
             <Ionicons name="mail-outline" size={20} color={palette.N1} />
-            <Text style={styles.emailButtonText}>Sign up with Email</Text>
+            <Text style={styles.emailButtonText}>Sign Up With Email</Text>
           </Pressable>
         </View>
 

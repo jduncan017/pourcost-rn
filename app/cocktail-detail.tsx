@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StatCard from '@/src/components/ui/StatCard';
 import DetailLevelToggle from '@/src/components/ui/DetailLevelToggle';
 import PourCostHero, { getPerformance } from '@/src/components/PourCostHero';
+import { useHeroTargetForCocktail } from '@/src/lib/useHeroTarget';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FeedbackService } from '@/src/services/feedback-service';
@@ -89,6 +90,7 @@ export default function CocktailDetailScreen() {
   }, [navigation, colors.text]);
 
   const isDetailed = detailLevel === 'detailed';
+  const { targetLabel: cocktailTargetLabel } = useHeroTargetForCocktail();
   const retailPrice = cocktail.retailPrice ?? defaultRetailPrice;
   const metrics = calculateCocktailMetrics(
     cocktail.ingredients,
@@ -102,11 +104,11 @@ export default function CocktailDetailScreen() {
   // Hide the Suggested Price row when pour cost is already on target. It's
   // noise when the user's existing menu price is dialed in; only shows up
   // when there's a meaningful delta to act on.
-  const performanceLabel =
+  const performance =
     pourCostGoal > 0 && pourCostPct > 0
-      ? getPerformance(pourCostPct / pourCostGoal).label
-      : 'On Target';
-  const isOnTarget = performanceLabel === 'On Target';
+      ? getPerformance(pourCostPct / pourCostGoal, pourCostPct - pourCostGoal)
+      : { tier: 'onTarget' as const };
+  const isOnTarget = performance.tier === 'onTarget';
   const totalVolume = cocktail.ingredients.reduce(
     (sum, ing) => sum + volumeToOunces(ing.pourSize),
     0
@@ -274,7 +276,12 @@ export default function CocktailDetailScreen() {
           {/* Pour Cost hero — detailed only, edge-to-edge. Sits at the top
               of the financial story so managers see the headline performance
               metric first. Stats below provide the supporting numbers. */}
-          {isDetailed && <PourCostHero pourCostPercentage={pourCostPct} />}
+          {isDetailed && (
+            <PourCostHero
+              pourCostPercentage={pourCostPct}
+              targetLabel={cocktailTargetLabel ?? undefined}
+            />
+          )}
 
           {/* Stats group — Menu Price always visible. Margin + Suggested Price
               are cost-derived and only show in detailed mode so simple mode

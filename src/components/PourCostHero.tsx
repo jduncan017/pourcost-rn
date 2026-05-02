@@ -12,19 +12,44 @@ const PERF_COLORS = {
   bad: palette.R3,
 };
 
+export type PerfTier = 'onTarget' | 'close' | 'drifting' | 'bad';
+
 /** Map a pour-cost-to-goal ratio into a color + label (e.g. 1.0 = On Target).
  *  Exported so other components (e.g. performance badges on detail pages) can
- *  reuse the same thresholds without duplicating the color math. */
-export function getPerformance(ratio: number) {
-  if (ratio <= 0) return { color: PERF_COLORS.onTarget, label: 'On Target' };
+ *  reuse the same thresholds without duplicating the color math.
+ *
+ *  Pass `pctDelta` (current pour cost % minus goal %) to distinguish the
+ *  exact-match "On Target" label from the band-but-not-exact "Within Target"
+ *  label. Without it, anything inside the on-target band reads "On Target". */
+export function getPerformance(ratio: number, pctDelta?: number) {
+  if (ratio <= 0)
+    return { color: PERF_COLORS.onTarget, label: 'On Target', tier: 'onTarget' as PerfTier };
   const distance = Math.abs(ratio - 1);
-  if (distance <= PERFORMANCE_DISTANCE_THRESHOLDS.ON_TARGET)
-    return { color: PERF_COLORS.onTarget, label: 'On Target' };
+  if (distance <= PERFORMANCE_DISTANCE_THRESHOLDS.ON_TARGET) {
+    const exact = pctDelta == null || Math.abs(pctDelta) < 0.05;
+    return {
+      color: PERF_COLORS.onTarget,
+      label: exact ? 'On Target' : 'Within Target',
+      tier: 'onTarget' as PerfTier,
+    };
+  }
   if (distance <= PERFORMANCE_DISTANCE_THRESHOLDS.CLOSE)
-    return { color: PERF_COLORS.close, label: ratio < 1 ? 'Slight Under' : 'Slight Over' };
+    return {
+      color: PERF_COLORS.close,
+      label: ratio < 1 ? 'Slight Under' : 'Slight Over',
+      tier: 'close' as PerfTier,
+    };
   if (distance <= PERFORMANCE_DISTANCE_THRESHOLDS.DRIFTING)
-    return { color: PERF_COLORS.drifting, label: ratio < 1 ? 'Under' : 'Over' };
-  return { color: PERF_COLORS.bad, label: ratio < 1 ? 'Way Under' : 'Way Over' };
+    return {
+      color: PERF_COLORS.drifting,
+      label: ratio < 1 ? 'Under' : 'Over',
+      tier: 'drifting' as PerfTier,
+    };
+  return {
+    color: PERF_COLORS.bad,
+    label: ratio < 1 ? 'Way Under' : 'Way Over',
+    tier: 'bad' as PerfTier,
+  };
 }
 
 interface PourCostHeroProps {
@@ -33,6 +58,10 @@ interface PourCostHeroProps {
    *  compare against the tier-appropriate target instead of the bar's
    *  global default. When omitted, falls back to the store's pourCostGoal. */
   targetGoal?: number;
+  /** Category prefix for the target readout (e.g. "Well Priced", "Call Priced",
+   *  "Premium", "Beer", "Wine", "Cocktail"). Renders as "Well Priced Target 10%".
+   *  When omitted, falls back to the generic "target {n}%" wording. */
+  targetLabel?: string;
   className?: string;
 }
 
@@ -49,6 +78,7 @@ interface PourCostHeroProps {
 export default function PourCostHero({
   pourCostPercentage,
   targetGoal,
+  targetLabel,
   className = '',
 }: PourCostHeroProps) {
   const { pourCostGoal } = useAppStore();
@@ -56,8 +86,8 @@ export default function PourCostHero({
 
   const goal = targetGoal ?? pourCostGoal ?? 20;
   const ratio = pourCostPercentage > 0 ? pourCostPercentage / goal : 0;
-  const perf = getPerformance(ratio);
   const delta = pourCostPercentage - goal;
+  const perf = getPerformance(ratio, delta);
   const absDelta = Math.abs(delta);
   const deltaWord =
     Math.abs(delta) < 0.05 ? null : delta < 0 ? 'under' : 'over';
@@ -131,7 +161,8 @@ export default function PourCostHero({
 
             <View className="flex-row items-end">
               <Text className="text-xs" style={{ color: colors.textTertiary }}>
-                target {goal}% -{` `}
+                {targetLabel ? `${targetLabel} Target` : 'target'} {goal}%
+                {deltaWord ? ' - ' : ''}
               </Text>
               {deltaWord && (
                 <Text
@@ -163,7 +194,13 @@ export default function PourCostHero({
 // PerformanceBar — single-color fill capsule with neon glow
 // ============================================================
 
-function PerformanceBar({ fillPercent, perfColor }: { fillPercent: number; perfColor: string }) {
+function PerformanceBar({
+  fillPercent,
+  perfColor,
+}: {
+  fillPercent: number;
+  perfColor: string;
+}) {
   // Goal sits at 50% of bar width (bar spans 0 → 2× goal).
   const goalPercent = 50;
 
@@ -199,11 +236,22 @@ function PerformanceBar({ fillPercent, perfColor }: { fillPercent: number; perfC
           {/* Glass top sheen — bright at top, soft mid, slight darkening at
               bottom. Sits on top of the fill so the capsule reads as glassy. */}
           <LinearGradient
-            colors={['rgba(255,255,255,0.45)', 'rgba(255,255,255,0.05)', 'rgba(0,0,0,0.18)']}
+            colors={[
+              'rgba(255,255,255,0.2)',
+              'rgba(255,255,255,0.05)',
+              'rgba(0,0,0,0.18)',
+            ]}
             locations={[0, 0.55, 1]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
-            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 5 }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              borderRadius: 5,
+            }}
             pointerEvents="none"
           />
         </View>
@@ -216,8 +264,8 @@ function PerformanceBar({ fillPercent, perfColor }: { fillPercent: number; perfC
           position: 'absolute',
           left: `${goalPercent}%`,
           marginLeft: -0.5,
-          top: 1,
-          bottom: 1,
+          top: -1,
+          bottom: -1,
           width: 1,
           backgroundColor: 'rgba(255,255,255,0.45)',
         }}

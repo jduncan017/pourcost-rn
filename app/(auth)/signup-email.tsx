@@ -185,7 +185,7 @@ export default function SignUpEmailScreen() {
             <View className="flex-row items-center gap-3">
               {isLoading && <ActivityIndicator size="small" color={palette.N1} />}
               <Text style={styles.primaryButtonText}>
-                {isLoading ? 'Creating account…' : 'Create Account'}
+                {isLoading ? 'Creating Account…' : 'Create Account'}
               </Text>
             </View>
           </Pressable>

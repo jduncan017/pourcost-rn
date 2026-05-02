@@ -65,7 +65,7 @@ export default function LoginScreen() {
             style={styles.emailButton}
           >
             <Ionicons name="mail-outline" size={20} color={palette.N1} />
-            <Text style={styles.emailButtonText}>Sign in with Email</Text>
+            <Text style={styles.emailButtonText}>Sign In With Email</Text>
           </Pressable>
         </View>
 

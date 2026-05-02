@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,8 @@ import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import HeaderSavePill from '@/src/components/ui/HeaderSavePill';
+import FormSaveBar from '@/src/components/ui/FormSaveBar';
+import { useUnsavedChangesGuard } from '@/src/lib/useUnsavedChangesGuard';
 import TextInput from '@/src/components/ui/TextInput';
 import Dropdown from '@/src/components/ui/Dropdown';
 import MetricRow from '@/src/components/ui/MetricRow';
@@ -33,6 +34,7 @@ import {
   formatCurrency,
   roundSuggestedPrice,
 } from '@/src/services/calculation-service';
+import { useHeroTargetForIngredient } from '@/src/lib/useHeroTarget';
 import { FeedbackService } from '@/src/services/feedback-service';
 
 /**
@@ -61,7 +63,7 @@ export default function IngredientSizeFormScreen() {
 
   const { ingredients, updateIngredient, addConfiguration, updateConfiguration, deleteConfiguration } =
     useIngredientsStore();
-  const { pourCostGoal, suggestedPriceRounding } = useAppStore();
+  const { suggestedPriceRounding, enabledProductSizes } = useAppStore();
   const ingredient = ingredients.find((i) => i.id === ingredientId);
 
   // Initial size + price values come from whichever record we're editing.
@@ -90,20 +92,29 @@ export default function IngredientSizeFormScreen() {
   );
   const productCost = parseFloat(productCostText) || 0;
 
+  const currentSizeLabel = volumeLabel(productSize);
   const sizeOptions = useMemo(() => {
     if (!ingredient) return [];
-    return getProductSizesForType(ingredient.type, ingredient.subType).map((size) => ({
+    return getProductSizesForType(
+      ingredient.type,
+      ingredient.subType,
+      enabledProductSizes,
+      currentSizeLabel,
+    ).map((size) => ({
       value: volumeLabel(size),
       label: volumeLabel(size),
       section: getProductSizeSection(size),
     }));
-  }, [ingredient]);
+  }, [ingredient, enabledProductSizes, currentSizeLabel]);
 
   const handleSizeChange = (selectedLabel: string) => {
     if (!ingredient) return;
-    const match = getProductSizesForType(ingredient.type, ingredient.subType).find(
-      (s) => volumeLabel(s) === selectedLabel
-    );
+    const match = getProductSizesForType(
+      ingredient.type,
+      ingredient.subType,
+      enabledProductSizes,
+      currentSizeLabel,
+    ).find((s) => volumeLabel(s) === selectedLabel);
     if (match) setProductSize(match);
   };
 
@@ -112,8 +123,14 @@ export default function IngredientSizeFormScreen() {
   const effectiveRetail = ingredient?.retailPrice ?? useAppStore.getState().defaultRetailPrice;
   const costPerOz = calculateCostPerOz(productSize, productCost);
   const costPerPour = calculateCostPerPour(productSize, productCost, effectivePourSize);
+
+  // Tier + pricing-mode-aware target driven by the LIVE productCost being edited.
+  const { targetGoal: targetPct, targetLabel } = useHeroTargetForIngredient({
+    type: ingredient?.type,
+    productCost,
+  });
   const suggestedRetail = roundSuggestedPrice(
-    calculateSuggestedPrice(costPerPour, pourCostGoal / 100),
+    calculateSuggestedPrice(costPerPour, targetPct / 100),
     suggestedPriceRounding
   );
   const pourCostPercentage =
@@ -131,6 +148,22 @@ export default function IngredientSizeFormScreen() {
 
   const [isSaving, setIsSaving] = useState(false);
   const saveRef = useRef<() => void>(() => {});
+
+  // Dirty tracking — snapshot the form once, prompt before back-nav if it has changed.
+  const initialSnapshotRef = useRef<string | null>(null);
+  const currentSnapshot = useMemo(
+    () => JSON.stringify({ productSize, productCostText }),
+    [productSize, productCostText],
+  );
+  useEffect(() => {
+    if (initialSnapshotRef.current === null) {
+      initialSnapshotRef.current = currentSnapshot;
+    }
+  }, [currentSnapshot]);
+  const isDirty =
+    initialSnapshotRef.current !== null &&
+    currentSnapshot !== initialSnapshotRef.current;
+  const guard = useUnsavedChangesGuard(isDirty);
 
   const handleSave = async () => {
     if (!ingredient) return;
@@ -152,6 +185,7 @@ export default function IngredientSizeFormScreen() {
       } else {
         await addConfiguration(ingredient.id, { productSize, productCost });
       }
+      guard.bypass();
       router.back();
     } catch (err) {
       Alert.alert('Error', err instanceof Error ? err.message : 'Failed to save size');
@@ -167,6 +201,7 @@ export default function IngredientSizeFormScreen() {
       volumeLabel(productSize),
       async () => {
         await deleteConfiguration(ingredient.id, configIdParam);
+        guard.bypass();
         router.back();
       },
       'size'
@@ -185,15 +220,8 @@ export default function IngredientSizeFormScreen() {
           <Text style={{ color: colors.textSecondary, fontSize: 16 }}>Cancel</Text>
         </Pressable>
       ),
-      headerRight: () => (
-        <HeaderSavePill
-          onPress={() => saveRef.current()}
-          disabled={!isValid || isSaving}
-          isSaving={isSaving}
-        />
-      ),
     });
-  }, [navigation, colors, isValid, isSaving, isAdding]);
+  }, [navigation, colors, isAdding]);
 
   if (!ingredient) {
     return (
@@ -319,9 +347,19 @@ export default function IngredientSizeFormScreen() {
 
             {ingredient.notForSale ? null : (
               <View className="-mx-6">
-                <PourCostHero pourCostPercentage={pourCostPercentage} />
+                <PourCostHero
+                  pourCostPercentage={pourCostPercentage}
+                  targetGoal={targetPct}
+                  targetLabel={targetLabel ?? undefined}
+                />
               </View>
             )}
+
+            <FormSaveBar
+              onPress={() => saveRef.current()}
+              disabled={!isValid || isSaving}
+              isSaving={isSaving}
+            />
 
             {/* Delete — only available on stored configurations (not the default) */}
             {isEditingConfig && (

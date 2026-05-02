@@ -3,7 +3,7 @@
  * Pour sizes and product sizes match the iOS app exactly.
  */
 
-import { Volume, PourSizeScale, fraction, volumeToOunces } from '@/src/types/models';
+import { Volume, PourSizeScale, fraction, volumeToOunces, volumeLabel } from '@/src/types/models';
 
 // ==========================================
 // POUR SIZES — matches iOS PourSizes-PourCost.swift
@@ -162,6 +162,40 @@ export const PRODUCT_SIZES: Volume[] = [
 export const INITIAL_PRODUCT_SIZE: Volume = { kind: 'milliliters', ml: 750 };
 
 /**
+ * Curated US-common subset turned on by default for new accounts. Niche sizes
+ * (European/Japanese bottles, growlers, metric kegs, alt BIBs) are off by
+ * default but available on the Container Sizes settings page.
+ *
+ * Labels are matched against `volumeLabel(...)` output. Keep in sync with
+ * PRODUCT_SIZES — if a label changes, this list needs the update too.
+ */
+export const DEFAULT_ENABLED_PRODUCT_SIZE_LABELS: string[] = [
+  // Spirits / mixers — 200ml, 375ml, 500ml, 750ml, 1L, 1.75L
+  '200ml',
+  '375ml',
+  '500ml',
+  '750ml',
+  '1L',
+  '1.75L',
+  // Wine extras — 187ml split, 1.5L magnum
+  '187ml',
+  '1.5L',
+  // Beer packaged
+  '1 Can/Bottle',
+  '4 pack',
+  '6 pack',
+  '12 pack',
+  '24 pack',
+  '30 pack',
+  // Beer draft
+  'Half Barrel',
+  'Sixth Barrel',
+  'Quarter Barrel',
+  // Non-alc
+  '5 gal BIB',
+];
+
+/**
  * Maps ingredient types to applicable product size indices.
  * If a type isn't listed, all sizes are shown.
  */
@@ -254,14 +288,31 @@ const SUBTYPE_SIZE_MAP: Record<string, number[]> = {
   'Tap': NA_TAP_SIZES,
 };
 
-/** Get product sizes filtered by ingredient type and optional subtype */
-export function getProductSizesForType(type?: string, subType?: string): Volume[] {
-  // Subtype-specific sizes take priority
+/** Get product sizes filtered by ingredient type and optional subtype.
+ *  When `enabledLabels` is provided, additionally filter to sizes the user
+ *  has turned on in Container Sizes settings. Pass `currentLabel` to ensure
+ *  the active selection still appears even if it's been disabled. */
+export function getProductSizesForType(
+  type?: string,
+  subType?: string,
+  enabledLabels?: string[],
+  currentLabel?: string,
+): Volume[] {
+  let sizes: Volume[];
   if (subType && SUBTYPE_SIZE_MAP[subType]) {
-    return SUBTYPE_SIZE_MAP[subType].map(i => PRODUCT_SIZES[i]).filter(Boolean);
+    sizes = SUBTYPE_SIZE_MAP[subType].map(i => PRODUCT_SIZES[i]).filter(Boolean);
+  } else if (!type || !PRODUCT_SIZE_MAP[type]) {
+    sizes = PRODUCT_SIZES;
+  } else {
+    sizes = PRODUCT_SIZE_MAP[type].map(i => PRODUCT_SIZES[i]).filter(Boolean);
   }
-  if (!type || !PRODUCT_SIZE_MAP[type]) return PRODUCT_SIZES;
-  return PRODUCT_SIZE_MAP[type].map(i => PRODUCT_SIZES[i]).filter(Boolean);
+
+  if (!enabledLabels || enabledLabels.length === 0) return sizes;
+  const enabledSet = new Set(enabledLabels);
+  return sizes.filter((s) => {
+    const label = volumeLabel(s);
+    return enabledSet.has(label) || label === currentLabel;
+  });
 }
 
 /** Get section label for a product size (for dropdown grouping) */

@@ -46,12 +46,12 @@ export default function GoogleSignInButton({ onSuccess, mode = 'sign-in' }: Goog
       {loading ? (
         <View className="flex-row items-center gap-3">
           <ActivityIndicator size="small" color={palette.N1} />
-          <Text style={styles.text}>Signing in…</Text>
+          <Text style={styles.text}>Signing In…</Text>
         </View>
       ) : (
         <>
           <AntDesign name="google" size={20} color="#4285F4" />
-          <Text style={styles.text}>{mode === 'sign-up' ? 'Sign up with Google' : 'Sign in with Google'}</Text>
+          <Text style={styles.text}>{mode === 'sign-up' ? 'Sign Up With Google' : 'Sign In With Google'}</Text>
         </>
       )}
     </Pressable>

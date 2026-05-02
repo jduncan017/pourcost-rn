@@ -430,7 +430,7 @@ export default function IngredientsScreen() {
               title={
                 searchQuery || selectedType !== 'All'
                   ? 'No ingredients found'
-                  : 'My Inventory is empty'
+                  : 'Bar Inventory is empty'
               }
               description={
                 searchQuery

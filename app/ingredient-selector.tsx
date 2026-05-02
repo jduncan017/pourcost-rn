@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
-import { View, Text, ScrollView, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, Pressable, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   LinearTransition,
 } from 'react-native-reanimated';
-import { useNavigation, useLocalSearchParams, useFocusEffect, type Href } from 'expo-router';
+import { useNavigation, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import HeaderSavePill from '@/src/components/ui/HeaderSavePill';
+import FormSaveBar from '@/src/components/ui/FormSaveBar';
 import SearchBar from '@/src/components/ui/SearchBar';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SuggestedTitle from '@/src/components/ui/SuggestedTitle';
-import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
+import { useThemeColors, useIsDarkMode, palette } from '@/src/contexts/ThemeContext';
 import { ingredientTypeIcon } from '@/src/lib/type-icons';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { useCocktailsStore } from '@/src/stores/cocktails-store';
@@ -23,6 +23,13 @@ import { SavedIngredient, CocktailIngredient, fraction } from '@/src/types/model
 import { calculateCostPerOz, calculateCostPerPour } from '@/src/services/calculation-service';
 import { getIngredientUsageCounts, sortByUsage } from '@/src/lib/ingredientUsage';
 import { useIngredientSelectionStore } from '@/src/stores/ingredient-selection-store';
+import {
+  searchCanonicalProducts,
+  mapCanonicalToType,
+  type CanonicalProductSummary,
+} from '@/src/lib/canonical-products';
+
+const DATABASE_DEBOUNCE_MS = 250;
 
 const FADE_DURATION = 400;
 
@@ -53,6 +60,7 @@ export default function IngredientSelectorScreen() {
   const navigation = useNavigation();
   const params = useLocalSearchParams();
   const colors = useThemeColors();
+  const isDark = useIsDarkMode();
   const { setSelectedIngredients: setStoreIngredients, setRemovedIngredientIds } = useIngredientSelectionStore();
   const { ingredients: allIngredients } = useIngredientsStore();
   const { cocktails } = useCocktailsStore();
@@ -62,6 +70,67 @@ export default function IngredientSelectorScreen() {
   const [selectedIngredients, setSelectedIngredients] = useState<SavedIngredient[]>([]);
   const [initialExistingIds, setInitialExistingIds] = useState<string[]>([]);
   const [fadingIds, setFadingIds] = useState<Set<string>>(new Set());
+
+  // Inline Spirit Database expander — collapsed by default, opens when the
+  // user explicitly asks for database results below their library.
+  const [showDatabase, setShowDatabase] = useState(false);
+  const [databaseResults, setDatabaseResults] = useState<CanonicalProductSummary[]>([]);
+  const [databaseLoading, setDatabaseLoading] = useState(false);
+  const databaseDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Reset the database expander when the user clears the search box. Keeps
+  // the section from sticking around when there's no query to drive it.
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setShowDatabase(false);
+      setDatabaseResults([]);
+    }
+  }, [searchQuery]);
+
+  // Auto-open the database section the moment the user's library has no
+  // matches — that's when the catalog is most useful and the manual expander
+  // tap becomes friction. Stays open through subsequent typing so results
+  // don't flicker back behind the collapser.
+
+  // Debounced canonical search when the database section is expanded.
+  useEffect(() => {
+    if (databaseDebounceRef.current) clearTimeout(databaseDebounceRef.current);
+    if (!showDatabase || searchQuery.trim().length < 2) {
+      setDatabaseResults([]);
+      setDatabaseLoading(false);
+      return;
+    }
+    setDatabaseLoading(true);
+    databaseDebounceRef.current = setTimeout(async () => {
+      const found = await searchCanonicalProducts(searchQuery);
+      setDatabaseResults(found);
+      setDatabaseLoading(false);
+    }, DATABASE_DEBOUNCE_MS);
+    return () => {
+      if (databaseDebounceRef.current) clearTimeout(databaseDebounceRef.current);
+    };
+  }, [searchQuery, showDatabase]);
+
+  const goToFormWithCanonical = (product: CanonicalProductSummary) => {
+    const { ingredientType, subType } = mapCanonicalToType(product);
+    const firstSize = product.defaultSizes[0];
+    router.push({
+      pathname: '/ingredient-form',
+      params: {
+        canonicalProductId: product.id,
+        name: product.name,
+        description: product.description ?? undefined,
+        abv: product.abv != null ? String(product.abv) : undefined,
+        type: ingredientType,
+        subType: subType || undefined,
+        productSize: firstSize ? JSON.stringify(firstSize) : undefined,
+      },
+    });
+  };
+
+  const goToFormEmpty = () => {
+    router.push({ pathname: '/ingredient-form', params: { name: searchQuery.trim() || undefined } });
+  };
 
   // Track ingredient count to detect newly created ingredients
   const prevIngredientCountRef = useRef(allIngredients.length);
@@ -99,6 +168,14 @@ export default function IngredientSelectorScreen() {
     }, [allIngredients.length])
   );
 
+  // Header right Create button — iOS 26 wraps interactive headerRight items
+  // in a Liquid Glass capsule automatically; that's the desired aesthetic
+  // here since this is a secondary action sitting next to a primary list.
+  // Ref pattern keeps the header pinned without re-setting options on every
+  // searchQuery keystroke.
+  const createRef = useRef<() => void>(() => {});
+  createRef.current = () => goToFormEmpty();
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: 'Add Ingredients',
@@ -108,9 +185,20 @@ export default function IngredientSelectorScreen() {
           <Text style={{ color: colors.text, fontSize: 16 }}>Cancel</Text>
         </Pressable>
       ),
-      headerRight: () => <HeaderSavePill onPress={handleFinishSelection} />,
+      headerRight: () => (
+        <Pressable
+          onPress={() => createRef.current()}
+          className="flex-row items-center gap-1 px-3 py-1.5"
+          hitSlop={6}
+        >
+          <Ionicons name="add" size={16} color={colors.text} />
+          <Text style={{ color: colors.text, fontSize: 15, fontWeight: '600' }}>
+            Create
+          </Text>
+        </Pressable>
+      ),
     });
-  }, [selectedIngredients.length, navigation, colors]);
+  }, [navigation, colors]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -212,11 +300,67 @@ export default function IngredientSelectorScreen() {
     return sortByUsage(filtered, usageCounts);
   }, [searchQuery, allIngredients, usageCounts]);
 
+  // Auto-show DB section when the user's library returns 3 or fewer matches
+  // for the active query. Threshold (vs strict zero) handles the case where
+  // a user has e.g. one vodka in inventory but is looking for something
+  // else — the DB results come up automatically without an extra tap.
+  // Once on, stays on until the user clears the search.
+  useEffect(() => {
+    if (searchQuery.trim().length >= 2 && searchResults.length <= 3) {
+      setShowDatabase(true);
+    }
+  }, [searchQuery, searchResults]);
+
   // Check if an ingredient is currently selected
   const isIngredientSelected = useCallback(
     (id: string) => !!selectedIngredients.find(item => item.id === id),
     [selectedIngredients]
   );
+
+  // Render a Spirit Database (canonical) row using the same visual as the
+  // library row — typed icon, name, subtitle, add-circle on the right —
+  // so the two sections feel like one continuous list.
+  const renderDatabaseRow = (product: CanonicalProductSummary) => {
+    const { ingredientType } = mapCanonicalToType(product);
+    const icon = ingredientTypeIcon(ingredientType);
+    const subtitle = [product.brand, product.subcategory ?? product.category]
+      .filter((s) => s && s !== product.name)
+      .join(' · ');
+    return (
+      <Pressable
+        key={product.id}
+        onPress={() => goToFormWithCanonical(product)}
+        className="flex-row items-center py-3"
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+      >
+        <MaterialCommunityIcons
+          name={icon.name}
+          size={22}
+          color={icon.color}
+          style={{ marginRight: 12 }}
+        />
+        <View className="flex-1">
+          <Text
+            className="text-base"
+            style={{ color: colors.text, fontWeight: '500' }}
+            numberOfLines={1}
+          >
+            {product.name}
+          </Text>
+          {subtitle ? (
+            <Text
+              className="text-sm mt-0.5"
+              style={{ color: colors.textTertiary }}
+              numberOfLines={1}
+            >
+              {subtitle}
+            </Text>
+          ) : null}
+        </View>
+        <Ionicons name="add-circle" size={26} color={colors.success} />
+      </Pressable>
+    );
+  };
 
   // Render an ingredient row — matches search page row visual with a typed
   // icon, and an add-circle indicator on the right. Tapping the whole row adds.
@@ -275,11 +419,21 @@ export default function IngredientSelectorScreen() {
           keyboardShouldPersistTaps="handled"
         >
         <View className="px-6 pt-4 pb-6 flex-col gap-6">
+          {/* Helper — points the user at the header Create button when their
+              ingredient isn't in their inventory or the Spirit Database. */}
+          <Text
+            className="text-sm leading-5"
+            style={{ color: colors.textSecondary }}
+          >
+            Search for an ingredient or create a new one above.
+          </Text>
+
           {/* Search Bar */}
           <SearchBar
             placeholder="Search ingredients..."
             value={searchQuery}
             onChangeText={handleSearch}
+            autoFocus
           />
 
           {/* Selected queue — only when there's something selected */}
@@ -341,38 +495,99 @@ export default function IngredientSelectorScreen() {
           {/* Search Results or Suggested */}
           {hasSearched ? (
             <View className="flex-col">
-              <ScreenTitle
-                title={`Search Results (${searchResults.filter(i => !isIngredientSelected(i.id) || fadingIds.has(i.id)).length})`}
-                variant="muted"
-                className="mb-1"
-              />
+              {(() => {
+                const visibleLibrary = searchResults.filter(
+                  (i) => !isIngredientSelected(i.id) || fadingIds.has(i.id),
+                );
+                const libraryEmpty = visibleLibrary.length === 0;
+                return (
+                  <>
+                    <ScreenTitle
+                      title={`Your Inventory (${visibleLibrary.length})`}
+                      variant="muted"
+                      className="mb-1"
+                    />
 
-              {searchResults.filter(i => !isIngredientSelected(i.id) || fadingIds.has(i.id)).length === 0 ? (
-                <View className="py-8 items-center flex-col gap-2">
-                  <Ionicons name="search" size={40} color={colors.textTertiary} />
-                  <Text
-                    className="text-center"
-                    style={{ color: colors.text, fontWeight: '500' }}
-                  >
-                    Nothing in My Inventory yet
-                  </Text>
-                  <Text
-                    className="text-sm text-center"
-                    style={{ color: colors.textTertiary }}
-                  >
-                    Tap "Don't see it?" below to search the Spirit Database or create a custom ingredient.
-                  </Text>
-                </View>
-              ) : (
-                <Animated.View layout={LinearTransition.duration(300)}>
-                  {searchResults
-                    .filter(i => !isIngredientSelected(i.id) || fadingIds.has(i.id))
-                    .map((ingredient, index) => {
-                      const isSuggested = index === 0 && (usageCounts.get(ingredient.id) ?? 0) > 0;
-                      return renderIngredientRow(ingredient, isSuggested);
-                    })}
-                </Animated.View>
-              )}
+                    {libraryEmpty ? (
+                      <Text
+                        className="text-sm py-2"
+                        style={{ color: colors.textTertiary }}
+                      >
+                        No matches in Your Inventory.
+                      </Text>
+                    ) : (
+                      <Animated.View layout={LinearTransition.duration(300)}>
+                        {visibleLibrary.map((ingredient, index) => {
+                          const isSuggested =
+                            index === 0 && (usageCounts.get(ingredient.id) ?? 0) > 0;
+                          return renderIngredientRow(ingredient, isSuggested);
+                        })}
+                      </Animated.View>
+                    )}
+
+                    {/* Spirit Database expander — only after the user has typed.
+                        Tapping loads canonical results inline below, on the
+                        same screen. Tapping a result routes to ingredient-form
+                        with prefill; the new ingredient auto-selects on
+                        return via the useFocusEffect above. */}
+                    {!showDatabase && (
+                      <Pressable
+                        onPress={() => setShowDatabase(true)}
+                        className="flex-row items-center justify-center gap-2 py-3 mt-3 rounded-full"
+                        style={{ backgroundColor: palette.P2 }}
+                      >
+                        <Ionicons name="add" size={18} color={palette.P8} />
+                        <Text
+                          style={{ color: palette.P8, fontWeight: '700', fontSize: 14 }}
+                        >
+                          Show Spirit Database Results
+                        </Text>
+                      </Pressable>
+                    )}
+
+                    {showDatabase && (
+                      <View className="flex-col mt-3">
+                        <ScreenTitle
+                          title={`Spirit Database${
+                            !databaseLoading ? ` (${databaseResults.length})` : ''
+                          }`}
+                          variant="muted"
+                          className="mb-1"
+                        />
+
+                        {databaseLoading && (
+                          <View className="flex-row items-center gap-2 py-2">
+                            <ActivityIndicator size="small" color={colors.textSecondary} />
+                            <Text className="text-sm" style={{ color: colors.textTertiary }}>
+                              Searching Spirit Database…
+                            </Text>
+                          </View>
+                        )}
+
+                        {!databaseLoading && databaseResults.length === 0 && (
+                          <Text
+                            className="text-sm py-2"
+                            style={{ color: colors.textTertiary }}
+                          >
+                            {searchQuery.trim().length < 2
+                              ? 'Type at least 2 characters to search the Spirit Database.'
+                              : 'No matches in the Spirit Database.'}
+                          </Text>
+                        )}
+
+                        {!databaseLoading && databaseResults.length > 0 && (
+                          <Animated.View layout={LinearTransition.duration(300)}>
+                            {databaseResults.map((product) =>
+                              renderDatabaseRow(product),
+                            )}
+                          </Animated.View>
+                        )}
+                      </View>
+                    )}
+
+                  </>
+                );
+              })()}
             </View>
           ) : (
             nonFadingCount > 0 && (
@@ -389,30 +604,26 @@ export default function IngredientSelectorScreen() {
               </View>
             )
           )}
-
-          {/* Catalog or custom ingredient CTA. Routes to /ingredient-create
-              (the catalog picker) so the user lands on a clearly-framed
-              search-first screen with a "Create from scratch" option below.
-              Newly created ingredients are auto-selected on return via the
-              useFocusEffect at the top of this screen. */}
-          <Pressable
-            onPress={() => router.push('/ingredient-create' as Href)}
-            className="flex-row items-center justify-center gap-2 py-3 rounded-xl"
-            style={{ backgroundColor: colors.accent }}
-          >
-            <Ionicons name="search" size={18} color={palette.N1} />
-            <Text style={{ color: palette.N1, fontWeight: '600', fontSize: 16 }}>
-              Don't See It? Search Spirit Database
-            </Text>
-          </Pressable>
-          <Text
-            className="text-xs text-center"
-            style={{ color: colors.textTertiary }}
-          >
-            Adds to My Inventory before adding to this recipe.
-          </Text>
         </View>
         </ScrollView>
+
+        {/* Sticky Done bar — anchored to the bottom so search results scroll
+            *under* it without pushing it offscreen. Background matches the
+            "to" color of GradientBackground (B8 dark / B1 light) so the bar
+            blends with the screen's gradient bottom. */}
+        <View
+          style={{
+            paddingHorizontal: 24,
+            paddingTop: 12,
+            paddingBottom: insets.bottom + 12,
+            backgroundColor: isDark ? palette.B8 : palette.B1,
+          }}
+        >
+          <FormSaveBar
+            onPress={handleFinishSelection}
+            label={selectedIngredients.length > 0 ? `Done (${selectedIngredients.length})` : 'Done'}
+          />
+        </View>
       </KeyboardAvoidingView>
     </GradientBackground>
   );
