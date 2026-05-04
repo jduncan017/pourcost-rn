@@ -74,7 +74,7 @@ export default function SettingsScreen() {
             <SettingsCard
               tone="gold"
               title="Verify Your Email"
-              description="Tap to confirm your email and unlock cross-device sync"
+              description="Tap to confirm your email so your bar syncs across devices"
               iconName="alert-circle-outline"
               onPress={() => router.push('/settings-account' as any)}
               showCaret

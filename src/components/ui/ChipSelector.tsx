@@ -17,6 +17,8 @@ export interface ChipSelectorProps {
 
   label?: string;
   showLabel?: boolean;
+  /** Render a red ` *` after the label to mark the field as required. */
+  required?: boolean;
 
   multiple?: boolean;
   selectedOptions?: string[];
@@ -37,6 +39,7 @@ export default function ChipSelector({
   onSelectionChange,
   label,
   showLabel = true,
+  required = false,
   multiple = false,
   selectedOptions = [],
   onMultipleSelectionChange,
@@ -144,6 +147,7 @@ export default function ChipSelector({
           style={{ color: colors.textTertiary, fontWeight: '600' }}
         >
           {label}
+          {required && <Text style={{ color: colors.error }}> *</Text>}
         </Text>
       )}
       {renderChips()}

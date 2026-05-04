@@ -9,16 +9,15 @@ import {
   Platform,
 } from 'react-native';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGuardedRouter } from '@/src/lib/guarded-router';
 import { Ionicons } from '@expo/vector-icons';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import FormSaveBar from '@/src/components/ui/FormSaveBar';
 import { useUnsavedChangesGuard } from '@/src/lib/useUnsavedChangesGuard';
 import TextInput from '@/src/components/ui/TextInput';
 import Dropdown from '@/src/components/ui/Dropdown';
-import MetricRow from '@/src/components/ui/MetricRow';
-import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
-import PourCostHero from '@/src/components/PourCostHero';
+import Toggle from '@/src/components/ui/Toggle';
+import BottomSheet from '@/src/components/ui/BottomSheet';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { useIngredientsStore } from '@/src/stores/ingredients-store';
 import { useAppStore } from '@/src/stores/app-store';
@@ -27,14 +26,6 @@ import {
   getProductSizesForType,
   getProductSizeSection,
 } from '@/src/constants/appConstants';
-import {
-  calculateCostPerOz,
-  calculateCostPerPour,
-  calculateSuggestedPrice,
-  formatCurrency,
-  roundSuggestedPrice,
-} from '@/src/services/calculation-service';
-import { useHeroTargetForIngredient } from '@/src/lib/useHeroTarget';
 import { FeedbackService } from '@/src/services/feedback-service';
 
 /**
@@ -52,6 +43,7 @@ import { FeedbackService } from '@/src/services/feedback-service';
 export default function IngredientSizeFormScreen() {
   const router = useGuardedRouter();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const colors = useThemeColors();
 
@@ -61,9 +53,15 @@ export default function IngredientSizeFormScreen() {
   const isEditingConfig = !!configIdParam && !isEditingDefault;
   const isAdding = !configIdParam;
 
-  const { ingredients, updateIngredient, addConfiguration, updateConfiguration, deleteConfiguration } =
-    useIngredientsStore();
-  const { suggestedPriceRounding, enabledProductSizes } = useAppStore();
+  const {
+    ingredients,
+    updateIngredient,
+    addConfiguration,
+    updateConfiguration,
+    deleteConfiguration,
+    setDefaultConfiguration,
+  } = useIngredientsStore();
+  const enabledProductSizes = useAppStore((s) => s.enabledProductSizes);
   const ingredient = ingredients.find((i) => i.id === ingredientId);
 
   // Initial size + price values come from whichever record we're editing.
@@ -76,13 +74,25 @@ export default function IngredientSizeFormScreen() {
       const cfg = ingredient.configurations?.find((c) => c.id === configIdParam);
       if (cfg) return { productSize: cfg.productSize, productCost: cfg.productCost };
     }
-    // Adding a new size — default to a sensible bottle for this ingredient type.
-    const defaults = getProductSizesForType(ingredient.type, ingredient.subType);
+    // Adding a new size — pick the first size for this ingredient type that
+    // isn't already configured (so the dropdown doesn't open with a duplicate
+    // pre-selected and immediately raise a "size already configured" error).
+    const allForType = getProductSizesForType(
+      ingredient.type,
+      ingredient.subType,
+      enabledProductSizes,
+    );
+    const taken = new Set<string>([
+      volumeLabel(ingredient.productSize),
+      ...(ingredient.configurations ?? []).map((c) => volumeLabel(c.productSize)),
+    ]);
+    const firstFree = allForType.find((s) => !taken.has(volumeLabel(s)));
     return {
-      productSize: defaults[0] ?? ({ kind: 'milliliters', ml: 750 } as Volume),
+      productSize:
+        firstFree ?? allForType[0] ?? ({ kind: 'milliliters', ml: 750 } as Volume),
       productCost: 0,
     };
-  }, [ingredient, isEditingDefault, isEditingConfig, configIdParam]);
+  }, [ingredient, isEditingDefault, isEditingConfig, configIdParam, enabledProductSizes]);
 
   const [productSize, setProductSize] = useState<Volume>(
     initial?.productSize ?? ({ kind: 'milliliters', ml: 750 } as Volume)
@@ -91,6 +101,17 @@ export default function IngredientSizeFormScreen() {
     initial ? initial.productCost.toFixed(2) : '0.00'
   );
   const productCost = parseFloat(productCostText) || 0;
+
+  // Set-as-default toggle. Initialized:
+  //   - editing the default → on, locked (already default)
+  //   - editing a config or adding new → off (user opts in)
+  // Applied at save time (after the size + cost write succeeds), not
+  // immediately on toggle.
+  const [setAsDefault, setSetAsDefault] = useState(isEditingDefault);
+
+  // Pick-new-default sheet shown when the user tries to delete the default
+  // size and there are other configurations to promote to default.
+  const [showPickNewDefault, setShowPickNewDefault] = useState(false);
 
   const currentSizeLabel = volumeLabel(productSize);
   const sizeOptions = useMemo(() => {
@@ -117,24 +138,6 @@ export default function IngredientSizeFormScreen() {
     ).find((s) => volumeLabel(s) === selectedLabel);
     if (match) setProductSize(match);
   };
-
-  // Preview — uses the ingredient's pour size + retail price.
-  const effectivePourSize = ingredient?.pourSize ?? useAppStore.getState().defaultPourSize;
-  const effectiveRetail = ingredient?.retailPrice ?? useAppStore.getState().defaultRetailPrice;
-  const costPerOz = calculateCostPerOz(productSize, productCost);
-  const costPerPour = calculateCostPerPour(productSize, productCost, effectivePourSize);
-
-  // Tier + pricing-mode-aware target driven by the LIVE productCost being edited.
-  const { targetGoal: targetPct, targetLabel } = useHeroTargetForIngredient({
-    type: ingredient?.type,
-    productCost,
-  });
-  const suggestedRetail = roundSuggestedPrice(
-    calculateSuggestedPrice(costPerPour, targetPct / 100),
-    suggestedPriceRounding
-  );
-  const pourCostPercentage =
-    effectiveRetail > 0 ? (costPerPour / effectiveRetail) * 100 : 0;
 
   const isValid = productCost > 0 && volumeToOunces(productSize) > 0;
   const isDuplicate = useMemo(() => {
@@ -178,12 +181,22 @@ export default function IngredientSizeFormScreen() {
 
     setIsSaving(true);
     try {
+      let configIdToPromote: string | null = null;
       if (isEditingDefault) {
         await updateIngredient(ingredient.id, { productSize, productCost });
+        // Editing the default — it's still the default. The toggle is
+        // locked on; nothing to swap.
       } else if (isEditingConfig && configIdParam) {
         await updateConfiguration(ingredient.id, configIdParam, { productSize, productCost });
+        if (setAsDefault) configIdToPromote = configIdParam;
       } else {
-        await addConfiguration(ingredient.id, { productSize, productCost });
+        const created = await addConfiguration(ingredient.id, { productSize, productCost });
+        if (setAsDefault) configIdToPromote = created.id;
+      }
+      // Apply set-as-default after the row exists so the swap has a valid
+      // target. No-op if the toggle was off or this row is already the default.
+      if (configIdToPromote) {
+        await setDefaultConfiguration(ingredient.id, configIdToPromote);
       }
       guard.bypass();
       router.back();
@@ -195,8 +208,25 @@ export default function IngredientSizeFormScreen() {
   };
   saveRef.current = handleSave;
 
+  const otherConfigs = useMemo(
+    () =>
+      ingredient
+        ? (ingredient.configurations ?? []).filter((c) => c.id !== configIdParam)
+        : [],
+    [ingredient, configIdParam],
+  );
+  const canDelete = isEditingConfig || (isEditingDefault && otherConfigs.length > 0);
+
   const handleDelete = () => {
-    if (!ingredient || !configIdParam) return;
+    if (!ingredient) return;
+    if (isEditingDefault) {
+      // Default size — promote a sibling first, then delete the previous
+      // default (which has been demoted to a config row by the swap).
+      if (otherConfigs.length === 0) return; // canDelete guards this in UI
+      setShowPickNewDefault(true);
+      return;
+    }
+    if (!configIdParam) return;
     FeedbackService.showDeleteConfirmation(
       volumeLabel(productSize),
       async () => {
@@ -208,6 +238,24 @@ export default function IngredientSizeFormScreen() {
     );
   };
 
+  const handleConfirmNewDefault = async (newDefaultConfigId: string) => {
+    if (!ingredient) return;
+    setShowPickNewDefault(false);
+    try {
+      // Step 1: swap → promoted config becomes default; old default's
+      // values move into that config row.
+      await setDefaultConfiguration(ingredient.id, newDefaultConfigId);
+      // Step 2: delete the row that's now holding the OLD default values.
+      await deleteConfiguration(ingredient.id, newDefaultConfigId);
+      guard.bypass();
+      router.back();
+    } catch (err) {
+      Alert.alert('Error', err instanceof Error ? err.message : 'Failed to delete size');
+    }
+  };
+
+  // Header right Save — small "+ Save" target gets iOS 26's auto Liquid
+  // Glass treatment, matches the canonical preview screen pattern.
   useLayoutEffect(() => {
     navigation.setOptions({
       title: isAdding ? 'Add Size' : 'Edit Size',
@@ -220,8 +268,25 @@ export default function IngredientSizeFormScreen() {
           <Text style={{ color: colors.textSecondary, fontSize: 16 }}>Cancel</Text>
         </Pressable>
       ),
+      headerRight: () => {
+        const inactive = !isValid || isSaving;
+        return (
+          <Pressable
+            onPress={() => saveRef.current()}
+            disabled={inactive}
+            className="flex-row items-center gap-1 px-3 py-1.5"
+            hitSlop={6}
+            style={{ opacity: inactive ? 0.4 : 1 }}
+          >
+            <Ionicons name="checkmark" size={16} color={colors.go} />
+            <Text style={{ color: colors.go, fontSize: 15, fontWeight: '700' }}>
+              {isSaving ? 'Saving…' : 'Save'}
+            </Text>
+          </Pressable>
+        );
+      },
     });
-  }, [navigation, colors, isAdding]);
+  }, [navigation, colors, isAdding, isValid, isSaving]);
 
   if (!ingredient) {
     return (
@@ -244,56 +309,28 @@ export default function IngredientSizeFormScreen() {
           keyboardShouldPersistTaps="handled"
           pointerEvents={isSaving ? 'none' : 'auto'}
         >
-          <View className="px-6 pt-4 pb-6 flex-col gap-7">
-            {/* Context — which ingredient we're editing + the retail price
-                that drives suggested pricing / pour-cost % in the preview below. */}
-            <View className="flex-col gap-3">
-              <View className="flex-col gap-1">
-                <Text
-                  className="text-[11px] tracking-widest uppercase"
-                  style={{ color: colors.textTertiary, fontWeight: '600' }}
-                >
-                  For Ingredient
+          <View className="px-6 pt-4 pb-6 flex-col gap-6">
+            {/* Context — which ingredient we're editing. The "(default size)"
+                line replaces the toggle when this row is already the default,
+                since you can't un-make-it default in place. */}
+            <View className="flex-col gap-1">
+              <Text
+                className="text-[11px] tracking-widest uppercase"
+                style={{ color: colors.textTertiary, fontWeight: '600' }}
+              >
+                For Ingredient
+              </Text>
+              <Text className="text-lg" style={{ color: colors.text, fontWeight: '600' }}>
+                {ingredient.name}
+              </Text>
+              {isEditingDefault && (
+                <Text className="text-sm" style={{ color: colors.textTertiary }}>
+                  (default size)
                 </Text>
-                <Text className="text-lg" style={{ color: colors.text, fontWeight: '600' }}>
-                  {ingredient.name}
-                </Text>
-              </View>
-
-              {!ingredient.notForSale && (
-                <View
-                  className="flex-row items-center justify-between px-3 py-2 rounded-lg"
-                  style={{
-                    backgroundColor: colors.surface,
-                    borderWidth: 1,
-                    borderColor: colors.borderSubtle,
-                  }}
-                >
-                  <View className="flex-col">
-                    <Text
-                      className="text-[10px] tracking-widest uppercase"
-                      style={{ color: colors.textTertiary, fontWeight: '600' }}
-                    >
-                      Retail Price
-                    </Text>
-                    <Text
-                      className="text-base"
-                      style={{ color: colors.text, fontWeight: '600' }}
-                    >
-                      {formatCurrency(effectiveRetail)}
-                    </Text>
-                  </View>
-                  <Text
-                    className="text-xs"
-                    style={{ color: colors.textTertiary }}
-                  >
-                    Set on ingredient
-                  </Text>
-                </View>
               )}
             </View>
 
-            {/* Size + price */}
+            {/* Size + cost */}
             <View className="flex-col gap-5">
               <Dropdown
                 value={volumeLabel(productSize)}
@@ -301,10 +338,27 @@ export default function IngredientSizeFormScreen() {
                 options={sizeOptions}
                 label="Bottle Size"
                 placeholder="Select size"
+                sheetHeaderRight={(close) => (
+                  <Pressable
+                    onPress={() => {
+                      close();
+                      router.push('/container-sizes' as any);
+                    }}
+                    className="px-3 py-1.5"
+                    hitSlop={6}
+                  >
+                    <Text
+                      style={{ color: colors.accent, fontWeight: '600', fontSize: 14 }}
+                    >
+                      Edit
+                    </Text>
+                  </Pressable>
+                )}
               />
 
               <TextInput
-                label={`Cost / ${volumeLabel(productSize)} *`}
+                label={`Cost / ${volumeLabel(productSize)}`}
+                required
                 value={productCostText}
                 onChangeText={(text) => {
                   if (text === '' || /^\d*\.?\d*$/.test(text)) {
@@ -323,61 +377,87 @@ export default function IngredientSizeFormScreen() {
               )}
             </View>
 
-            {/* Preview metrics — driven by the ingredient's default pour size + retail. */}
-            <View className="flex-col gap-3">
-              <Text
-                className="text-[11px] tracking-widest uppercase"
-                style={{ color: colors.textTertiary, fontWeight: '600' }}
+            {/* Set As Default — toggle. Hidden on the default page (the
+                line under the ingredient name covers that state). On a
+                config or new-size page, flipping this on swaps after the
+                size+cost write succeeds inside Save. */}
+            {!isEditingDefault && (
+              <View
+                className="flex-row items-center justify-between rounded-xl px-4 py-3"
+                style={{
+                  backgroundColor: colors.surface,
+                  borderWidth: 1,
+                  borderColor: colors.borderSubtle,
+                }}
               >
-                Preview at this Price
-              </Text>
-              <MetricRow label="Cost / Oz:" value={`$${costPerOz.toFixed(3)}`} />
-              <MetricRow
-                label={`Cost / ${volumeLabel(effectivePourSize)} pour:`}
-                value={formatCurrency(costPerPour)}
-              />
-              {ingredient.notForSale ? null : (
-                <AiSuggestionRow
-                  label="Suggested Retail"
-                  value={formatCurrency(suggestedRetail)}
-                  infoTermKey="suggestedPrice"
-                />
-              )}
-            </View>
-
-            {ingredient.notForSale ? null : (
-              <View className="-mx-6">
-                <PourCostHero
-                  pourCostPercentage={pourCostPercentage}
-                  targetGoal={targetPct}
-                  targetLabel={targetLabel ?? undefined}
-                />
+                <Text
+                  style={{ color: colors.text, fontWeight: '600', fontSize: 15 }}
+                >
+                  Set as default size
+                </Text>
+                <Toggle value={setAsDefault} onValueChange={setSetAsDefault} />
               </View>
             )}
-
-            <FormSaveBar
-              onPress={() => saveRef.current()}
-              disabled={!isValid || isSaving}
-              isSaving={isSaving}
-            />
-
-            {/* Delete — only available on stored configurations (not the default) */}
-            {isEditingConfig && (
-              <Pressable
-                onPress={handleDelete}
-                className="flex-row items-center justify-center gap-2 py-3"
-              >
-                <Ionicons name="trash-outline" size={18} color={colors.error} />
-                <Text style={{ color: colors.error, fontWeight: '500', fontSize: 16 }}>
-                  Delete Size
-                </Text>
-              </Pressable>
-            )}
-
-            <View className="h-8" />
           </View>
         </ScrollView>
+
+        {/* Delete — anchored to the bottom of the screen as a sibling of the
+            ScrollView so it stays at the bottom regardless of content height.
+            Hidden when this is the only size on the ingredient (delete the
+            ingredient itself from the ingredient form instead). */}
+        {canDelete && (
+          <Pressable
+            onPress={handleDelete}
+            className="flex-row items-center justify-center gap-2"
+            style={{
+              paddingTop: 12,
+              paddingBottom: insets.bottom + 16,
+            }}
+          >
+            <Ionicons name="trash-outline" size={18} color={colors.error} />
+            <Text style={{ color: colors.error, fontWeight: '500', fontSize: 16 }}>
+              Delete Size
+            </Text>
+          </Pressable>
+        )}
       </KeyboardAvoidingView>
+
+      {/* Pick-new-default sheet — fires when the user taps Delete on the
+          default size and there are other configs to promote. */}
+      <BottomSheet
+        visible={showPickNewDefault}
+        onClose={() => setShowPickNewDefault(false)}
+        title="Pick New Default"
+      >
+        <View className="px-4 pb-6 flex-col gap-2">
+          <Text className="text-sm leading-5 mb-2" style={{ color: colors.textSecondary }}>
+            Pick a new default. Then we'll delete the {volumeLabel(productSize)}.
+          </Text>
+          {otherConfigs.map((c) => (
+            <Pressable
+              key={c.id}
+              onPress={() => handleConfirmNewDefault(c.id)}
+              className="flex-row items-center justify-between rounded-xl px-4 py-3"
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.7 : 1,
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: colors.borderSubtle,
+              })}
+            >
+              <View className="flex-col">
+                <Text style={{ color: colors.text, fontWeight: '600', fontSize: 16 }}>
+                  {volumeLabel(c.productSize)}
+                </Text>
+                <Text style={{ color: colors.textTertiary, fontSize: 13 }}>
+                  ${c.productCost.toFixed(2)}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
+            </Pressable>
+          ))}
+        </View>
+      </BottomSheet>
     </GradientBackground>
   );
 }

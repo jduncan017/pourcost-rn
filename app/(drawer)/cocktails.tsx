@@ -192,7 +192,7 @@ export default function CocktailsScreen() {
       {/* Header */}
       <View className="mb-6 mt-4">
         <Text className="text-sm mb-3" style={{ color: colors.textTertiary }}>
-          Recipes you've built, with live cost and margin.
+          Recipes you've built. Cost and margin update with your ingredients.
         </Text>
         <View className="flex-row items-center gap-3">
           <View className="flex-1">

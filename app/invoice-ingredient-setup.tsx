@@ -31,11 +31,11 @@ import { useHeroTargetForIngredient } from '@/src/lib/useHeroTarget';
 import { FeedbackService } from '@/src/services/feedback-service';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import TextInput from '@/src/components/ui/TextInput';
+import SuggestedRetailInput from '@/src/components/ui/SuggestedRetailInput';
 import Button from '@/src/components/ui/Button';
 import Card from '@/src/components/ui/Card';
 import MetricRow from '@/src/components/ui/MetricRow';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
-import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
 import PourCostHero from '@/src/components/PourCostHero';
 import ChipSelector from '@/src/components/ui/ChipSelector';
 import {
@@ -100,15 +100,17 @@ export default function InvoiceIngredientSetupScreen() {
     (item?.category as IngredientType) ?? 'Spirit'
   );
   const [subType, setSubType] = useState(item?.subcategory ?? '');
-  const [retailPriceText, setRetailPriceText] = useState(() => {
-    if (!item) return '8.00';
-    // Default to suggested retail rounded up to nearest dollar
-    const pourSizeVol: Volume = defaultPourSize;
-    const costPerPour = calculateCostPerPour(item.volume, item.perBottlePrice, pourSizeVol);
-    const suggested = calculateSuggestedPrice(costPerPour, 0.2);
-    const rounded = Math.ceil(suggested);
-    return rounded > 0 ? String(rounded) : '8.00';
-  });
+  // Bottle cost — seeded from OCR. Suggested mode shows "From Invoice" pill;
+  // first keystroke flips to manual and the user's value drives all downstream
+  // calculations. Reset returns to the OCR value.
+  const [bottleCostText, setBottleCostText] = useState(
+    item?.perBottlePrice ? item.perBottlePrice.toFixed(2) : '',
+  );
+  const [isBottleCostManual, setIsBottleCostManual] = useState(false);
+  // Retail — fully computed from the suggested formula until the user types.
+  // Mirrors the cocktail-form / ingredient-form treatment.
+  const [retailPriceText, setRetailPriceText] = useState('');
+  const [retailIsManual, setRetailIsManual] = useState(false);
 
   // Reset form state when index changes
   const resetFormForIndex = useCallback((idx: number) => {
@@ -117,13 +119,11 @@ export default function InvoiceIngredientSetupScreen() {
     setName(itm.name);
     setIngredientType((itm.category as IngredientType) ?? 'Spirit');
     setSubType(itm.subcategory ?? '');
-
-    const pourSizeVol: Volume = defaultPourSize;
-    const costPerPour = calculateCostPerPour(itm.volume, itm.perBottlePrice, pourSizeVol);
-    const suggested = calculateSuggestedPrice(costPerPour, 0.2);
-    const rounded = Math.ceil(suggested);
-    setRetailPriceText(rounded > 0 ? String(rounded) : '8.00');
-  }, [items, defaultPourSize]);
+    setBottleCostText(itm.perBottlePrice ? itm.perBottlePrice.toFixed(2) : '');
+    setIsBottleCostManual(false);
+    setRetailPriceText('');
+    setRetailIsManual(false);
+  }, [items]);
 
   // Header
   useLayoutEffect(() => {
@@ -142,18 +142,23 @@ export default function InvoiceIngredientSetupScreen() {
     );
   }
 
-  // Calculations
-  const retailPrice = parseFloat(retailPriceText) || 0;
+  // Calculations — bottle cost flows from suggested-mode (OCR) or manual edit;
+  // retail flows from suggested formula or manual edit. Downstream math uses
+  // the effective values so the user always sees their changes propagate.
+  const effectiveBottleCost = isBottleCostManual
+    ? parseFloat(bottleCostText) || 0
+    : item.perBottlePrice;
   const pourSizeVolume: Volume = defaultPourSize;
-  const costPerOz = calculateCostPerOz(item.volume, item.perBottlePrice);
-  const costPerPour = calculateCostPerPour(item.volume, item.perBottlePrice, pourSizeVolume);
-  const pourCostPercentage = retailPrice > 0 ? (costPerPour / retailPrice) * 100 : 0;
+  const costPerOz = calculateCostPerOz(item.volume, effectiveBottleCost);
+  const costPerPour = calculateCostPerPour(item.volume, effectiveBottleCost, pourSizeVolume);
   const { targetGoal: targetPct, targetLabel } = useHeroTargetForIngredient({
     type: ingredientType,
-    productCost: item.perBottlePrice,
+    productCost: effectiveBottleCost,
   });
   const suggestedRetail = calculateSuggestedPrice(costPerPour, targetPct / 100);
-  const pourCostMargin = retailPrice - costPerPour;
+  const effectiveRetail = retailIsManual ? parseFloat(retailPriceText) || 0 : suggestedRetail;
+  const pourCostPercentage = effectiveRetail > 0 ? (costPerPour / effectiveRetail) * 100 : 0;
+  const pourCostMargin = effectiveRetail - costPerPour;
 
   const subtypes = SUBTYPES_BY_TYPE[ingredientType] ?? [];
 
@@ -169,8 +174,8 @@ export default function InvoiceIngredientSetupScreen() {
       const newIngredient = await addIngredient({
         name: name.trim(),
         productSize: item.volume,
-        productCost: item.perBottlePrice,
-        retailPrice: retailPrice > 0 ? retailPrice : undefined,
+        productCost: effectiveBottleCost,
+        retailPrice: effectiveRetail > 0 ? effectiveRetail : undefined,
         pourSize: pourSizeVolume,
         type: ingredientType,
         subType: subtypes.length > 0 ? subType || undefined : undefined,
@@ -183,9 +188,9 @@ export default function InvoiceIngredientSetupScreen() {
         .insert({
           ingredient_id: newIngredient.id,
           product_size: item.volume,
-          product_cost: item.perBottlePrice,
+          product_cost: effectiveBottleCost,
           pack_size: packSize,
-          pack_cost: Math.round(packSize * item.perBottlePrice * 100) / 100,
+          pack_cost: Math.round(packSize * effectiveBottleCost * 100) / 100,
           is_default: true,
           source: 'invoice',
           last_updated_price_at: new Date().toISOString(),
@@ -226,7 +231,7 @@ export default function InvoiceIngredientSetupScreen() {
     } finally {
       setIsSaving(false);
     }
-  }, [name, item, retailPrice, ingredientType, subType, isLast, currentIndex, invoiceId, total, router, addIngredient, resetFormForIndex, pourSizeVolume, subtypes]);
+  }, [name, item, effectiveBottleCost, effectiveRetail, ingredientType, subType, isLast, currentIndex, invoiceId, total, router, addIngredient, resetFormForIndex, pourSizeVolume, subtypes]);
 
   // Type chips
   const typeOptions = ['Spirit', 'Wine', 'Beer', 'Mixer', 'Other'];
@@ -264,7 +269,8 @@ export default function InvoiceIngredientSetupScreen() {
 
             <View className="flex-col gap-5">
               <TextInput
-                label="Ingredient Name *"
+                label="Ingredient Name"
+                required
                 value={name}
                 onChangeText={setName}
                 placeholder="e.g., Espolon Tequila Reposado"
@@ -301,12 +307,31 @@ export default function InvoiceIngredientSetupScreen() {
               <ScreenTitle title="FROM INVOICE" variant="group" />
             </View>
 
-            <Card displayClasses="flex flex-col gap-3" padding="medium">
+            <Card displayClasses="flex flex-col gap-4" padding="medium">
               <MetricRow label="Bottle Size:" value={volumeLabel(item.volume)} />
               {item.packSize > 1 && (
                 <MetricRow label="Pack Size:" value={`${item.packSize}-pack case`} />
               )}
-              <MetricRow label="Cost / Bottle:" value={formatCurrency(item.perBottlePrice)} />
+              <SuggestedRetailInput
+                label="Cost / Bottle"
+                value={bottleCostText}
+                onChangeText={(text) => {
+                  if (text === '' || /^\d*\.?\d*$/.test(text)) {
+                    setBottleCostText(text);
+                    setIsBottleCostManual(true);
+                  }
+                }}
+                isSuggesting={!isBottleCostManual}
+                onResetToSuggested={() => {
+                  setBottleCostText(item.perBottlePrice.toFixed(2));
+                  setIsBottleCostManual(false);
+                }}
+                pillLabel="From Invoice"
+                resetLabel="Reset to Invoice"
+                placeholder="0.00"
+                keyboardType="decimal-pad"
+                prefix="$"
+              />
               {item.sku && (
                 <MetricRow label="SKU:" value={item.sku} />
               )}
@@ -318,22 +343,30 @@ export default function InvoiceIngredientSetupScreen() {
             </View>
 
             <Card displayClasses="flex flex-col gap-6" padding="large">
-              <TextInput
-                label="Retail Price *"
-                value={retailPriceText}
+              <SuggestedRetailInput
+                label="Retail Price"
+                required
+                value={
+                  retailIsManual
+                    ? retailPriceText
+                    : suggestedRetail > 0
+                      ? suggestedRetail.toFixed(2)
+                      : ''
+                }
                 onChangeText={(text) => {
                   if (text === '' || /^\d*\.?\d*$/.test(text)) {
                     setRetailPriceText(text);
+                    setRetailIsManual(true);
                   }
+                }}
+                isSuggesting={!retailIsManual && suggestedRetail > 0}
+                onResetToSuggested={() => {
+                  setRetailIsManual(false);
+                  setRetailPriceText('');
                 }}
                 placeholder="0.00"
                 keyboardType="decimal-pad"
                 prefix="$"
-              />
-
-              <AiSuggestionRow
-                label="Suggested Retail"
-                value={formatCurrency(suggestedRetail)}
               />
 
               {/* Bleed Hero to card edges — Hero paints its own top/bottom hairlines. */}

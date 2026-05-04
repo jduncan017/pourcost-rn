@@ -101,6 +101,7 @@ export default function IngredientDetailScreen() {
   const {
     defaultPourSize,
     defaultRetailPrice,
+    defaultRetailPrices,
     detailLevel,
     suggestedPriceRounding,
     minIngredientPrice,
@@ -152,7 +153,10 @@ export default function IngredientDetailScreen() {
   const isDetailed = detailLevel === 'detailed';
   const isNotForSale = ingredient.notForSale === true;
   const effectivePourSize = ingredient.pourSize ?? defaultPourSize;
-  const effectiveRetailPrice = ingredient.retailPrice ?? defaultRetailPrice;
+  const effectiveRetailPrice =
+    ingredient.retailPrice ??
+    defaultRetailPrices[ingredient.type as keyof typeof defaultRetailPrices] ??
+    defaultRetailPrice;
 
   // Selectable size: the inline default + any stored configurations.
   // Each option is keyed by the volume label (one config per unique size).

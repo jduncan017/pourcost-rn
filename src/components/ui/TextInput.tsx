@@ -17,6 +17,12 @@ interface CustomTextInputProps extends Omit<TextInputProps, 'style'> {
   containerClassName?: string;
   inputClassName?: string;
   required?: boolean;
+  /** Override the default border color. Used by the suggested-retail wrapper
+   *  to render a purple-tinted border when the value is auto-computed. */
+  borderColor?: string;
+  /** Optional content rendered after the input (before the secure-toggle if
+   *  any). Used for "Suggested" pills and the like. */
+  rightAdornment?: React.ReactNode;
   /** Forwarded to the underlying RN TextInput. React 19 ref-as-prop pattern —
    *  no forwardRef needed and avoids the NativeWind cssInterop incompatibility
    *  with ForwardRefExoticComponent objects. */
@@ -32,6 +38,8 @@ export default function TextInput({
   inputClassName = '',
   required = false,
   secureTextEntry,
+  borderColor,
+  rightAdornment,
   ref,
   ...textInputProps
 }: CustomTextInputProps) {
@@ -58,7 +66,9 @@ export default function TextInput({
         style={{
           backgroundColor: error ? colors.errorSubtle : colors.surface,
           borderWidth: 1,
-          borderColor: error ? colors.error + '60' : colors.border,
+          borderColor: error
+            ? colors.error + '60'
+            : (borderColor ?? colors.border),
         }}
       >
         {icon && (
@@ -89,6 +99,8 @@ export default function TextInput({
           }}
           {...textInputProps}
         />
+
+        {rightAdornment}
 
         {isSecure && (
           <Pressable

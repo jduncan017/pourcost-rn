@@ -255,7 +255,7 @@ export async function adoptLibraryRecipes(args: AdoptArgs): Promise<AdoptResult>
         .filter((r): r is NonNullable<typeof r> => r !== null);
 
       if (ciRowsData.length === 0) {
-        result.errors.push(`Skipped "${recipe.name}" — no ingredients could be resolved.`);
+        result.errors.push(`Skipped "${recipe.name}". No ingredients could be resolved.`);
         continue;
       }
 

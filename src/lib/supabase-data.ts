@@ -7,6 +7,7 @@
 import { supabase } from './supabase';
 import { SavedIngredient, Cocktail, CocktailIngredient, IngredientConfiguration, Volume, fraction } from '@/src/types/models';
 import type { ThemeMode, IngredientOrderPref } from '@/src/stores/app-store';
+import type { IngredientType } from '@/src/constants/appConstants';
 
 // ==========================================
 // PROFILE TYPES & FUNCTIONS
@@ -20,6 +21,8 @@ interface ProfileRow {
   wine_pour_cost_goal: number | null;
   default_pour_size: Volume | null;
   default_retail_price: number;
+  default_pour_sizes: Partial<Record<IngredientType, Volume>> | null;
+  default_retail_prices: Partial<Record<IngredientType, number>> | null;
   min_cocktail_price: number | null;
   min_ingredient_price: number | null;
   ingredient_order_pref: string;
@@ -33,6 +36,11 @@ export interface ProfileData {
   winePourCostGoal: number;
   defaultPourSize: Volume;
   defaultRetailPrice: number;
+  /** Per-type pour size defaults. Server may return a partial map; callers
+   *  merge with the in-app sensible defaults. */
+  defaultPourSizes: Partial<Record<IngredientType, Volume>> | null;
+  /** Per-type retail price defaults. Same partial-merge pattern. */
+  defaultRetailPrices: Partial<Record<IngredientType, number>> | null;
   minCocktailPrice: number;
   minIngredientPrice: number;
   ingredientOrderPref: IngredientOrderPref;
@@ -50,7 +58,7 @@ export async function fetchProfile(): Promise<ProfileData | null> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, display_name, pour_cost_goal, beer_pour_cost_goal, wine_pour_cost_goal, default_pour_size, default_retail_price, min_cocktail_price, min_ingredient_price, ingredient_order_pref, theme_mode, default_landing_screen, enabled_product_sizes')
+    .select('id, display_name, pour_cost_goal, beer_pour_cost_goal, wine_pour_cost_goal, default_pour_size, default_retail_price, default_pour_sizes, default_retail_prices, min_cocktail_price, min_ingredient_price, ingredient_order_pref, theme_mode, default_landing_screen, enabled_product_sizes')
     .eq('id', user.id)
     .single();
 
@@ -65,6 +73,8 @@ export async function fetchProfile(): Promise<ProfileData | null> {
       row.wine_pour_cost_goal != null ? Math.round(Number(row.wine_pour_cost_goal) * 100) : 25,
     defaultPourSize: row.default_pour_size ?? DEFAULT_POUR_SIZE,
     defaultRetailPrice: Number(row.default_retail_price),
+    defaultPourSizes: row.default_pour_sizes ?? null,
+    defaultRetailPrices: row.default_retail_prices ?? null,
     minCocktailPrice: row.min_cocktail_price != null ? Number(row.min_cocktail_price) : 10,
     minIngredientPrice: row.min_ingredient_price != null ? Number(row.min_ingredient_price) : 7,
     ingredientOrderPref: (row.ingredient_order_pref as IngredientOrderPref) ?? 'manual',
@@ -85,6 +95,8 @@ export async function updateProfile(profile: Partial<ProfileData>): Promise<void
   if (profile.winePourCostGoal !== undefined) row.wine_pour_cost_goal = profile.winePourCostGoal / 100;
   if (profile.defaultPourSize !== undefined) row.default_pour_size = profile.defaultPourSize;
   if (profile.defaultRetailPrice !== undefined) row.default_retail_price = profile.defaultRetailPrice;
+  if (profile.defaultPourSizes !== undefined) row.default_pour_sizes = profile.defaultPourSizes;
+  if (profile.defaultRetailPrices !== undefined) row.default_retail_prices = profile.defaultRetailPrices;
   if (profile.minCocktailPrice !== undefined) row.min_cocktail_price = profile.minCocktailPrice;
   if (profile.minIngredientPrice !== undefined) row.min_ingredient_price = profile.minIngredientPrice;
   if (profile.ingredientOrderPref !== undefined) row.ingredient_order_pref = profile.ingredientOrderPref;

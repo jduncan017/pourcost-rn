@@ -19,19 +19,30 @@ import DetailLevelToggle from '@/src/components/ui/DetailLevelToggle';
 import TextInput from '@/src/components/ui/TextInput';
 import type { TextInput as RNTextInput } from 'react-native';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import FormSaveBar from '@/src/components/ui/FormSaveBar';
 import { useUnsavedChangesGuard } from '@/src/lib/useUnsavedChangesGuard';
 import IngredientInUseSheet from '@/src/components/ui/IngredientInUseSheet';
+import BottomSheet from '@/src/components/ui/BottomSheet';
+import Dropdown from '@/src/components/ui/Dropdown';
 import IngredientInputs, {
   IngredientInputValues,
 } from '@/src/components/IngredientInputs';
-import { useThemeColors } from '@/src/contexts/ThemeContext';
+import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import {
   INITIAL_PRODUCT_SIZE,
   SUBTYPES_BY_TYPE,
   type IngredientType,
 } from '@/src/constants/appConstants';
 import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
+import SuggestedRetailInput from '@/src/components/ui/SuggestedRetailInput';
+import PourCostHero, { getPerformance } from '@/src/components/PourCostHero';
+import { useHeroTargetForIngredient } from '@/src/lib/useHeroTarget';
+import {
+  applyPriceFloor,
+  calculateCostPerPour,
+  calculateSuggestedPrice,
+  formatCurrency,
+  roundSuggestedPrice,
+} from '@/src/services/calculation-service';
 import { FeedbackService } from '@/src/services/feedback-service';
 import {
   getCanonicalProductDetail,
@@ -60,7 +71,13 @@ export default function IngredientFormScreen() {
     (params.description as string) || ''
   );
   const [retailPriceText, setRetailPriceText] = useState(
-    (params.retailPrice as string) || '8.00'
+    (params.retailPrice as string) || ''
+  );
+  // True once the user has typed into the retail field. Until then the
+  // input shows the live suggestion with a purple "Suggested" pill; typing
+  // flips this true. The "Use Suggested" reset pill flips it back.
+  const [retailIsManual, setRetailIsManual] = useState(
+    !!(params.retailPrice as string),
   );
   const [abvText, setAbvText] = useState((params.abv as string) || '');
 
@@ -74,7 +91,9 @@ export default function IngredientFormScreen() {
       FeedbackService.showWarning('Parse Error', 'Could not read product size. Using default.');
     }
 
-    let pourSize = volumeToOunces(useAppStore.getState().defaultPourSize);
+    const initialType = (params.type as IngredientType) || 'Spirit';
+    const pourSizes = useAppStore.getState().defaultPourSizes;
+    let pourSize = volumeToOunces(pourSizes[initialType] ?? pourSizes.Spirit);
     try {
       if (params.pourSize)
         pourSize = volumeToOunces(
@@ -85,12 +104,19 @@ export default function IngredientFormScreen() {
     }
 
     return {
-      ingredientType: (params.type as IngredientType) || 'Spirit',
+      ingredientType: initialType,
       subType: (params.subType as string) || '',
       productSize,
-      productCost: Number(params.productCost) || 25.0,
+      // 0 in create mode means "not entered yet" — drives progressive
+      // disclosure: pricing block + Other Sizes section stay hidden until
+      // the user enters a cost. Edit mode prefills from params with the
+      // saved value so pricing renders immediately.
+      productCost: params.productCost ? Number(params.productCost) : 0,
       pourSize,
-      retailPrice: Number(params.retailPrice) || 8.0,
+      retailPrice:
+        Number(params.retailPrice) ||
+        useAppStore.getState().defaultRetailPrices[initialType] ||
+        8.0,
       pourCostPct: useAppStore.getState().pourCostGoal,
       notForSale: !forSale,
       garnishAmount: 50,
@@ -113,21 +139,101 @@ export default function IngredientFormScreen() {
   );
   const configurations = liveIngredient?.configurations ?? [];
 
+  // Create-mode pending extra sizes — there's no ingredient row yet, so we
+  // can't write configurations to the DB. Hold them in local state and
+  // flush them as configurations after the ingredient is inserted on Save.
+  // The "default" size is still entered inline via IngredientInputs.
+  type PendingSize = { id: string; productSize: Volume; productCost: number };
+  const [pendingExtraSizes, setPendingExtraSizes] = useState<PendingSize[]>([]);
+  const [showSizeSheet, setShowSizeSheet] = useState(false);
+  const [editingPendingSize, setEditingPendingSize] = useState<PendingSize | null>(null);
+
+  // Sync local inputValues.productSize/productCost from the store whenever
+  // the persisted ingredient changes underneath us — e.g. after the user
+  // promoted a different size to default via the size form. Without this,
+  // the SizeRow + pricing block render stale values from the original
+  // initialization.
+  useEffect(() => {
+    if (!liveIngredient) return;
+    setInputValues((prev) => {
+      const sizeChanged =
+        volumeLabel(prev.productSize) !== volumeLabel(liveIngredient.productSize);
+      const costChanged = prev.productCost !== liveIngredient.productCost;
+      if (!sizeChanged && !costChanged) return prev;
+      return {
+        ...prev,
+        productSize: liveIngredient.productSize,
+        productCost: liveIngredient.productCost,
+      };
+    });
+  }, [liveIngredient?.productSize, liveIngredient?.productCost]);
+
+  // One-way latch: once a cost has been entered (or prefilled in edit mode),
+  // the pricing/sizes blocks stay revealed even if the user clears the field.
+  // Prevents jarring layout shifts when someone backspaces while editing.
+  const [pricingRevealed, setPricingRevealed] = useState(
+    inputValues.productCost > 0,
+  );
+  useEffect(() => {
+    if (!pricingRevealed && inputValues.productCost > 0) {
+      setPricingRevealed(true);
+    }
+  }, [inputValues.productCost, pricingRevealed]);
+
+  // Reactive reads for the inline pricing block. Pulled here (not via
+  // getState in the IIFE) so re-renders pick up changes correctly.
+  const suggestedPriceRounding = useAppStore((s) => s.suggestedPriceRounding);
+  const minIngredientPrice = useAppStore((s) => s.minIngredientPrice);
+  const { targetGoal: tieredTarget, targetLabel } = useHeroTargetForIngredient({
+    type: inputValues.ingredientType,
+    productCost: inputValues.productCost,
+  });
+
+  // Live suggested retail — recomputed whenever the inputs that drive it
+  // change. Hoisted so save logic + suggested-mode display can both reach it.
+  const suggestedRetail = (() => {
+    const pourSizeVol: Volume = {
+      kind: 'decimalOunces',
+      ounces: inputValues.pourSize,
+    };
+    const cpp = calculateCostPerPour(
+      inputValues.productSize,
+      inputValues.productCost,
+      pourSizeVol,
+    );
+    return applyPriceFloor(
+      roundSuggestedPrice(
+        calculateSuggestedPrice(cpp, tieredTarget / 100),
+        suggestedPriceRounding,
+      ),
+      minIngredientPrice,
+    );
+  })();
+  const effectiveRetail = retailIsManual
+    ? parseFloat(retailPriceText) || 0
+    : suggestedRetail;
+
   // Pour size for saving — held on the ingredient, consumed by every size's cost analysis.
   const pourSizeVolume: Volume = {
     kind: 'decimalOunces',
     ounces: inputValues.pourSize,
   };
 
-  // Validation — retail required when for-sale. Product size+cost still required for CREATE
-  // (first bottle must have a price); edit mode relies on existing values.
+  // Validation — retail required when for-sale (covered by effectiveRetail
+  // which falls back to the live suggestion when the user hasn't manually
+  // typed). Product size+cost still required for CREATE (first bottle must
+  // have a price); edit mode relies on existing values. SubType is required
+  // whenever the chosen type defines a subtype list (e.g. Spirit → Whiskey/
+  // Vodka/etc, used by tier-based pour-cost targets).
+  const requiresSubType = !!SUBTYPES_BY_TYPE[inputValues.ingredientType];
   const isValid =
     name.trim().length > 0 &&
     inputValues.productCost > 0 &&
     volumeToOunces(inputValues.productSize) > 0 &&
-    (!forSale || inputValues.retailPrice > 0);
+    (!requiresSubType || inputValues.subType.length > 0) &&
+    (!forSale || effectiveRetail > 0);
 
-  const { addIngredient, updateIngredient, deleteIngredient } =
+  const { addIngredient, updateIngredient, deleteIngredient, addConfiguration } =
     useIngredientsStore();
 
   // Override fields — render only in Detailed form mode. All optional;
@@ -150,6 +256,29 @@ export default function IngredientFormScreen() {
     (liveIngredient?.flavorNotes ?? []).join(', '),
   );
 
+  // Per-field "user has overridden the canonical inheritance" flags. Drive
+  // the purple "Inherited" pill in suggested mode and the "Use Canonical"
+  // reset pill in manual mode. Initialized from the persisted override —
+  // any column with a saved value starts as manual; everything else starts
+  // inherited (subject to canonical prefill below).
+  const [isBrandManual, setIsBrandManual] = useState(!!liveIngredient?.brand);
+  const [isOriginManual, setIsOriginManual] = useState(!!liveIngredient?.origin);
+  const [isProductionRegionManual, setIsProductionRegionManual] = useState(
+    !!liveIngredient?.productionRegion,
+  );
+  const [isParentCompanyManual, setIsParentCompanyManual] = useState(
+    !!liveIngredient?.parentCompany,
+  );
+  const [isFoundedYearManual, setIsFoundedYearManual] = useState(
+    liveIngredient?.foundedYear != null,
+  );
+  const [isAgingYearsManual, setIsAgingYearsManual] = useState(
+    liveIngredient?.agingYears != null,
+  );
+  const [isFlavorNotesManual, setIsFlavorNotesManual] = useState(
+    !!(liveIngredient?.flavorNotes && liveIngredient.flavorNotes.length > 0),
+  );
+
   // Form mode local state (independent of the detail-screen detailLevel).
   // Default to Detailed when there's a canonical link OR any saved override
   // — those signal the user is working with a database-backed product.
@@ -170,7 +299,9 @@ export default function IngredientFormScreen() {
   // input back to the canonical — matching values save as undefined (NULL),
   // so the linking-fallback stays clean and only intentional edits become
   // overrides in the DB.
-  const canonicalRef = useRef<CanonicalProductDetail | null>(null);
+  // Cache canonical in state (not just a ref) so the override-field UI can
+  // resolve "Inherited" status from canonical values during render.
+  const [canonical, setCanonical] = useState<CanonicalProductDetail | null>(null);
   // `prefillReady` is state (not a ref) so the dirty-tracking effect below
   // can wait for prefill to finish before capturing its initial snapshot.
   // Otherwise canonical-prefill writes count as user changes and pop the
@@ -181,7 +312,7 @@ export default function IngredientFormScreen() {
     let cancelled = false;
     getCanonicalProductDetail(canonicalProductId).then((c) => {
       if (cancelled) return;
-      canonicalRef.current = c;
+      setCanonical(c);
       if (c) {
         // Only prefill fields the user hasn't already saved an override for.
         // Reading liveIngredient gives us the persisted state; if a column is
@@ -223,11 +354,13 @@ export default function IngredientFormScreen() {
   const initialSnapshotRef = useRef<string | null>(null);
   const currentSnapshot = useMemo(
     () => JSON.stringify({
-      name, canonicalProductId, forSale, description, retailPriceText, abvText, inputValues,
+      name, canonicalProductId, forSale, description, retailPriceText, retailIsManual,
+      abvText, inputValues,
       brand, origin, productionRegion, parentCompany, foundedYearText, agingYearsText, flavorNotesText,
     }),
     [
-      name, canonicalProductId, forSale, description, retailPriceText, abvText, inputValues,
+      name, canonicalProductId, forSale, description, retailPriceText, retailIsManual,
+      abvText, inputValues,
       brand, origin, productionRegion, parentCompany, foundedYearText, agingYearsText, flavorNotesText,
     ],
   );
@@ -277,7 +410,6 @@ export default function IngredientFormScreen() {
       // NULL — display falls back to the canonical and stays in sync if the
       // canonical is later updated. Only typed-and-different values become
       // real overrides in the DB.
-      const canonical = canonicalRef.current;
       const overrideOrUndefined = <T,>(input: T | undefined, canonicalValue: T | null | undefined): T | undefined => {
         if (input === undefined || input === null) return undefined;
         if (typeof input === 'string' && input === '') return undefined;
@@ -297,7 +429,11 @@ export default function IngredientFormScreen() {
         name: sanitizeName(name),
         productSize: inputValues.productSize,
         productCost: inputValues.productCost,
-        retailPrice: !forSale ? undefined : inputValues.retailPrice,
+        retailPrice: !forSale
+          ? undefined
+          : effectiveRetail > 0
+            ? effectiveRetail
+            : undefined,
         pourSize: !forSale ? undefined : pourSizeVolume,
         type: inputValues.ingredientType,
         subType: SUBTYPES_BY_TYPE[inputValues.ingredientType]
@@ -324,7 +460,22 @@ export default function IngredientFormScreen() {
       if (isEditing) {
         await updateIngredient(ingredientId, data);
       } else {
-        await addIngredient(data);
+        const created = await addIngredient(data);
+        // Flush any extra sizes the user added during create. The default
+        // size lives inline on the ingredient row; these extras become
+        // configurations attached to the just-created ingredient.
+        for (const p of pendingExtraSizes) {
+          try {
+            await addConfiguration(created.id, {
+              productSize: p.productSize,
+              productCost: p.productCost,
+            });
+          } catch (err) {
+            // Non-fatal; surface a single error toast at the end. We don't
+            // roll back the ingredient since the default size is valid.
+            if (__DEV__) console.warn('[ingredient-form] addConfiguration failed', err);
+          }
+        }
       }
       guard.bypass();
       router.back();
@@ -378,8 +529,25 @@ export default function IngredientFormScreen() {
           </Text>
         </Pressable>
       ),
+      headerRight: () => {
+        const inactive = !isValid || isSaving;
+        return (
+          <Pressable
+            onPress={() => saveRef.current()}
+            disabled={inactive}
+            className="flex-row items-center gap-1 px-3 py-1.5"
+            hitSlop={6}
+            style={{ opacity: inactive ? 0.4 : 1 }}
+          >
+            <Ionicons name="checkmark" size={16} color={colors.go} />
+            <Text style={{ color: colors.go, fontSize: 15, fontWeight: '700' }}>
+              {isSaving ? 'Saving…' : 'Save'}
+            </Text>
+          </Pressable>
+        );
+      },
     });
-  }, [isEditing, navigation, colors]);
+  }, [isEditing, navigation, colors, isValid, isSaving]);
 
   return (
     <GradientBackground>
@@ -419,7 +587,8 @@ export default function IngredientFormScreen() {
                 "Create from scratch"). */}
             <View className="flex-col gap-5">
               <TextInput
-                label="Ingredient Name *"
+                label="Ingredient Name"
+                required
                 value={name}
                 onChangeText={(text) => {
                   setName(text);
@@ -477,10 +646,26 @@ export default function IngredientFormScreen() {
                   Identity Details
                 </Text>
 
-                <TextInput
+                <SuggestedRetailInput
                   label="Brand"
                   value={brand}
-                  onChangeText={setBrand}
+                  onChangeText={(t) => {
+                    setBrand(t);
+                    setIsBrandManual(true);
+                  }}
+                  isSuggesting={
+                    !isBrandManual && !!canonical?.brand && brand === canonical.brand
+                  }
+                  onResetToSuggested={
+                    canonical?.brand
+                      ? () => {
+                          setBrand(canonical.brand!);
+                          setIsBrandManual(false);
+                        }
+                      : undefined
+                  }
+                  pillLabel="Inherited"
+                  resetLabel="Use Canonical"
                   placeholder="e.g., Tito's"
                   autoCapitalize="words"
                 />
@@ -493,56 +678,162 @@ export default function IngredientFormScreen() {
                   multiline
                 />
 
-                <TextInput
+                <SuggestedRetailInput
                   label="Origin"
                   value={origin}
-                  onChangeText={setOrigin}
+                  onChangeText={(t) => {
+                    setOrigin(t);
+                    setIsOriginManual(true);
+                  }}
+                  isSuggesting={
+                    !isOriginManual && !!canonical?.origin && origin === canonical.origin
+                  }
+                  onResetToSuggested={
+                    canonical?.origin
+                      ? () => {
+                          setOrigin(canonical.origin!);
+                          setIsOriginManual(false);
+                        }
+                      : undefined
+                  }
+                  pillLabel="Inherited"
+                  resetLabel="Use Canonical"
                   placeholder="e.g., Austin, TX, USA"
                   autoCapitalize="words"
                 />
 
-                <TextInput
+                <SuggestedRetailInput
                   label="Production Region"
                   value={productionRegion}
-                  onChangeText={setProductionRegion}
+                  onChangeText={(t) => {
+                    setProductionRegion(t);
+                    setIsProductionRegionManual(true);
+                  }}
+                  isSuggesting={
+                    !isProductionRegionManual &&
+                    !!canonical?.productionRegion &&
+                    productionRegion === canonical.productionRegion
+                  }
+                  onResetToSuggested={
+                    canonical?.productionRegion
+                      ? () => {
+                          setProductionRegion(canonical.productionRegion!);
+                          setIsProductionRegionManual(false);
+                        }
+                      : undefined
+                  }
+                  pillLabel="Inherited"
+                  resetLabel="Use Canonical"
                   placeholder="e.g., Cognac, France"
                   autoCapitalize="words"
                 />
 
-                <TextInput
+                <SuggestedRetailInput
                   label="Parent Company"
                   value={parentCompany}
-                  onChangeText={setParentCompany}
+                  onChangeText={(t) => {
+                    setParentCompany(t);
+                    setIsParentCompanyManual(true);
+                  }}
+                  isSuggesting={
+                    !isParentCompanyManual &&
+                    !!canonical?.parentCompany &&
+                    parentCompany === canonical.parentCompany
+                  }
+                  onResetToSuggested={
+                    canonical?.parentCompany
+                      ? () => {
+                          setParentCompany(canonical.parentCompany!);
+                          setIsParentCompanyManual(false);
+                        }
+                      : undefined
+                  }
+                  pillLabel="Inherited"
+                  resetLabel="Use Canonical"
                   placeholder="e.g., Diageo"
                   autoCapitalize="words"
                 />
 
                 <View className="flex-row gap-3">
                   <View className="flex-1">
-                    <TextInput
+                    <SuggestedRetailInput
                       label="Founded"
                       value={foundedYearText}
-                      onChangeText={(t) => setFoundedYearText(t.replace(/[^0-9]/g, ''))}
+                      onChangeText={(t) => {
+                        setFoundedYearText(t.replace(/[^0-9]/g, ''));
+                        setIsFoundedYearManual(true);
+                      }}
+                      isSuggesting={
+                        !isFoundedYearManual &&
+                        canonical?.foundedYear != null &&
+                        foundedYearText === String(canonical.foundedYear)
+                      }
+                      onResetToSuggested={
+                        canonical?.foundedYear != null
+                          ? () => {
+                              setFoundedYearText(String(canonical.foundedYear));
+                              setIsFoundedYearManual(false);
+                            }
+                          : undefined
+                      }
+                      pillLabel="Inherited"
+                      resetLabel="Use Canonical"
                       placeholder="e.g., 1997"
                       keyboardType="number-pad"
                       maxLength={4}
                     />
                   </View>
                   <View className="flex-1">
-                    <TextInput
+                    <SuggestedRetailInput
                       label="Aging (years)"
                       value={agingYearsText}
-                      onChangeText={(t) => setAgingYearsText(t.replace(/[^0-9.]/g, ''))}
+                      onChangeText={(t) => {
+                        setAgingYearsText(t.replace(/[^0-9.]/g, ''));
+                        setIsAgingYearsManual(true);
+                      }}
+                      isSuggesting={
+                        !isAgingYearsManual &&
+                        canonical?.agingYears != null &&
+                        agingYearsText === String(canonical.agingYears)
+                      }
+                      onResetToSuggested={
+                        canonical?.agingYears != null
+                          ? () => {
+                              setAgingYearsText(String(canonical.agingYears));
+                              setIsAgingYearsManual(false);
+                            }
+                          : undefined
+                      }
+                      pillLabel="Inherited"
+                      resetLabel="Use Canonical"
                       placeholder="e.g., 12"
                       keyboardType="decimal-pad"
                     />
                   </View>
                 </View>
 
-                <TextInput
+                <SuggestedRetailInput
                   label="Flavor Notes (comma-separated)"
                   value={flavorNotesText}
-                  onChangeText={setFlavorNotesText}
+                  onChangeText={(t) => {
+                    setFlavorNotesText(t);
+                    setIsFlavorNotesManual(true);
+                  }}
+                  isSuggesting={
+                    !isFlavorNotesManual &&
+                    !!canonical?.flavorNotes?.length &&
+                    flavorNotesText === canonical.flavorNotes.join(', ')
+                  }
+                  onResetToSuggested={
+                    canonical?.flavorNotes?.length
+                      ? () => {
+                          setFlavorNotesText(canonical.flavorNotes!.join(', '));
+                          setIsFlavorNotesManual(false);
+                        }
+                      : undefined
+                  }
+                  pillLabel="Inherited"
+                  resetLabel="Use Canonical"
                   placeholder="e.g., clean, peppery, citrus"
                   autoCapitalize="none"
                 />
@@ -561,34 +852,29 @@ export default function IngredientFormScreen() {
               hideProductSize={isEditing}
               noCard
               pourSizeOverride
-              defaultPourSizeOz={volumeToOunces(useAppStore.getState().defaultPourSize)}
+              defaultPourSizeOz={volumeToOunces(
+                useAppStore.getState().defaultPourSizes[inputValues.ingredientType]
+                  ?? useAppStore.getState().defaultPourSize,
+              )}
             />
 
-            {/* Retail Price — set here, referenced on the size page while
-                the user enters bottle costs. Placed BEFORE sizes so the
-                retail anchor exists when they tap through to each bottle. */}
-            {forSale && (
-              <View className="flex-col gap-5">
-                <TextInput
-                  label="Retail Price *"
-                  value={retailPriceText}
-                  onChangeText={(text) => {
-                    if (text === '' || /^\d*\.?\d*$/.test(text)) {
-                      setRetailPriceText(text);
-                      const price = text === '' ? 0 : parseFloat(text) || 0;
-                      handleInputChange({ retailPrice: price });
-                    }
-                  }}
-                  placeholder="0.00"
-                  keyboardType="decimal-pad"
-                  prefix="$"
-                />
-              </View>
+            {/* Multi-size hint — only when no cost has been entered yet in
+                create mode. Surfaces the multi-size capability before the
+                Other Sizes section is gated open. Once pricing is revealed
+                the actual Other Sizes section takes over and the hint is
+                no longer needed. */}
+            {!isEditing && !pricingRevealed && (
+              <Text
+                className="text-xs leading-4"
+                style={{ color: colors.textTertiary }}
+              >
+                Carry this in multiple sizes? Add more below after entering cost.
+              </Text>
             )}
 
             {/* Sizes section — edit mode only. Lists the primary inline size +
-                any configurations. Tap to edit, plus button to add.
-                Cost analysis for each size happens on the size-form screen. */}
+                any configurations. Tap to edit, plus button to add. Cost
+                analysis for each size happens on the size-form screen. */}
             {isEditing && (
               <View className="flex-col gap-3">
                 <Text
@@ -655,11 +941,126 @@ export default function IngredientFormScreen() {
               </View>
             )}
 
-            <FormSaveBar
-              onPress={() => saveRef.current()}
-              disabled={!isValid || isSaving}
-              isSaving={isSaving}
-            />
+            {/* Other Sizes — create mode only. The size + cost shown above
+                in IngredientInputs is the default; this section collects any
+                additional sizes the user wants to configure during create.
+                They become configurations attached to the new ingredient
+                after Save. Edit mode uses the unified Sizes section above. */}
+            {!isEditing && pricingRevealed && (
+              <View className="flex-col gap-3">
+                <Text
+                  className="text-[11px] tracking-widest uppercase"
+                  style={{ color: colors.textTertiary, fontWeight: '600' }}
+                >
+                  Other Sizes
+                </Text>
+
+                {pendingExtraSizes.map((p) => (
+                  <SizeRow
+                    key={p.id}
+                    label={volumeLabel(p.productSize)}
+                    cost={p.productCost}
+                    onPress={() => {
+                      setEditingPendingSize(p);
+                      setShowSizeSheet(true);
+                    }}
+                  />
+                ))}
+
+                <Pressable
+                  onPress={() => {
+                    setEditingPendingSize(null);
+                    setShowSizeSheet(true);
+                  }}
+                  className="flex-row items-center justify-center gap-2 py-3 rounded-xl"
+                  style={{
+                    backgroundColor: colors.accent + '15',
+                    borderWidth: 1,
+                    borderColor: colors.accent + '99',
+                    borderStyle: 'dashed',
+                  }}
+                >
+                  <Ionicons name="add" size={18} color={colors.accent} />
+                  <Text
+                    style={{
+                      color: colors.accent,
+                      fontWeight: '600',
+                      fontSize: 15,
+                    }}
+                  >
+                    Add Size
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+
+            {/* Pricing — retail price + Pour Cost Hero. Hidden until the
+                default size has a cost set; without cost there's nothing to
+                anchor the pricing math against. Numbers here are based on
+                the DEFAULT size only — the detail page breaks down each
+                size separately. */}
+            {forSale && pricingRevealed && (
+              <View className="flex-col gap-5">
+                <SuggestedRetailInput
+                  label="Retail Price"
+                  required
+                  value={
+                    retailIsManual
+                      ? retailPriceText
+                      : suggestedRetail > 0
+                        ? suggestedRetail.toFixed(2)
+                        : ''
+                  }
+                  onChangeText={(text) => {
+                    if (text === '' || /^\d*\.?\d*$/.test(text)) {
+                      setRetailPriceText(text);
+                      setRetailIsManual(true);
+                      const price = text === '' ? 0 : parseFloat(text) || 0;
+                      handleInputChange({ retailPrice: price });
+                    }
+                  }}
+                  isSuggesting={!retailIsManual && suggestedRetail > 0}
+                  onResetToSuggested={() => {
+                    setRetailIsManual(false);
+                    setRetailPriceText('');
+                    handleInputChange({ retailPrice: suggestedRetail });
+                  }}
+                  placeholder="0.00"
+                  keyboardType="decimal-pad"
+                  prefix="$"
+                />
+
+                {(() => {
+                  // Pour cost % from the effective retail (suggested or manual).
+                  const pourSizeVol: Volume = {
+                    kind: 'decimalOunces',
+                    ounces: inputValues.pourSize,
+                  };
+                  const costPerPour = calculateCostPerPour(
+                    inputValues.productSize,
+                    inputValues.productCost,
+                    pourSizeVol,
+                  );
+                  const pourCostPercentage =
+                    effectiveRetail > 0 ? (costPerPour / effectiveRetail) * 100 : 0;
+                  return (
+                    <View className="flex-col gap-2 -mx-6">
+                      <PourCostHero
+                        pourCostPercentage={pourCostPercentage}
+                        targetGoal={tieredTarget}
+                        targetLabel={targetLabel ?? undefined}
+                      />
+                      <Text
+                        className="text-xs px-6"
+                        style={{ color: colors.textTertiary }}
+                      >
+                        Based on your default size. Each size has its own pour cost on the detail page.
+                      </Text>
+                    </View>
+                  );
+                })()}
+              </View>
+            )}
 
             {/* Delete button (edit mode only) */}
             {isEditing && (
@@ -684,6 +1085,57 @@ export default function IngredientFormScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Inline size editor — used in create mode (no DB ingredient yet) to
+          add or edit a pending extra size. In edit mode the user goes to
+          the dedicated /ingredient-size-form screen instead. */}
+      <PendingSizeSheet
+        visible={showSizeSheet}
+        onClose={() => {
+          setShowSizeSheet(false);
+          setEditingPendingSize(null);
+        }}
+        editing={editingPendingSize}
+        ingredientType={inputValues.ingredientType}
+        ingredientSubType={inputValues.subType}
+        existingSizes={[
+          inputValues.productSize,
+          ...pendingExtraSizes.map((p) => p.productSize),
+        ]}
+        onSave={(size, cost) => {
+          if (editingPendingSize) {
+            setPendingExtraSizes((prev) =>
+              prev.map((p) =>
+                p.id === editingPendingSize.id
+                  ? { ...p, productSize: size, productCost: cost }
+                  : p,
+              ),
+            );
+          } else {
+            setPendingExtraSizes((prev) => [
+              ...prev,
+              {
+                id: Math.random().toString(36).slice(2),
+                productSize: size,
+                productCost: cost,
+              },
+            ]);
+          }
+          setShowSizeSheet(false);
+          setEditingPendingSize(null);
+        }}
+        onDelete={
+          editingPendingSize
+            ? () => {
+                setPendingExtraSizes((prev) =>
+                  prev.filter((p) => p.id !== editingPendingSize.id),
+                );
+                setShowSizeSheet(false);
+                setEditingPendingSize(null);
+              }
+            : undefined
+        }
+      />
     </GradientBackground>
   );
 }
@@ -744,5 +1196,182 @@ function SizeRow({
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
     </Pressable>
+  );
+}
+
+// ============================================================
+// PendingSizeSheet — inline size + cost editor used during create.
+// We can't write to ingredient_configurations until the ingredient
+// row exists, so create-mode extras live in local state and flush
+// on Save. Edit mode uses the dedicated /ingredient-size-form screen.
+// ============================================================
+
+function PendingSizeSheet({
+  visible,
+  onClose,
+  editing,
+  ingredientType,
+  ingredientSubType,
+  existingSizes,
+  onSave,
+  onDelete,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  editing: { id: string; productSize: Volume; productCost: number } | null;
+  ingredientType: string;
+  ingredientSubType?: string;
+  existingSizes: Volume[];
+  onSave: (size: Volume, cost: number) => void;
+  onDelete?: () => void;
+}) {
+  const colors = useThemeColors();
+  const router = useGuardedRouter();
+  const enabledProductSizes = useAppStore((s) => s.enabledProductSizes);
+
+  const [size, setSize] = useState<Volume>(
+    editing?.productSize ?? ({ kind: 'milliliters', ml: 750 } as Volume),
+  );
+  const [costText, setCostText] = useState(
+    editing ? editing.productCost.toFixed(2) : '0.00',
+  );
+
+  // Reset state whenever the sheet opens fresh.
+  useEffect(() => {
+    if (!visible) return;
+    if (editing) {
+      setSize(editing.productSize);
+      setCostText(editing.productCost.toFixed(2));
+    } else {
+      const allForType = (
+        require('@/src/constants/appConstants') as typeof import('@/src/constants/appConstants')
+      ).getProductSizesForType(ingredientType, ingredientSubType, enabledProductSizes);
+      const taken = new Set(existingSizes.map((s) => volumeLabel(s)));
+      const firstFree = allForType.find((s) => !taken.has(volumeLabel(s)));
+      setSize(
+        firstFree ?? allForType[0] ?? ({ kind: 'milliliters', ml: 750 } as Volume),
+      );
+      setCostText('0.00');
+    }
+  }, [visible, editing, ingredientType, ingredientSubType, enabledProductSizes, existingSizes]);
+
+  const sizeOptions = useMemo(() => {
+    const {
+      getProductSizesForType: gp,
+      getProductSizeSection: gs,
+    } = require('@/src/constants/appConstants') as typeof import('@/src/constants/appConstants');
+    const currentLabel = volumeLabel(size);
+    return gp(ingredientType, ingredientSubType, enabledProductSizes, currentLabel).map(
+      (s) => ({
+        value: volumeLabel(s),
+        label: volumeLabel(s),
+        section: gs(s),
+      }),
+    );
+  }, [ingredientType, ingredientSubType, enabledProductSizes, size]);
+
+  const handleSizeChange = (selectedLabel: string) => {
+    const {
+      getProductSizesForType: gp,
+    } = require('@/src/constants/appConstants') as typeof import('@/src/constants/appConstants');
+    const match = gp(ingredientType, ingredientSubType, enabledProductSizes, volumeLabel(size)).find(
+      (s) => volumeLabel(s) === selectedLabel,
+    );
+    if (match) setSize(match);
+  };
+
+  const cost = parseFloat(costText) || 0;
+  const isValid = cost > 0 && volumeToOunces(size) > 0;
+  const isDuplicate =
+    !editing &&
+    existingSizes.some((s) => volumeLabel(s) === volumeLabel(size));
+  const sizeChangedToConflict =
+    !!editing &&
+    volumeLabel(size) !== volumeLabel(editing.productSize) &&
+    existingSizes.some((s) => volumeLabel(s) === volumeLabel(size));
+
+  return (
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      title={editing ? 'Edit Size' : 'Add Size'}
+    >
+      <View className="px-4 pb-6 flex-col gap-5">
+        <Dropdown
+          value={volumeLabel(size)}
+          onValueChange={handleSizeChange}
+          options={sizeOptions}
+          label="Bottle Size"
+          placeholder="Select size"
+          sheetHeaderRight={(close) => (
+            <Pressable
+              onPress={() => {
+                close();
+                onClose();
+                router.push('/container-sizes' as any);
+              }}
+              className="px-3 py-1.5"
+              hitSlop={6}
+            >
+              <Text style={{ color: colors.accent, fontWeight: '600', fontSize: 14 }}>
+                Edit
+              </Text>
+            </Pressable>
+          )}
+        />
+
+        <TextInput
+          label={`Cost / ${volumeLabel(size)}`}
+          required
+          value={costText}
+          onChangeText={(text) => {
+            if (text === '' || /^\d*\.?\d*$/.test(text)) setCostText(text);
+          }}
+          placeholder="0.00"
+          keyboardType="decimal-pad"
+          prefix="$"
+        />
+
+        {(isDuplicate || sizeChangedToConflict) && (
+          <Text className="text-sm" style={{ color: colors.error }}>
+            This size is already configured.
+          </Text>
+        )}
+
+        <View className="flex-row gap-3">
+          {onDelete && (
+            <Pressable
+              onPress={onDelete}
+              className="flex-row items-center justify-center gap-2 py-3 rounded-xl flex-1"
+              style={{
+                borderWidth: 1,
+                borderColor: colors.error + '60',
+              }}
+            >
+              <Ionicons name="trash-outline" size={16} color={colors.error} />
+              <Text style={{ color: colors.error, fontWeight: '600', fontSize: 14 }}>
+                Delete
+              </Text>
+            </Pressable>
+          )}
+          <Pressable
+            onPress={() => {
+              if (!isValid || isDuplicate || sizeChangedToConflict) return;
+              onSave(size, cost);
+            }}
+            disabled={!isValid || isDuplicate || sizeChangedToConflict}
+            className="py-3 rounded-xl flex-1 items-center justify-center"
+            style={{
+              backgroundColor: colors.go,
+              opacity: !isValid || isDuplicate || sizeChangedToConflict ? 0.4 : 1,
+            }}
+          >
+            <Text style={{ color: palette.N1, fontWeight: '700', fontSize: 15 }}>
+              {editing ? 'Update' : 'Add Size'}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    </BottomSheet>
   );
 }

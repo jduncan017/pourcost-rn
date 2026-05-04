@@ -65,7 +65,7 @@ export default function SettingsProTipsScreen() {
               style={{ color: colors.textSecondary }}
             >
               Practical advice for pricing, pouring, and running the bar.
-              The kind of thing you usually only learn by watching a good GM.
+              The kind of thing you usually only pick up from a seasoned manager.
             </Text>
           </View>
 

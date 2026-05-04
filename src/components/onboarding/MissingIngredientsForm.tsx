@@ -23,6 +23,7 @@ import {
 } from '@/src/lib/wells';
 import { MissingIngredientGroup } from '@/src/lib/library-recipes';
 import { PricedMissingIngredient } from '@/src/lib/recipe-adopter';
+import { getCategoryCostPrior } from '@/src/lib/category-cost-priors';
 import { HapticService } from '@/src/services/haptic-service';
 
 const FOOTER_BG = '#0B1120';
@@ -54,6 +55,14 @@ interface RowState {
   costText: string;
   /** Numeric value, set on blur. Drives validation. */
   cost: number | undefined;
+  /** True when the displayed cost is the category-level wholesale prior,
+   *  not user input. Drives the purple "Suggested" pill. Flips to false on
+   *  the first keystroke; resettable via the "Use Suggested" pill. */
+  isSuggesting: boolean;
+  /** Cached prior at the current size (recomputes when size changes). Null
+   *  when no prior is available for this group's category. Used to drive
+   *  both the initial suggestion and the reset action. */
+  suggestedCost: number | null;
 }
 
 export default function MissingIngredientsForm({
@@ -82,9 +91,62 @@ export default function MissingIngredientsForm({
     setRows((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
   };
 
+  const onCostChange = (key: string, text: string) => {
+    setRows((prev) => {
+      const row = prev[key];
+      if (!row) return prev;
+      return { ...prev, [key]: { ...row, costText: text, isSuggesting: false } };
+    });
+  };
+
+  const onSizeChange = (key: string, size: Volume) => {
+    setRows((prev) => {
+      const row = prev[key];
+      if (!row) return prev;
+      const group = missing.find((g) => g.key === key);
+      const newPrior = group
+        ? getCategoryCostPrior(group.canonicalCategory, group.canonicalSubcategory, size)
+        : null;
+      // If the row was in suggested mode, refresh the displayed cost to the
+      // new size's prior; otherwise leave the user's typed value alone.
+      if (row.isSuggesting && newPrior != null) {
+        return {
+          ...prev,
+          [key]: {
+            ...row,
+            size,
+            suggestedCost: newPrior,
+            costText: newPrior.toFixed(2),
+            cost: newPrior,
+          },
+        };
+      }
+      return { ...prev, [key]: { ...row, size, suggestedCost: newPrior } };
+    });
+  };
+
+  const resetToSuggested = (key: string) => {
+    setRows((prev) => {
+      const row = prev[key];
+      if (!row || row.suggestedCost == null) return prev;
+      return {
+        ...prev,
+        [key]: {
+          ...row,
+          isSuggesting: true,
+          costText: row.suggestedCost.toFixed(2),
+          cost: row.suggestedCost,
+        },
+      };
+    });
+    HapticService.buttonPress();
+  };
+
   const commitCost = (key: string) => {
     const row = rows[key];
     if (!row) return;
+    // Suggested rows already have cost set; nothing to commit on blur.
+    if (row.isSuggesting) return;
     const cleaned = row.costText.trim();
     if (cleaned === '') {
       updateRow(key, { cost: undefined });
@@ -193,7 +255,7 @@ export default function MissingIngredientsForm({
               Set Up Missing Ingredients
             </Text>
             <Text className="text-base mt-2 leading-6" style={{ color: palette.N3 }}>
-              These are needed for the cocktails you picked. Estimate costs for now, you can update anytime from Bar Inventory.
+              These are needed for the cocktails you picked. We've prefilled typical wholesale costs. Tap any to adjust, or update later from Bar Inventory.
             </Text>
           </View>
 
@@ -201,6 +263,13 @@ export default function MissingIngredientsForm({
             {missing.map((group) => {
               const row = rows[group.key];
               const isReady = row?.cost != null && row.cost > 0;
+              const isSuggesting = row?.isSuggesting ?? false;
+              const hasPrior = row?.suggestedCost != null;
+              const inputBorderColor = isSuggesting
+                ? palette.P3 + '70'
+                : isReady
+                  ? palette.B5 + '60'
+                  : palette.Y4 + '60';
               return (
                 <View
                   key={group.key}
@@ -244,25 +313,55 @@ export default function MissingIngredientsForm({
                       <Ionicons name="chevron-down" size={14} color={palette.N3} />
                     </Pressable>
                     <View className="flex-1" />
-                    <Text style={{ color: palette.N3, fontSize: 13 }}>Bottle cost</Text>
+                    {isSuggesting ? (
+                      <View
+                        className="rounded-full px-2 py-1"
+                        style={{ backgroundColor: palette.P3 + '24' }}
+                      >
+                        <Text style={{ color: palette.P2, fontSize: 11, fontWeight: '700' }}>
+                          Suggested
+                        </Text>
+                      </View>
+                    ) : hasPrior ? (
+                      <Pressable
+                        onPress={() => resetToSuggested(group.key)}
+                        hitSlop={6}
+                        className="flex-row items-center gap-1 rounded-full px-2 py-1"
+                        style={{
+                          backgroundColor: palette.P3 + '14',
+                          borderWidth: 1,
+                          borderColor: palette.P3 + '40',
+                        }}
+                      >
+                        <Ionicons name="sparkles" size={11} color={palette.P2} />
+                        <Text style={{ color: palette.P2, fontSize: 11, fontWeight: '600' }}>
+                          Use Suggested
+                        </Text>
+                      </Pressable>
+                    ) : (
+                      <Text style={{ color: palette.N3, fontSize: 13 }}>Bottle cost</Text>
+                    )}
                     <View
                       className="flex-row items-center rounded-lg px-2"
                       style={{
                         backgroundColor: 'rgba(255,255,255,0.06)',
                         borderWidth: 1,
-                        borderColor: isReady ? palette.B5 + '60' : palette.Y4 + '60',
+                        borderColor: inputBorderColor,
                       }}
                     >
                       <Text style={{ color: palette.N2, fontSize: 15 }}>$</Text>
                       <RNTextInput
                         value={row?.costText ?? ''}
-                        onChangeText={(text) => updateRow(group.key, { costText: text })}
+                        onChangeText={(text) => onCostChange(group.key, text)}
                         onBlur={() => commitCost(group.key)}
                         onSubmitEditing={() => commitCost(group.key)}
                         keyboardType="decimal-pad"
                         returnKeyType="done"
                         placeholder="0.00"
                         placeholderTextColor={palette.N4 + '80'}
+                        // Select-all-on-focus while showing the prior so the
+                        // first keystroke replaces "22.00" cleanly.
+                        selectTextOnFocus={isSuggesting}
                         style={{
                           color: palette.N1,
                           fontSize: 15,
@@ -341,7 +440,7 @@ export default function MissingIngredientsForm({
             // canonical sizes are authoritative.
             allowExtended={activeGroup.canonicalDefaultSizes.length < 2}
             onSelect={(size) => {
-              updateRow(activeGroup.key, { size });
+              onSizeChange(activeGroup.key, size);
               setActiveSizeKey(null);
             }}
             onClose={() => setActiveSizeKey(null)}
@@ -363,7 +462,14 @@ function initialRows(missing: MissingIngredientGroup[]): Record<string, RowState
       g.canonicalDefaultSizes.length > 0
         ? bestSizeFromCanonical(g.canonicalDefaultSizes)
         : COMMON_WELL_SIZES[1].value; // 750ml index in COMMON; close to 1L
-    out[g.key] = { size, costText: '', cost: undefined };
+    const prior = getCategoryCostPrior(g.canonicalCategory, g.canonicalSubcategory, size);
+    out[g.key] = {
+      size,
+      suggestedCost: prior,
+      isSuggesting: prior != null,
+      costText: prior != null ? prior.toFixed(2) : '',
+      cost: prior ?? undefined,
+    };
   }
   return out;
 }

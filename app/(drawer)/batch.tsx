@@ -111,7 +111,7 @@ function formatBatchAmount(
 
   if (line.unit === 'dash' && scaledOz < 1) {
     const count = Math.max(1, Math.round(scaledOz / DASH_OZ));
-    return `${count} dash${count === 1 ? '' : 'es'}`;
+    return `${count} dash`;
   }
   if (line.unit === 'bspn' && scaledOz < 1) {
     const count = Math.max(1, Math.round(scaledOz / BSPN_OZ));
@@ -526,7 +526,7 @@ export default function BatchScreen() {
                   <InfoIcon
                     title="Pre-Dilution"
                     content={
-                      "Ice adds about 20% water to stirred drinks and 20-25% to shaken. If you're serving the batch up or chilled without ice, add that water yourself so it doesn't taste harsh. If you're serving over ice, skip: the ice will dilute at service."
+                      "Ice adds 20-25% water at service. Turn this on for batches served up or chilled (no ice), so the drink isn't too strong. Leave off for batches served over ice."
                     }
                     learnMoreTipKey="preDiluteBatches"
                     size={18}
@@ -674,7 +674,7 @@ export default function BatchScreen() {
                               className="text-sm"
                               style={{ color: colors.textTertiary }}
                             >
-                              —
+                              -
                             </Text>
                           )}
                         </View>

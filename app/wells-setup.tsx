@@ -23,7 +23,7 @@ export default function WellsSetup() {
       showBack={false}
       mode="settings"
       title="Manage Wells"
-      subtitle="Update your house pours. Pick from your inventory, the Spirit Database, or add a custom brand. Changes save when you tap Save."
+      subtitle="Update your house pours. Pick from your inventory, the Spirit Database, or add a custom brand."
     />
   );
 }

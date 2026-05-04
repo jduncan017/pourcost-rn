@@ -172,7 +172,7 @@ export default function InvoiceLineEditScreen() {
               <View className="flex-row justify-between">
                 <Text className="text-sm" style={{ color: colors.textSecondary }}>Per bottle</Text>
                 <Text className="text-sm font-semibold" style={{ color: colors.text }}>
-                  ${unitPrice || '—'}
+                  ${unitPrice || '0.00'}
                 </Text>
               </View>
               <View className="flex-row justify-between">

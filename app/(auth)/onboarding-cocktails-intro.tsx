@@ -11,7 +11,7 @@ export default function OnboardingCocktailsIntro() {
       iconName="wine-outline"
       iconColor={palette.B5}
       title="Add Some Cocktails"
-      body="Pick from 30 classic recipes. We'll wire each one up to your wells and only ask you to set prices for ingredients you don't already have."
+      body="Pick from 30 classic recipes. We'll match each one to your wells and only ask you to price the ingredients you don't already have."
       bullets={[
         'Spirit slots auto-match to your wells',
         'Pantry staples (lime juice, simple syrup, bitters) auto-add',

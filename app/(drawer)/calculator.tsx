@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { type Href } from 'expo-router';
 import { useGuardedRouter } from '@/src/lib/guarded-router';
@@ -14,6 +14,7 @@ import { useAppStore } from '@/src/stores/app-store';
 import { formatCurrency, roundSuggestedPrice } from '@/src/services/calculation-service';
 import { getPourChipsForContext } from '@/src/constants/appConstants';
 import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
+import { capture } from '@/src/services/analytics-service';
 
 export default function CalculatorScreen() {
   const router = useGuardedRouter();
@@ -74,6 +75,37 @@ export default function CalculatorScreen() {
     ? (values.servingAmount > 0 ? values.garnishAmount / values.servingAmount : 0)
     : (values.pourSize > 0 ? productSizeOz / values.pourSize : 0);
   const marginPerProduct = pourCostMargin * usesPerProduct;
+
+  // Debounced usage event — fires once user stops adjusting inputs.
+  // Skips initial mount fire so we don't spam on screen open.
+  const isFirstRun = useRef(true);
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+    const t = setTimeout(() => {
+      capture('calculator_used', {
+        ingredient_type: values.ingredientType,
+        is_garnish: isGarnish,
+        product_size_oz: Math.round(productSizeOz * 100) / 100,
+        pour_size_oz: values.pourSize,
+        product_cost: values.productCost,
+        pour_cost_pct: values.pourCostPct,
+        cost_per_pour: Math.round(costPerPour * 100) / 100,
+        suggested_price: suggestedCharge,
+      });
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [
+    values.ingredientType,
+    values.productSize,
+    values.productCost,
+    values.pourSize,
+    values.pourCostPct,
+    values.garnishAmount,
+    values.servingAmount,
+  ]);
 
   const handleSaveIngredient = () => {
     if (isGarnish) {

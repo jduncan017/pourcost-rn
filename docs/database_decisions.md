@@ -399,3 +399,47 @@ This is post-V1 work but worth designing the schema for.
 | 2026-04-30 | Bloody Mary deferred until prep builder ships          | Bloody Mary cost depends on whether bar mixes from scratch or buys mix; can't price honestly without the prep builder. Hidden from picker via `HIDDEN_RECIPE_NAMES` + removed in seed 006. |
 | 2026-04-30 | TEMPORARY: vermouth subType aliases                    | Wells use sub_type='Sweet Vermouth'/'Dry Vermouth'; canonical uses subcategory='Sweet'/'Dry'. `SUBTYPE_ALIASES` map bridges them. Should disappear when SPIRIT_SUBTYPES + wells.ts align with the locked taxonomy below. |
 | 2026-04-30 | TEMPORARY: nameKeyword filter for wells search         | Wells rows for Bourbon/Rye/Scotch/Irish/Japanese filter `subcategory='Whiskey' AND name ILIKE '%bourbon%'` (etc.) until canonical re-seed splits Whiskey into the locked taxonomy subcategories. Same for rum subtypes. |
+| 2026-05-02 | Recipe pour-size names use singular `dash`            | Display layer doesn't pluralize. "2 dash" not "2 dashes". See "Recipe pour-size naming conventions" section below. |
+| 2026-05-02 | Garnish unitQuantity displays count only on detail    | Volume.name stores `'1 cherry'` for fallback (pour picker, batch screen) but cocktail-detail's Build column renders just the quantity, with the ingredient name in col 2. Prevents "1 cherry Maraschino Cherry" duplication. |
+
+---
+
+## Recipe pour-size naming conventions
+
+The `cocktail_ingredients.pour_size` JSONB stores a `Volume`. The `name` field on `namedOunces` and `unitQuantity` variants is a free string today (no schema-level enum), but it surfaces directly in the cocktail-detail "Build" column. Stick to these conventions when authoring seed library recipes (`005_library_recipes.sql` or future expansions) or any programmatic recipe creation.
+
+### Bitters / barspoon / rinse — `kind: 'namedOunces'`
+
+| Pour | Use this name | Avoid |
+|---|---|---|
+| 1 dash | `'dash'` | `'1 dashes'`, `'1 dash'` |
+| 2 dash | `'2 dash'` | `'2 dashes'` |
+| 3 dash | `'3 dash'` | `'3 dashes'` |
+| 1 barspoon | `'bspn'` | `'1 bspn'`, `'barspoon'` |
+| 2 barspoon | `'2 bspn'` | `'2 barspoons'` |
+| Rinse (e.g. absinthe) | `'Rinse'` | `'Wash'`, `'splash'` |
+
+Always **singular `dash`** — even for counts > 1 ("2 dash" not "2 dashes"). The detail-page renderer doesn't pluralize; the ingredient name in column 2 carries the full identity.
+
+### Garnishes — `kind: 'unitQuantity'`, `unitType: 'oneThing'`
+
+| Pour | Use this name | Why |
+|---|---|---|
+| 1 cherry | `name: '1 cherry'`, `quantity: 1` | The detail page renders only the quantity (`'1'`); the noun comes from the ingredient name (`'Maraschino Cherry'`). Avoid duplicating the noun in the volume name. |
+| 1 peel | `name: '1 peel'`, `quantity: 1` | Display reads "1 Orange Peel". |
+| 1 twist | `name: '1 twist'`, `quantity: 1` | Display reads "1 Lemon Twist". |
+| 1 wedge | `name: '1 wedge'`, `quantity: 1` | Display reads "1 Lime Wedge". |
+
+Rule: the volume's `name` stores the descriptive form for fallback contexts (cocktail-form pour picker, batch screen), but the cocktail-detail Build column ignores the noun and shows just `quantity`.
+
+### Cans / packs — `kind: 'unitQuantity'`, `unitType: 'oneCanOrBottle'`
+
+`name` stays descriptive (`'6 pack'`, `'12 pack'`) since it conveys size, not just count. Detail page renders the full name.
+
+### Validation
+
+The data model accepts arbitrary strings on the `name` field. User-facing pickers (`QUICK_POUR_SIZES`, `OTHER_POUR_SIZES` in `appConstants.ts`) provide a controlled set, so user-built cocktails can't introduce bad strings. **Risk surface = seed data + future programmatic recipe creation** (library expansion, AI-generated recipes, imports).
+
+If quirky names start appearing post-launch, options to lock down:
+- Add a `VALID_NAMED_OUNCES_NAMES` constant and validate at insert time in `recipe-adopter.ts` / the seed helper.
+- Migrate to a typed enum union on the `name` field for `namedOunces`. Ship-blockable; do post-launch when seed authoring patterns are clear.

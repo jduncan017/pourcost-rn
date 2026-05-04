@@ -127,6 +127,12 @@ export const useCocktailsStore = create<CocktailsState>()(
             cocktails: [newCocktail, ...state.cocktails],
           }));
           if (wasEmpty) capture('first_cocktail_added');
+          capture('cocktail_created', {
+            ingredient_count: newCocktail.ingredients?.length ?? 0,
+            has_retail_price: (newCocktail.retailPrice ?? 0) > 0,
+            category: newCocktail.category ?? null,
+            favorited: !!newCocktail.favorited,
+          });
           FeedbackService.showOperationSuccess('create', newCocktail.name);
           return newCocktail;
         } catch (error) {
@@ -145,6 +151,11 @@ export const useCocktailsStore = create<CocktailsState>()(
               c.id === id ? updated : c
             ),
           }));
+          capture('cocktail_updated', {
+            ingredient_count: updated.ingredients?.length ?? 0,
+            has_retail_price: (updated.retailPrice ?? 0) > 0,
+            fields_changed: Object.keys(updates).join(','),
+          });
         } catch (error) {
           const msg = error instanceof Error ? error.message : 'Failed to update cocktail';
           set({ error: msg });
@@ -156,6 +167,11 @@ export const useCocktailsStore = create<CocktailsState>()(
         const cocktail = get().cocktails.find(c => c.id === id);
         if (!cocktail) return;
         set({ error: null });
+
+        capture('cocktail_deleted', {
+          ingredient_count: cocktail.ingredients?.length ?? 0,
+          category: cocktail.category ?? null,
+        });
 
         // Optimistically remove from UI
         set(state => ({
@@ -202,6 +218,8 @@ export const useCocktailsStore = create<CocktailsState>()(
             c.id === id ? { ...c, favorited: newFavorited } : c
           ),
         }));
+
+        capture('cocktail_favorited', { favorited: newFavorited });
 
         try {
           await updateCocktailById(id, { favorited: newFavorited });

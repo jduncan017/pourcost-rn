@@ -19,6 +19,8 @@ interface DropdownProps<T = any> {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  /** Render a red ` *` after the label to mark the field as required. */
+  required?: boolean;
   sheetHeaderRight?: React.ReactNode | ((close: () => void) => React.ReactNode);
 }
 
@@ -30,6 +32,7 @@ export default function Dropdown<T = any>({
   placeholder = 'Select an option',
   disabled = false,
   className = '',
+  required = false,
   sheetHeaderRight,
 }: DropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,6 +57,7 @@ export default function Dropdown<T = any>({
           style={{ color: colors.textTertiary, fontWeight: '600' }}
         >
           {label}
+          {required && <Text style={{ color: colors.error }}> *</Text>}
         </Text>
       ) : null}
 

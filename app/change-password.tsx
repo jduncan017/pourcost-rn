@@ -42,7 +42,7 @@ export default function ChangePasswordScreen() {
   const handleSubmit = async () => {
     if (!canSubmit) return;
     if (!user?.email) {
-      setError("Can't verify your current password without an email on your account.");
+      setError('We need an email on your account to verify your current password.');
       return;
     }
 

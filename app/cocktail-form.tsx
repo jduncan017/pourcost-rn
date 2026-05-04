@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
-import FormSaveBar from '@/src/components/ui/FormSaveBar';
 import { useUnsavedChangesGuard } from '@/src/lib/useUnsavedChangesGuard';
 import ChipSelector from '@/src/components/ui/ChipSelector';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,12 +10,12 @@ import { useCocktailsStore } from '@/src/stores/cocktails-store';
 import { useAppStore } from '@/src/stores/app-store';
 import TextInput from '@/src/components/ui/TextInput';
 import EmptyState from '@/src/components/EmptyState';
-import PourCostHero, { getPerformance } from '@/src/components/PourCostHero';
+import PourCostHero from '@/src/components/PourCostHero';
 import { useHeroTargetForCocktail } from '@/src/lib/useHeroTarget';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import { useThemeColors, palette } from '@/src/contexts/ThemeContext';
 import { sanitizeName, sanitizeDescription } from '@/src/lib/sanitize';
-import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
+import SuggestedRetailInput from '@/src/components/ui/SuggestedRetailInput';
 import StatCard from '@/src/components/ui/StatCard';
 import CocktailIngredientItem from '@/src/components/CocktailIngredientItem';
 import { useIngredientSelectionStore } from '@/src/stores/ingredient-selection-store';
@@ -58,6 +57,13 @@ export default function CocktailFormScreen() {
   const [notes, setNotes] = useState((params.notes as string) || '');
   const [retailPrice, setRetailPrice] = useState(
     (params.retailPrice as string) || defaultRetailPrice.toFixed(2)
+  );
+  // True once the user has typed into the retail price field. Until then
+  // the input shows the live suggested value with a purple "Suggested"
+  // pill on the right; typing flips this to true and the visual collapses
+  // to a plain input. Reset pill flips it back to false.
+  const [retailIsManual, setRetailIsManual] = useState(
+    !!(params.retailPrice as string),
   );
   const [ingredients, setIngredients] = useState<CocktailIngredient[]>([]);
 
@@ -132,14 +138,8 @@ export default function CocktailFormScreen() {
     }, [selectedIngredients, selectedIngredient, removedIngredientIds])
   );
 
-  // Calculate totals with actual retail price
+  // Calculate totals
   const totalCost = ingredients.reduce((sum, ing) => sum + ing.cost, 0);
-  const retailPriceNum = parseFloat(retailPrice) || 0;
-  const profitMargin = retailPriceNum - totalCost;
-  const pourCostPercentage =
-    totalCost > 0 && retailPriceNum > 0
-      ? (totalCost / retailPriceNum) * 100
-      : 0;
 
   // Suggested retail derived from cost + bar-wide pour cost goal, with the
   // user's rounding preference and the cocktail price floor applied.
@@ -154,23 +154,22 @@ export default function CocktailFormScreen() {
         )
       : 0;
 
-  // Mirror cocktail-detail: only surface the Suggested Price row when the
-  // current pour cost is outside the target band. On-target = no noise.
-  const performance =
-    pourCostGoal > 0 && pourCostPercentage > 0
-      ? getPerformance(
-          pourCostPercentage / pourCostGoal,
-          pourCostPercentage - pourCostGoal,
-        )
-      : { tier: 'onTarget' as const };
-  const isOnTarget = performance.tier === 'onTarget';
-  const showSuggestedPrice = totalCost > 0 && !isOnTarget && suggestedPrice > 0;
+  // Effective retail used for all downstream math. Manual mode → user's
+  // typed value; suggested mode → live computed suggestion.
+  const effectiveRetail = retailIsManual
+    ? parseFloat(retailPrice) || 0
+    : suggestedPrice;
+  const profitMargin = effectiveRetail - totalCost;
+  const pourCostPercentage =
+    totalCost > 0 && effectiveRetail > 0
+      ? (totalCost / effectiveRetail) * 100
+      : 0;
 
-  // Validation
+  // Validation — effectiveRetail covers both suggested and manual modes.
   const isValid =
     name.trim().length > 0 &&
     ingredients.length > 0 &&
-    parseFloat(retailPrice) > 0;
+    effectiveRetail > 0;
 
   // Remove ingredient
   const removeIngredient = (ingredientId: string) => {
@@ -200,8 +199,10 @@ export default function CocktailFormScreen() {
   // settles on edit). Snapshot mismatch = user has unsaved edits.
   const initialSnapshotRef = useRef<string | null>(null);
   const currentSnapshot = useMemo(
-    () => JSON.stringify({ name, description, category, notes, retailPrice, ingredients }),
-    [name, description, category, notes, retailPrice, ingredients],
+    () => JSON.stringify({
+      name, description, category, notes, retailPrice, retailIsManual, ingredients,
+    }),
+    [name, description, category, notes, retailPrice, retailIsManual, ingredients],
   );
   useEffect(() => {
     if (initialSnapshotRef.current !== null) return;
@@ -229,7 +230,7 @@ export default function CocktailFormScreen() {
         category: category as CocktailCategory,
         notes: sanitizeDescription(notes) || undefined,
         ingredients,
-        retailPrice: parseFloat(retailPrice) || undefined,
+        retailPrice: effectiveRetail > 0 ? effectiveRetail : undefined,
         favorited: false,
       };
 
@@ -272,8 +273,25 @@ export default function CocktailFormScreen() {
           <Text style={{ color: colors.textSecondary, fontSize: 16 }}>Cancel</Text>
         </Pressable>
       ),
+      headerRight: () => {
+        const inactive = !isValid || isSaving;
+        return (
+          <Pressable
+            onPress={() => saveRef.current()}
+            disabled={inactive}
+            className="flex-row items-center gap-1 px-3 py-1.5"
+            hitSlop={6}
+            style={{ opacity: inactive ? 0.4 : 1 }}
+          >
+            <Ionicons name="checkmark" size={16} color={colors.go} />
+            <Text style={{ color: colors.go, fontSize: 15, fontWeight: '700' }}>
+              {isSaving ? 'Saving…' : 'Save'}
+            </Text>
+          </Pressable>
+        );
+      },
     });
-  }, [isEditing, navigation, colors]);
+  }, [isEditing, navigation, colors, isValid, isSaving]);
 
   return (
     <GradientBackground>
@@ -286,7 +304,8 @@ export default function CocktailFormScreen() {
           {/* Identity — Name + Category + Description + Notes */}
           <View className="flex-col gap-5">
             <TextInput
-              label="Cocktail Name *"
+              label="Cocktail Name"
+              required
               value={name}
               onChangeText={setName}
               placeholder="e.g., Classic Margarita"
@@ -395,22 +414,29 @@ export default function CocktailFormScreen() {
                 />
               </View>
 
-              <TextInput
-                label="Retail Price *"
-                value={retailPrice}
-                onChangeText={setRetailPrice}
+              <SuggestedRetailInput
+                label="Retail Price"
+                required
+                value={
+                  retailIsManual
+                    ? retailPrice
+                    : suggestedPrice > 0
+                      ? suggestedPrice.toFixed(2)
+                      : ''
+                }
+                onChangeText={(text) => {
+                  setRetailPrice(text);
+                  setRetailIsManual(true);
+                }}
+                isSuggesting={!retailIsManual && suggestedPrice > 0}
+                onResetToSuggested={() => {
+                  setRetailIsManual(false);
+                  setRetailPrice('');
+                }}
                 placeholder="0.00"
                 keyboardType="decimal-pad"
                 prefix="$"
               />
-
-              {showSuggestedPrice && (
-                <AiSuggestionRow
-                  label="Suggested Price"
-                  value={formatCurrency(suggestedPrice)}
-                  onApply={() => setRetailPrice(suggestedPrice.toFixed(2))}
-                />
-              )}
 
               <View className="-mx-6">
                 <PourCostHero
@@ -420,12 +446,6 @@ export default function CocktailFormScreen() {
               </View>
             </View>
           )}
-
-          <FormSaveBar
-            onPress={() => saveRef.current()}
-            disabled={!isValid}
-            isSaving={isSaving}
-          />
 
           {/* Delete button at bottom (edit mode only) */}
           {isEditing && (

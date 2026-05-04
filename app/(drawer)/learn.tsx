@@ -17,7 +17,7 @@ export default function LearnScreen() {
         <View className="px-6 pt-4 pb-6 flex-col gap-3">
           <SettingsCard
             title="Glossary"
-            description="Bar finance terms: Pour Cost, COGS, Margin, etc."
+            description="Plain-language definitions for pour cost, margin, and the rest."
             iconName="book-outline"
             onPress={() => router.push('/settings-glossary' as any)}
             showCaret

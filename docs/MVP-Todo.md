@@ -1,6 +1,6 @@
 # PourCost RN — MVP To-Do
 
-_Last updated 2026-05-02._
+_Last updated 2026-05-04._
 
 Remaining work before the first submission. Delete a line when it's done; if it changes scope to post-MVP, move it to `feature-list.md` instead.
 
@@ -15,15 +15,9 @@ Remaining work before the first submission. Delete a line when it's done; if it 
 - [ ] **Final QA pass on the new size-form flow**. Add, edit, delete cycle, multi-size detail dropdown, "Bottle Size" ledger row, delete-in-use blocker, multi-select bulk delete.
 - [ ] **App Store Connect closeout**. Paste Terms + Privacy URLs, set app version, screenshot upload.
 
-### Detail page polish
-
-- [ ] **Cocktail detail restructure** (mirror of ingredient-detail). SPECS / NUMBERS toggle (vs INFO / NUMBERS). Hero with icon + 3 lines (eyebrow, name, type subinfo); full-width below. Specs tab = recipe build, description, glass/garnish/technique. Numbers tab = StatCards, PourCostHero, suggested price with Apply, More Details list (replaces bottom drawer). Same primitives as ingredient page (Card, StatCard, ScreenTitle, DetailRow). ~30 min.
-- [ ] **"Set as default size" affordance for ingredient configurations**. Schema already supports `is_default` on `ingredient_configurations` but no UI to switch which size is the primary. Two implementation paths proposed: (a) swap pattern — primary inline + configs as alternates, "Make this default" button swaps the values (no migration); (b) pointer pattern — add `default_configuration_id` column on ingredients (more flexible, requires migration). Lean (a) — simpler, fits existing model.
-
 ### Onboarding extras (deferred)
 
 - [ ] **Goal selector + 3-screen app tour** (Phase B from the cocktail picker work). Optional first-run goal question ("What brought you here? Cost out drinks / Set menu prices / Just curious") that drives a 3-screen swipe tour explaining My Inventory, Cocktails, Quick Calculator. Hold until cocktail picker telemetry tells us where users actually drop off — could be unnecessary friction.
-- [ ] **Inventory page filter chips: only show subtypes the user has**. Currently shows all `SPIRIT_SUBTYPES`/etc. regardless of usage. Should derive from current inventory so empty options don't appear.
 
 ### Architecture debt to pay
 
@@ -46,6 +40,37 @@ Remaining work before the first submission. Delete a line when it's done; if it 
 - [ ] **Std-dev pour cost bar zones**. Replace the current ratio-distance color zones with proper std-dev-based bands so the bar's color zones reflect statistical distance from target instead of arbitrary buckets. Strong UX improvement; post-MVP per Joshua.
 
 ## Completed
+
+### Form + pricing UX (2026-05-03 / 04)
+
+- [x] **`SuggestedRetailInput` component**. Single input with two visual states: purple border + "Suggested" pill when displaying a computed value, plain border + "Use Suggested" reset pill once the user types. Replaces the old `AiSuggestionRow` + Apply pattern across cocktail-form, ingredient-form, and invoice-ingredient-setup. Generalized via `pillLabel`/`resetLabel` props so the same component drives "Inherited / Use Canonical" on override fields and "From Invoice / Reset to Invoice" on OCR'd costs. Auto-selects on focus while suggesting.
+- [x] **Category cost priors for missing-ingredients pricing**. `src/lib/category-cost-priors.ts` returns a typical wholesale cost per (category, subcategory) anchored at a reference bottle size and scales linearly with the user's selected size. `MissingIngredientsForm` baselines each row with the prior, flips to manual on first keystroke. Lets users hit Save fast on items they don't have strong opinions about.
+- [x] **Inherited / Use Canonical override fields on ingredient-form** (Detailed mode). Brand, Origin, Production Region, Parent Company, Founded, Aging, Flavor Notes — show purple "Inherited" pill while displaying the linked canonical's value; flip to manual on first keystroke; reset pill clears the override (saves NULL so the canonical fallback applies on display).
+- [x] **Invoice ingredient-setup smart pricing**. Cost / Bottle is now editable with a "From Invoice" pill (was read-only `MetricRow`); Retail Price uses `SuggestedRetailInput` with the suggested-from-cost flow. Downstream math uses `effectiveBottleCost` / `effectiveRetail`.
+- [x] **Required-field markers — consistent**. All inline ` *` in label strings replaced with the `TextInput` `required` prop (renders red asterisk via `colors.error`). Added `required` prop to `Dropdown` and `ChipSelector`. Marked Product Size, Cost, and Spirit subtype required on the ingredient form; subType validation enforced when the chosen type defines subtypes. Display Name on onboarding-profile gets the marker. Auth/password forms intentionally unmarked (every field required, marker would be noise).
+- [x] **Pricing label/blurb cleanup on ingredient-form**. Removed the "Pricing" label + "Pour cost shown for the default size. View per-size analysis on the ingredient detail page." blurb. Reworded blurb now sits under the Pour Cost Hero: "Based on your default size. Each size has its own pour cost on the detail page."
+- [x] **Latched pricing reveal**. `pricingRevealed` flips true once cost crosses zero and never resets. Multi-size hint hides; Other Sizes section + Pricing block stay visible even after the user clears the cost field. No more layout shift on backspace.
+- [x] **"Set as default size" affordance for ingredient configurations**. Swap-pattern (option a). `setDefaultConfiguration` action on `ingredients-store` swaps `productSize`/`productCost` between the inline default and the chosen config (no schema change). `ingredient-size-form` exposes a "Set as default size" toggle that applies on save; the default's own page shows "(default size)" under the name instead of the toggle. Delete on the default opens a "Pick New Default" bottom sheet before completing.
+
+### Cocktail detail restructure (2026-05-03)
+
+- [x] **Cocktail detail restructure** (mirror of ingredient-detail). Removed the bottom-sheet "View More Details" pattern. New order: Identity hero → Menu Price/Margin StatCards → The Build → Notes → (detailed) PourCostHero → Suggested Price (gated on a real delta) → More Details inline `DetailRow` list. `pourLabel` now renders unitQuantity garnishes as a quantity-only string so we don't get "1 cherry Maraschino Cherry".
+- [x] **Inventory filter chips: only show subtypes the user has**. Spirit keeps a curated `ALWAYS_VISIBLE_SPIRIT_SUBTYPES` set so users can pre-filter even with zero stock; the long tail (Mezcal, Brandy, Liqueur, etc.) only appears once the user owns one. Beer / Wine / Non-Alc subtypes derive entirely from current inventory.
+
+### Defaults + settings (2026-05-04)
+
+- [x] **Per-type default pour sizes**. `defaultPourSizes: Record<IngredientType, Volume>` in app-store with sensible per-type values (Spirit 1.5oz, Beer 12oz, Wine 5oz, Non-Alc 1oz, etc.). `IngredientInputs.applyDefaults` snaps to a chip matching the per-type default, falling back to the type's first chip — fixes the "switching to Beer then back to Spirit drops to 1oz" bug. New `settings-pour-sizes` screen with one row per type. Spirit slot mirrors the legacy single `defaultPourSize` for back-compat. Migration v3 (Zustand persist) + Supabase migration 017 (`default_pour_sizes JSONB`).
+- [x] **Per-type default retail prices**. Parallel to pour sizes — `defaultRetailPrices: Record<IngredientType, number>` with Beer $6, Wine $10, Spirit $10, Non-Alc $4, Prepped $8, Garnish $2, Other $8. New `settings-retail-prices` screen. ingredient-detail / IngredientListItem fall back to per-type when no override on the ingredient. Migration v4 + same Supabase migration 017.
+- [x] **Sort label clarity**. "Most → Least" → "Largest Pour First", "Least → Most" → "Smallest Pour First", "Cost High → Low" → "Most Expensive First". Added missing "Manual (drag to reorder)" option so users can return to manual after picking a sort. Subtitle reworded.
+- [x] **Migration 017 — per-type defaults sync**. Adds `default_pour_sizes` + `default_retail_prices` JSONB columns to `profiles`. `loadProfile` merges server values with in-app sensible defaults so partial maps still resolve. `saveProfile` writes both. CLI-only push from this point onward — no more MCP `apply_migration`.
+
+### Copy polish pass (2026-05-04)
+
+- [x] **Em-dashes purged from user-facing copy**. settings-tiers, ingredients header, onboarding-wells-intro, settings-calculations, batch placeholder, invoice-line-edit placeholder, offline-queue toast, recipe-adopter error.
+- [x] **Mechanism jargon untangled**. "pour cost performance bar" → "pour cost meter"; "spirit tier ladder" → "Spirit Price Tiers"; "ingredient's per-pour math" → "ingredient's cost per pour"; "Low confidence match" → "We're not sure this is the right match"; "We'll wire each one up" → "We'll match each one"; "Bar finance terms: COGS…" → "Plain-language definitions for pour cost, margin, and the rest."
+- [x] **Marketing fluff removed**. "powers everything else" reworded; "with live cost and margin" → "Cost and margin update with your ingredients"; "build out your Bar Inventory" → "start costing cocktails"; both "60 seconds" claims removed; "unlock cross-device sync" → "so your bar syncs across devices".
+- [x] **Awkward sentences fixed**. "Changes save when you tap Save" deleted; "Can't verify your current password without an email on your account" → "We need an email on your account to verify your current password"; sub-floor / "good GM" reworded; verbose ice-dilution + delete-default copy tightened.
+- [x] **Empty states tightened**. EmptyIngredients / EmptyCocktails / EmptyCalculations now one short sentence each (down from 15+ words).
 
 ### Schema + data foundation
 

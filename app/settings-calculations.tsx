@@ -10,19 +10,7 @@ import PickerSheet from '@/src/components/ui/PickerSheet';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useAppStore, IngredientOrderPref, PriceRounding } from '@/src/stores/app-store';
-import { US_POUR_SIZES } from '@/src/constants/appConstants';
-import { volumeLabel, Volume } from '@/src/types/models';
-
-const POUR_SIZE_OPTIONS = US_POUR_SIZES.filter((v) => {
-  if (v.kind !== 'fractionalOunces') return false;
-  const oz = v.numerator / v.denominator;
-  return oz >= 0.5 && oz <= 3;
-});
-
-const pourSizeDropdownOptions = POUR_SIZE_OPTIONS.map((v) => ({
-  value: JSON.stringify(v),
-  label: volumeLabel(v),
-}));
+import { volumeLabel } from '@/src/types/models';
 
 const pourCostDropdownOptions = Array.from({ length: 41 }, (_, i) => {
   const val = 10 + i;
@@ -30,15 +18,11 @@ const pourCostDropdownOptions = Array.from({ length: 41 }, (_, i) => {
 });
 
 const orderDropdownOptions: { value: IngredientOrderPref; label: string }[] = [
-  { value: 'most-to-least', label: 'Most → Least' },
-  { value: 'least-to-most', label: 'Least → Most' },
-  { value: 'cost-high-low', label: 'Cost High → Low' },
+  { value: 'manual', label: 'Manual (drag to reorder)' },
+  { value: 'most-to-least', label: 'Largest Pour First' },
+  { value: 'least-to-most', label: 'Smallest Pour First' },
+  { value: 'cost-high-low', label: 'Most Expensive First' },
 ];
-
-const retailPriceOptions = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 25, 30].map((v) => ({
-  value: v,
-  label: `$${v.toFixed(2)}`,
-}));
 
 const minCocktailPriceOptions = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 20, 25].map((v) => ({
   value: v,
@@ -66,8 +50,8 @@ export default function SettingsCalculationsScreen() {
     pourCostGoal,
     beerPourCostGoal,
     winePourCostGoal,
-    defaultPourSize, setDefaultPourSize,
-    defaultRetailPrice, setDefaultRetailPrice,
+    defaultPourSizes,
+    defaultRetailPrices,
     minCocktailPrice, setMinCocktailPrice,
     minIngredientPrice, setMinIngredientPrice,
     ingredientOrderPref, setIngredientOrderPref,
@@ -94,8 +78,6 @@ export default function SettingsCalculationsScreen() {
     navigation.setOptions({ title: 'Calculations' });
   }, [navigation]);
 
-  const [showPourSizePicker, setShowPourSizePicker] = useState(false);
-  const [showRetailPricePicker, setShowRetailPricePicker] = useState(false);
   const [showMinCocktailPicker, setShowMinCocktailPicker] = useState(false);
   const [showMinIngredientPicker, setShowMinIngredientPicker] = useState(false);
   const [showOrderPicker, setShowOrderPicker] = useState(false);
@@ -133,17 +115,17 @@ export default function SettingsCalculationsScreen() {
           <View className="flex-col gap-3">
             <ScreenTitle variant="group" title="Defaults" />
             <SettingsCard
-              title="Default Pour Size"
-              description={volumeLabel(defaultPourSize)}
+              title="Default Pour Sizes"
+              description={`Spirit ${volumeLabel(defaultPourSizes.Spirit)}, Beer ${volumeLabel(defaultPourSizes.Beer)}, Wine ${volumeLabel(defaultPourSizes.Wine)}`}
               iconName="water-outline"
-              onPress={() => setShowPourSizePicker(true)}
+              onPress={() => router.push('/settings-pour-sizes' as any)}
               showCaret
             />
             <SettingsCard
-              title="Default Retail Price"
-              description={`$${defaultRetailPrice.toFixed(2)}`}
+              title="Default Retail Prices"
+              description={`Spirit $${defaultRetailPrices.Spirit.toFixed(0)}, Beer $${defaultRetailPrices.Beer.toFixed(0)}, Wine $${defaultRetailPrices.Wine.toFixed(0)}`}
               iconName="pricetag-outline"
-              onPress={() => setShowRetailPricePicker(true)}
+              onPress={() => router.push('/settings-retail-prices' as any)}
               showCaret
             />
             <SettingsCard
@@ -202,30 +184,10 @@ export default function SettingsCalculationsScreen() {
         </View>
       </ScrollView>
 
-      {showPourSizePicker && (
-        <PickerSheet
-          title="Default Pour Size"
-          subtitle="Pre-fills the pour size when you build a cocktail or look at an ingredient's per-pour math."
-          options={pourSizeDropdownOptions}
-          value={JSON.stringify(defaultPourSize)}
-          onSelect={(val) => { try { setDefaultPourSize(JSON.parse(val) as Volume); debouncedSave(); } catch {} }}
-          onClose={() => setShowPourSizePicker(false)}
-        />
-      )}
-      {showRetailPricePicker && (
-        <PickerSheet
-          title="Default Retail Price"
-          subtitle="Pre-fills the retail price field when you create a new ingredient or cocktail. Override per-item anytime."
-          options={retailPriceOptions}
-          value={defaultRetailPrice}
-          onSelect={(val) => { setDefaultRetailPrice(val); debouncedSave(); }}
-          onClose={() => setShowRetailPricePicker(false)}
-        />
-      )}
       {showOrderPicker && (
         <PickerSheet
           title="Ingredient Order"
-          subtitle="How ingredient pours are sorted in the cocktail Build column on detail pages."
+          subtitle="How ingredients are listed in a cocktail's recipe."
           options={orderDropdownOptions}
           value={ingredientOrderPref}
           onSelect={(val) => { setIngredientOrderPref(val as IngredientOrderPref); debouncedSave(); }}
@@ -245,7 +207,7 @@ export default function SettingsCalculationsScreen() {
       {showMinCocktailPicker && (
         <PickerSheet
           title="Minimum Cocktail Price"
-          subtitle="Suggested cocktail prices won't go below this. Stops cheap recipes from suggesting sub-floor prices no bar would actually charge."
+          subtitle="Suggested cocktail prices won't drop below this, even when cheap recipes would technically allow it."
           options={minCocktailPriceOptions}
           value={minCocktailPrice}
           onSelect={(val) => { setMinCocktailPrice(val); debouncedSave(); }}
@@ -255,7 +217,7 @@ export default function SettingsCalculationsScreen() {
       {showMinIngredientPicker && (
         <PickerSheet
           title="Minimum Spirit Pour Price"
-          subtitle="Suggested per-pour ingredient prices won't go below this — wells and call brands stay realistically priced."
+          subtitle="Suggested per-pour ingredient prices won't drop below this. Keeps wells and call brands realistically priced."
           options={minIngredientPriceOptions}
           value={minIngredientPrice}
           onSelect={(val) => { setMinIngredientPrice(val); debouncedSave(); }}

@@ -11,7 +11,7 @@ export default function OnboardingWellsIntro() {
       iconName="beer-outline"
       iconColor={palette.Y4}
       title="Set Up Your Wells"
-      body="Wells are the house pours your bar uses by default — the well vodka, the well whiskey, etc. Setting them up takes about 60 seconds and powers everything else."
+      body="Wells are the house pours your bar uses by default. The well vodka, the well whiskey, and so on. We'll use these for cocktails when no specific brand is called for."
       bullets={[
         'Pick brands you actually pour',
         'Enter the cost so we can price your cocktails',

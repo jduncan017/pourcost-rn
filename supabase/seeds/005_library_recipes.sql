@@ -101,7 +101,7 @@ SELECT seed_library_recipe(
   '[
     {"name": "Bourbon", "pour": {"kind":"decimalOunces","ounces":2}, "order": 1},
     {"name": "Demerara Syrup", "pour": {"kind":"decimalOunces","ounces":0.25}, "order": 2},
-    {"name": "Angostura Aromatic Bitters", "brand": "Angostura", "pour": {"kind":"namedOunces","name":"3 dashes","ounces":0.05}, "order": 3, "notes": "3 dashes"},
+    {"name": "Angostura Aromatic Bitters", "brand": "Angostura", "pour": {"kind":"namedOunces","name":"3 dash","ounces":0.05}, "order": 3, "notes": "3 dash"},
     {"name": "Orange Peel", "pour": {"kind":"unitQuantity","unitType":"oneThing","name":"1 peel","quantity":1,"ounces":0}, "order": 4, "notes": "Express and drop"}
   ]'::jsonb
 );
@@ -115,7 +115,7 @@ SELECT seed_library_recipe(
   '[
     {"name": "Rye Whiskey", "pour": {"kind":"decimalOunces","ounces":2}, "order": 1},
     {"name": "Carpano Antica Formula", "brand": "Carpano", "pour": {"kind":"decimalOunces","ounces":1}, "order": 2},
-    {"name": "Angostura Aromatic Bitters", "brand": "Angostura", "pour": {"kind":"namedOunces","name":"2 dashes","ounces":0.04}, "order": 3, "notes": "2 dashes"},
+    {"name": "Angostura Aromatic Bitters", "brand": "Angostura", "pour": {"kind":"namedOunces","name":"2 dash","ounces":0.04}, "order": 3, "notes": "2 dash"},
     {"name": "Luxardo Cherry", "brand": "Luxardo", "pour": {"kind":"unitQuantity","unitType":"oneThing","name":"1 cherry","quantity":1,"ounces":0}, "order": 4}
   ]'::jsonb
 );
@@ -129,7 +129,7 @@ SELECT seed_library_recipe(
   '[
     {"name": "Rye Whiskey", "pour": {"kind":"decimalOunces","ounces":2}, "order": 1},
     {"name": "Demerara Syrup", "pour": {"kind":"decimalOunces","ounces":0.25}, "order": 2},
-    {"name": "Peychaud''s Bitters", "brand": "Peychaud''s", "pour": {"kind":"namedOunces","name":"4 dashes","ounces":0.07}, "order": 3, "notes": "4 dashes"},
+    {"name": "Peychaud''s Bitters", "brand": "Peychaud''s", "pour": {"kind":"namedOunces","name":"4 dash","ounces":0.07}, "order": 3, "notes": "4 dash"},
     {"name": "Pernod Absinthe", "brand": "Pernod", "pour": {"kind":"namedOunces","name":"Rinse","ounces":0.1}, "order": 4, "notes": "Rinse glass"},
     {"name": "Lemon Twist", "pour": {"kind":"unitQuantity","unitType":"oneThing","name":"1 twist","quantity":1,"ounces":0}, "order": 5, "notes": "Express and discard"}
   ]'::jsonb

@@ -27,6 +27,7 @@ import {
   mapCanonicalToType,
   type CanonicalProductSummary,
 } from '@/src/lib/canonical-products';
+import { capture } from '@/src/services/analytics-service';
 
 const DATABASE_DEBOUNCE_MS = 250;
 
@@ -85,6 +86,7 @@ export default function SearchScreen() {
   }, [cocktails]);
 
   const handleItemPress = (type: 'ingredient' | 'cocktail', id: string) => {
+    capture('search_result_tapped', { kind: type });
     router.push({
       pathname: type === 'cocktail' ? '/cocktail-detail' : '/ingredient-detail',
       params: { id },
@@ -123,6 +125,21 @@ export default function SearchScreen() {
       if (databaseDebounceRef.current) clearTimeout(databaseDebounceRef.current);
     };
   }, [searchQuery, showDatabase]);
+
+  // Debounced search event — fires once typing settles.
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q) return;
+    const t = setTimeout(() => {
+      capture('search_performed', {
+        query_length: q.length,
+        ingredient_results: searchResults.ingredients.length,
+        cocktail_results: searchResults.cocktails.length,
+        database_open: showDatabase,
+      });
+    }, 800);
+    return () => clearTimeout(t);
+  }, [searchQuery, searchResults.ingredients.length, searchResults.cocktails.length, showDatabase]);
 
   // Tap a canonical → preview-detail; preview Save replaces preview with
   // the form, save in form pops back here.

@@ -5,8 +5,40 @@ import { Volume, fraction } from '@/src/types/models';
 import { fetchProfile } from '@/src/lib/supabase-data';
 import { updateProfile } from '@/src/lib/supabase-writes';
 import { FeedbackService } from '@/src/services/feedback-service';
+import { capture } from '@/src/services/analytics-service';
 import { PourCostTier, DEFAULT_TIERS } from '@/src/lib/pour-cost-tiers';
-import { DEFAULT_ENABLED_PRODUCT_SIZE_LABELS } from '@/src/constants/appConstants';
+import {
+  DEFAULT_ENABLED_PRODUCT_SIZE_LABELS,
+  type IngredientType,
+} from '@/src/constants/appConstants';
+
+// Sensible per-type pour sizes used when the user hasn't customized them.
+// Spirit anchors to the existing global default (1.5 oz fractional). Others
+// pick the most common chip option for that category.
+const DEFAULT_POUR_SIZES_BY_TYPE: Record<IngredientType, Volume> = {
+  Spirit: fraction(3, 2), // 1.5 oz
+  Beer: { kind: 'decimalOunces', ounces: 12 },
+  Wine: { kind: 'decimalOunces', ounces: 5 },
+  'Non-Alc': fraction(1, 1), // 1 oz (mixer/syrup pour)
+  Prepped: fraction(1, 1),
+  Garnish: fraction(1, 1), // not user-facing, garnish has its own unit flow
+  Other: fraction(1, 1),
+};
+
+// Sensible per-type retail price defaults used when the user hasn't
+// customized them. Pre-fills the retail price on new ingredients before any
+// suggested-from-cost math kicks in, and acts as the display fallback for
+// ingredients that don't carry their own retail. Spirit anchors to $10 to
+// match the legacy single `defaultRetailPrice`.
+const DEFAULT_RETAIL_PRICES_BY_TYPE: Record<IngredientType, number> = {
+  Spirit: 10,
+  Beer: 6,
+  Wine: 10,
+  'Non-Alc': 4,
+  Prepped: 8,
+  Garnish: 2,
+  Other: 8,
+};
 
 // ==========================================
 // TYPES
@@ -29,7 +61,16 @@ interface AppState {
   /** Bar-wide pour cost target for wine by the glass. */
   winePourCostGoal: number;
   defaultPourSize: Volume;
+  /** Per-ingredient-type pour size defaults. Used by the ingredient form to
+   *  pick a sensible starting pour when the user picks a type, and as the
+   *  display fallback for ingredients that don't carry their own pourSize.
+   *  Spirit's slot is the canonical "general default" (back-compat with the
+   *  legacy single `defaultPourSize`). */
+  defaultPourSizes: Record<IngredientType, Volume>;
   defaultRetailPrice: number;
+  /** Per-ingredient-type retail price defaults. Mirrors defaultPourSizes —
+   *  Spirit's slot stays in sync with the legacy single `defaultRetailPrice`. */
+  defaultRetailPrices: Record<IngredientType, number>;
   /** Minimum allowed Suggested Price for cocktails. Floor wins when raw
    *  pour-cost math suggests less than this. Default $10. */
   minCocktailPrice: number;
@@ -61,7 +102,14 @@ interface AppState {
   setBeerPourCostGoal: (goal: number) => void;
   setWinePourCostGoal: (goal: number) => void;
   setDefaultPourSize: (size: Volume) => void;
+  /** Set the default pour for a specific ingredient type. Spirit also mirrors
+   *  to the legacy `defaultPourSize` so the rest of the app (sort fallbacks,
+   *  lists, detail screens) stays in sync. */
+  setDefaultPourSizeForType: (type: IngredientType, size: Volume) => void;
   setDefaultRetailPrice: (price: number) => void;
+  /** Set the default retail price for a specific ingredient type. Spirit
+   *  also mirrors to the legacy `defaultRetailPrice`. */
+  setDefaultRetailPriceForType: (type: IngredientType, price: number) => void;
   setMinCocktailPrice: (price: number) => void;
   setMinIngredientPrice: (price: number) => void;
   setIngredientOrderPref: (pref: IngredientOrderPref) => void;
@@ -104,7 +152,9 @@ export const useAppStore = create<AppState>()(
       beerPourCostGoal: 22,
       winePourCostGoal: 25,
       defaultPourSize: fraction(3, 2), // 1.5 oz
+      defaultPourSizes: { ...DEFAULT_POUR_SIZES_BY_TYPE },
       defaultRetailPrice: 10.0,
+      defaultRetailPrices: { ...DEFAULT_RETAIL_PRICES_BY_TYPE },
       minCocktailPrice: 10.0,
       minIngredientPrice: 7.0,
       ingredientOrderPref: 'manual',
@@ -133,12 +183,35 @@ export const useAppStore = create<AppState>()(
         if (goal >= 5 && goal <= 60) set({ winePourCostGoal: goal });
       },
 
-      setDefaultPourSize: (size) => set({ defaultPourSize: size }),
+      setDefaultPourSize: (size) =>
+        set((state) => ({
+          defaultPourSize: size,
+          defaultPourSizes: { ...state.defaultPourSizes, Spirit: size },
+        })),
+
+      setDefaultPourSizeForType: (type, size) =>
+        set((state) => ({
+          defaultPourSizes: { ...state.defaultPourSizes, [type]: size },
+          // Keep the legacy single `defaultPourSize` mirrored to Spirit so
+          // sort/display fallbacks elsewhere stay aligned.
+          ...(type === 'Spirit' ? { defaultPourSize: size } : {}),
+        })),
 
       setDefaultRetailPrice: (price) => {
         if (price >= 0 && price <= 1000) {
-          set({ defaultRetailPrice: price });
+          set((state) => ({
+            defaultRetailPrice: price,
+            defaultRetailPrices: { ...state.defaultRetailPrices, Spirit: price },
+          }));
         }
+      },
+
+      setDefaultRetailPriceForType: (type, price) => {
+        if (price < 0 || price > 1000) return;
+        set((state) => ({
+          defaultRetailPrices: { ...state.defaultRetailPrices, [type]: price },
+          ...(type === 'Spirit' ? { defaultRetailPrice: price } : {}),
+        }));
       },
 
       setMinCocktailPrice: (price) => {
@@ -149,17 +222,32 @@ export const useAppStore = create<AppState>()(
         if (price >= 0 && price <= 100) set({ minIngredientPrice: price });
       },
 
-      setIngredientOrderPref: (pref) => set({ ingredientOrderPref: pref }),
+      setIngredientOrderPref: (pref) => {
+        set({ ingredientOrderPref: pref });
+        capture('setting_changed', { key: 'ingredientOrderPref', value: pref });
+      },
 
-      setThemeMode: (mode) => set({ themeMode: mode }),
+      setThemeMode: (mode) => {
+        set({ themeMode: mode });
+        capture('setting_changed', { key: 'themeMode', value: mode });
+      },
 
       setDisplayName: (name) => set({ displayName: name }),
 
-      setDefaultLandingScreen: (screen) => set({ defaultLandingScreen: screen }),
+      setDefaultLandingScreen: (screen) => {
+        set({ defaultLandingScreen: screen });
+        capture('setting_changed', { key: 'defaultLandingScreen', value: screen });
+      },
 
-      setDetailLevel: (level) => set({ detailLevel: level }),
+      setDetailLevel: (level) => {
+        set({ detailLevel: level });
+        capture('setting_changed', { key: 'detailLevel', value: level });
+      },
 
-      setSuggestedPriceRounding: (r) => set({ suggestedPriceRounding: r }),
+      setSuggestedPriceRounding: (r) => {
+        set({ suggestedPriceRounding: r });
+        capture('setting_changed', { key: 'suggestedPriceRounding', value: r });
+      },
 
       setFirstLaunch: (isFirst) => set({ isFirstLaunch: isFirst }),
 
@@ -176,8 +264,14 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      setProModeEnabled: (enabled) => set({ proModeEnabled: enabled }),
-      setPourCostTiers: (tiers) => set({ pourCostTiers: tiers }),
+      setProModeEnabled: (enabled) => {
+        set({ proModeEnabled: enabled });
+        capture('setting_changed', { key: 'proModeEnabled', value: enabled });
+      },
+      setPourCostTiers: (tiers) => {
+        set({ pourCostTiers: tiers });
+        capture('setting_changed', { key: 'pourCostTiers', value: tiers.length });
+      },
 
       // Load profile from Supabase → store
       loadProfile: async () => {
@@ -185,12 +279,29 @@ export const useAppStore = create<AppState>()(
           const profile = await fetchProfile();
           if (!profile) return;
 
+          // Merge per-type defaults from the server with the in-app sensible
+          // defaults so any keys missing on the server (older profiles, or
+          // simply types the user hasn't touched) still resolve to a value.
+          const mergedPourSizes: Record<IngredientType, Volume> = {
+            ...DEFAULT_POUR_SIZES_BY_TYPE,
+            ...(profile.defaultPourSizes ?? {}),
+            // Spirit always tracks the legacy single column for back-compat
+            // with older clients writing only the single field.
+            Spirit: profile.defaultPourSize,
+          };
+          const mergedRetailPrices: Record<IngredientType, number> = {
+            ...DEFAULT_RETAIL_PRICES_BY_TYPE,
+            ...(profile.defaultRetailPrices ?? {}),
+            Spirit: profile.defaultRetailPrice,
+          };
           set({
             pourCostGoal: profile.pourCostGoal,
             beerPourCostGoal: profile.beerPourCostGoal,
             winePourCostGoal: profile.winePourCostGoal,
             defaultPourSize: profile.defaultPourSize,
+            defaultPourSizes: mergedPourSizes,
             defaultRetailPrice: profile.defaultRetailPrice,
+            defaultRetailPrices: mergedRetailPrices,
             minCocktailPrice: profile.minCocktailPrice,
             minIngredientPrice: profile.minIngredientPrice,
             ingredientOrderPref: profile.ingredientOrderPref,
@@ -223,7 +334,9 @@ export const useAppStore = create<AppState>()(
             beerPourCostGoal: state.beerPourCostGoal,
             winePourCostGoal: state.winePourCostGoal,
             defaultPourSize: state.defaultPourSize,
+            defaultPourSizes: state.defaultPourSizes,
             defaultRetailPrice: state.defaultRetailPrice,
+            defaultRetailPrices: state.defaultRetailPrices,
             minCocktailPrice: state.minCocktailPrice,
             minIngredientPrice: state.minIngredientPrice,
             ingredientOrderPref: state.ingredientOrderPref,
@@ -247,7 +360,9 @@ export const useAppStore = create<AppState>()(
           beerPourCostGoal: 22,
           winePourCostGoal: 25,
           defaultPourSize: fraction(3, 2),
+          defaultPourSizes: { ...DEFAULT_POUR_SIZES_BY_TYPE },
           defaultRetailPrice: 10.0,
+          defaultRetailPrices: { ...DEFAULT_RETAIL_PRICES_BY_TYPE },
           minCocktailPrice: 10.0,
           minIngredientPrice: 7.0,
           ingredientOrderPref: 'manual',
@@ -265,22 +380,51 @@ export const useAppStore = create<AppState>()(
     {
       name: 'app-store',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 2,
+      version: 4,
       migrate: (persistedState: any, version: number) => {
+        let next = persistedState;
         if (version < 2) {
-          // Migration from v0/v1 → v2: new settings model
-          return {
-            ...persistedState,
-            pourCostGoal: persistedState.pourCostGoal ?? 18,
-            defaultPourSize: persistedState.defaultPourSize ?? { kind: 'fractionalOunces', numerator: 3, denominator: 2 },
-            defaultRetailPrice: persistedState.defaultRetailPrice ?? 10.0,
-            ingredientOrderPref: persistedState.ingredientOrderPref ?? 'manual',
-            themeMode: persistedState.isDarkMode === false ? 'light' : 'dark',
-            displayName: persistedState.displayName ?? '',
+          // v0/v1 → v2: new settings model
+          next = {
+            ...next,
+            pourCostGoal: next.pourCostGoal ?? 18,
+            defaultPourSize: next.defaultPourSize ?? { kind: 'fractionalOunces', numerator: 3, denominator: 2 },
+            defaultRetailPrice: next.defaultRetailPrice ?? 10.0,
+            ingredientOrderPref: next.ingredientOrderPref ?? 'manual',
+            themeMode: next.isDarkMode === false ? 'light' : 'dark',
+            displayName: next.displayName ?? '',
             lastSyncDate: null,
           };
         }
-        return persistedState;
+        if (version < 3) {
+          // v2 → v3: per-type pour-size defaults. Seed from the legacy
+          // single `defaultPourSize` for Spirit; sensible static values for
+          // the rest. Existing user value wins for Spirit.
+          const legacy = next.defaultPourSize ?? DEFAULT_POUR_SIZES_BY_TYPE.Spirit;
+          next = {
+            ...next,
+            defaultPourSizes: {
+              ...DEFAULT_POUR_SIZES_BY_TYPE,
+              Spirit: legacy,
+              ...(next.defaultPourSizes ?? {}),
+            },
+          };
+        }
+        if (version < 4) {
+          // v3 → v4: per-type retail price defaults. Seed Spirit from the
+          // legacy single `defaultRetailPrice`; everyone else gets the
+          // category-typical default.
+          const legacyRetail = next.defaultRetailPrice ?? DEFAULT_RETAIL_PRICES_BY_TYPE.Spirit;
+          next = {
+            ...next,
+            defaultRetailPrices: {
+              ...DEFAULT_RETAIL_PRICES_BY_TYPE,
+              Spirit: legacyRetail,
+              ...(next.defaultRetailPrices ?? {}),
+            },
+          };
+        }
+        return next;
       },
     }
   )

@@ -10,7 +10,6 @@ import IngredientInUseSheet from '@/src/components/ui/IngredientInUseSheet';
 import SelectionActionBar from '@/src/components/ui/SelectionActionBar';
 import SearchBar from '@/src/components/ui/SearchBar';
 import ChipSelector, {
-  IngredientTypeSelector,
   SortSelector,
 } from '@/src/components/ui/ChipSelector';
 import EmptyState from '@/src/components/EmptyState';
@@ -55,6 +54,48 @@ export default function IngredientsScreen() {
   const clearError = useIngredientsStore((s) => s.clearError);
 
   const [selectedSubType, setSelectedSubType] = useState('All');
+  // Reactive ingredient list — drives the "what filter chips to show"
+  // calculation below (hide types/subtypes the user doesn't own).
+  const allIngredients = useIngredientsStore((s) => s.ingredients);
+
+  // Top-level types that always appear in the chip row, regardless of
+  // whether the user owns any of that type. These are the staples; the
+  // remaining types (Non-Alc / Prepped / Garnish / Other) only show up
+  // once the user actually has one.
+  const ALWAYS_VISIBLE_TYPES = useMemo(() => ['Spirit', 'Beer', 'Wine'], []);
+  // Spirit subtypes that always appear when Spirit is selected. Even with
+  // zero spirits in inventory the user can pre-filter for these. The other
+  // spirit subtypes (Mezcal, Brandy, Liqueur, etc.) only show once the
+  // user has at least one of that subtype.
+  const ALWAYS_VISIBLE_SPIRIT_SUBTYPES = useMemo(
+    () => ['Gin', 'Vodka', 'Whiskey', 'Tequila', 'Rum'],
+    [],
+  );
+
+  const visibleTypes = useMemo(() => {
+    const allTypes = ['Spirit', 'Beer', 'Wine', 'Non-Alc', 'Prepped', 'Garnish', 'Other'];
+    const owned = new Set(allIngredients.map((i) => i.type).filter(Boolean) as string[]);
+    return allTypes.filter(
+      (t) => ALWAYS_VISIBLE_TYPES.includes(t) || owned.has(t),
+    );
+  }, [allIngredients, ALWAYS_VISIBLE_TYPES]);
+
+  const visibleSubtypes = useMemo(() => {
+    const allForType = SUBTYPES_BY_TYPE[selectedType];
+    if (!allForType) return [];
+    const owned = new Set(
+      allIngredients
+        .filter((i) => i.type === selectedType && i.subType)
+        .map((i) => i.subType as string),
+    );
+    if (selectedType === 'Spirit') {
+      return allForType.filter(
+        (s) => ALWAYS_VISIBLE_SPIRIT_SUBTYPES.includes(s) || owned.has(s),
+      );
+    }
+    // Beer / Wine / Non-Alc: only show subtypes the user has.
+    return allForType.filter((s) => owned.has(s));
+  }, [allIngredients, selectedType, ALWAYS_VISIBLE_SPIRIT_SUBTYPES]);
   const [inUseIngredient, setInUseIngredient] = useState<SavedIngredient | null>(null);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -65,7 +106,7 @@ export default function IngredientsScreen() {
   const cocktails = useCocktailsStore((s) => s.cocktails);
 
   // Get filtered ingredients from store, then apply subtype filter locally
-  const hasSubtypes = !!SUBTYPES_BY_TYPE[selectedType];
+  const hasSubtypes = visibleSubtypes.length > 0;
   const filteredIngredients = (() => {
     const base = getFilteredIngredients();
     if (!hasSubtypes || selectedSubType === 'All') return base;
@@ -308,7 +349,7 @@ export default function IngredientsScreen() {
           <View>
             <View className="mb-6 mt-4">
               <Text className="text-sm mb-3" style={{ color: colors.textTertiary }}>
-                Ingredients in your bar — costs, sizes, and what's prepped.
+                Ingredients in your bar. Costs, sizes, and what's prepped.
               </Text>
               <View className="flex-row items-center gap-3">
                 <View className="flex-1">
@@ -333,13 +374,15 @@ export default function IngredientsScreen() {
             <View className="mb-6">
               <View className="mb-4">
                 <ScreenTitle title="Type" variant="group" className="mb-2" />
-                <IngredientTypeSelector
-                  selectedType={selectedType}
-                  onTypeChange={(t) => {
+                <ChipSelector
+                  options={['All', ...visibleTypes]}
+                  selectedOption={selectedType}
+                  onSelectionChange={(t) => {
                     setSelectedType(t);
                     if (t !== 'Spirit') setSelectedSubType('All');
                   }}
                   showLabel={false}
+                  variant="filter"
                 />
               </View>
 
@@ -351,7 +394,7 @@ export default function IngredientsScreen() {
                     className="mb-2"
                   />
                   <ChipSelector
-                    options={['All', ...SUBTYPES_BY_TYPE[selectedType]]}
+                    options={['All', ...visibleSubtypes]}
                     selectedOption={selectedSubType}
                     onSelectionChange={setSelectedSubType}
                     showLabel={false}
@@ -437,7 +480,7 @@ export default function IngredientsScreen() {
                   ? `No ingredients match "${searchQuery}"${selectedType !== 'All' ? ` in ${selectedType}` : ''}`
                   : selectedType !== 'All'
                     ? `No ingredients in ${selectedType} category`
-                    : "Set up your wells in 60 seconds and we'll add your house pours so you can start building cocktails."
+                    : 'Set up your wells and we\'ll add your house pours so you can start building cocktails.'
               }
               actionLabel={
                 searchQuery || selectedType !== 'All' ? 'Add Ingredient' : 'Set Up Wells'

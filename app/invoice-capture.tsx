@@ -6,7 +6,7 @@
  * Falls back to photo library picker for pre-existing images.
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -32,6 +32,7 @@ try {
 import { Ionicons } from '@expo/vector-icons';
 import { useInvoicesStore } from '@/src/stores/invoices-store';
 import { processInvoice } from '@/src/services/invoice-pipeline-service';
+import { capture } from '@/src/services/analytics-service';
 import { useThemeColors } from '@/src/contexts/ThemeContext';
 import GradientBackground from '@/src/components/ui/GradientBackground';
 import Button from '@/src/components/ui/Button';
@@ -95,6 +96,9 @@ export default function InvoiceCaptureScreen() {
   const { createInvoice, isUploading } = useInvoicesStore();
 
   const [pages, setPages] = useState<string[]>([]);
+  const uploadedRef = useRef(false);
+  const pagesRef = useRef<string[]>([]);
+  pagesRef.current = pages;
 
   const pickFromLibrary = useCallback(async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -144,9 +148,19 @@ export default function InvoiceCaptureScreen() {
 
   // Auto-launch scanner on mount if no pages yet
   useEffect(() => {
+    capture('invoice_capture_started', {
+      scanner_available: !!DocumentScanner,
+    });
     if (pages.length === 0) {
       scanDocument();
     }
+    return () => {
+      if (!uploadedRef.current) {
+        capture('invoice_capture_abandoned', {
+          page_count: pagesRef.current.length,
+        });
+      }
+    };
   }, []);
 
   const removePage = useCallback((index: number) => {
@@ -158,10 +172,16 @@ export default function InvoiceCaptureScreen() {
 
     try {
       const invoice = await createInvoice({ imageUris: pages, imageUrls: [] });
+      uploadedRef.current = true;
+      capture('invoice_capture_completed', { page_count: pages.length });
       router.replace('/(drawer)/invoices' as any);
 
       // Kick off processing in the background (non-blocking)
       processInvoice(invoice).then((result) => {
+        capture('invoice_processed', {
+          success: result.success,
+          page_count: pages.length,
+        });
         if (result.success) {
           useInvoicesStore.getState().loadInvoices(true);
         }

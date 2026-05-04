@@ -26,7 +26,7 @@ import {
   getPourChipsForContext,
   type IngredientType,
 } from '@/src/constants/appConstants';
-import { Volume, volumeLabel } from '@/src/types/models';
+import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
 
 // ==========================================
 // CONSTANTS
@@ -109,8 +109,12 @@ export default function IngredientInputs({
   } = values;
   const currentSizeLabel = volumeLabel(productSize);
 
-  // Local text state for numeric inputs
-  const [productCostText, setProductCostText] = useState(productCost.toString());
+  // Local text state for numeric inputs. Empty string when the value is 0
+  // (uninitialized) so the placeholder shows instead of "0" — otherwise
+  // typing into the field appends to "0" and produces "020" etc.
+  const [productCostText, setProductCostText] = useState(
+    productCost > 0 ? productCost.toString() : '',
+  );
   const [retailPriceText, setRetailPriceText] = useState(retailPrice.toString());
   const [garnishAmountText, setGarnishAmountText] = useState(garnishAmount.toString());
   const [servingAmountText, setServingAmountText] = useState(servingAmount.toString());
@@ -152,8 +156,19 @@ export default function IngredientInputs({
   const applyDefaults = (type: string, st?: string) => {
     const newSize = findDefaultSize(type, st);
     const chips = getPourChipsForContext(type, newSize);
-    const defaultChip = type === 'Prepped' ? chips.find(c => c.oz === 1) : undefined;
-    const newPourSize = defaultChip?.oz ?? chips[0]?.oz ?? 1.5;
+    // Prefer the user's per-type default pour size if it matches a chip for
+    // this category. Falls back to the type's first chip otherwise.
+    const perTypeDefault = useAppStore
+      .getState()
+      .defaultPourSizes[type as IngredientType];
+    const perTypeOz = perTypeDefault ? volumeToOunces(perTypeDefault) : null;
+    const matchingChip =
+      perTypeOz != null
+        ? chips.find((c) => Math.abs(c.oz - perTypeOz) < 0.001)
+        : undefined;
+    const preppedChip = type === 'Prepped' ? chips.find((c) => c.oz === 1) : undefined;
+    const newPourSize =
+      matchingChip?.oz ?? preppedChip?.oz ?? chips[0]?.oz ?? 1.5;
     onChange({
       productSize: newSize,
       pourSize: newPourSize,
@@ -226,6 +241,7 @@ export default function IngredientInputs({
       {showSubtypes && subtypes && (
         <ChipSelector
           label={`${ingredientType} Type`}
+          required={variant === 'form'}
           options={[...subtypes]}
           selectedOption={subType}
           onSelectionChange={handleSubTypeChange}
@@ -240,7 +256,8 @@ export default function IngredientInputs({
             <View className="flex-1">
               <TextInput
                 label="Product Size"
-                        value={garnishAmountText}
+                required={variant === 'form'}
+                value={garnishAmountText}
                 onChangeText={(text) => {
                   if (text === '' || /^\d*\.?\d*$/.test(text)) {
                     setGarnishAmountText(text);
@@ -262,7 +279,8 @@ export default function IngredientInputs({
 
           <TextInput
             label={`Cost / ${garnishProductLabel}`}
-                value={productCostText}
+            required={variant === 'form'}
+            value={productCostText}
             onChangeText={(text) => {
               if (text === '' || /^\d*\.?\d*$/.test(text)) {
                 setProductCostText(text);
@@ -296,7 +314,8 @@ export default function IngredientInputs({
               onValueChange={handleProductSizeChange}
               options={productSizeOptions}
               label={ingredientType === 'Prepped' ? 'Batch Yield' : 'Product Size'}
-                  placeholder="Select size"
+              required={variant === 'form'}
+              placeholder="Select size"
               sheetHeaderRight={variant === 'form' ? (closeSheet) => (
                 <Pressable
                   onPress={() => {
@@ -317,7 +336,8 @@ export default function IngredientInputs({
               label={ingredientType === 'Prepped'
                 ? `Batch Cost (${volumeLabel(productSize)})`
                 : `Cost / ${volumeLabel(productSize)}`}
-                  value={productCostText}
+              required={variant === 'form'}
+              value={productCostText}
               onChangeText={(text) => {
                 if (text === '' || /^\d*\.?\d*$/.test(text)) {
                   setProductCostText(text);
@@ -332,7 +352,8 @@ export default function IngredientInputs({
 
           {/* Serving pour size. In form mode (pourSizeOverride=true), starts
               collapsed showing the user's default with a Customize CTA. In
-              calculator mode, always-visible chip selector (current behavior). */}
+              calculator mode, always-visible chip selector (current behavior).
+              Layout: label → descriptor → input — matches the rest of the form. */}
           {pourSizeOverride && !pourOverrideExpanded ? (
             <View className="flex-col gap-1.5">
               <Text
@@ -341,30 +362,36 @@ export default function IngredientInputs({
               >
                 SERVING POUR
               </Text>
-              <Pressable
-                onPress={() => setPourOverrideExpanded(true)}
-                className="flex-row items-center justify-between rounded-xl px-4 py-3"
-                style={{
-                  backgroundColor: colors.inputBg,
-                  borderWidth: 1,
-                  borderColor: colors.borderSubtle,
-                }}
-              >
-                <View className="flex-col">
-                  <Text style={{ color: colors.text, fontWeight: '600', fontSize: 16 }}>
-                    {pourSize} oz
-                  </Text>
-                  <Text style={{ color: colors.textTertiary, fontSize: 12 }}>
-                    {matchesDefaultPour ? 'Using your default pour size' : 'Custom for this ingredient'}
-                  </Text>
-                </View>
-                <Text style={{ color: colors.accent, fontWeight: '600', fontSize: 14 }}>
-                  Customize
-                </Text>
-              </Pressable>
               <Text className="text-xs" style={{ color: colors.textTertiary }}>
                 How much you sell per drink. Change the default in Settings.
               </Text>
+              <Pressable
+                onPress={() => setPourOverrideExpanded(true)}
+                className="flex-row items-center justify-between rounded-lg p-4"
+                style={{
+                  backgroundColor: colors.surface,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                }}
+              >
+                <Text className="flex-row items-baseline" style={{ fontSize: 15 }}>
+                  <Text style={{ color: colors.text, fontWeight: '600' }}>
+                    {pourSize}oz
+                  </Text>
+                  {matchesDefaultPour ? (
+                    <Text style={{ color: colors.textTertiary, fontWeight: '500' }}>
+                      {' '}(default)
+                    </Text>
+                  ) : (
+                    <Text style={{ color: colors.textTertiary, fontWeight: '500' }}>
+                      {' '}(custom)
+                    </Text>
+                  )}
+                </Text>
+                <Text style={{ color: colors.accent, fontWeight: '600', fontSize: 14 }}>
+                  Change
+                </Text>
+              </Pressable>
             </View>
           ) : (
             <View className="flex-col gap-1.5">

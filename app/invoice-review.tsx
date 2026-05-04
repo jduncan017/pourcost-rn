@@ -131,7 +131,7 @@ function MappingCard({
         <View className="flex-row items-center gap-1 mt-2">
           <Ionicons name="warning" size={12} color={colors.warning} />
           <Text className="text-xs" style={{ color: colors.warning }}>
-            Low confidence match. Verify this is correct.
+            We're not sure this is the right match. Double-check before saving.
           </Text>
         </View>
       )}

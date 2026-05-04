@@ -72,6 +72,7 @@ export default function OnboardingProfile() {
           {/* Display Name */}
           <TextInput
             label="Display Name"
+            required
             value={displayName}
             onChangeText={setDisplayName}
             placeholder="Your name or bar name"

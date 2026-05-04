@@ -110,7 +110,13 @@ export async function searchCanonicalProducts(
     .from('canonical_products')
     .select('id, name, brand, category, subcategory, default_sizes, abv, origin, description, flavor_notes, image_url')
     .not('brand', 'is', null)
-    .or(`name.ilike.%${trimmed}%,brand.ilike.%${trimmed}%`)
+    // Match against category + subcategory too so "whisk" surfaces every
+    // whiskey (subcategory = 'Whiskey'), "vodka" surfaces every vodka, etc.
+    // Without this, the search only hit `name` and `brand`, so a category
+    // search returned the rare brand whose name happens to include the term.
+    .or(
+      `name.ilike.%${trimmed}%,brand.ilike.%${trimmed}%,category.ilike.%${trimmed}%,subcategory.ilike.%${trimmed}%`,
+    )
     .order('name')
     .limit(limit);
 

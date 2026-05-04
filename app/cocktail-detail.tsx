@@ -10,15 +10,12 @@ import { Ionicons } from '@expo/vector-icons';
 import AiSuggestionRow from '@/src/components/ui/AiSuggestionRow';
 import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import ActionSheet from '@/src/components/ui/ActionSheet';
-import LedgerRow from '@/src/components/ui/LedgerRow';
-import BottomSheet from '@/src/components/ui/BottomSheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StatCard from '@/src/components/ui/StatCard';
 import DetailLevelToggle from '@/src/components/ui/DetailLevelToggle';
 import PourCostHero, { getPerformance } from '@/src/components/PourCostHero';
 import { useHeroTargetForCocktail } from '@/src/lib/useHeroTarget';
 import GradientBackground from '@/src/components/ui/GradientBackground';
-import { LinearGradient } from 'expo-linear-gradient';
 import { FeedbackService } from '@/src/services/feedback-service';
 import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
 import { ensureDate } from '@/src/lib/ensureDate';
@@ -30,12 +27,54 @@ import {
   applyPriceFloor,
 } from '@/src/services/calculation-service';
 
-/** Display-friendly pour size: "2oz", "0.75oz", "1.5oz". Decimal everywhere. */
+/** Display-friendly pour size: "2oz", "0.75oz", "1.5oz". Decimal everywhere.
+ *  For garnish-style unit quantities (a cherry, a peel, a twist) we render
+ *  just the count — the noun is duplicated in the ingredient name in col 2,
+ *  so "1 Maraschino Cherry" reads cleaner than "1 cherry Maraschino Cherry".
+ *  Pack-style unit quantities (oneCanOrBottle, e.g. "6 pack") keep their
+ *  descriptive name since the ingredient name doesn't repeat the size. */
 function pourLabel(v: Volume): string {
-  if (v.kind === 'namedOunces' || v.kind === 'unitQuantity') return volumeLabel(v);
+  if (v.kind === 'unitQuantity') {
+    if (v.unitType === 'oneThing') return String(v.quantity);
+    return volumeLabel(v);
+  }
+  if (v.kind === 'namedOunces') return volumeLabel(v);
   const oz = volumeToOunces(v);
   const formatted = oz % 1 === 0 ? oz : Number(oz.toFixed(2));
   return `${formatted}oz`;
+}
+
+/** Mirror of ingredient-detail's DetailRow. Single label/value row with a
+ *  hairline divider above each row except the first. Used in the Numbers-tab
+ *  More Details list (replaces the previous bottom-drawer Ledger). */
+function DetailRow({
+  label,
+  value,
+  isFirst,
+}: {
+  label: string;
+  value: string;
+  isFirst?: boolean;
+}) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderTopWidth: isFirst ? 0 : 1,
+        borderTopColor: 'rgba(255,255,255,0.08)',
+      }}
+    >
+      <Text className="text-base" style={{ color: palette.N3 }}>
+        {label}
+      </Text>
+      <Text className="text-base" style={{ color: palette.N1, fontWeight: '600' }}>
+        {value}
+      </Text>
+    </View>
+  );
 }
 
 
@@ -53,7 +92,6 @@ export default function CocktailDetailScreen() {
   const colors = useThemeColors();
   const params = useLocalSearchParams();
   const [showActions, setShowActions] = useState(false);
-  const [showLedger, setShowLedger] = useState(false);
 
   const { getCocktailById, loadCocktails, deleteCocktail, updateCocktail } =
     useCocktailsStore();
@@ -189,32 +227,6 @@ export default function CocktailDetailScreen() {
         ]}
       />
 
-      <BottomSheet
-        visible={showLedger}
-        onClose={() => setShowLedger(false)}
-        title="The Numbers"
-      >
-        <View className="px-4 pb-6 flex-col gap-1">
-          <LedgerRow
-            label="Cost Of Goods"
-            value={formatCurrency(metrics.totalCost)}
-            infoTermKey="cogs"
-          />
-          <LedgerRow
-            label="Total Volume"
-            value={`${totalVolume.toFixed(2)} oz`}
-          />
-          <LedgerRow
-            label="Category"
-            value={cocktail.category || 'Other'}
-          />
-          <LedgerRow
-            label="Last Updated"
-            value={new Date(cocktail.updatedAt).toLocaleDateString()}
-          />
-        </View>
-      </BottomSheet>
-
       <ScrollView
         className="flex-1"
         bounces={false}
@@ -273,19 +285,9 @@ export default function CocktailDetailScreen() {
             </View>
           </View>
 
-          {/* Pour Cost hero — detailed only, edge-to-edge. Sits at the top
-              of the financial story so managers see the headline performance
-              metric first. Stats below provide the supporting numbers. */}
-          {isDetailed && (
-            <PourCostHero
-              pourCostPercentage={pourCostPct}
-              targetLabel={cocktailTargetLabel ?? undefined}
-            />
-          )}
-
-          {/* Stats group — Menu Price always visible. Margin + Suggested Price
-              are cost-derived and only show in detailed mode so simple mode
-              stays focused on the recipe and retail price. */}
+          {/* Menu Price — always visible. Sits between the hero and the
+              recipe so the bartender + manager both anchor on what the
+              cocktail sells for before reading the build. */}
           <View className="px-6 flex-col gap-3">
             <View className="flex-row gap-3">
               <StatCard
@@ -300,27 +302,12 @@ export default function CocktailDetailScreen() {
                 />
               )}
             </View>
-            {isDetailed && !isOnTarget && (() => {
-              const suggested = applyPriceFloor(
-                roundSuggestedPrice(metrics.suggestedPrice, suggestedPriceRounding),
-                minCocktailPrice,
-              );
-              return (
-                <AiSuggestionRow
-                  label="Suggested Price"
-                  value={formatCurrency(suggested)}
-                  infoTermKey="suggestedPrice"
-                  onApply={
-                    suggested > 0
-                      ? () => updateCocktail(cocktail.id, { retailPrice: suggested })
-                      : undefined
-                  }
-                />
-              );
-            })()}
           </View>
 
-          {/* THE BUILD — open 3-col list. Page anchor for both bartender and manager. */}
+          {/* THE BUILD — open 3-col list. Page anchor for both bartender and
+              manager. Sits ABOVE the Pour Cost Hero per the dual-persona
+              design: bartender reads the recipe; manager scrolls past for
+              the financial story. */}
           <View className="px-6 flex-col gap-1">
             <ScreenTitle title="The Build" variant="muted" className="mb-1" />
 
@@ -407,50 +394,79 @@ export default function CocktailDetailScreen() {
             </View>
           ) : null}
 
-          {/* LEDGER summary bar — detailed only. Tappable footer that opens
-              the full Ledger in a bottom sheet. Sticks to bottom via marginTop:auto.
-              Future home for price history, margin trends, version history. */}
+          {/* ============================================================
+              NUMBERS TAB (detailLevel === 'detailed')
+              Pour Cost hero, suggested price (when off-target), and the
+              inline More Details list. Replaces the old bottom-drawer Ledger. */}
           {isDetailed && (
-            <Pressable
-              onPress={() => setShowLedger(true)}
-              style={{ marginTop: 'auto' }}
-            >
-              <LinearGradient
-                colors={[palette.B9 + '50', palette.N9] as const}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.5, y: 1 }}
-              >
+            <>
+              {/* Pour Cost hero — edge-to-edge, headline performance metric. */}
+              <PourCostHero
+                pourCostPercentage={pourCostPct}
+                targetLabel={cocktailTargetLabel ?? undefined}
+              />
+
+              {/* Suggested Price with Apply — only when off-target AND the
+                  suggestion would actually change the price. Without the
+                  delta gate, recipes with retail already at the floor or
+                  rounding-equal to the suggestion render an Apply that
+                  writes the same value (looks like Apply does nothing). */}
+              {!isOnTarget && (() => {
+                const suggested = applyPriceFloor(
+                  roundSuggestedPrice(metrics.suggestedPrice, suggestedPriceRounding),
+                  minCocktailPrice,
+                );
+                const wouldChangePrice = Math.abs(suggested - retailPrice) >= 0.01;
+                if (suggested <= 0 || !wouldChangePrice) return null;
+                return (
+                  <View className="px-6">
+                    <AiSuggestionRow
+                      label="Suggested Price"
+                      value={formatCurrency(suggested)}
+                      infoTermKey="suggestedPrice"
+                      onApply={() =>
+                        updateCocktail(cocktail.id, { retailPrice: suggested })
+                      }
+                    />
+                  </View>
+                );
+              })()}
+
+              {/* More Details — inline list (mirrors ingredient-detail). */}
+              <View className="px-6 flex-col gap-3">
+                <ScreenTitle title="More Details" variant="muted" />
                 <View
-                  className="px-6 pt-4 flex-row items-center justify-between"
+                  className="rounded-xl px-4"
                   style={{
-                    borderTopWidth: 1,
-                    borderTopColor: colors.borderSubtle,
-                    paddingBottom: insets.bottom + 16,
+                    backgroundColor: colors.surface,
+                    borderWidth: 1,
+                    borderColor: colors.borderSubtle,
                   }}
                 >
-                  <View className="flex-col gap-0.5">
-                    <Text
-                      className="text-xs uppercase"
-                      style={{ color: colors.textTertiary, letterSpacing: 1 }}
-                    >
-                      The Numbers
-                    </Text>
-                    <Text
-                      className="text-sm"
-                      style={{ color: colors.textSecondary }}
-                    >
-                      View more details
-                    </Text>
-                  </View>
-                  <Ionicons
-                    name="chevron-up"
-                    size={20}
-                    color={colors.textSecondary}
+                  <DetailRow
+                    label="Cost Of Goods"
+                    value={formatCurrency(metrics.totalCost)}
+                    isFirst
+                  />
+                  <DetailRow
+                    label="Total Volume"
+                    value={`${totalVolume.toFixed(2)} oz`}
+                  />
+                  <DetailRow
+                    label="Category"
+                    value={cocktail.category || 'Other'}
+                  />
+                  <DetailRow
+                    label="Last Updated"
+                    value={new Date(cocktail.updatedAt).toLocaleDateString()}
                   />
                 </View>
-              </LinearGradient>
-            </Pressable>
+              </View>
+            </>
           )}
+
+          {/* Bottom padding so content doesn't slam against the safe area. */}
+          <View style={{ height: insets.bottom + 16 }} />
         </View>
       </ScrollView>
     </GradientBackground>

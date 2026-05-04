@@ -252,6 +252,8 @@ function RootLayoutNav() {
             <Stack.Screen name="container-sizes" options={{ title: 'Container Sizes' }} />
             <Stack.Screen name="settings-account" options={{ title: 'Account' }} />
             <Stack.Screen name="settings-calculations" options={{ title: 'Calculations' }} />
+            <Stack.Screen name="settings-pour-sizes" options={{ title: 'Default Pour Sizes' }} />
+            <Stack.Screen name="settings-retail-prices" options={{ title: 'Default Retail Prices' }} />
             <Stack.Screen name="settings-tiers" options={{ title: 'Pour Cost Targets' }} />
             <Stack.Screen name="settings-glossary" options={{ title: 'Glossary' }} />
             <Stack.Screen name="settings-pro-tips" options={{ title: 'Pro Tips' }} />

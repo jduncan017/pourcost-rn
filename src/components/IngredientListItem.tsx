@@ -47,12 +47,16 @@ export default function IngredientListItem({
 }: IngredientListItemProps) {
   if (!ingredient) return null;
 
-  const { defaultPourSize, defaultRetailPrice } = useAppStore();
+  const { defaultPourSize, defaultRetailPrice, defaultRetailPrices } = useAppStore();
   const colors = useThemeColors();
 
-  // Use per-ingredient overrides, fall back to global defaults
+  // Use per-ingredient overrides, fall back to per-type defaults, then to the
+  // legacy single defaults.
   const effectivePourSize = ingredient.pourSize ?? defaultPourSize;
-  const effectiveRetailPrice = ingredient.retailPrice ?? defaultRetailPrice;
+  const effectiveRetailPrice =
+    ingredient.retailPrice ??
+    defaultRetailPrices[ingredient.type as keyof typeof defaultRetailPrices] ??
+    defaultRetailPrice;
   const isNotForSale = ingredient.notForSale === true;
 
   // Memoize calculations — only recompute when inputs change

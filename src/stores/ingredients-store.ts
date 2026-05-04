@@ -55,6 +55,11 @@ export interface IngredientsState {
     updates: Partial<Omit<IngredientConfiguration, 'id' | 'ingredientId' | 'createdAt'>>,
   ) => Promise<void>;
   deleteConfiguration: (ingredientId: string, configId: string) => Promise<void>;
+  /** Promote a configuration to default by swapping its size/cost with the
+   *  ingredient's inline default. The previous default's values move into the
+   *  configuration row that was promoted, so the row count stays the same and
+   *  no migration is needed. */
+  setDefaultConfiguration: (ingredientId: string, configId: string) => Promise<void>;
 
   setSearchQuery: (query: string) => void;
   setSelectedType: (type: string) => void;
@@ -145,6 +150,11 @@ export const useIngredientsStore = create<IngredientsState>()(
             ingredients: [newIngredient, ...state.ingredients],
           }));
           if (wasEmpty) capture('first_ingredient_added');
+          capture('ingredient_created', {
+            type: newIngredient.type ?? null,
+            has_pour_cost: (newIngredient.productCost ?? 0) > 0,
+            config_count: newIngredient.configurations?.length ?? 0,
+          });
           FeedbackService.showOperationSuccess('create', newIngredient.name);
           return newIngredient;
         } catch (error) {
@@ -158,11 +168,20 @@ export const useIngredientsStore = create<IngredientsState>()(
         set({ error: null });
         try {
           const updated = await updateIngredientById(id, updates);
+          // The DB returns the bare ingredient row (no configurations join),
+          // so we preserve the in-memory configurations from the previous
+          // state — otherwise replacing the row would clobber them.
           set(state => ({
             ingredients: state.ingredients.map(ing =>
-              ing.id === id ? updated : ing
+              ing.id === id
+                ? { ...updated, configurations: ing.configurations }
+                : ing,
             ),
           }));
+          capture('ingredient_updated', {
+            type: updated.type ?? null,
+            fields_changed: Object.keys(updates).join(','),
+          });
 
           // Cascade cost/name changes to cocktails that use this ingredient
           cascadeIngredientUpdate(updated).then(() => {
@@ -184,6 +203,10 @@ export const useIngredientsStore = create<IngredientsState>()(
         const ingredient = get().ingredients.find(i => i.id === id);
         if (!ingredient) return;
         set({ error: null });
+
+        capture('ingredient_deleted', {
+          type: ingredient.type ?? null,
+        });
 
         // Optimistically remove from UI
         set(state => ({
@@ -266,6 +289,45 @@ export const useIngredientsStore = create<IngredientsState>()(
                 }
               : ing
           ),
+        }));
+      },
+
+      setDefaultConfiguration: async (ingredientId, configId) => {
+        const ing = get().ingredients.find((i) => i.id === ingredientId);
+        if (!ing) throw new Error('Ingredient not found');
+        const target = (ing.configurations ?? []).find((c) => c.id === configId);
+        if (!target) throw new Error('Configuration not found');
+
+        // Snapshot the current default's size + cost — those become the
+        // promoted configuration's new values after the swap.
+        const prevDefaultSize = ing.productSize;
+        const prevDefaultCost = ing.productCost;
+
+        // Two updates, target row first so a mid-swap failure leaves the
+        // user with a duplicate (recoverable) instead of a missing default.
+        await updateIngredientConfiguration(configId, {
+          productSize: prevDefaultSize,
+          productCost: prevDefaultCost,
+        });
+        await updateIngredientById(ingredientId, {
+          productSize: target.productSize,
+          productCost: target.productCost,
+        });
+
+        set((state) => ({
+          ingredients: state.ingredients.map((i) => {
+            if (i.id !== ingredientId) return i;
+            return {
+              ...i,
+              productSize: target.productSize,
+              productCost: target.productCost,
+              configurations: (i.configurations ?? []).map((c) =>
+                c.id === configId
+                  ? { ...c, productSize: prevDefaultSize, productCost: prevDefaultCost }
+                  : c,
+              ),
+            };
+          }),
         }));
       },
 

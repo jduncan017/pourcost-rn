@@ -163,7 +163,7 @@ export async function processQueue(): Promise<void> {
     if (remaining.length > 0) {
       FeedbackService.showWarning(
         'Sync Issue',
-        `${remaining.length} change${remaining.length > 1 ? 's' : ''} failed to sync — will retry`
+        `${remaining.length} change${remaining.length > 1 ? 's' : ''} failed to sync. We'll retry shortly.`
       );
     } else if (failed > 0) {
       FeedbackService.showWarning(

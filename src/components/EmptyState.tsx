@@ -71,7 +71,7 @@ export const EmptyIngredients = ({ onAdd }: { onAdd?: () => void }) => (
   <EmptyState
     icon="wine-outline"
     title="No Ingredients Yet"
-    description="Start by adding your first ingredient to calculate cocktail costs and build out your Bar Inventory."
+    description="Add your first ingredient to start costing cocktails."
     actionLabel="Add Ingredient"
     onAction={onAdd}
   />
@@ -81,7 +81,7 @@ export const EmptyCocktails = ({ onAdd }: { onAdd?: () => void }) => (
   <EmptyState
     icon="wine"
     title="No Cocktails Yet"
-    description="Create your first cocktail recipe to calculate costs and pricing with your ingredients."
+    description="Build your first recipe to see its cost and margin."
     actionLabel="Create Cocktail"
     onAction={onAdd}
   />
@@ -99,6 +99,6 @@ export const EmptyCalculations = () => (
   <EmptyState
     icon="calculator-outline"
     title="No Calculations Yet"
-    description="Use the calculator to estimate ingredient costs and cocktail pricing."
+    description="Run a quick estimate without saving anything to your bar."
   />
 );

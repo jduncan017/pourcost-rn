@@ -166,7 +166,7 @@ export default function SettingsTiersScreen() {
             <View className="flex-col gap-4">
               <ScreenTitle variant="group" title="Pour Cost Goal" />
               <Text className="text-sm leading-5" style={{ color: palette.N3 }}>
-                The target pour cost % we use when calculating Suggested Prices and the pour cost performance bar.
+                Target pour cost %. Drives Suggested Prices and the pour cost meter.
               </Text>
 
               <CustomSlider
@@ -191,7 +191,7 @@ export default function SettingsTiersScreen() {
             >
               <Ionicons name="lock-closed" size={16} color={palette.Y4} style={{ marginTop: 2 }} />
               <Text className="flex-1" style={{ color: palette.N2, fontSize: 13, lineHeight: 18 }}>
-                Per-category goals (beer, wine) and the spirit tier ladder are coming soon as a paid feature. Sensible defaults apply to your bar today.
+                Per-category goals (beer, wine) and per-tier spirit goals are coming soon as a paid feature. Sensible defaults apply today.
               </Text>
             </View>
           </View>
@@ -208,7 +208,7 @@ export default function SettingsTiersScreen() {
           <View className="flex-col gap-4">
             <ScreenTitle variant="group" title="Bar-Wide Goals" />
             <Text className="text-sm leading-5" style={{ color: palette.N3 }}>
-              Targets used when calculating Suggested Prices and the pour cost performance bar. Spirits use a tier ladder below; cocktails, beer, and wine use these.
+              Targets that drive Suggested Prices and the pour cost meter. Cocktails, beer, and wine use these. Spirits use the price tiers below.
             </Text>
 
             <CustomSlider
@@ -249,9 +249,9 @@ export default function SettingsTiersScreen() {
 
           {/* Spirits tier ladder */}
           <View className="flex-col gap-3">
-            <ScreenTitle variant="group" title="Spirits Tier Ladder" />
+            <ScreenTitle variant="group" title="Spirit Price Tiers" />
             <Text className="text-sm leading-5" style={{ color: palette.N3 }}>
-              Pour cost % varies a lot across price tiers — wells run lower, premium spirits higher. Each ingredient picks the right target based on its bottle cost.
+              Pour cost % varies a lot across price tiers. Wells run lower, premium spirits higher. Each ingredient picks the right target based on its bottle cost.
             </Text>
 
             {/* Pro Mode section — admin only */}
