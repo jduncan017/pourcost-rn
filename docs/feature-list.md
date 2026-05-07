@@ -223,6 +223,7 @@ Schema (`prepped_ingredient_recipes`, `prepped_ingredient_templates`) not yet ap
 - **Change email address** — `updateUser({ email })` + double-confirm flow. ~30-45 min.
 - **Coachmark tour** — `react-native-copilot`, 5-step guided tour, once per tab. ~1-2 days. Ship after observing PostHog drop-off.
 - **Empty-state inline hints** — for users who opted out of sample bar.
+- **Real Tutorials tab in Learn** — per-feature deep dives (separate from the existing "Getting Started" orientation carousel which only describes what's where). Candidate topics: how to read the Pour Cost meter, when to use tiered targets vs flat, what the spirit price tiers mean, how Suggested Price floors work, how invoice scanning matches to inventory, batching workflows. Format TBD post-launch — could be cards, short videos, GIF demos, or a hybrid. Most successful indie apps build these targeted at where telemetry shows users get stuck, not upfront. Drives a separate Learn entry alongside Getting Started.
 
 ## Canonical library expansion
 

@@ -1,6 +1,6 @@
 # PourCost RN — MVP To-Do
 
-_Last updated 2026-05-04._
+_Last updated 2026-05-06._
 
 Remaining work before the first submission. Delete a line when it's done; if it changes scope to post-MVP, move it to `feature-list.md` instead.
 
@@ -27,7 +27,7 @@ Remaining work before the first submission. Delete a line when it's done; if it 
 ### Onboarding & cocktail flow polish
 
 - [ ] **Perfect onboarding + cocktail addition flow**. Open-ended punch list — turn into specifics as friction surfaces during QA. Likely items: copy polish on intro screens, double-check skip paths, verify the library browse → adoption flow lands correctly outside onboarding (just shipped as `cocktails-browse` / `cocktails-browse-prices` / `cocktails-browse-adopting`), audit haptics + animation timings, ensure `Bar Inventory` rename is consistent across all surfaces. ~2-4h once specifics are known.
-- [ ] **Tutorial section in Learn tab** (cut from full multi-screen plan). Single "Getting Started" tutorial — 2-3 minute optional walkthrough of the 5 core screens (Cocktails, Bar Inventory, Calculator, Search, Settings). Highlighted as a green tab in Learn (matches the gold-tab pattern used elsewhere). Optional + dismissible. Skip the per-feature tutorials for V1.1 — once telemetry shows where users drop off, build tutorials targeted at those specific screens. ~3-4h.
+- [x] **Getting Started carousel** — 6-slide orientation deck (Welcome / Bar Inventory / Cocktails / Quick Calculator / Search / You're Ready). Runs as the FIRST step of new-account onboarding (auth flows route to `/getting-started?from=onboarding`, "Get Started" advances into `onboarding-profile`). Always replayable from Learn → Getting Started; entry is green-toned with "Start here" copy until `gettingStartedSeen` flips. Skip lives in the navigation header so iOS 26 auto-applies Liquid Glass. Static cards by design — what's where, not how to use it. Real per-feature tutorials are a post-MVP item in `feature-list.md`.
 
 ### Library + adoption (V1.1 carryovers — most landed in MVP)
 

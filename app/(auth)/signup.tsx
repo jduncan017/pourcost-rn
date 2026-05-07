@@ -41,14 +41,24 @@ export default function SignUpScreen() {
           <AppleSignInButton
             mode="sign-up"
             onSuccess={(isNewUser) => {
-              if (isNewUser) router.replace('/(auth)/onboarding-profile' as any);
+              if (isNewUser) {
+                router.replace({
+                  pathname: '/getting-started',
+                  params: { from: 'onboarding' },
+                } as any);
+              }
               // For existing users, let _layout.tsx redirect to cocktails — no explicit push.
             }}
           />
           <GoogleSignInButton
             mode="sign-up"
             onSuccess={(isNewUser) => {
-              if (isNewUser) router.replace('/(auth)/onboarding-profile' as any);
+              if (isNewUser) {
+                router.replace({
+                  pathname: '/getting-started',
+                  params: { from: 'onboarding' },
+                } as any);
+              }
             }}
           />
 

@@ -44,12 +44,22 @@ export default function LoginScreen() {
         <View className="flex-col gap-3" style={{ marginTop: 24 }}>
           <AppleSignInButton
             onSuccess={(isNewUser) => {
-              if (isNewUser) router.replace('/(auth)/onboarding-profile' as any);
+              if (isNewUser) {
+                router.replace({
+                  pathname: '/getting-started',
+                  params: { from: 'onboarding' },
+                } as any);
+              }
             }}
           />
           <GoogleSignInButton
             onSuccess={(isNewUser) => {
-              if (isNewUser) router.replace('/(auth)/onboarding-profile' as any);
+              if (isNewUser) {
+                router.replace({
+                  pathname: '/getting-started',
+                  params: { from: 'onboarding' },
+                } as any);
+              }
             }}
           />
 

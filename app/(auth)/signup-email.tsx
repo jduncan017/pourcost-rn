@@ -78,7 +78,12 @@ export default function SignUpEmailScreen() {
       return;
     }
 
-    router.replace('/(auth)/onboarding-profile' as any);
+    // Tutorial carousel runs before profile setup. The "Get Started"
+    // button on the final slide advances into onboarding-profile.
+    router.replace({
+      pathname: '/getting-started',
+      params: { from: 'onboarding' },
+    } as any);
   };
 
   return (

@@ -86,6 +86,10 @@ interface AppState {
   detailLevel: DetailLevel;
   suggestedPriceRounding: PriceRounding;
   isFirstLaunch: boolean;
+  /** True once the user has finished (or skipped past the last slide of)
+   *  the Getting Started orientation carousel. Drives the "Start here"
+   *  callout on the Learn entry — green-toned until seen, default after. */
+  gettingStartedSeen: boolean;
   isLoading: boolean;
   lastSyncDate: Date | null;
   enabledProductSizes: string[]; // Volume labels of enabled container sizes
@@ -119,6 +123,7 @@ interface AppState {
   setDetailLevel: (level: DetailLevel) => void;
   setSuggestedPriceRounding: (r: PriceRounding) => void;
   setFirstLaunch: (isFirst: boolean) => void;
+  setGettingStartedSeen: (seen: boolean) => void;
   setLoading: (loading: boolean) => void;
   setEnabledProductSizes: (sizes: string[]) => void;
   toggleProductSize: (sizeLabel: string) => void;
@@ -164,6 +169,7 @@ export const useAppStore = create<AppState>()(
       detailLevel: 'detailed',
       suggestedPriceRounding: '1',
       isFirstLaunch: true,
+      gettingStartedSeen: false,
       isLoading: false,
       lastSyncDate: null,
       enabledProductSizes: DEFAULT_ENABLED_PRODUCT_SIZE_LABELS,
@@ -250,6 +256,8 @@ export const useAppStore = create<AppState>()(
       },
 
       setFirstLaunch: (isFirst) => set({ isFirstLaunch: isFirst }),
+
+      setGettingStartedSeen: (seen) => set({ gettingStartedSeen: seen }),
 
       setLoading: (loading) => set({ isLoading: loading }),
 
@@ -372,6 +380,7 @@ export const useAppStore = create<AppState>()(
           detailLevel: 'detailed',
           suggestedPriceRounding: '1',
           isFirstLaunch: false,
+          gettingStartedSeen: false,
           proModeEnabled: false,
           pourCostTiers: DEFAULT_TIERS,
         });
