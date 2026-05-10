@@ -1,0 +1,50 @@
+ Easiest → hardest, with parallelism for things you and I can do simultaneously                                          
+                                                                                                                        
+  ┌───────────────┬────────────────────────────┬───────┬────────┬────────────────────────────────────────────────────┐    
+  │       #       │            Task            │ Owner │  Est   │                       Notes                        │ 
+  ├───────────────┼────────────────────────────┼───────┼────────┼────────────────────────────────────────────────────┤    
+  ├───────────────┼────────────────────────────┼───────┼────────┼────────────────────────────────────────────────────┤      
+  ├───────────────┼────────────────────────────┼───────┼────────┼────────────────────────────────────────────────────┤
+  │ 4             │ Perfect onboarding +       │ me    │ 2-4h   │ Punch list emerges from your QA pass               │    
+  │               │ cocktail flow polish       │       │        │                                                    │
+  ├───────────────┼────────────────────────────┼───────┼────────┼────────────────────────────────────────────────────┤      
+  ├───────────────┼────────────────────────────┼───────┼────────┼────────────────────────────────────────────────────┤
+  ├───────────────┼────────────────────────────┼───────┼────────┼────────────────────────────────────────────────────┤    
+  │ 6             │ App Store Connect closeout │ you   │ 30 min │ Quick once everything else is ready                │
+  │               │  (URLs, version, etc.)     │       │  - 1h  │                                                    │    
+  ├───────────────┼────────────────────────────┼───────┼────────┼────────────────────────────────────────────────────┤    
+  ├───────────────┼────────────────────────────┼───────┼────────┼────────────────────────────────────────────────────┤
+  │ 8             │ Final QA pass on size-form │ you   │ 1-2h   │ Discovers items for #4                             │    
+  │               │  flow                      │       │        │                                                    │    
+  ├───────────────┼────────────────────────────┼───────┼────────┼────────────────────────────────────────────────────┤
+  │ 9             │ App Store screenshots      │ you   │ 2-3h   │ Blocks on design freeze; design is essentially     │    
+  │               │                            │       │        │ frozen now                                         │
+  ├───────────────┼────────────────────────────┼───────┼────────┼────────────────────────────────────────────────────┤
+  │               │                            │       │        │ Whiskey split + larger seed expansion. After this  │
+  │ 10            │ Canonical re-seed (the big │ you   │ 4-6h+  │ lands I do ~1h of cleanup: update SPIRIT_SUBTYPES  │
+  │               │  one)                      │       │        │ chips, retire nameKeyword + SUBTYPE_ALIASES        │
+  │               │                            │       │        │ workarounds, recheck library recipe slots          │
+  └───────────────┴────────────────────────────┴───────┴────────┴────────────────────────────────────────────────────┘
+
+  Recommended execution order                                                                                             
+  
+  Now (parallel):                                                                                                         
+  - You: kick off #10 canonical re-seed first — it's the longest pole, blocks #11 (my cleanup) and gates whether the
+  whiskey filter chips look right in cocktail picker                                                                      
+  - Me: knock out #1 → #2 → #3 while you're seeding (~2-3h of my time)
+                                                                                                                          
+  Once your re-seed lands:                                                                                                
+  - Me: 1h cleanup pass on subtypes / workarounds / recipe slots                                                          
+  - You: start #7 PostHog dashboards + #8 size-form QA in parallel                                                        
+  - Your QA will surface punch-list items that feed into my #4                                                            
+                                                                                                                          
+  Almost-shipped phase:                                                                                                   
+  - Me: knock out #4 polish (informed by your QA findings) → #5 tutorial                                                  
+  - You: #9 screenshots (design fully frozen by now) → #6 App Store Connect                                               
+                                                                           
+  Critical path: canonical re-seed → my cleanup → your QA → my polish → your screenshots → your closeout. Everything else 
+  can happen alongside.                                                                                                   
+                                                                                                                          
+  The fastest way to ship is starting the re-seed today. It's the only thing that anchors a chain (canonical re-seed →    
+  app-side cleanup → onboarding flow verification → screenshots that include working whiskey chips → store closeout). The
+  rest is parallelizable noise.      

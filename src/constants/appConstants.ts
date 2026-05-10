@@ -549,7 +549,6 @@ export const SPIRIT_SUBTYPES = [
   'Liqueur',
   'Vermouth',
   'Amaro',
-  'Cordial',
   'Bitters',
   'Other Spirit',
 ] as const;
@@ -569,6 +568,9 @@ export const BEER_SUBTYPES = [
   'Sour',
   'Belgian',
   'Ale',
+  'Amber',
+  'Cider',
+  'Hard Seltzer',
   'Other',
 ] as const;
 
@@ -583,7 +585,6 @@ export const WINE_SUBTYPES = [
   'Rosé',
   'Sparkling',
   'Fortified',
-  'Other',
 ] as const;
 
 export type WineSubtype = (typeof WINE_SUBTYPES)[number];
@@ -595,12 +596,10 @@ export const NA_SUBTYPES = [
   'Juice',
   'Syrup',
   'Mixer',
-  'Garnish',
   'Dairy',
   'Egg',
   'Spice',
   'Herb',
-  'Prepped',
   'Other',
 ] as const;
 

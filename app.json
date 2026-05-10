@@ -2,7 +2,7 @@
   "expo": {
     "name": "PourCostRN",
     "slug": "pourcost",
-    "version": "1.0.0",
+    "version": "2.4.0",
     "orientation": "portrait",
     "icon": "./assets/images/ios-dark.png",
     "scheme": "pourcost",
@@ -11,6 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "clutterbuck.PourCostFree",
+      "buildNumber": "1",
       "usesAppleSignIn": true,
       "infoPlist": {
         "CFBundleDisplayName": "PourCost",
