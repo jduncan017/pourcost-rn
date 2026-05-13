@@ -26,6 +26,7 @@ import ScreenTitle from '@/src/components/ui/ScreenTitle';
 import SkeletonLoader from '@/src/components/ui/SkeletonLoader';
 import {
   SUBTYPES_BY_TYPE,
+  SPIRIT_L3_CANONICAL_SUBS,
   type IngredientSortOption,
 } from '@/src/constants/appConstants';
 
@@ -54,6 +55,7 @@ export default function IngredientsScreen() {
   const clearError = useIngredientsStore((s) => s.clearError);
 
   const [selectedSubType, setSelectedSubType] = useState('All');
+  const [selectedCanonicalSub, setSelectedCanonicalSub] = useState('All');
   // Reactive ingredient list — drives the "what filter chips to show"
   // calculation below (hide types/subtypes the user doesn't own).
   const allIngredients = useIngredientsStore((s) => s.ingredients);
@@ -96,6 +98,27 @@ export default function IngredientsScreen() {
     // Beer / Wine / Non-Alc: only show subtypes the user has.
     return allForType.filter((s) => owned.has(s));
   }, [allIngredients, selectedType, ALWAYS_VISIBLE_SPIRIT_SUBTYPES]);
+
+  // L3 chip row: canonical subcategories under the current L2 selection.
+  // Only renders for Spirit umbrellas that wrap multiple canonical subs
+  // (Whiskey → Bourbon/Rye/Scotch/etc., Rum → White/Aged/Dark/etc.). Shows
+  // only subs the user actually owns + 'All'.
+  const visibleCanonicalSubs = useMemo(() => {
+    if (selectedType !== 'Spirit' || selectedSubType === 'All') return [];
+    const allForSub = SPIRIT_L3_CANONICAL_SUBS[selectedSubType];
+    if (!allForSub) return [];
+    const owned = new Set(
+      allIngredients
+        .filter(
+          (i) =>
+            i.type === 'Spirit' &&
+            i.subType === selectedSubType &&
+            i.canonicalSubcategory,
+        )
+        .map((i) => i.canonicalSubcategory as string),
+    );
+    return allForSub.filter((s) => owned.has(s));
+  }, [allIngredients, selectedType, selectedSubType]);
   const [inUseIngredient, setInUseIngredient] = useState<SavedIngredient | null>(null);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -105,12 +128,19 @@ export default function IngredientsScreen() {
   const [blockedIngredients, setBlockedIngredients] = useState<SavedIngredient[]>([]);
   const cocktails = useCocktailsStore((s) => s.cocktails);
 
-  // Get filtered ingredients from store, then apply subtype filter locally
+  // Get filtered ingredients from store, then apply subtype + canonical-sub
+  // filters locally.
   const hasSubtypes = visibleSubtypes.length > 0;
+  const hasCanonicalSubs = visibleCanonicalSubs.length > 0;
   const filteredIngredients = (() => {
-    const base = getFilteredIngredients();
-    if (!hasSubtypes || selectedSubType === 'All') return base;
-    return base.filter((i) => i.subType === selectedSubType);
+    let base = getFilteredIngredients();
+    if (hasSubtypes && selectedSubType !== 'All') {
+      base = base.filter((i) => i.subType === selectedSubType);
+    }
+    if (hasCanonicalSubs && selectedCanonicalSub !== 'All') {
+      base = base.filter((i) => i.canonicalSubcategory === selectedCanonicalSub);
+    }
+    return base;
   })();
 
   // Build a header title that reflects active filter + sort. Default reads
@@ -380,6 +410,7 @@ export default function IngredientsScreen() {
                   onSelectionChange={(t) => {
                     setSelectedType(t);
                     if (t !== 'Spirit') setSelectedSubType('All');
+                    setSelectedCanonicalSub('All');
                   }}
                   showLabel={false}
                   variant="filter"
@@ -396,7 +427,27 @@ export default function IngredientsScreen() {
                   <ChipSelector
                     options={['All', ...visibleSubtypes]}
                     selectedOption={selectedSubType}
-                    onSelectionChange={setSelectedSubType}
+                    onSelectionChange={(s) => {
+                      setSelectedSubType(s);
+                      setSelectedCanonicalSub('All');
+                    }}
+                    showLabel={false}
+                    variant="filter"
+                  />
+                </View>
+              )}
+
+              {hasCanonicalSubs && (
+                <View className="mb-4">
+                  <ScreenTitle
+                    title={`${selectedSubType} Style`}
+                    variant="group"
+                    className="mb-2"
+                  />
+                  <ChipSelector
+                    options={['All', ...visibleCanonicalSubs]}
+                    selectedOption={selectedCanonicalSub}
+                    onSelectionChange={setSelectedCanonicalSub}
                     showLabel={false}
                     variant="filter"
                   />

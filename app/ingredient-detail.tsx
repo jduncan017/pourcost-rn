@@ -19,7 +19,7 @@ import GradientBackground from '@/src/components/ui/GradientBackground';
 import Dropdown from '@/src/components/ui/Dropdown';
 import IngredientInUseSheet from '@/src/components/ui/IngredientInUseSheet';
 import { FeedbackService } from '@/src/services/feedback-service';
-import { SavedIngredient, Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
+import { SavedIngredient, Volume, IngredientConfiguration, volumeLabel, volumeToOunces } from '@/src/types/models';
 import { buildIngredientEditParams } from '@/src/lib/buildIngredientEditParams';
 import {
   calculateIngredientMetrics,
@@ -158,14 +158,18 @@ export default function IngredientDetailScreen() {
     defaultRetailPrices[ingredient.type as keyof typeof defaultRetailPrices] ??
     defaultRetailPrice;
 
-  // Selectable size: the inline default + any stored configurations.
-  // Each option is keyed by the volume label (one config per unique size).
+  // Selectable size: the inline default + any stored non-default configurations.
+  // The isDefault config row (if present) is merged into the 'default' entry so
+  // pack/distributor info is accessible without creating a duplicate dropdown option.
   const sizeOptions = useMemo(() => {
-    const opts: { value: string; label: string; size: Volume; cost: number }[] = [
-      { value: 'default', label: volumeLabel(ingredient.productSize), size: ingredient.productSize, cost: ingredient.productCost },
+    const defaultConfig = ingredient.configurations?.find((c) => c.isDefault) ?? null;
+    const opts: { value: string; label: string; size: Volume; cost: number; config: IngredientConfiguration | null }[] = [
+      { value: 'default', label: volumeLabel(ingredient.productSize), size: ingredient.productSize, cost: ingredient.productCost, config: defaultConfig },
     ];
     for (const c of ingredient.configurations ?? []) {
-      opts.push({ value: c.id, label: volumeLabel(c.productSize), size: c.productSize, cost: c.productCost });
+      if (!c.isDefault) {
+        opts.push({ value: c.id, label: volumeLabel(c.productSize), size: c.productSize, cost: c.productCost, config: c });
+      }
     }
     return opts;
   }, [ingredient]);
@@ -496,6 +500,24 @@ export default function IngredientDetailScreen() {
                     value={formatCurrency(selectedOption.cost)}
                     isFirst
                   />
+                  {selectedOption.config?.packSize != null && selectedOption.config.packSize > 1 && (
+                    <DetailRow
+                      label="Pack Size"
+                      value={`${selectedOption.config.packSize} units`}
+                    />
+                  )}
+                  {selectedOption.config?.packCost != null && (
+                    <DetailRow
+                      label="Pack Cost"
+                      value={formatCurrency(selectedOption.config.packCost)}
+                    />
+                  )}
+                  {selectedOption.config?.distributorName != null && (
+                    <DetailRow
+                      label="Distributor"
+                      value={selectedOption.config.distributorName}
+                    />
+                  )}
                   <DetailRow
                     label="Cost / Oz"
                     value={formatCurrency(metrics.costPerOz)}

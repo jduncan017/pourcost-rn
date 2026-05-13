@@ -63,13 +63,48 @@ export interface WellCategory {
  * Single-member families (Vodka, Gin) are intentionally absent.
  */
 export const SPIRIT_FAMILIES: Record<string, string[]> = {
-  Whiskey: ['Whiskey', 'Bourbon', 'Rye', 'Scotch', 'Irish', 'Japanese', 'Canadian'],
-  Rum: ['Rum', 'White Rum', 'Light Rum', 'Dark Rum', 'Aged Rum', 'Spiced Rum', 'Overproof Rum'],
+  Whiskey: [
+    'Whiskey',
+    'Bourbon',
+    'Tennessee Whiskey',
+    'Rye', 'Rye Whiskey',
+    'Scotch',
+    'Irish', 'Irish Whiskey',
+    'Japanese', 'Japanese Whisky',
+    'Canadian', 'Canadian Whisky',
+    'American Whiskey',
+    'Other Whiskey',
+  ],
+  Rum: [
+    'Rum',
+    'White Rum', 'Light Rum',
+    'Gold Rum',
+    'Aged Rum',
+    'Dark Rum',
+    'Spiced Rum',
+    'Overproof Rum',
+    'Rhum Agricole',
+    'Cachaça',
+    'Other Rum',
+  ],
   // Tequila and Mezcal are NOT auto-substituted for each other — Mezcal cocktails
   // are their own thing in the bartender's mind. Listed as siblings here so a
   // future "willing fallback" mode can opt in if the bar wants it.
-  Agave: ['Tequila', 'Mezcal'],
+  Agave: [
+    'Tequila',
+    'Tequila Blanco', 'Tequila Reposado', 'Tequila Anejo',
+    'Tequila Extra Anejo', 'Tequila Cristalino',
+    'Mezcal',
+    'Mezcal Joven', 'Mezcal Reposado', 'Mezcal Anejo',
+  ],
   Vermouth: ['Sweet Vermouth', 'Dry Vermouth', 'Vermouth'],
+  Vodka: ['Vodka', 'Plain', 'Flavored'],
+  Gin: [
+    'Gin',
+    'Gin: London Dry', 'Gin: Plymouth', 'Gin: Old Tom', 'Gin: Genever',
+    'Gin: Navy Strength', 'Gin: Modern',
+  ],
+  Brandy: ['Brandy', 'Cognac', 'Armagnac', 'Calvados', 'Pisco'],
 };
 
 export function familyFallbacks(subType: string): string[] {
@@ -139,7 +174,7 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'vodka',
     label: 'Well Vodka',
     subType: 'Vodka',
-    canonicalSubcategories: ['Vodka'],
+    canonicalSubcategories: ['Plain', 'Flavored'],
     defaultExpanded: true,
     quickPicks: [
       { name: 'Smirnoff Vodka', productSize: bottle(1000) },
@@ -152,7 +187,10 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'gin',
     label: 'Well Gin',
     subType: 'Gin',
-    canonicalSubcategories: ['Gin'],
+    canonicalSubcategories: [
+      'Gin: London Dry', 'Gin: Plymouth', 'Gin: Old Tom', 'Gin: Genever',
+      'Gin: Navy Strength', 'Gin: Modern',
+    ],
     defaultExpanded: true,
     quickPicks: [
       { name: 'Beefeater Gin', productSize: bottle(1000) },
@@ -165,7 +203,10 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'rum',
     label: 'Well Rum',
     subType: 'Rum',
-    canonicalSubcategories: ['Rum'],
+    canonicalSubcategories: [
+      'White Rum', 'Gold Rum', 'Aged Rum', 'Dark Rum', 'Spiced Rum',
+      'Overproof Rum', 'Rhum Agricole', 'Cachaça', 'Other Rum',
+    ],
     defaultExpanded: true,
     quickPicks: [
       { name: 'Cruzan Light Rum', productSize: bottle(1000) },
@@ -178,7 +219,10 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'tequila',
     label: 'Well Tequila',
     subType: 'Tequila',
-    canonicalSubcategories: ['Tequila'],
+    canonicalSubcategories: [
+      'Tequila Blanco', 'Tequila Reposado', 'Tequila Anejo',
+      'Tequila Extra Anejo', 'Tequila Cristalino',
+    ],
     defaultExpanded: true,
     quickPicks: [
       { name: 'Jose Cuervo Especial Silver', productSize: bottle(1000) },
@@ -191,7 +235,11 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'whiskey',
     label: 'Well Whiskey',
     subType: 'Whiskey',
-    canonicalSubcategories: ['Whiskey'],
+    canonicalSubcategories: [
+      'Bourbon', 'Tennessee Whiskey', 'Rye Whiskey', 'Scotch',
+      'Irish Whiskey', 'Japanese Whisky', 'Canadian Whisky',
+      'American Whiskey', 'Other Whiskey',
+    ],
     defaultExpanded: true,
     quickPicks: [
       { name: 'Seagram’s 7 Crown', productSize: bottle(1000) },
@@ -208,8 +256,7 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'bourbon',
     label: 'Well Bourbon',
     subType: 'Bourbon',
-    canonicalSubcategories: ['Whiskey'],
-    nameKeyword: 'bourbon',
+    canonicalSubcategories: ['Bourbon'],
     defaultExpanded: false,
     quickPicks: [
       { name: 'Jim Beam Bourbon', productSize: bottle(1000) },
@@ -222,8 +269,7 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'rye',
     label: 'Well Rye',
     subType: 'Rye',
-    canonicalSubcategories: ['Whiskey'],
-    nameKeyword: 'rye',
+    canonicalSubcategories: ['Rye Whiskey'],
     defaultExpanded: false,
     quickPicks: [
       { name: 'Old Overholt Rye', productSize: bottle(1000) },
@@ -235,8 +281,7 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'scotch',
     label: 'Well Scotch',
     subType: 'Scotch',
-    canonicalSubcategories: ['Whiskey'],
-    nameKeyword: 'scotch',
+    canonicalSubcategories: ['Scotch'],
     defaultExpanded: false,
     quickPicks: [
       { name: 'Dewar’s White Label', productSize: bottle(1000) },
@@ -249,8 +294,7 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'irish',
     label: 'Well Irish Whiskey',
     subType: 'Irish',
-    canonicalSubcategories: ['Whiskey'],
-    nameKeyword: 'irish',
+    canonicalSubcategories: ['Irish Whiskey'],
     defaultExpanded: false,
     quickPicks: [
       { name: 'Jameson Irish Whiskey', productSize: bottle(1000) },
@@ -262,8 +306,7 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'japanese',
     label: 'Well Japanese Whisky',
     subType: 'Japanese',
-    canonicalSubcategories: ['Whiskey'],
-    nameKeyword: 'japan',
+    canonicalSubcategories: ['Japanese Whisky'],
     defaultExpanded: false,
     quickPicks: [
       { name: 'Suntory Toki', productSize: bottle(1000) },
@@ -275,8 +318,7 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'white_rum',
     label: 'Well White Rum',
     subType: 'White Rum',
-    canonicalSubcategories: ['Rum'],
-    nameKeyword: 'white',
+    canonicalSubcategories: ['White Rum'],
     defaultExpanded: false,
     quickPicks: [
       { name: 'Bacardi Superior', productSize: bottle(1000) },
@@ -288,8 +330,7 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'dark_rum',
     label: 'Well Dark Rum',
     subType: 'Dark Rum',
-    canonicalSubcategories: ['Rum'],
-    nameKeyword: 'dark',
+    canonicalSubcategories: ['Dark Rum'],
     defaultExpanded: false,
     quickPicks: [
       { name: 'Myers’s Dark Rum', productSize: bottle(1000) },
@@ -301,8 +342,7 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'aged_rum',
     label: 'Well Aged Rum',
     subType: 'Aged Rum',
-    canonicalSubcategories: ['Rum'],
-    nameKeyword: 'aged',
+    canonicalSubcategories: ['Aged Rum'],
     defaultExpanded: false,
     quickPicks: [
       { name: 'Mount Gay Eclipse', productSize: bottle(1000) },
@@ -314,8 +354,7 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'overproof_rum',
     label: 'Well Overproof Rum',
     subType: 'Overproof Rum',
-    canonicalSubcategories: ['Rum'],
-    nameKeyword: 'overproof',
+    canonicalSubcategories: ['Overproof Rum'],
     defaultExpanded: false,
     quickPicks: [
       { name: 'Wray & Nephew Overproof', productSize: bottle(1000) },
@@ -326,7 +365,7 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'mezcal',
     label: 'Well Mezcal',
     subType: 'Mezcal',
-    canonicalSubcategories: ['Mezcal'],
+    canonicalSubcategories: ['Mezcal Joven', 'Mezcal Reposado', 'Mezcal Anejo'],
     defaultExpanded: false,
     quickPicks: [
       { name: 'Del Maguey Vida', productSize: bottle(1000) },
@@ -338,7 +377,7 @@ export const WELL_CATEGORIES: WellCategory[] = [
     key: 'brandy',
     label: 'Well Brandy / Cognac',
     subType: 'Brandy',
-    canonicalSubcategories: ['Brandy'],
+    canonicalSubcategories: ['Cognac', 'Armagnac', 'Calvados', 'Pisco', 'Brandy'],
     defaultExpanded: false,
     quickPicks: [
       { name: 'E&J VS Brandy', productSize: bottle(1000) },

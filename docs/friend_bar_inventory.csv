@@ -1,0 +1,523 @@
+name,type,sub_type,bottle_size,cost,abv,brand,distributor,pack_size,pack_cost
+Nicolas Catena Zapata,Wine,Other,750,42.86,12,Nicolas Catena Zapata,Breakthru Beverage,12,514.28
+WYCLIFF BRUT CALIFORNIA CHAMPAGNE,Wine,Sparkling,750,4.90,12,WYCLIFF BRUT CALIFORNIA,Breakthru Beverage,1,
+Rombauer Carneros Chardonnay,Wine,White,750,29.50,12,Rombauer,Breakthru Beverage,12,354.00
+Old Forester Classic 86 Proof,Spirit,Whiskey,750,17.00,43,Old Forester,Breakthru Beverage,1,
+WOODFORD RESERVE KENTUCKY STRAIGHT BOURBON WHISKEY,Spirit,Whiskey,1000,37.00,40,Woodford Reserve,Breakthru Beverage,6,222.02
+WOODFORD RESERVE KENTUCKY STRAIGHT BOURBON WHISKEY,Spirit,Whiskey,750,37.00,40,Woodford Reserve,Breakthru Beverage,1,
+E&J BRANDY VS,Spirit,Brandy,750,10.00,40,E&J,Breakthru Beverage,1,
+JACK DANIELS OLD #7 TENNESSEE WHISKEY,Spirit,Whiskey,750,22.99,40,JACK DANIELS,Breakthru Beverage,1,
+Jack Daniel's Old No. 7 Tennessee Whiskey,Spirit,Whiskey,750,22.99,40,Jack Daniel's,Breakthru Beverage,1,
+Llord's Creme De Cacao White,Spirit,Liqueur,750,7.00,40,Llord's,Breakthru Beverage,1,
+Llord's Creme De Cacao Dark,Spirit,Liqueur,750,7.00,40,Llord's,Breakthru Beverage,1,
+L'Ecole No. 41 Walla Walla Valley Cabernet Sauvignon,Wine,Red,750,34.25,12,L'Ecole No. 41,Breakthru Beverage,12,411.00
+Don Julio 1942,Spirit,Tequila,750,124.99,40,Don Julio,Breakthru Beverage,1,
+Captain Morgan Original Spiced Rum,Spirit,Rum,750,19.50,40,Captain Morgan,Breakthru Beverage,1,
+Baileys Original Irish Cream,Spirit,Liqueur,750,31.49,40,Baileys,Breakthru Beverage,1,
+Lagavulin 16 Year Old,Spirit,Whiskey,750,74.06,40,Lagavulin,Breakthru Beverage,1,
+LAGAVULIN SCOTCH SINGLE MALT 16YR 750ML,Spirit,Whiskey,750,76.01,40,Lagavulin,Breakthru Beverage,1,
+Oban 14 Year Single Malt,Spirit,Whiskey,750,89.62,40,Oban,Breakthru Beverage,1,
+Johnnie Walker Black Label,Spirit,Whiskey,750,40.49,40,Johnnie Walker,Breakthru Beverage,1,
+TANQUERAY LONDON DRY GIN,Spirit,Gin,750,25.00,40,Tanqueray,Breakthru Beverage,1,
+Pimm's No. 1 Liqueur,Spirit,Liqueur,750,26.99,40,Pimm's,Breakthru Beverage,1,
+Bushmills Original Irish Whiskey,Spirit,Whiskey,750,25.18,40,Bushmills,Breakthru Beverage,1,
+BULLEIT BOURBON,Spirit,Whiskey,750,29.99,40,Bulleit,Breakthru Beverage,1,
+Hendrick's Gin,Spirit,Gin,750,27.99,40,Hendrick's,Breakthru Beverage,1,
+HENNESSY VS COGNAC,Spirit,Cognac,750,52.30,40,Hennessy,Breakthru Beverage,1,
+Hennessy VSOP Privilege,Spirit,Cognac,750,82.99,40,Hennessy,Breakthru Beverage,1,
+Hennessy X.O Cognac,Spirit,Cognac,750,199.99,40,Hennessy,Breakthru Beverage,1,
+KETEL ONE,Spirit,Vodka,750,23.99,40,Ketel One,Breakthru Beverage,1,
+RED BULL SUGARFREE,Non-Alc,Mixer,250,1.70,,Red Bull,Breakthru Beverage,24,40.75
+RED BULL,Non-Alc,Mixer,250,1.70,,Red Bull,Breakthru Beverage,24,40.75
+Ruinart Bl De Bl,Wine,Sparkling,750,35.49,12,Ruinart,Breakthru Beverage,12,425.88
+Crown Royal Canadian Whisky,Spirit,Whiskey,750,32.75,40,Crown Royal,Breakthru Beverage,1,
+TITOS HANDMADE VODKA,Spirit,Vodka,750,19.99,40,TITOS HANDMADE,Breakthru Beverage,12,239.93
+Banfi Tuscany Chianti Classico Riserva,Wine,Red,750,168.05,12,Banfi,Breakthru Beverage,1,168.05
+Conti Sertoli Salis Canua Sforzato di Valtellina,Wine,Red,750,49.99,12,Conti Sertoli Salis,Breakthru Beverage,6,299.96
+PETER VELLA BURGUNDY,Wine,Red,750,16.50,12,PETER VELLA BURGUNDY,Breakthru Beverage,4,66.01
+PETER VELLA CHABLIS,Wine,White,750,16.50,12,PETER VELLA CHABLIS,Breakthru Beverage,4,66.01
+Michter's US*1 Small Batch Kentucky Straight Bourbon Whiskey,Spirit,Whiskey,750,33.50,40,Michter's,Breakthru Beverage,1,
+Michter's 10 Year Single Barrel Rye Whiskey,Spirit,Whiskey,750,155.56,40,Michter's,Breakthru Beverage,1,
+Michter's 10 Year Single Barrel Kentucky Straight Bourbon,Spirit,Whiskey,750,155.56,40,Michter's,Breakthru Beverage,1,
+TAYLOR MARSALA,Wine,Fortified,750,5.50,12,TAYLOR MARSALA,Breakthru Beverage,1,
+TAYLOR PORT,Wine,Fortified,750,5.50,12,TAYLOR PORT,Breakthru Beverage,1,
+GUINNESS DRAUGHT 14.9OZ CAN,Beer,Stout,441,37.15,5,Guinness,Breakthru Beverage,1,37.15
+GUINNESS DRAUGHT 11.2OZ BOTLE,Beer,Stout,331,32.20,5,Guinness,Breakthru Beverage,1,32.20
+Clos Dady Sauternes 375ml,Wine,Other,375,22.50,12,Clos Dady Sauternes,Breakthru Beverage,12,270.00
+Remy Martin XO,Spirit,Cognac,750,153.70,40,Remy Martin,Breakthru Beverage,1,
+COINTREAU ORANGE LIQUER TRIPLE SEC,Spirit,Liqueur,750,27.50,40,Triple Sec,Breakthru Beverage,1,
+Louis XIII by Remy Martin,Spirit,Cognac,750,9074.07,40,Remy Martin,Breakthru Beverage,1,
+Nolet's Silver Gin,Spirit,Gin,750,31.99,40,Nolet's,Breakthru Beverage,1,
+Ron Zacapa 23,Spirit,Rum,750,46.99,40,Ron Zacapa,Breakthru Beverage,1,
+Jose Cuervo Tradicional Blanco,Spirit,Tequila,750,19.50,40,Jose Cuervo,Breakthru Beverage,12,234.00
+Stranahan's Original Single Malt Whiskey,Spirit,Whiskey,750,41.00,40,Stranahan,Breakthru Beverage,1,
+BULLEIT 95 RYE,Spirit,Whiskey,750,29.99,40,Bulleit,Breakthru Beverage,1,
+DON JULIO 70 CRISTALINO,Spirit,Tequila,750,51.99,40,Don Julio,Breakthru Beverage,1,
+New Amsterdam Original Vodka,Spirit,Vodka,750,9.50,40,New Amsterdam,Breakthru Beverage,12,114.05
+AVERY WHITE RASCAL WHEAT ALE,Beer,Wheat,Half Barrel,131.00,5,Avery,Breakthru Beverage,1,
+Guinness Draught 20L Keg,Beer,Stout,20000,77.55,5,Guinness,Breakthru Beverage,1,
+Ska Brewing Modus Hoperandi,Beer,IPA,355,1.42,5,Ska Brewing,Breakthru Beverage,24,34.00
+CASAMIGOS BLANCO,Spirit,Tequila,750,47.50,40,Casamigos,Breakthru Beverage,1,
+CASAMIGOS REPOSADO,Spirit,Tequila,750,53.00,40,Casamigos,Breakthru Beverage,1,
+Pieropan Soave Classico,Wine,White,750,78.02,12,Pieropan,Breakthru Beverage,1,78.02
+ODELL 90 SHILLING ALE,Beer,Ale,355,1.32,5,Odell,Breakthru Beverage,24,31.58
+ODELL IPA,Beer,IPA,355,1.32,5,Odell,Breakthru Beverage,24,31.58
+BOULEVARD IRISH RED ALE,Beer,Ale,355,32.95,5,Boulevard,Breakthru Beverage,1,32.95
+Left Hand Milk Stout,Beer,Stout,355,1.50,5,Left Hand Milk,Breakthru Beverage,24,36.00
+Rombauer Sauvignon Blanc,Wine,White,750,16.25,12,Rombauer,Breakthru Beverage,12,195.05
+Orin Swift Cellars Mercury Head Cabernet Sauvignon Napa Valley,Wine,Red,750,129.00,12,Orin Swift Cellars,Breakthru Beverage,6,774.00
+Orin Swift Papillon Red Napa Valley,Wine,Red,750,60.00,12,Orin Swift Papillon,Breakthru Beverage,6,360.02
+Stem Ciders Real Dry,Beer,Other,355,1.87,5,Stem Ciders,Breakthru Beverage,24,44.94
+WOODFORD RESERVE KENTUCKY STRAIGHT RYE WHISKEY,Spirit,Whiskey,750,38.00,40,Woodford Reserve,Breakthru Beverage,1,
+Left Hand Milk Stout NITRO,Beer,Stout,355,1.44,5,Left Hand Milk,Breakthru Beverage,24,34.50
+Disaronno Originale,Spirit,Liqueur,750,34.00,40,Disaronno,Breakthru Beverage,1,
+Volcan De Mi Tierra Blanco,Spirit,Tequila,750,37.49,40,Volcan De Mi Tierra,Breakthru Beverage,1,
+Whitehaven Marlborough Sauvignon Blanc,Wine,White,750,13.00,12,Whitehaven Marlborough,Breakthru Beverage,12,156.00
+PROVERB CHARDONNAY CALIFORNIA,Wine,White,750,5.75,12,PROVERB,Breakthru Beverage,1,
+PROVERB PINOT GRIGIO CALIFORNIA,Wine,White,750,5.75,12,PROVERB,Breakthru Beverage,1,
+PROVERB CABERNET SAUVIGNON CALIFORNIA,Wine,Red,750,5.75,12,PROVERB,Breakthru Beverage,1,
+PROVERB PINOT NOIR CALIFORNIA,Wine,Red,750,5.75,12,PROVERB,Breakthru Beverage,1,
+PROVERB SAUVIGNON BLANC,Wine,White,750,5.75,12,PROVERB,Breakthru Beverage,1,
+LAWS BRBN 4 GRAIN,Spirit,Whiskey,750,39.93,40,LAWS BRBN,Breakthru Beverage,1,
+LAWS WHSKY BONDED WHEAT,Spirit,Whiskey,750,64.95,40,LAWS WHSKY BONDED,Breakthru Beverage,1,
+STEM CIDERS HIBISCUS SESSION APPLE CIDER,Beer,Other,355,1.87,5,Stem Ciders,Breakthru Beverage,24,44.94
+PROVERB ROSE CALIFORNIA,Wine,Rosé,750,69.05,12,PROVERB,Breakthru Beverage,1,69.05
+LA MARCA PROSECCO DOC COLLEZIONE,Wine,Sparkling,750,132.05,12,La Marca,Breakthru Beverage,1,132.05
+Boen Pinot Noir Tri County,Wine,Red,750,12.00,12,Boen,Breakthru Beverage,12,144.00
+MR. BLACK COFFEE LIQUER,Spirit,Liqueur,750,20.49,40,Mr. Black,Breakthru Beverage,1,
+Bruichladdich Port Charlotte PC10,Spirit,Whiskey,750,45.00,40,Bruichladdich,Breakthru Beverage,1,
+Orin Swift 8 Years In The Desert,Wine,Red,750,28.00,12,Orin Swift,Breakthru Beverage,12,336.05
+ODELL SIPPIN PRETTY,Beer,Sour,355,1.50,5,Odell,Breakthru Beverage,24,36.00
+Horse Soldier Straight Bourbon,Spirit,Whiskey,750,31.00,40,Horse Soldier Straight,Breakthru Beverage,1,
+Poggio al Tesoro Il Seggio Bolgheri,Wine,Red,750,28.00,12,Poggio Al Tesoro,Breakthru Beverage,6,168.00
+SKA BREWING THE HAZY IPA,Beer,IPA,355,1.42,5,Ska Brewing,Breakthru Beverage,24,34.00
+Banfi Tuscany Fonte alla Selva Gran Selezione Chianti Classico DOCG,Wine,Red,750,25.00,12,Banfi,Breakthru Beverage,6,150.00
+HIGH NOON HARD SELTZER VARIETY PACK,Beer,Other,355,2.20,5,High Noon,Breakthru Beverage,24,52.78
+Don Julio Blanco,Spirit,Tequila,750,41.00,40,Don Julio,Breakthru Beverage,1,
+Don Julio Reposado,Spirit,Tequila,750,48.00,40,Don Julio,Breakthru Beverage,1,
+Don Julio Anejo,Spirit,Tequila,750,55.00,40,Don Julio,Breakthru Beverage,1,
+Don Fulano Blanco,Spirit,Tequila,750,41.00,40,Don Fulano,Breakthru Beverage,1,
+Don Fulano Reposado,Spirit,Tequila,750,48.14,40,Don Fulano,Breakthru Beverage,1,
+Don Fulano Fuerte Blanco,Spirit,Tequila,750,49.50,40,Don Fulano,Breakthru Beverage,1,
+Benriach The Original Ten,Spirit,Whiskey,750,43.00,40,Benriach,Breakthru Beverage,1,
+RED BULL RED EDITION,Non-Alc,Mixer,250,1.70,,Red Bull,Breakthru Beverage,24,40.75
+George Dickel 8 Year Bourbon,Spirit,Whiskey,750,23.04,40,George Dickel,Breakthru Beverage,1,
+The Botanist Islay Dry Gin,Spirit,Gin,750,36.00,40,The Botanist,Breakthru Beverage,1,
+ODELL LAGERADO,Beer,Lager,355,0.99,5,Odell,Breakthru Beverage,24,23.68
+Telmont Reserve Brut,Wine,Sparkling,750,41.00,12,Telmont,Breakthru Beverage,6,246.00
+Volcan De Mi Tierra X.A Tequila,Spirit,Tequila,750,130.00,40,Volcan De Mi Tierra,Breakthru Beverage,1,
+Lyre's Italian Spritz Non-Alcoholic Spirit,Non-Alc,Other,750,23.00,,Lyre's,Breakthru Beverage,6,138.02
+Dom Perignon Champagne Brut 2013,Wine,Sparkling,750,1355.96,12,Dom Perignon,Breakthru Beverage,1,1355.96
+Belvedere Organic Vodka,Spirit,Vodka,750,32.49,40,Belvedere,Breakthru Beverage,1,
+Chambord,Spirit,Liqueur,750,23.70,40,Chambord,Breakthru Beverage,1,
+Numanthia 2017,Wine,Other,750,281.96,12,Numanthia,Breakthru Beverage,1,281.96
+Veuve Clicquot Brut Yellow Label,Wine,Sparkling,750,55.99,12,Veuve Clicquot,Breakthru Beverage,12,671.88
+LES TROIS CROIX BORDEAUX,Wine,Red,750,161.96,12,LES TROIS CROIX,Breakthru Beverage,1,161.96
+Hendrick's Grand Cabaret Gin,Spirit,Gin,750,38.00,40,Hendrick's,Breakthru Beverage,1,
+Kosta Browne Gap's Crown Vineyard Pinot Noir 2021,Wine,Red,750,654.00,12,Kosta Browne Gap's,Breakthru Beverage,1,654.00
+Veuve Clicquot Brut Rose,Wine,Sparkling,750,65.50,12,Veuve Clicquot,Breakthru Beverage,12,785.97
+Moet & Chandon Brut Imperial,Wine,Sparkling,750,180.02,12,Moet & Chandon,Breakthru Beverage,1,180.02
+Moet & Chandon Brut Imperial,Wine,Sparkling,750,30.00,12,Moet & Chandon,Breakthru Beverage,6,180.00
+Silver Oak Napa Valley Cabernet Sauvignon 2019,Wine,Red,750,1440.00,12,Silver Oak,Breakthru Beverage,1,1440.00
+Duckhorn Vineyards Merlot Three Palms Vineyard Napa Valley,Wine,Red,750,96.00,12,Duckhorn Vineyards,Breakthru Beverage,6,576.00
+Jayson By Pahlmeyer Cabernet Sauvignon 2021,Wine,Red,750,390.02,12,Jayson By Pahlmeyer,Breakthru Beverage,1,390.02
+Glenmorangie 18 Year Old Extremely Rare Single Malt Scotch Whisky,Spirit,Whiskey,750,118.00,40,Glenmorangie,Breakthru Beverage,1,
+Glenmorangie Distillery Triple Cask Reserve Highland Single Malt Scotch Whisky,Spirit,Whiskey,750,26.99,40,Glenmorangie,Breakthru Beverage,1,
+Banhez Ensamble Espadin & Barril Joven Mezcal Artesanal,Spirit,Mezcal,750,32.00,40,Banhez,Breakthru Beverage,1,
+Combier L'Original,Spirit,Liqueur,750,37.00,40,Combier,Breakthru Beverage,1,
+DUCKHORN SAUVIGNON BLANC 2023,Wine,White,750,21.00,12,DUCKHORN,Breakthru Beverage,1,
+CUERVO TEQ TRADICIONAL BL ON PREM,Spirit,Tequila,750,14.99,40,Cuervo,Breakthru Beverage,12,179.88
+Glenmorangie 12 Year Old The Original Highland Single Malt Scotch Whisky,Spirit,Whiskey,750,42.99,40,Glenmorangie,Breakthru Beverage,1,
+Condesa Gin Clasica Gin,Spirit,Gin,750,14.00,40,Condesa,Breakthru Beverage,12,168.02
+Sir Davis Sherry Cask Finished Rye Whiskey,Spirit,Whiskey,750,306.00,40,Sir Davis Sherry,Breakthru Beverage,1,
+Belvedere Vodka 10 Organic Vodka,Spirit,Vodka,750,35.00,40,Belvedere,Breakthru Beverage,1,
+Silver Oak Alexander Valley Cabernet Sauvignon,Wine,Red,750,60.00,12,Silver Oak,Breakthru Beverage,12,720.00
+Cloudy Bay Te Wahi Pinot Noir,Wine,Red,750,66.50,12,Cloudy Bay Te,Breakthru Beverage,6,399.00
+Volcan De Mi Tierra Reposado,Spirit,Tequila,750,43.49,40,Volcan De Mi Tierra,Breakthru Beverage,1,
+Hennessy XO La Carafe (XO Night),Spirit,Cognac,750,216.99,40,Hennessy,Breakthru Beverage,1,
+Au Sommet Atlas Peak Cabernet Sauvignon,Wine,Red,750,245.00,12,Au Sommet Atlas,Breakthru Beverage,3,735.00
+Cloudy Bay Sauvignon Blanc,Wine,White,750,22.99,12,Cloudy Bay,Breakthru Beverage,12,275.93
+LALO Tequila Blanco Tequila 100% Agave,Spirit,Tequila,750,50.00,40,LALO,Breakthru Beverage,6,300.00
+Baileys Chocolate Irish Creme,Spirit,Liqueur,750,31.49,40,Baileys,Breakthru Beverage,1,
+Cloudy Bay Pinot Noir,Wine,Red,750,31.24,12,Cloudy Bay,Breakthru Beverage,6,187.46
+Lucky One Original Vodka Lemonade,Spirit,Vodka,750,1.85,40,Lucky One Original,Breakthru Beverage,24,44.40
+Chateau d'Esclans Cotes de Provence Whispering Angel Rose,Wine,Rosé,750,15.24,12,Chateau d'Esclans,Breakthru Beverage,1,
+Joseph Phelps Napa Valley Cabernet Sauvignon,Wine,Red,750,37.50,12,Joseph Phelps Napa,Breakthru Beverage,12,449.96
+Numanthia,Wine,Other,750,7.83,12,Numanthia,Breakthru Beverage,6,46.99
+Orin Swift Cellars Merlot You Had Me At Hell No No Advice From John California,Wine,Red,750,24.00,12,Orin Swift Cellars,Breakthru Beverage,6,144.00
+Chateau d'Esclans Cotes de Provence Garrus Rose,Wine,Rosé,750,45.00,12,Chateau d'Esclans,Breakthru Beverage,6,270.02
+French Bloom Le Blanc French Bubbly,Wine,White,750,27.33,12,French Bloom,Breakthru Beverage,6,164.00
+Belvedere Vodka Dirty Brew Organic Coffee Vodka,Spirit,Vodka,750,24.49,40,Belvedere,Breakthru Beverage,1,
+French Bloom Le Rose French Bubbly,Wine,Rosé,750,33.75,12,French Bloom,Breakthru Beverage,6,202.50
+Woodinville Straight Bourbon Whiskey,Spirit,Whiskey,750,25.92,40,Woodinville Straight,Breakthru Beverage,1,
+Woodinville Straight Rye Whiskey,Spirit,Whiskey,750,25.92,40,Woodinville Straight,Breakthru Beverage,1,
+Minuty Prestige Rose,Wine,Rosé,750,16.75,12,Minuty Prestige,Breakthru Beverage,12,200.95
+Lazy K Bar Bourbon,Spirit,Whiskey,750,74.99,40,Lazy K Bar,Breakthru Beverage,6,449.95
+Terrazas de los Andes Reserva Malbec,Wine,Red,750,17.42,12,Terrazas De Los,Breakthru Beverage,12,209.04
+Chateau Minuty Cotes de Provence Rose et Or,Wine,Rosé,750,70.08,12,Chateau Minuty Cotes,Breakthru Beverage,6,420.47
+Cade Estate Howell Mountain Cabernet Sauvignon 2021,Wine,Red,750,774.05,12,Cade,Classic Wines,1,774.05
+Nautilus Sauvignon Blanc,Wine,White,750,150.00,12,Nautilus,Classic Wines,1,150.00
+Fee Brothers Fee Foam Cocktail Foamer Bitters,Spirit,Bitters,750,6.62,40,Fee Brothers,Classic Wines,12,79.45
+Fee Brothers Black Walnut Bitters,Spirit,Bitters,750,7.25,40,Fee Brothers,Classic Wines,1,
+Monin Pumpkin Spice Syrup,Non-Alc,Syrup,1000,13.74,,Monin,Classic Wines,4,54.95
+Pride Mountain Vineyards Merlot 2021,Wine,Red,750,342.77,12,Pride Mountain Vineyards,Classic Wines,1,342.77
+Vietti Moscato d'Asti 2024,Wine,White,750,171.41,12,Vietti Moscato D'Asti,Classic Wines,1,171.41
+Fortaleza Tequila Blanco,Spirit,Tequila,750,46.67,40,Fortaleza,Classic Wines,1,
+MERRY EDWARDS SAUVIGNON BLANC RRV 2023,Wine,White,750,37.14,12,MERRY EDWARDS,Classic Wines,12,445.73
+Merry Edwards Pinot Noir Sonoma Coast 2020,Wine,Red,750,599.93,12,Merry Edwards,Classic Wines,1,599.93
+Fortaleza Tequila Blanco Still Strength,Spirit,Tequila,750,54.17,40,Fortaleza,Classic Wines,1,
+Domaine Fouassier Sancerre La Garenne,Wine,White,750,39.28,12,Domaine Fouassier Sancerre,Classic Wines,12,471.39
+Plumpjack Estate Oakville Cabernet Sauvignon,Wine,Red,750,142.85,12,Plumpjack,Classic Wines,6,857.12
+1/2 BBL SUPERPOWER IPA,Beer,IPA,Half Barrel,230.00,5,SUPERPOWER,Comrade Brewing,1,
+COORS BANQUET,Beer,Lager,355,1.23,5,Coors,Coors Distributing,24,29.50
+COORS LIGHT,Beer,Lager,355,1.30,5,Coors,Coors Distributing,24,31.10
+COORS LIGHT 1/2 BBL,Beer,Lager,Half Barrel,121.00,5,Coors,Coors Distributing,1,
+BLUE MOON BELGIAN WHITE,Beer,Belgian,355,1.47,5,BLUE MOON,Coors Distributing,24,35.35
+MOLSON CANADIAN LIGHT,Beer,Lager,355,1.40,5,MOLSON,Coors Distributing,24,33.55
+OSKAR BLUES DALE'S PALE ALE,Beer,Pale Ale,355,1.54,5,Oskar Blues,Coors Distributing,24,36.95
+CORONA EXTRA,Beer,Lager,355,1.44,5,Corona,Coors Distributing,24,34.55
+MODELO ESPECIAL,Beer,Lager,355,1.44,5,Modelo,Coors Distributing,24,34.55
+MILLER LITE,Beer,Lager,355,1.23,5,Miller,Coors Distributing,24,29.50
+HEINEKEN,Beer,Lager,355,34.65,5,Heineken,Coors Distributing,1,34.65
+HEINEKEN 0.0,Beer,Lager,355,34.65,5,Heineken,Coors Distributing,1,34.65
+PROST PILS,Beer,Pilsner,355,195.00,5,PROST PILS,Coors Distributing,1,
+SAMUEL ADAMS BOSTON LAGER,Beer,Lager,355,1.54,5,Samuel Adams,Coors Distributing,24,36.95
+SIERRA NEVADA HAZY IPA,Beer,IPA,355,1.54,5,Sierra Nevada,Coors Distributing,24,36.90
+NEW BELGIUM FAT TIRE AMBER ALE,Beer,Ale,355,1.47,5,New Belgium,Coors Distributing,24,35.40
+VOODOO RANGER IPA,Beer,IPA,355,1.47,5,VOODOO RANGER,Coors Distributing,24,35.40
+FEVERTREE CLUB SODA 200ML 24PK,Non-Alc,Mixer,200,0.96,,FeverTree,Coors Distributing,24,23.00
+FEVER TREE DISTILLER'S COLA 200ML BOTTLE,Non-Alc,Mixer,200,23.00,,Fever Tree,Coors Distributing,1,23.00
+FEVERTREE GINGER ALE 200ML 24PK,Non-Alc,Mixer,200,0.96,,FeverTree,Coors Distributing,24,23.00
+FEVERTREE GINGER BEER 200ML 24PK,Non-Alc,Mixer,200,0.96,,FeverTree,Coors Distributing,24,23.00
+FEVERTREE PREMIUM TONIC WATER 200ML 24PK,Non-Alc,Mixer,200,0.96,,FeverTree,Coors Distributing,24,23.00
+FEVER TREE SPARKLING CUCUMBER 200ML BOTTLE,Non-Alc,Mixer,200,23.00,,Fever Tree,Coors Distributing,1,23.00
+FEVER TREE CLUB SODA 150ML CAN,Non-Alc,Mixer,150,17.00,,Fever Tree,Coors Distributing,1,17.00
+FEVER TREE GINGER ALE 150ML CAN,Non-Alc,Mixer,150,17.00,,Fever Tree,Coors Distributing,1,17.00
+FEVER TREE GINGER BEER 150ML CAN,Non-Alc,Mixer,150,17.00,,Fever Tree,Coors Distributing,1,17.00
+FEVER TREE TONIC WATER 150ML CAN,Non-Alc,Mixer,150,17.00,,Fever Tree,Coors Distributing,1,17.00
+FEVER TREE PINK GRAPEFRUIT 150ML CAN,Non-Alc,Mixer,150,17.00,,Fever Tree,Coors Distributing,1,17.00
+PROVOCATEUR PINOT NOIR 2023,Wine,Red,750,19.99,12,PROVOCATEUR,CS Wine,1,
+VISPIDAE PINOT NOIR 2022,Wine,Red,750,32.99,12,VISPIDAE,CS Wine,1,
+Belle Pente Pinot Noir Estate Reserve,Wine,Red,750,45.99,12,Belle Pente,CS Wine,12,551.88
+"Donkey & Goat, York Vineyard, Cabernet Sauvignon, 2020",Wine,Red,750,49.99,12,Donkey & Goat,CS Wine,1,
+"Donkey & Goat, If Then, Red Blend, 2023",Wine,Red,750,19.99,12,Donkey & Goat,CS Wine,1,
+"Donkey & Goat, Twinkle, 2024",Wine,Other,750,23.99,12,Donkey & Goat,CS Wine,1,
+"Donkey & Goat, Ramato, Orange Wine, 2024",Wine,White,750,22.99,12,Donkey & Goat,CS Wine,1,
+"Donkey & Goat, Siletto Vineyard, Cabernet Pfeffer, 2022",Wine,Red,750,25.99,12,Donkey & Goat,CS Wine,1,
+"Gramercy Cellars, Cabernet Sauvignon, Columbia Valley, 2018",Wine,Red,750,479.88,12,Gramercy Cellars,CS Wine,1,479.88
+J.K. Carriere Antoinette Pinot Noir,Wine,Red,750,49.99,12,J.K Carriere Antoinette,CS Wine,1,
+"Realm ""The Bard"" Cabernet Sauvignon 2021",Wine,Red,750,129.99,12,Realm Bard,CS Wine,1,
+White Dog,Spirit,Whiskey,750,36.00,40,White Dog,Distillery 291,6,216.00
+BUDWEISER,Beer,Lager,355,1.15,5,Budweiser,Eagle Rock,24,27.70
+STELLA ARTOIS,Beer,Lager,355,1.38,5,Stella Artois,Eagle Rock,24,33.05
+Breckenridge Brewery Avalanche Amber Ale,Beer,Ale,Half Barrel,160.00,5,Breckenridge Brewery,Eagle Rock,1,
+Breckenrdige Palisade Peach,Beer,Other,Half Barrel,155.00,5,Breckenrdige Palisade Peach,Eagle Rock,1,
+Breckenridge Spring Forward Grapefruit IPA,Beer,IPA,Half Barrel,160.00,5,Breckenridge Spring Forward,Eagle Rock,1,
+BRECKENRIDGE BREWERY SUMMER CERVZA SALT AND LIME LAGER,Beer,Lager,Half Barrel,155.00,5,Breckenridge Brewery,Eagle Rock,1,
+Station 26 Oktoberfest,Beer,Lager,Half Barrel,155.00,5,Station,Eagle Rock,1,
+BUD LIGHT,Beer,Lager,355,1.15,5,Bud Light,Eagle Rock,24,27.70
+Golden Road Broncos Blonde,Beer,Pale Ale,Half Barrel,115.00,5,Golden Road Broncos,Eagle Rock,1,
+Sazerac Straight Rye Whiskey,Spirit,Whiskey,750,22.96,40,Sazerac Straight,Eagle Rock,1,
+BLANTON'S BOURBON,Spirit,Whiskey,750,59.26,40,BLANTON'S,Eagle Rock,1,
+EAGLE RARE 10 YEAR OLD,Spirit,Whiskey,750,31.85,40,Eagle Rare,Eagle Rock,1,
+BUFFALO TRACE BOURBON,Spirit,Whiskey,750,22.21,40,Buffalo Trace,Eagle Rock,12,266.57
+Peychaud's Aromatic Cocktail Bitters,Spirit,Bitters,750,4.66,40,Peychaud's,Eagle Rock,1,
+E.H. TAYLOR JR. SMALL BATCH BOURBON,Spirit,Whiskey,750,41.48,40,E.H TAYLOR JR,Eagle Rock,1,
+WHEATLEY VODKA,Spirit,Vodka,750,12.50,40,WHEATLEY,Eagle Rock,1,
+W.L. WELLER SPECIAL RESERVE,Spirit,Whiskey,750,20.74,40,W.L WELLER SPECIAL,Eagle Rock,1,
+Romana Sambuca Liqueur Classico,Spirit,Liqueur,750,27.66,40,Sambuca,Eagle Rock,1,
+FIREBALL,Spirit,Whiskey,750,15.99,40,FIREBALL,Eagle Rock,1,
+MICHELOB ULTRA,Beer,Lager,355,1.28,5,MICHELOB ULTRA,Eagle Rock,24,30.75
+COLUMBO MARSALA SWEET,Wine,Fortified,750,11.50,12,COLUMBO MARSALA SWEET,Elite Brands,1,
+BEST DAY BREWING NON-ALCOHOLIC WEST COAST IPA,Non-Alc,Other,355,36.00,,Best Day Brewing,Elite Brands,1,36.00
+SKA MODUS 4/6/ 12OZ CANS,Beer,IPA,355,34.50,5,Ska,Elite Brands,1,34.50
+"TEQUILA, ARETTE CLASICA BLANCO",Spirit,Tequila,750,19.49,40,Arette,Estate Brands,1,
+"TEQUILA, ARETTE REPOSADO JALISCO",Spirit,Tequila,750,22.00,40,Arette,Estate Brands,1,
+SCO AUTOMATIC JONES SMOKED OLD FASHIONED RITZ CARLTON,Spirit,Other Spirit,750,10.75,40,SCO AUTOMATIC JONES,Maverick Wine,12,129.00
+SCO AUTOMATIC JONES EARL GREEY NEGRONI RITZ CARLTON,Spirit,Other Spirit,750,10.75,40,SCO AUTOMATIC JONES,Maverick Wine,12,129.00
+SCO AUTOMATIC JONES ESPRESSO MARTINI RITZ CARLTON,Spirit,Other Spirit,750,10.75,40,SCO AUTOMATIC JONES,Maverick Wine,12,129.00
+L'ECOLE NO.41 WALLA WALLA VALLEY CABERNET SAUVIGNON,Wine,Red,750,402.00,12,L'Ecole,Maverick Wine,1,402.00
+The Macallan 15 Year Old Double Cask Single Malt Scotch Whisky,Spirit,Whiskey,750,133.23,40,The Macallan,Republic National,1,
+Giffard Banane du Bresil Liqueur,Spirit,Liqueur,750,29.50,40,Giffard Banane Du,Republic National,1,
+Carpano Antica Formula Vermouth,Wine,Fortified,750,32.99,12,Carpano Antica,Republic National,6,197.94
+Giesen Zero Giesen 0% Sauvignon Blanc - Non Alc,Wine,White,750,10.00,12,Giesen Zero Giesen,Republic National,12,120.00
+Four Roses Small Batch Kentucky Straight Bourbon Whiskey,Spirit,Whiskey,750,31.00,40,Four Roses,Republic National,1,
+Breckenridge Distillery Bourbon Whiskey 86 Proof,Spirit,Whiskey,750,29.99,43,Breckenridge Distillery,Republic National,1,
+Breckenridge Distillery Vodka,Spirit,Vodka,750,10.00,40,Breckenridge Distillery,Republic National,1,
+Four Roses Single Barrel Kentucky Straight Bourbon Whiskey,Spirit,Whiskey,750,36.80,40,Four Roses,Republic National,1,
+Opus One 2018 Red Blend,Wine,Red,750,1890.00,12,Opus One,Republic National,1,1890.00
+Resonance 2018 Yamhill Carlton Pinot Noir,Wine,Red,750,50.00,12,Resonance,Republic National,1,
+Resonance 2018 Yamhill Carlton Pinot Noir,Wine,Red,750,48.00,12,Resonance,Republic National,6,288.00
+ROCKY MOUNTAIN PEACHES AND CREAM SODA,Non-Alc,Mixer,,31.07,,Rocky Mountain,Republic National,1,31.07
+ROCKY MOUNTAIN COLORADO COLA,Non-Alc,Mixer,,31.07,,Rocky Mountain,Republic National,1,31.07
+ROCKY MOUNTAIN ROOT BEER,Non-Alc,Mixer,,31.07,,Rocky Mountain,Republic National,1,31.07
+ROCKY MOUNTAIN ORANGE CREAM SODA,Non-Alc,Mixer,,31.07,,Rocky Mountain,Republic National,1,31.07
+Empress 1908 Gin,Spirit,Gin,750,44.05,40,Empress 1908,Republic National,1,
+Giesen Zero Giesen 0% Red Blend - Non Alc,Wine,Red,750,10.00,12,Giesen Zero Giesen,Republic National,12,120.00
+Real Cocktail Ingredients Real Prickly Pear,Non-Alc,Mixer,,5.04,,Real Cocktail Ingredients,Republic National,6,30.24
+ROCKY MOUNTAIN SODA PRICKLY PEAR,Non-Alc,Mixer,,26.00,,Rocky Mountain Soda,Republic National,1,26.00
+Pighin Pinot Grigio,Wine,White,750,11.50,12,Pighin,Republic National,12,138.00
+JEIO BRUT PROSECCO,Wine,Sparkling,750,10.00,12,JEIO BRUT,Republic National,1,
+Champagne Taittinger Taittinger La Francaise Brut,Wine,Sparkling,750,192.00,12,Taittinger,Republic National,1,192.00
+COTE MAS CREMANT LIMOUX BRUT,Wine,Sparkling,750,17.80,12,COTE MAS CREMANT,Republic National,1,
+K Vintners 2019 Powerline Vineyard The Creator Red Wine,Wine,Red,750,624.00,12,K Vintners,Republic National,1,624.00
+Billecart Salmon Brut Reserve,Wine,Sparkling,750,46.00,12,Billecart Salmon Brut,Republic National,1,46.00
+2021 Chateau de Beaucastel Chateauneuf-du-Pape,Wine,Red,750,438.00,12,Chateau De Beaucastel,Republic National,1,438.00
+FAMILLE PERRIN 2020 MUSCAT BEAUMES DE VENISE,Wine,Other,750,18.20,12,FAMILLE PERRIN,Republic National,1,
+Buglioni 2019 Amarone,Wine,Red,750,468.00,12,Buglioni,Republic National,1,468.00
+Carpano Classico Rosso Vermouth,Wine,Fortified,750,2.47,12,Carpano,Republic National,6,14.80
+Carpano Dry Vermouth,Wine,Fortified,750,13.00,12,Carpano,Republic National,6,78.00
+Breckenridge Reserve Bourbon,Spirit,Whiskey,750,28.00,40,Breckenridge,Republic National,6,168.00
+Trimbach 2022 Reisling Organic,Wine,White,750,21.00,12,Trimbach,Republic National,12,252.00
+ARGYLE 2023 ROSE PINOT NOIR,Wine,Rosé,750,16.00,12,ARGYLE,Republic National,1,
+Craggy Range 2024 Te Muna Sauvignon Blanc,Wine,White,750,180.00,12,Craggy Range,Republic National,1,180.00
+FAMILLE PERRIN CHEATEAU DE BEAUCASTEL 2023 BLANC,Wine,White,750,74.80,12,FAMILLE PERRIN CHEATEAU,Republic National,1,
+Nicolas Feuillatte Champagne Nicolas Feuillatte Brut NV,Wine,Sparkling,750,39.99,12,Nicolas Feuillatte,Republic National,12,479.92
+Gaja Wd 2020 Gaja Barbaresco,Wine,Red,750,250.00,12,Gaja,Republic National,6,1500.00
+Borgogno 2022 No Name Nebbiolo,Wine,Red,750,39.00,12,Borgogno,Republic National,6,234.00
+E. Guigal 2020 Etienne Guigal Chateauneuf du Pape Rouge,Wine,Red,750,42.00,12,E Guigal,Republic National,12,504.00
+Moscato Chiarlo Nivole,Wine,White,750,16.00,12,Moscato Chiarlo Nivole,Republic National,12,192.00
+William Fevre 2023 Chablis Champs Royaux,Wine,White,750,28.00,12,William Fevre,Republic National,12,336.00
+Ridge Estate Chardonnay 2023,Wine,White,750,660.00,12,Ridge,Republic National,1,660.00
+Faiveley 2023 Domaine Bourgogne Joseph Rouge,Wine,Red,750,31.50,12,Faiveley,Republic National,12,378.00
+Ornellaia Le Volte 2023 Le Volte dell'Ornellaia Toscana Red Wine,Wine,Red,750,25.50,12,Ornellaia Le Volte,Republic National,12,306.00
+Sequoia Grove 2021 Cabernet Sauvignon,Wine,Red,750,384.00,12,Sequoia Grove,Republic National,1,384.00
+REAL BLACKBERRY PUREE INFUSED SYRUP,Non-Alc,Syrup,1000,4.75,,REAL BLACKBERRY PUREE,Republic National,6,28.50
+Patrimony 2020 Cabernet Sauvignon,Wine,Red,750,202.00,12,Patrimony,Republic National,3,606.00
+"Emeritus Vineyards 'Pinot Hill' Pinot Noir, Sonoma Coast, 2020",Wine,Red,750,258.00,12,Emeritus Vineyards,Republic National,1,258.00
+E. Guigal 2021 Guigal La Landonne Vt,Wine,Red,750,384.80,12,E Guigal,Republic National,1,
+Wayfarer 2021 Fort Ross Sea Pinot Noir,Wine,Red,750,396.00,12,Wayfarer,Republic National,1,396.00
+Arcanum 2022 Il Fauno d'Red,Wine,Red,750,25.00,12,Arcanum,Republic National,12,300.00
+GRAHAM'S 10 YEAR OLD TAWNY PORT,Wine,Fortified,750,25.00,12,GRAHAM'S,Republic National,6,150.00
+Graham's 20 Year Old Tawny Port,Wine,Fortified,750,45.00,12,Graham's,Republic National,6,270.00
+Graham's Tawny Port 30yr,Wine,Fortified,750,115.00,12,Graham's Tawny Port,Republic National,6,690.00
+Mock One Non Alcoholic Mock One Experience Whiskey,Non-Alc,Other,750,22.00,,Mock One,Republic National,6,132.00
+Dog Point 2023 Sauvignon Blanc,Wine,White,750,228.00,12,Dog Point,Republic National,1,228.00
+JORDAN CAB 2021,Wine,Red,750,420.00,12,Jordan,Republic National,1,420.00
+DAOU CAB RESERVE 2023,Wine,Red,750,150.00,12,Daou,Republic National,1,
+Breckenridge Distillery Breckenridge Orange Cream Rtd,Beer,Other,355,2.25,5,Breckenridge Distillery Breckenridge,Republic National,24,54.00
+J Davies Diamond Mountain Cabbernet Sauvignon,Wine,Red,750,124.00,12,J Davies Diamond,Republic National,1,
+Chateau Montelena Winery 2019 Chateau Montelena Estate Cabernet Sauvignon,Wine,Red,750,900.00,12,Chateau Montelena Winery,Republic National,1,900.00
+Empress Na Empress 1908 Indigo Na - Non Alc,Non-Alc,Other,750,23.50,,Empress 1908,Republic National,1,
+VINA ROBLES 2020 MOUNTN RD RESERVE CABERNET SAUVIGNON,Wine,Red,750,49.80,12,VINA ROBLES,Republic National,1,
+Chateau Montelena Winery 2022 Chateau Montelena Napa Valley Cabernet Sauvignon,Wine,Red,750,62.00,12,Chateau Montelena Winery,Republic National,12,744.00
+Eisele Vineyard 2014 Eisele Estate Cabernet Sauvignon,Wine,Red,750,350.80,12,Eisele Vineyard,Republic National,1,
+E. GUIGAL 2020 COTE-ROTIE BRUNE ET BLONDE,Wine,Red,750,71.80,12,E GUIGAL,Republic National,1,
+FAMILLE PERRIN CHATEAU DE BEAUCASTEL ROUGE,Wine,Red,750,74.80,12,FAMILLE PERRIN CHATEAU,Republic National,1,
+DuMOL 2022 Wester Reach Russian River Valley Pinot Noir,Wine,Red,750,312.00,12,DuMOL,Republic National,1,312.00
+Chateau Greysac 2018 Bordeaux,Wine,Red,750,252.00,12,Chateau Greysac,Republic National,1,252.00
+Michele Chiarlo 2020 Chiarlo Cerequio Barolo,Wine,Red,750,96.00,12,Michele Chiarlo,Republic National,6,576.00
+Michele Chiarlo 2020 Chiarlo Tortoniano Barolo,Wine,Red,750,44.00,12,Michele Chiarlo,Republic National,6,264.00
+Michele Chiarlo 2023 Nivole Moscato d'Asti,Wine,White,750,120.00,12,Michele Chiarlo,Republic National,1,120.00
+RIDGE VINEYARDS 2021 RESERVE RIDGE ESTATE CABERNET SAUVIGNON,Wine,Red,750,68.80,12,RIDGE VINEYARDS,Republic National,1,
+DAOU 2021 Soul of a Lion Cabernet Sauvignon,Wine,Red,750,104.99,12,Daou,Republic National,6,629.94
+Cakebread Cellars 2023 Sauvignon Blanc,Wine,White,750,264.00,12,Cakebread,Republic National,1,264.00
+Les Cadrans 2021 des Lassegue St Em Ma,Wine,Red,750,25.00,12,Les Cadrans,Republic National,6,150.00
+CARBOY LITTLETON 2022 CARBOY CO.LORADO RED BLEND,Wine,Red,750,21.00,12,CARBOY LITTLETON,Republic National,12,252.00
+Empress 1908 Cucum Lemon Gin,Spirit,Gin,750,42.17,40,Empress 1908,Republic National,6,253.00
+Chateau Montelena Winery 2022 Chateau Montelena Chardonnay,Wine,White,750,45.00,12,Chateau Montelena Winery,Republic National,12,540.00
+Penfolds 2022 Max's Cabernet Sauvignon,Wine,Red,750,13.00,12,Penfolds,Republic National,12,156.00
+MARTIN RAY 2022 SYNTHESIS CABERNET SAUVIGNON,Wine,Red,750,31.50,12,MARTIN RAY,Republic National,1,
+Opus One 2021 Overture Napa Valley Red Blend,Wine,Red,750,132.50,12,Opus One,Republic National,6,795.00
+Jordan Chardonnay 2022,Wine,White,750,263.99,12,Jordan,Republic National,1,263.99
+Cakebread Cellars 2023 Napa Valley Chardonnay,Wine,White,750,336.00,12,Cakebread,Republic National,1,336.00
+Domaine Hubert Brochard 2023 Hubert Brochard Sancerre Chateau de Fontaine,Wine,White,750,28.00,12,Domaine Hubert Brochard,Republic National,12,336.00
+Chateau de Pez 2021 Chateau de Pes St Estephe,Wine,Red,750,36.00,12,Chateau De Pez,Republic National,12,432.00
+Benanti 2022 Cont Calde Sottana,Wine,Other,750,47.00,12,Benanti,Republic National,6,282.00
+ARGYLE BRUT ROSE,Wine,Sparkling,750,240.00,12,ARGYLE BRUT,Republic National,1,240.00
+Zena Crown 2021 Vineyard The Sum Pinot Noir,Wine,Red,750,66.00,12,Zena Crown,Republic National,1,
+Marques de Murrieta 2020 Reserva Rioja,Wine,Red,750,282.00,12,Marques De Murrieta,Republic National,1,282.00
+Graham's Graham S Tawny 40yr,Wine,Fortified,750,215.00,12,Graham's Graham S,Republic National,1,
+MR AND MRS T SWEET AND SOUR MIX,Non-Alc,Mixer,,4.50,,MR AND MRS,Republic National,6,27.00
+LE CLOS JORDANNE,Wine,Other,750,39.60,12,LE CLOS JORDANNE,Republic National,1,
+CH D AQUERIA 2024 TAVEL ROSE,Wine,Rosé,750,17.30,12,CH D AQUERIA,Republic National,1,
+Chateau de Nalys 2020 Chateauneuf-du-Pape Rouge St. Pierres,Wine,Red,750,46.00,12,Chateau De Nalys,Republic National,12,552.00
+Zonin N/A Zonin Cuvee Zero - Non Alc,Non-Alc,Other,750,3.92,,Zonin N/A Zonin,Republic National,24,94.00
+Ridge Vineyards 2023 Ridge Three Valley Zinfandel,Wine,Red,750,228.00,12,Ridge Vineyards,Republic National,1,
+Ridge Vineyards 2023 Ridge Three Valley Zinfandel,Wine,Red,750,19.00,12,Ridge Vineyards,Republic National,12,228.00
+"Ca'Marcanda, Camarcanda Bolgheri, 2022",Wine,Red,750,1080.00,12,Ca'Marcanda Camarcanda Bolgheri,Republic National,1,1080.00
+Hartford Court Russian River Valley Chardonnay,Wine,White,750,216.00,12,Hartford Court Russian,Republic National,1,216.00
+Macallan 18 Year Old Sherry Oak Single Malt,Spirit,Whiskey,750,312.90,40,Macallan,Republic National,1,
+Vina Robles Paso Rob Cabernet Sauvignon Estate,Wine,Red,750,16.00,12,Vina Robles Paso,Republic National,12,192.00
+Chateau Blaignan Bordeaux,Wine,Red,750,17.00,12,Chateau Blaignan Bordeaux,Republic National,12,204.00
+Sotol Por Siempre Sotol,Spirit,Other Spirit,750,32.00,40,Sotol Por Siempre,Republic National,1,
+Familia Torres Torres Celeste Rioja Crianza Wd,Wine,Red,750,16.00,12,Familia Torres Torres,Republic National,6,96.00
+"Pago del Cielo, 'Celeste', Crianza, Ribera del Duero,",Wine,Red,750,96.00,12,Pago Del Cielo,Republic National,1,96.00
+Don Q Barrel Spiced Rum,Spirit,Rum,750,25.55,40,Don Q,Republic National,1,
+DECERO MALBEC,Wine,Red,750,16.80,12,DECERO MALBEC,Republic National,1,
+Fernet Branca Liqueur,Spirit,Amaro,750,32.80,40,Fernet Branca,Republic National,1,
+LALO Blanco Tequila,Spirit,Tequila,750,38.00,40,LALO,Republic National,1,
+Chopin Potato Vodka,Spirit,Vodka,750,25.20,40,Chopin,Republic National,1,
+REAL PEACH PUREE,Non-Alc,Syrup,1000,4.75,,REAL PEACH PUREE,Republic National,6,28.50
+Real Cocktail Ingredients Real Raspberry Puree Infused Syrup,Non-Alc,Syrup,1000,5.04,,Real Cocktail Ingredients,Republic National,6,30.24
+Real Mango Puree Syrup,Non-Alc,Syrup,1000,4.75,,Real Mango Puree,Republic National,6,28.50
+Breckenridge Distillery Port Cask Finish Whiskey,Spirit,Whiskey,750,34.80,40,Breckenridge Distillery Port,Republic National,1,
+Breckenridge Distillers High Proof Blend Bourbon,Spirit,Whiskey,750,34.80,40,Breckenridge Distillers High,Republic National,1,
+ROSE'S GRENADINE,Non-Alc,Syrup,1000,8.55,,Rose's,Republic National,1,
+The Macallan 12 Year Old Double Cask Single Malt Scotch Whisky,Spirit,Whiskey,750,63.05,40,The Macallan,Republic National,1,
+"Dal Forno Romano, Amarone della Valpolicella, 2018",Wine,Red,750,2070.00,12,Dal Forno Romano,Republic National,1,2070.00
+"Dal Forno Romano, Valpolicella Superiore, 2019",Wine,Red,750,690.00,12,Dal Forno Romano,Republic National,1,690.00
+"Famille Joly, Les Vieux Clos, 2023",Wine,White,750,354.00,12,Famille Joly Les,Republic National,1,354.00
+"GAJA, Barbaresco, 2022",Wine,Red,750,1650.00,12,Gaja,Republic National,1,1650.00
+"Patrimony, Cabernet Sauvignon, Paso Robles, 2021",Wine,Red,750,606.00,12,Patrimony,Republic National,1,606.00
+"Pieve Santa Restituta, Brunello di Montalcino, 2020",Wine,Red,750,468.00,12,Pieve Santa Restituta,Republic National,1,468.00
+TENUTA SAN GUIDO 'LE DIFESE' 2023,Wine,Red,750,468.00,12,TENUTA SAN GUIDO,Republic National,1,468.00
+TENUTA SAN GUIDO 'GUIDALBERTO' 2023,Wine,Red,750,684.00,12,TENUTA SAN GUIDO,Republic National,1,684.00
+TENUTA SAN GUIDO 'SASSICAIA' 2022,Wine,Red,750,1320.00,12,Sassicaia,Republic National,1,1320.00
+Bombay Sapphire Gin 94,Spirit,Gin,750,29.38,47,Bombay Sapphire,Southern Glazer's,1,
+Patron Tequila Silver Bar 80,Spirit,Tequila,750,41.58,40,Patron,Southern Glazer's,12,499.00
+Dekuyper Sour Apple Schnapps Pucker 30,Spirit,Liqueur,750,10.73,40,Dekuyper,Southern Glazer's,1,
+Grey Goose Pear Flavored Vodka Grey Goose La Poire 80,Spirit,Vodka,750,35.99,40,Grey Goose,Southern Glazer's,6,215.94
+absolut vodka 80,Spirit,Vodka,750,25.98,40,Absolut,Southern Glazer's,12,311.81
+nonino amaro quintessentia 70,Spirit,Amaro,750,42.96,35,Nonino,Southern Glazer's,1,
+Filthy Onions,Non-Alc,Garnish,,6.33,,Filthy,Southern Glazer's,1,
+filthy pickle olives,Non-Alc,Garnish,,7.33,,Filthy,Southern Glazer's,1,
+GREY GOOSE VODKA 80,Spirit,Vodka,1000,33.49,40,Grey Goose,Southern Glazer's,1,
+LUXARDO MARASCHINO CHERRIES 5.6KG,Non-Alc,Garnish,,135.00,,Luxardo,Southern Glazer's,1,
+St Germain Elderflower Liqueur 40,Spirit,Liqueur,750,32.83,40,St Germain,Southern Glazer's,6,197.00
+Jefferson's Straight Bourbon 82.3,Spirit,Whiskey,750,37.87,40,Jefferson's Straight,Southern Glazer's,1,
+Dewar's Blended Scotch White Label 80,Spirit,Whiskey,750,28.83,40,Dewar's,Southern Glazer's,1,
+Dewar's Blended Scotch White Label 80,Spirit,Whiskey,750,28.83,40,Dewar's,Southern Glazer's,12,346.00
+ANGOSTURA ORANGE BITTERS,Spirit,Bitters,750,10.71,40,Angostura,Southern Glazer's,1,
+Filthy Blue Cheese Olives,Non-Alc,Garnish,,41.00,,Filthy,Southern Glazer's,6,246.00
+Jameson Blended Irish Whiskey 80,Spirit,Whiskey,750,37.49,40,Jameson,Southern Glazer's,1,
+midori melon liqueur 40,Spirit,Liqueur,750,29.98,40,Midori Melon,Southern Glazer's,1,
+Bacardi Light Rum Superior 80,Spirit,Rum,750,17.79,40,Bacardi,Southern Glazer's,12,213.50
+Benedictine Brandy Liqueur B&b 80,Spirit,Brandy,750,37.02,40,Benedictine,Southern Glazer's,1,
+Benedictine Brandy Liqueur Dom 80,Spirit,Brandy,750,29.43,40,Benedictine,Southern Glazer's,1,
+Del Maguey Mezcal Vida 84,Spirit,Mezcal,750,31.84,42,Del Maguey,Southern Glazer's,1,
+Maker's 46 Straight Bourbon,Spirit,Whiskey,750,31.99,40,Maker's,Southern Glazer's,1,
+Patron Coffee Liqueur Xo Cafe 70,Spirit,Tequila,750,35.69,35,Patron,Southern Glazer's,1,
+Whistle Pig 10yr Rye,Spirit,Whiskey,750,69.67,40,Whistle Pig,Southern Glazer's,1,
+Frangelico Hazelnut Liqueur 40,Spirit,Liqueur,750,35.06,40,Frangelico,Southern Glazer's,1,
+Chartreuse Herbal Liqueur Green 110,Spirit,Liqueur,750,58.99,55,Chartreuse,Southern Glazer's,1,
+FILTHY BLACK CHERRY-SMALL JAR,Non-Alc,Garnish,,13.00,,Filthy,Southern Glazer's,12,156.00
+malibu coconut flavored rum original 42,Spirit,Rum,750,19.55,40,Malibu Coconut Flavored,Southern Glazer's,1,
+Licor 43,Spirit,Liqueur,750,33.32,40,Licor 43,Southern Glazer's,1,
+olmeca altos tequila reposado 80,Spirit,Tequila,750,31.83,40,Olmeca,Southern Glazer's,6,191.00
+olmeca altos tequila plata 80,Spirit,Tequila,750,31.83,40,Olmeca,Southern Glazer's,6,191.00
+GREEN SPOT SINGLE POT STILL IRISH WHISKEY 80,Spirit,Whiskey,750,63.70,40,GREEN SPOT,Southern Glazer's,1,
+Teeling Blended Irish Whiskey Small Batch,Spirit,Whiskey,750,37.44,40,Teeling Blended,Southern Glazer's,1,
+Angostura Bitters 16oz,Spirit,Bitters,473,26.42,40,Angostura,Southern Glazer's,1,
+10th Mountain Spirits Rye Whiskey 86,Spirit,Whiskey,750,39.00,43,10th Mountain,Southern Glazer's,1,
+Hibiki Japanese Whisky,Spirit,Whiskey,750,74.07,40,Hibiki,Southern Glazer's,1,
+Jefferson's Straight Bourbon Ocean Aged At Sea 90,Spirit,Whiskey,750,65.70,45,Jefferson's Straight,Southern Glazer's,1,
+Angel's Envy Straight Bourbon Finished In Port Wine Barrels,Spirit,Whiskey,750,45.75,40,Angel's Envy Straight,Southern Glazer's,6,274.50
+Aberfeldy Single Malt Scotch 16 Yr 80,Spirit,Whiskey,750,77.00,40,Aberfeldy,Southern Glazer's,1,
+Courvoisier Cognac VSOP,Spirit,Cognac,750,31.10,40,Courvoisier,Southern Glazer's,1,
+Courvoisier Cognac Vsop 80,Spirit,Cognac,750,31.10,40,Courvoisier,Southern Glazer's,1,
+Courvoisier Cognac XO,Spirit,Cognac,750,148.14,40,Courvoisier,Southern Glazer's,1,
+angel's envy rye whiskey finished in caribbean rum casks finished rye 100,Spirit,Whiskey,750,72.00,50,Angel's Envy,Southern Glazer's,1,
+ANGEL'S ENVY RYE WHISKEY FINISHED RYE 100,Spirit,Whiskey,750,72.00,50,ANGEL'S ENVY,Southern Glazer's,1,
+Aberfeldy Single Malt Scotch 12 Yr 80,Spirit,Whiskey,750,45.75,40,Aberfeldy,Southern Glazer's,1,
+Patron Reposado Tequila,Spirit,Tequila,750,43.99,40,Patron,Southern Glazer's,1,
+High West Rye Whiskey Double Rye!,Spirit,Whiskey,750,34.81,40,High West,Southern Glazer's,1,
+italicus rosolio di bergamotto liqueur 40,Spirit,Liqueur,750,38.33,40,Italicus Rosolio Di,Southern Glazer's,1,
+Filthy Bloody Mary Mix,Non-Alc,Mixer,,7.12,,Filthy,Southern Glazer's,8,57.00
+chateau ste. michelle sauvignon blanc columbia valley,Wine,White,750,8.00,12,Chateau Ste Michelle,Southern Glazer's,12,96.00
+FILTHY BLOODY MARY MIX 4 GALLON/CS,Non-Alc,Mixer,,18.50,,Filthy,Southern Glazer's,4,74.00
+jameson orange flavored whiskey 60,Spirit,Whiskey,750,37.49,30,Jameson,Southern Glazer's,1,
+Cazadores Tequila Blanco 80,Spirit,Tequila,750,22.49,40,Cazadores,Southern Glazer's,1,
+FILTHY BLACK CHERRY-LARGE JAR,Non-Alc,Garnish,,39.17,,Filthy,Southern Glazer's,6,235.00
+onehope brut sparkling california,Wine,Sparkling,750,107.00,12,Onehope Brut,Southern Glazer's,1,107.00
+Aperol Aperitivo 22,Spirit,Liqueur,750,26.91,40,Aperol,Southern Glazer's,6,161.46
+Averna Siciliano Amaro,Spirit,Amaro,750,32.77,40,Averna,Southern Glazer's,1,
+cynar aperitif ricetta originale 33,Spirit,Amaro,750,25.31,40,Cynar,Southern Glazer's,1,
+wild turkey straight bourbon longbranch 8 yr 86,Spirit,Whiskey,750,30.36,43,Wild Turkey,Southern Glazer's,1,
+CLASE AZUL REPESADO 80,Spirit,Tequila,750,144.44,40,Clase Azul,Southern Glazer's,1,
+elijah craig straight bourbon small batch 94,Spirit,Whiskey,750,28.49,47,Elijah Craig,Southern Glazer's,1,
+bombay gin sapphire premier cru murcian lemon 94,Spirit,Gin,750,26.59,47,Bombay,Southern Glazer's,6,159.54
+prunotto barbaresco bric turot 2019,Wine,Red,750,57.77,12,Prunotto Barbaresco Bric,Southern Glazer's,6,346.62
+Chartreuse Herbal Liqueur Cuvee Des Meilleurs Ouvriers De France Sommeliers 90,Spirit,Liqueur,750,89.50,45,Chartreuse,Southern Glazer's,1,
+Hipstirs syrup lavender haze,Non-Alc,Syrup,1000,11.00,,Hipstirs,Southern Glazer's,1,
+Avissi Prosecco Extra Dry,Wine,Sparkling,750,13.26,12,Avissi,Southern Glazer's,6,79.55
+Rutherford Hill Cabernet Sauvignon AJT 2021,Wine,Red,750,180.00,12,Rutherford Hill,Southern Glazer's,1,180.00
+CLASE AZUL ANEJO 80,Spirit,Tequila,750,451.67,40,Clase Azul,Southern Glazer's,1,
+Filthy Olive Brine,Non-Alc,Mixer,,3.50,,Filthy,Southern Glazer's,12,42.05
+7 Cellars Pinot Noir The Farm Collection Monterey County 2021,Wine,Red,750,189.50,12,7 Cellars,Southern Glazer's,1,189.50
+nickel & nickel cabernet sauvignon bear track vineyard napa valley 2021,Wine,Red,750,468.00,12,Nickel & Nickel,Southern Glazer's,1,468.00
+Beefeater London Dry Gin 80,Spirit,Gin,750,25.73,40,Beefeater,Southern Glazer's,1,
+silverado vineyards cabernet sauvignon solo stags leap district 2018,Wine,Red,750,690.00,12,Silverado Vineyards,Southern Glazer's,1,690.00
+the prisoner red blend wine california 2022,Wine,Red,750,42.85,12,Prisoner Red Blend,Southern Glazer's,12,514.20
+elway's chardonnay reserve carneros 2022,Wine,White,750,290.50,12,Elway's,Southern Glazer's,1,290.50
+CAMPARI APERITIVO 48,Spirit,Liqueur,750,35.04,40,Campari,Southern Glazer's,1,
+Caymus Vineyards Cabernet Sauvignon Special Selection Napa Valley 2019 Wood Box,Wine,Red,750,199.17,12,Caymus,Southern Glazer's,6,1195.00
+KAHLUA COFFEE LIQUER THE ORIGINAL 40,Spirit,Liqueur,750,31.07,40,Kahlua,Southern Glazer's,1,
+Patron Tequila Cristalino Anejo 80,Spirit,Tequila,750,59.99,40,Patron,Southern Glazer's,1,
+Almave Blanco Non-Alcoholic,Non-Alc,Other,750,29.33,,Almave,Southern Glazer's,1,
+nino negri valtellina superiore vigneto fracia 2019,Wine,Red,750,51.99,12,Nino Negri Valtellina,Southern Glazer's,6,311.94
+ELWAY'S CABERNET SAUVIGNON RESERVE NAPA VALLEY 2021,Wine,Red,750,57.88,12,ELWAY'S,Southern Glazer's,1,
+austin hope cabernet sauvignon paso robles 2022,Wine,Red,750,546.00,12,Austin Hope,Southern Glazer's,1,546.00
+grey goose vodka altius 80,Spirit,Vodka,750,140.00,40,Grey Goose,Southern Glazer's,1,
+Il Poggione Brunello di Montalcino 2019,Wine,Red,750,228.00,12,Il Poggione Brunello,Southern Glazer's,1,228.00
+patz & hall pinot noir sonoma coast 2021,Wine,Red,750,37.03,12,Patz & Hall,Southern Glazer's,12,444.36
+Stag's Leap Wine Cellars Cabernet Sauvignon Artemis Napa Valley 2022,Wine,Red,750,66.66,12,Stag's Leap,Southern Glazer's,6,399.96
+liquid light sauvignon blanc washington,Wine,White,750,14.81,12,Liquid Light,Southern Glazer's,12,177.69
+liquid light pinot grigio washington,Wine,White,750,14.81,12,Liquid Light,Southern Glazer's,12,177.69
+liquid light chardonnay washington,Wine,White,750,14.81,12,Liquid Light,Southern Glazer's,12,177.69
+GOLD SPOT SINGLE POT STILL IRISH WHISKEY GENERATIONS EDITION 13 YR 92,Spirit,Whiskey,750,98.21,46,GOLD SPOT,Southern Glazer's,1,
+Bravium Pinot Noir Anderson Valley 2023,Wine,Red,750,29.63,12,Bravium,Southern Glazer's,6,177.78
+liquid light brut rose washington,Wine,Sparkling,750,16.29,12,Liquid Light Brut,Southern Glazer's,12,195.48
+SWANSON CAB SAUV NAPA VALLEY 2022,Wine,Red,750,180.00,12,SWANSON CAB SAUV,Southern Glazer's,1,180.00
+liquid light sparkling wine brut washington,Wine,Sparkling,750,16.29,12,Liquid Light,Southern Glazer's,12,195.48
+chateau branaire ducru saint julien 2019 wood box,Wine,Red,750,68.00,12,Chateau Branaire Ducru,Southern Glazer's,6,408.00
+MONKEY 47 DRY GIN SCHWARZWALD 94,Spirit,Gin,750,72.33,47,Monkey 47,Southern Glazer's,1,
+sea smoke pinot noir ten sea smoke estate vineyard santa rita hills 2022,Wine,Red,750,498.00,12,Sea Smoke,Southern Glazer's,1,498.00
+elway's cabernet sauvignon completion oakville 2022,Wine,Red,750,183.25,12,Elway's,Southern Glazer's,6,1099.50
+justin red wine isosceles paso robles 2021,Wine,Red,750,450.00,12,Justin Red,Southern Glazer's,1,450.00
+chateau ste. michelle merlot indian wells columbia valley 2021,Wine,Red,750,150.00,12,Chateau Ste Michelle,Southern Glazer's,1,150.00
+Terlato Pinot Grigio Colli Orientali Del Friuli 2024,Wine,White,750,20.00,12,Terlato,Southern Glazer's,12,239.95
+dolce white wine late harvest wine napa valley 2019,Wine,White,750,75.83,12,Dolce,Southern Glazer's,6,455.00
+Dolce Late Harvest 375ML,Wine,Other,375,270.00,12,Dolce Late Harvest,Southern Glazer's,1,270.00
+LUXARDO MARASCHINO ORIGINALE 64,Spirit,Liqueur,750,32.00,32,Luxardo,Southern Glazer's,1,
+far niente cabernet sauvignon napa valley 2022,Wine,Red,750,50.00,12,Far Niente,Southern Glazer's,12,600.00
+Owen's Craft Mixers Transfusion Mix,Non-Alc,Mixer,,1.25,,Owen's Craft,Southern Glazer's,24,30.00
+MIRAVAL COTES DE PROVENCE ROSE 2024,Wine,Rosé,750,210.00,12,MIRAVAL COTES DE,Southern Glazer's,1,210.00
+summer dreams pinot noir stargazing sonoma coast 2023,Wine,Red,750,330.00,12,Summer Dreams,Southern Glazer's,1,330.00
+Martini Vermouth Extra Dry,Wine,Sparkling,750,13.83,12,Martini,Southern Glazer's,6,83.00
+Booker's Straight Bourbon Barry's Batch 2025-1 7 Yr 125.7,Spirit,Whiskey,750,68.14,40,Booker's,Southern Glazer's,1,
+Lallier Champagne Brut R.021 Reflexion 2021,Wine,Sparkling,750,53.14,12,Lallier,Southern Glazer's,6,318.82
+Filthy Agave Nectar,Non-Alc,Syrup,1000,12.13,,Filthy,Southern Glazer's,1,
+chateau ste. michelle red blend indian wells columbia valley 2022,Wine,Red,750,9.00,12,Chateau Ste Michelle,Southern Glazer's,12,108.00
+rex hill pinot noir willamette valley 2022,Wine,Red,750,30.00,12,Rex Hill,Southern Glazer's,6,180.00
+angel's envy straight bourbon cask strength distillers collection 10 10 yr 122.6,Spirit,Whiskey,750,174.99,40,Angel's Envy Straight,Southern Glazer's,1,
+estival sauvignon blanc horse heaven hills 2024,Wine,White,750,12.00,12,Estival,Southern Glazer's,12,144.00
+sea smoke blanc de noirs sea spray sea smoke estate vineyard santa rita hills 2020,Wine,Sparkling,750,70.25,12,Sea Smoke Blanc,Southern Glazer's,6,421.50
+Booker's Straight Bourbon The Reserves 2025 Batch 9 Yr 123.3,Spirit,Whiskey,750,99.99,40,Booker's,Southern Glazer's,1,
+booker's straight bourbon the reserves 2025 batch 8 yr 123.3,Spirit,Whiskey,750,99.99,40,Booker's,Southern Glazer's,1,
+7 cellars cabernet sauvignon the farm collection paso robles 2023,Wine,Red,750,15.79,12,7 Cellars,Southern Glazer's,12,189.50
+CHIMNEY ROCK CAB SAUV 40 ANNY 2023,Wine,Red,750,59.00,12,CHIMNEY ROCK CAB,Southern Glazer's,1,
+ethos cellars cabernet sauvignon columbia valley 2022,Wine,Red,750,15.00,12,Ethos Cellars,Southern Glazer's,6,90.00
+caymus vineyards cabernet sauvignon napa valley 2023,Wine,Red,750,63.74,12,Caymus,Southern Glazer's,12,764.92
+eroica riesling columbia valley 2024,Wine,White,750,18.51,12,Eroica,Southern Glazer's,6,111.07
+liquid light rose wine washington 2024,Wine,Rosé,750,14.81,12,Liquid Light,Southern Glazer's,12,177.69
+LILLET APERITIF BLANC 34,Wine,White,750,18.48,12,Lillet,Southern Glazer's,1,
+Booker's Straight Bourbon Phantom Pipes Batch 2025-04 7 Yr 126.4,Spirit,Whiskey,750,68.14,40,Booker's,Southern Glazer's,1,
+erath pinot noir reserve willamette valley 2023,Wine,Red,750,17.50,12,Erath,Southern Glazer's,6,105.00
+patron tequila silver 100,Spirit,Tequila,750,41.24,50,Patron,Southern Glazer's,1,
+colorado avalanche straight bourbon 90,Spirit,Whiskey,750,40.83,45,Colorado Avalanche Straight,Southern Glazer's,6,245.00
+FIJI NATURAL ARTESIAN WATER,Non-Alc,Mixer,500,1.09,,FIJI,Southern Glazer's,24,26.25
+FIJI NATURAL ARTESIAN WATER,Non-Alc,Mixer,1000,2.00,,FIJI,Southern Glazer's,12,24.00
+redbreast single pot still irish whiskey 12 yr 80,Spirit,Whiskey,750,61.04,40,Redbreast,Southern Glazer's,1,
+LOMBARDO MARSALA ANBRA SWEET FINE I.P.,Wine,Fortified,750,9.00,12,LOMBARDO MARSALA ANBRA,Southern Glazer's,1,
+El Tesoro Tequila Blanco 80,Spirit,Tequila,750,41.23,40,El Tesoro,Southern Glazer's,1,
+Bacardi 8 aged rum rare gold reserva ocho 8 yr,Spirit,Tequila,750,36.98,40,Bacardi,Southern Glazer's,1,
+Basil Hayden's Straight Bourbon 80,Spirit,Whiskey,750,48.83,40,Basil Hayden,Southern Glazer's,1,
+Gekkeikan Junmai Sake,Wine,Other,750,8.14,12,Gekkeikan Junmai Sake,Southern Glazer's,1,
+codigo 1530 tequila blanco 80,Spirit,Tequila,750,47.50,40,Codigo,Southern Glazer's,1,
+codigo 1530 tequila reposado 80,Spirit,Tequila,750,64.16,40,Codigo,Southern Glazer's,1,
+el tesoro tequila anejo 80,Spirit,Tequila,750,67.14,40,El Tesoro,Southern Glazer's,1,
+Perrier Jouet Grand Brut Shape,Wine,Sparkling,750,35.00,12,Perrier Jouet Grand,Southern Glazer's,6,210.00
+Chartreuse Herbal Liqueur Yellow 86,Spirit,Liqueur,750,58.99,43,Chartreuse,Southern Glazer's,1,
+Basil Hayden's Dark Rye,Spirit,Whiskey,750,41.21,40,Basil Hayden,Southern Glazer's,1,
+DOS HOMBRES MEZCAL ARTESENAL JOVEN ESPADIN 84,Spirit,Mezcal,750,51.00,42,Dos Hombres,Southern Glazer's,1,
+justin red wine isosceles reserve paso robles 2015,Wine,Red,750,777.00,12,Justin Red,Southern Glazer's,1,777.00
+Jim Beam Straight Bourbon White Label 80,Spirit,Whiskey,750,21.05,40,Jim Beam,Southern Glazer's,1,
+liquid alchemist orgeat syrup,Non-Alc,Syrup,1000,24.99,,Liquid Alchemist,Southern Glazer's,1,
+KNOB CREEK STRAIGHT BOURBON SMALL BATCH 12YR 100,Spirit,Whiskey,750,56.87,50,Knob Creek,Southern Glazer's,1,
+Grand Marnier Cognac & Orange Liqueur Cordon Rouge 80,Spirit,Cognac,750,37.51,40,Grand Marnier,Southern Glazer's,1,
+MAKER'S MARK STRAIGHT BOURBON 90,Spirit,Whiskey,1000,37.54,45,Maker's Mark,Southern Glazer's,12,450.47
+"LAMBORN FAMILY VINEYARDS CABERNET SAUVIGNON, HOWELL MOUNTAIN",Wine,Red,750,106.00,12,Lamborn,Still Tap,1,
+"QUIXOTE PANZA CABERNET SAUVIGNON, STAGS LEAP DISTRICT, NAPA VALLEY",Wine,Red,750,50.00,12,Quixote,Still Tap,1,
+QUIXOTE PETITE SIRAH,Wine,Red,750,64.52,12,Quixote,Still Tap,1,
+"Giacomo Grimaldi, Barolo, Piedmont, Italy",Wine,Red,750,30.00,12,Giacomo Grimaldi Barolo,Synergy Fine Wines,12,360.00

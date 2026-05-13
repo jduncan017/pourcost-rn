@@ -26,7 +26,7 @@ import {
   getPourChipsForContext,
   type IngredientType,
 } from '@/src/constants/appConstants';
-import { Volume, volumeLabel, volumeToOunces } from '@/src/types/models';
+import { Volume, volumeLabel, volumeToOunces, isFreeFormSize, needsSizeUpdate } from '@/src/types/models';
 
 // ==========================================
 // CONSTANTS
@@ -309,26 +309,43 @@ export default function IngredientInputs({
         <>
           {/* ── STANDARD ── */}
           {!hideProductSize && (
-            <Dropdown
-              value={volumeLabel(productSize)}
-              onValueChange={handleProductSizeChange}
-              options={productSizeOptions}
-              label={ingredientType === 'Prepped' ? 'Batch Yield' : 'Product Size'}
-              required={variant === 'form'}
-              placeholder="Select size"
-              sheetHeaderRight={variant === 'form' ? (closeSheet) => (
-                <Pressable
-                  onPress={() => {
-                    closeSheet();
-                    router.push('/container-sizes' as any);
-                  }}
-                  className="flex-row items-center gap-1 p-1"
+            <>
+              <Dropdown
+                value={isFreeFormSize(productSize) ? '' : volumeLabel(productSize)}
+                onValueChange={handleProductSizeChange}
+                options={productSizeOptions}
+                label={ingredientType === 'Prepped' ? 'Batch Yield' : 'Product Size'}
+                required={variant === 'form'}
+                placeholder={isFreeFormSize(productSize)
+                  ? needsSizeUpdate(productSize) ? 'Update Required' : volumeLabel(productSize)
+                  : 'Select size'}
+                sheetHeaderRight={variant === 'form' ? (closeSheet) => (
+                  <Pressable
+                    onPress={() => {
+                      closeSheet();
+                      router.push('/container-sizes' as any);
+                    }}
+                    className="flex-row items-center gap-1 p-1"
+                  >
+                    <Ionicons name="settings-outline" size={18} color={colors.textSecondary} />
+                    <Text style={{ color: colors.textSecondary, fontSize: 14 }}>Edit</Text>
+                  </Pressable>
+                ) : undefined}
+              />
+              {isFreeFormSize(productSize) && (
+                <View
+                  className="flex-row items-start gap-2 rounded-lg p-3"
+                  style={{ backgroundColor: colors.warning + '20', borderWidth: 1, borderColor: colors.warning + '60' }}
                 >
-                  <Ionicons name="settings-outline" size={18} color={colors.textSecondary} />
-                  <Text style={{ color: colors.textSecondary, fontSize: 14 }}>Edit</Text>
-                </Pressable>
-              ) : undefined}
-            />
+                  <Ionicons name="warning-outline" size={16} color={colors.warning} style={{ marginTop: 1 }} />
+                  <Text className="flex-1 text-xs" style={{ color: colors.warning }}>
+                    {needsSizeUpdate(productSize)
+                      ? 'No bottle size was set. Select a size above before cost calculations will work.'
+                      : `"${volumeLabel(productSize)}" wasn't recognized as a standard size. Select a size above to enable costing.`}
+                  </Text>
+                </View>
+              )}
+            </>
           )}
 
           {!hideProductSize && (

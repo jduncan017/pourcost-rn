@@ -113,6 +113,17 @@ export default function SettingsScreen() {
               onPress={() => setShowLandingPicker(true)}
               showCaret
             />
+            {/* CSV import — hidden until Gemini-driven normalization pipeline ships.
+                Current raw-CSV path produces messy names, duplicates, and missing
+                subcategories. Re-enable by uncommenting once the cleanup pass is live.
+            <SettingsCard
+              title="Import Ingredients"
+              description="Upload a CSV to bulk-add your inventory"
+              iconName="document-attach-outline"
+              onPress={() => router.push('/ingredient-import' as any)}
+              showCaret
+            />
+            */}
           </View>
 
           <SectionDivider />

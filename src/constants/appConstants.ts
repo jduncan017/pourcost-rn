@@ -550,6 +550,7 @@ export const SPIRIT_SUBTYPES = [
   'Vermouth',
   'Amaro',
   'Bitters',
+  'RTD',
   'Other Spirit',
 ] as const;
 
@@ -571,6 +572,7 @@ export const BEER_SUBTYPES = [
   'Amber',
   'Cider',
   'Hard Seltzer',
+  'Hard Kombucha',
   'Other',
 ] as const;
 
@@ -582,9 +584,12 @@ export type BeerSubtype = (typeof BEER_SUBTYPES)[number];
 export const WINE_SUBTYPES = [
   'Red',
   'White',
+  'Orange',
   'Rosé',
   'Sparkling',
   'Fortified',
+  'Sake',
+  'Mead',
 ] as const;
 
 export type WineSubtype = (typeof WINE_SUBTYPES)[number];
@@ -611,6 +616,39 @@ export const SUBTYPES_BY_TYPE: Record<string, readonly string[]> = {
   Beer: BEER_SUBTYPES,
   Wine: WINE_SUBTYPES,
   'Non-Alc': NA_SUBTYPES,
+};
+
+/**
+ * L3 chip filter map: for each Spirit chip subtype that wraps multiple
+ * canonical subcategories, the list of canonical sub values that fall
+ * under it. Drives the third chip row on the inventory screen (Bourbon /
+ * Rye / Scotch / etc. when the user taps Whiskey).
+ *
+ * Stays in sync with the locked canonical taxonomy in
+ * docs/database_decisions.md and the mapCanonicalToType collapse logic in
+ * canonical-products.ts.
+ *
+ * Only listed for L2 chips that wrap more than one canonical sub. Cognac,
+ * Amaro, Other Spirit chips map 1:1 to their canonical sub — no L3.
+ */
+export const SPIRIT_L3_CANONICAL_SUBS: Record<string, readonly string[]> = {
+  Whiskey: ['Bourbon', 'Tennessee Whiskey', 'Rye Whiskey', 'Scotch', 'Irish Whiskey',
+            'Japanese Whisky', 'Canadian Whisky', 'American Whiskey', 'Other Whiskey'],
+  Rum: ['White Rum', 'Gold Rum', 'Aged Rum', 'Dark Rum', 'Spiced Rum',
+        'Overproof Rum', 'Rhum Agricole', 'Cachaça', 'Other Rum'],
+  Tequila: ['Tequila Blanco', 'Tequila Reposado', 'Tequila Anejo',
+            'Tequila Extra Anejo', 'Tequila Cristalino'],
+  Mezcal: ['Mezcal Joven', 'Mezcal Reposado', 'Mezcal Anejo'],
+  Gin: ['Gin: London Dry', 'Gin: Plymouth', 'Gin: Old Tom', 'Gin: Genever',
+        'Gin: Navy Strength', 'Gin: Modern'],
+  Brandy: ['Cognac', 'Armagnac', 'Calvados', 'Pisco', 'Brandy'],
+  Vodka: ['Plain', 'Flavored'],
+  Liqueur: ['Orange', 'Citrus', 'Cherry', 'Berry', 'Stone Fruit', 'Tropical',
+            'Herbal', 'Anise', 'Coffee', 'Cream', 'Almond', 'Hazelnut', 'Cacao',
+            'Floral', 'Mint', 'Vanilla', 'Spiced', 'Aperitif Bitter', 'Other'],
+  Vermouth: ['Dry', 'Sweet', 'Bianco', 'Aperitif Wine'],
+  Bitters: ['Aromatic', 'Orange', 'Chocolate', 'Other'],
+  Absinthe: ['Absinthe', 'Pastis'],
 };
 
 // ==========================================

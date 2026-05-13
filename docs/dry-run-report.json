@@ -1,0 +1,6724 @@
+{
+  "generated": "2026-05-11T01:14:02.088Z",
+  "source": "docs/friend_bar_inventory.csv",
+  "summary": {
+    "total": 522,
+    "exact_match": 14,
+    "no_match": 491,
+    "needs_size_update": 17,
+    "parse_errors": 0,
+    "normalization_warnings": 168,
+    "no_match_by_type": {
+      "Wine": 227,
+      "Spirit": 192,
+      "Non-Alc": 48,
+      "Beer": 41
+    }
+  },
+  "rows": [
+    {
+      "row": 2,
+      "name": "Nicolas Catena Zapata",
+      "type": "Wine",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$42.86",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 3,
+      "name": "Wycliff Brut California Champagne",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$4.90",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Wycliff Brut California Champagne\"",
+        "ALL CAPS brand → normalized to: \"Wycliff Brut California\""
+      ]
+    },
+    {
+      "row": 4,
+      "name": "Rombauer Carneros Chardonnay",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$29.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 5,
+      "name": "Old Forester Classic 86 Proof",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$17.00",
+      "abv": "43%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 6,
+      "name": "Woodford Reserve Kentucky Straight Bourbon Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "1L",
+      "cost": "$37.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Woodford Reserve Kentucky Straight Bourbon Whiskey\""
+      ]
+    },
+    {
+      "row": 7,
+      "name": "Woodford Reserve Kentucky Straight Bourbon Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$37.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Woodford Reserve Kentucky Straight Bourbon Whiskey\""
+      ]
+    },
+    {
+      "row": 8,
+      "name": "E&J Brandy Vs",
+      "type": "Spirit",
+      "sub_type": "Brandy",
+      "bottle_size": "750ml",
+      "cost": "$10.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"E&J Brandy Vs\""
+      ]
+    },
+    {
+      "row": 9,
+      "name": "Jack Daniels Old #7 Tennessee Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$22.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Jack Daniels Old #7 Tennessee Whiskey\"",
+        "ALL CAPS brand → normalized to: \"Jack Daniels\""
+      ]
+    },
+    {
+      "row": 10,
+      "name": "Jack Daniel's Old No. 7 Tennessee Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$22.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 11,
+      "name": "Llord's Creme De Cacao White",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$7.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 12,
+      "name": "Llord's Creme De Cacao Dark",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$7.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 13,
+      "name": "L'Ecole No. 41 Walla Walla Valley Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$34.25",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 14,
+      "name": "Don Julio 1942",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$124.99",
+      "abv": "40%",
+      "match_status": "exact_match",
+      "canonical_id": "9b534a9b-e838-4044-a646-a2fe7103e653",
+      "canonical_name": "Don Julio 1942",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 15,
+      "name": "Captain Morgan Original Spiced Rum",
+      "type": "Spirit",
+      "sub_type": "Rum",
+      "bottle_size": "750ml",
+      "cost": "$19.50",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 16,
+      "name": "Baileys Original Irish Cream",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$31.49",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 17,
+      "name": "Lagavulin 16 Year Old",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$74.06",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 18,
+      "name": "Lagavulin Scotch Single Malt 16yr 750ml",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$76.01",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Lagavulin Scotch Single Malt 16yr 750ml\""
+      ]
+    },
+    {
+      "row": 19,
+      "name": "Oban 14 Year Single Malt",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$89.62",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 20,
+      "name": "Johnnie Walker Black Label",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$40.49",
+      "abv": "40%",
+      "match_status": "exact_match",
+      "canonical_id": "619b5f55-b2c1-47df-afac-b281d7f4d443",
+      "canonical_name": "Johnnie Walker Black Label",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 21,
+      "name": "Tanqueray London Dry Gin",
+      "type": "Spirit",
+      "sub_type": "Gin",
+      "bottle_size": "750ml",
+      "cost": "$25.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Tanqueray London Dry Gin\""
+      ]
+    },
+    {
+      "row": 22,
+      "name": "Pimm's No. 1 Liqueur",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$26.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 23,
+      "name": "Bushmills Original Irish Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$25.18",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 24,
+      "name": "Bulleit Bourbon",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$29.99",
+      "abv": "40%",
+      "match_status": "exact_match",
+      "canonical_id": "552e5517-0e96-4802-a495-e006fe711a11",
+      "canonical_name": "Bulleit Bourbon",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Bulleit Bourbon\""
+      ]
+    },
+    {
+      "row": 25,
+      "name": "Hendrick's Gin",
+      "type": "Spirit",
+      "sub_type": "Gin",
+      "bottle_size": "750ml",
+      "cost": "$27.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 26,
+      "name": "Hennessy Vs Cognac",
+      "type": "Spirit",
+      "sub_type": "Cognac",
+      "bottle_size": "750ml",
+      "cost": "$52.30",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Hennessy Vs Cognac\""
+      ]
+    },
+    {
+      "row": 27,
+      "name": "Hennessy VSOP Privilege",
+      "type": "Spirit",
+      "sub_type": "Cognac",
+      "bottle_size": "750ml",
+      "cost": "$82.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 28,
+      "name": "Hennessy X.O Cognac",
+      "type": "Spirit",
+      "sub_type": "Cognac",
+      "bottle_size": "750ml",
+      "cost": "$199.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 29,
+      "name": "Ketel One",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$23.99",
+      "abv": "40%",
+      "match_status": "exact_match",
+      "canonical_id": "21a00e6c-c748-45d8-ab4a-524073c662e2",
+      "canonical_name": "Ketel One",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Ketel One\""
+      ]
+    },
+    {
+      "row": 30,
+      "name": "Red Bull Sugarfree",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "250ml",
+      "cost": "$1.70",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Red Bull Sugarfree\""
+      ]
+    },
+    {
+      "row": 31,
+      "name": "Red Bull",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "250ml",
+      "cost": "$1.70",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Red Bull\""
+      ]
+    },
+    {
+      "row": 32,
+      "name": "Ruinart Bl De Bl",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$35.49",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 33,
+      "name": "Crown Royal Canadian Whisky",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$32.75",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 34,
+      "name": "Titos Handmade Vodka",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$19.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Titos Handmade Vodka\"",
+        "ALL CAPS brand → normalized to: \"Titos Handmade\""
+      ]
+    },
+    {
+      "row": 35,
+      "name": "Banfi Tuscany Chianti Classico Riserva",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$168.05",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 36,
+      "name": "Conti Sertoli Salis Canua Sforzato di Valtellina",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$49.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 37,
+      "name": "Peter Vella Burgundy",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$16.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Peter Vella Burgundy\"",
+        "ALL CAPS brand → normalized to: \"Peter Vella Burgundy\""
+      ]
+    },
+    {
+      "row": 38,
+      "name": "Peter Vella Chablis",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$16.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Peter Vella Chablis\"",
+        "ALL CAPS brand → normalized to: \"Peter Vella Chablis\""
+      ]
+    },
+    {
+      "row": 39,
+      "name": "Michter's US*1 Small Batch Kentucky Straight Bourbon Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$33.50",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 40,
+      "name": "Michter's 10 Year Single Barrel Rye Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$155.56",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 41,
+      "name": "Michter's 10 Year Single Barrel Kentucky Straight Bourbon",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$155.56",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 42,
+      "name": "Taylor Marsala",
+      "type": "Wine",
+      "sub_type": "Fortified",
+      "bottle_size": "750ml",
+      "cost": "$5.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Taylor Marsala\"",
+        "ALL CAPS brand → normalized to: \"Taylor Marsala\""
+      ]
+    },
+    {
+      "row": 43,
+      "name": "Taylor Port",
+      "type": "Wine",
+      "sub_type": "Fortified",
+      "bottle_size": "750ml",
+      "cost": "$5.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Taylor Port\"",
+        "ALL CAPS brand → normalized to: \"Taylor Port\""
+      ]
+    },
+    {
+      "row": 44,
+      "name": "Guinness Draught 14.9oz Can",
+      "type": "Beer",
+      "sub_type": "Stout",
+      "bottle_size": "441ml",
+      "cost": "$37.15",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Guinness Draught 14.9oz Can\""
+      ]
+    },
+    {
+      "row": 45,
+      "name": "Guinness Draught 11.2oz Botle",
+      "type": "Beer",
+      "sub_type": "Stout",
+      "bottle_size": "331ml",
+      "cost": "$32.20",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Guinness Draught 11.2oz Botle\""
+      ]
+    },
+    {
+      "row": 46,
+      "name": "Clos Dady Sauternes 375ml",
+      "type": "Wine",
+      "sub_type": "Other",
+      "bottle_size": "375ml",
+      "cost": "$22.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 47,
+      "name": "Remy Martin XO",
+      "type": "Spirit",
+      "sub_type": "Cognac",
+      "bottle_size": "750ml",
+      "cost": "$153.70",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 48,
+      "name": "Cointreau Orange Liquer Triple Sec",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$27.50",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Cointreau Orange Liquer Triple Sec\""
+      ]
+    },
+    {
+      "row": 49,
+      "name": "Louis XIII by Remy Martin",
+      "type": "Spirit",
+      "sub_type": "Cognac",
+      "bottle_size": "750ml",
+      "cost": "$9074.07",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 50,
+      "name": "Nolet's Silver Gin",
+      "type": "Spirit",
+      "sub_type": "Gin",
+      "bottle_size": "750ml",
+      "cost": "$31.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 51,
+      "name": "Ron Zacapa 23",
+      "type": "Spirit",
+      "sub_type": "Rum",
+      "bottle_size": "750ml",
+      "cost": "$46.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 52,
+      "name": "Jose Cuervo Tradicional Blanco",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$19.50",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 53,
+      "name": "Stranahan's Original Single Malt Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$41.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 54,
+      "name": "Bulleit 95 Rye",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$29.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Bulleit 95 Rye\""
+      ]
+    },
+    {
+      "row": 55,
+      "name": "Don Julio 70 Cristalino",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$51.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Don Julio 70 Cristalino\""
+      ]
+    },
+    {
+      "row": 56,
+      "name": "New Amsterdam Original Vodka",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$9.50",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 57,
+      "name": "Avery White Rascal Wheat Ale",
+      "type": "Beer",
+      "sub_type": "Wheat",
+      "bottle_size": "Half Barrel",
+      "cost": "$131.00",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Avery White Rascal Wheat Ale\""
+      ]
+    },
+    {
+      "row": 58,
+      "name": "Guinness Draught 20L Keg",
+      "type": "Beer",
+      "sub_type": "Stout",
+      "bottle_size": "20L",
+      "cost": "$77.55",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 59,
+      "name": "Ska Brewing Modus Hoperandi",
+      "type": "Beer",
+      "sub_type": "IPA",
+      "bottle_size": "355ml",
+      "cost": "$1.42",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 60,
+      "name": "Casamigos Blanco",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$47.50",
+      "abv": "40%",
+      "match_status": "exact_match",
+      "canonical_id": "2e49b43d-1f52-4e76-b76b-c42e36893a90",
+      "canonical_name": "Casamigos Blanco",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Casamigos Blanco\""
+      ]
+    },
+    {
+      "row": 61,
+      "name": "Casamigos Reposado",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$53.00",
+      "abv": "40%",
+      "match_status": "exact_match",
+      "canonical_id": "0578eca5-dc0f-4795-bea2-99ef3d6ff6d5",
+      "canonical_name": "Casamigos Reposado",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Casamigos Reposado\""
+      ]
+    },
+    {
+      "row": 62,
+      "name": "Pieropan Soave Classico",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$78.02",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 63,
+      "name": "Odell 90 Shilling Ale",
+      "type": "Beer",
+      "sub_type": "Ale",
+      "bottle_size": "355ml",
+      "cost": "$1.32",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Odell 90 Shilling Ale\""
+      ]
+    },
+    {
+      "row": 64,
+      "name": "Odell Ipa",
+      "type": "Beer",
+      "sub_type": "IPA",
+      "bottle_size": "355ml",
+      "cost": "$1.32",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Odell Ipa\""
+      ]
+    },
+    {
+      "row": 65,
+      "name": "Boulevard Irish Red Ale",
+      "type": "Beer",
+      "sub_type": "Ale",
+      "bottle_size": "355ml",
+      "cost": "$32.95",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Boulevard Irish Red Ale\""
+      ]
+    },
+    {
+      "row": 66,
+      "name": "Left Hand Milk Stout",
+      "type": "Beer",
+      "sub_type": "Stout",
+      "bottle_size": "355ml",
+      "cost": "$1.50",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 67,
+      "name": "Rombauer Sauvignon Blanc",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$16.25",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 68,
+      "name": "Orin Swift Cellars Mercury Head Cabernet Sauvignon Napa Valley",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$129.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 69,
+      "name": "Orin Swift Papillon Red Napa Valley",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$60.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 70,
+      "name": "Stem Ciders Real Dry",
+      "type": "Beer",
+      "sub_type": "Other",
+      "bottle_size": "355ml",
+      "cost": "$1.87",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 71,
+      "name": "Woodford Reserve Kentucky Straight Rye Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$38.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Woodford Reserve Kentucky Straight Rye Whiskey\""
+      ]
+    },
+    {
+      "row": 72,
+      "name": "Left Hand Milk Stout NITRO",
+      "type": "Beer",
+      "sub_type": "Stout",
+      "bottle_size": "355ml",
+      "cost": "$1.44",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 73,
+      "name": "Disaronno Originale",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$34.00",
+      "abv": "40%",
+      "match_status": "exact_match",
+      "canonical_id": "59e64627-db91-4c4a-913b-c57ed822ab23",
+      "canonical_name": "Disaronno Originale",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 74,
+      "name": "Volcan De Mi Tierra Blanco",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$37.49",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 75,
+      "name": "Whitehaven Marlborough Sauvignon Blanc",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$13.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 76,
+      "name": "Proverb Chardonnay California",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$5.75",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Proverb Chardonnay California\"",
+        "ALL CAPS brand → normalized to: \"Proverb\""
+      ]
+    },
+    {
+      "row": 77,
+      "name": "Proverb Pinot Grigio California",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$5.75",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Proverb Pinot Grigio California\"",
+        "ALL CAPS brand → normalized to: \"Proverb\""
+      ]
+    },
+    {
+      "row": 78,
+      "name": "Proverb Cabernet Sauvignon California",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$5.75",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Proverb Cabernet Sauvignon California\"",
+        "ALL CAPS brand → normalized to: \"Proverb\""
+      ]
+    },
+    {
+      "row": 79,
+      "name": "Proverb Pinot Noir California",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$5.75",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Proverb Pinot Noir California\"",
+        "ALL CAPS brand → normalized to: \"Proverb\""
+      ]
+    },
+    {
+      "row": 80,
+      "name": "Proverb Sauvignon Blanc",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$5.75",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Proverb Sauvignon Blanc\"",
+        "ALL CAPS brand → normalized to: \"Proverb\""
+      ]
+    },
+    {
+      "row": 81,
+      "name": "Laws Brbn 4 Grain",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$39.93",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Laws Brbn 4 Grain\"",
+        "ALL CAPS brand → normalized to: \"Laws Brbn\""
+      ]
+    },
+    {
+      "row": 82,
+      "name": "Laws Whsky Bonded Wheat",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$64.95",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Laws Whsky Bonded Wheat\"",
+        "ALL CAPS brand → normalized to: \"Laws Whsky Bonded\""
+      ]
+    },
+    {
+      "row": 83,
+      "name": "Stem Ciders Hibiscus Session Apple Cider",
+      "type": "Beer",
+      "sub_type": "Other",
+      "bottle_size": "355ml",
+      "cost": "$1.87",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Stem Ciders Hibiscus Session Apple Cider\""
+      ]
+    },
+    {
+      "row": 84,
+      "name": "Proverb Rose California",
+      "type": "Wine",
+      "sub_type": "Rosé",
+      "bottle_size": "750ml",
+      "cost": "$69.05",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Proverb Rose California\"",
+        "ALL CAPS brand → normalized to: \"Proverb\""
+      ]
+    },
+    {
+      "row": 85,
+      "name": "La Marca Prosecco Doc Collezione",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$132.05",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"La Marca Prosecco Doc Collezione\""
+      ]
+    },
+    {
+      "row": 86,
+      "name": "Boen Pinot Noir Tri County",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$12.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 87,
+      "name": "Mr. Black Coffee Liquer",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$20.49",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Mr. Black Coffee Liquer\""
+      ]
+    },
+    {
+      "row": 88,
+      "name": "Bruichladdich Port Charlotte PC10",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$45.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 89,
+      "name": "Orin Swift 8 Years In The Desert",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$28.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 90,
+      "name": "Odell Sippin Pretty",
+      "type": "Beer",
+      "sub_type": "Sour",
+      "bottle_size": "355ml",
+      "cost": "$1.50",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Odell Sippin Pretty\""
+      ]
+    },
+    {
+      "row": 91,
+      "name": "Horse Soldier Straight Bourbon",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$31.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 92,
+      "name": "Poggio al Tesoro Il Seggio Bolgheri",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$28.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 93,
+      "name": "Ska Brewing The Hazy Ipa",
+      "type": "Beer",
+      "sub_type": "IPA",
+      "bottle_size": "355ml",
+      "cost": "$1.42",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Ska Brewing The Hazy Ipa\""
+      ]
+    },
+    {
+      "row": 94,
+      "name": "Banfi Tuscany Fonte alla Selva Gran Selezione Chianti Classico DOCG",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$25.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 95,
+      "name": "High Noon Hard Seltzer Variety Pack",
+      "type": "Beer",
+      "sub_type": "Other",
+      "bottle_size": "355ml",
+      "cost": "$2.20",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"High Noon Hard Seltzer Variety Pack\""
+      ]
+    },
+    {
+      "row": 96,
+      "name": "Don Julio Blanco",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$41.00",
+      "abv": "40%",
+      "match_status": "exact_match",
+      "canonical_id": "cefdc9b0-1916-4563-a248-18049a983a42",
+      "canonical_name": "Don Julio Blanco",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 97,
+      "name": "Don Julio Reposado",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$48.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 98,
+      "name": "Don Julio Anejo",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$55.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 99,
+      "name": "Don Fulano Blanco",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$41.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 100,
+      "name": "Don Fulano Reposado",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$48.14",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 101,
+      "name": "Don Fulano Fuerte Blanco",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$49.50",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 102,
+      "name": "Benriach The Original Ten",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$43.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 103,
+      "name": "Red Bull Red Edition",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "250ml",
+      "cost": "$1.70",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Red Bull Red Edition\""
+      ]
+    },
+    {
+      "row": 104,
+      "name": "George Dickel 8 Year Bourbon",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$23.04",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 105,
+      "name": "The Botanist Islay Dry Gin",
+      "type": "Spirit",
+      "sub_type": "Gin",
+      "bottle_size": "750ml",
+      "cost": "$36.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 106,
+      "name": "Odell Lagerado",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$0.99",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Odell Lagerado\""
+      ]
+    },
+    {
+      "row": 107,
+      "name": "Telmont Reserve Brut",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$41.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 108,
+      "name": "Volcan De Mi Tierra X.A Tequila",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$130.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 109,
+      "name": "Lyre's Italian Spritz Non-Alcoholic Spirit",
+      "type": "Non-Alc",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$23.00",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 110,
+      "name": "Dom Perignon Champagne Brut 2013",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$1355.96",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 111,
+      "name": "Belvedere Organic Vodka",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$32.49",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 112,
+      "name": "Chambord",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$23.70",
+      "abv": "40%",
+      "match_status": "exact_match",
+      "canonical_id": "9a51f5a1-c6a0-49fb-9654-ed8bb5d51f51",
+      "canonical_name": "Chambord",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 113,
+      "name": "Numanthia 2017",
+      "type": "Wine",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$281.96",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 114,
+      "name": "Veuve Clicquot Brut Yellow Label",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$55.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 115,
+      "name": "Les Trois Croix Bordeaux",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$161.96",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Les Trois Croix Bordeaux\"",
+        "ALL CAPS brand → normalized to: \"Les Trois Croix\""
+      ]
+    },
+    {
+      "row": 116,
+      "name": "Hendrick's Grand Cabaret Gin",
+      "type": "Spirit",
+      "sub_type": "Gin",
+      "bottle_size": "750ml",
+      "cost": "$38.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 117,
+      "name": "Kosta Browne Gap's Crown Vineyard Pinot Noir 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$654.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 118,
+      "name": "Veuve Clicquot Brut Rose",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$65.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 119,
+      "name": "Moet & Chandon Brut Imperial",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$180.02",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 120,
+      "name": "Moet & Chandon Brut Imperial",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$30.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 121,
+      "name": "Silver Oak Napa Valley Cabernet Sauvignon 2019",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$1440.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 122,
+      "name": "Duckhorn Vineyards Merlot Three Palms Vineyard Napa Valley",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$96.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 123,
+      "name": "Jayson By Pahlmeyer Cabernet Sauvignon 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$390.02",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 124,
+      "name": "Glenmorangie 18 Year Old Extremely Rare Single Malt Scotch Whisky",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$118.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 125,
+      "name": "Glenmorangie Distillery Triple Cask Reserve Highland Single Malt Scotch Whisky",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$26.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 126,
+      "name": "Banhez Ensamble Espadin & Barril Joven Mezcal Artesanal",
+      "type": "Spirit",
+      "sub_type": "Mezcal",
+      "bottle_size": "750ml",
+      "cost": "$32.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 127,
+      "name": "Combier L'Original",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$37.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 128,
+      "name": "Duckhorn Sauvignon Blanc 2023",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$21.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Duckhorn Sauvignon Blanc 2023\"",
+        "ALL CAPS brand → normalized to: \"Duckhorn\""
+      ]
+    },
+    {
+      "row": 129,
+      "name": "Cuervo Teq Tradicional Bl On Prem",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$14.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Cuervo Teq Tradicional Bl On Prem\""
+      ]
+    },
+    {
+      "row": 130,
+      "name": "Glenmorangie 12 Year Old The Original Highland Single Malt Scotch Whisky",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$42.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 131,
+      "name": "Condesa Gin Clasica Gin",
+      "type": "Spirit",
+      "sub_type": "Gin",
+      "bottle_size": "750ml",
+      "cost": "$14.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 132,
+      "name": "Sir Davis Sherry Cask Finished Rye Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$306.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 133,
+      "name": "Belvedere Vodka 10 Organic Vodka",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$35.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 134,
+      "name": "Silver Oak Alexander Valley Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$60.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 135,
+      "name": "Cloudy Bay Te Wahi Pinot Noir",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$66.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 136,
+      "name": "Volcan De Mi Tierra Reposado",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$43.49",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 137,
+      "name": "Hennessy XO La Carafe (XO Night)",
+      "type": "Spirit",
+      "sub_type": "Cognac",
+      "bottle_size": "750ml",
+      "cost": "$216.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 138,
+      "name": "Au Sommet Atlas Peak Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$245.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 139,
+      "name": "Cloudy Bay Sauvignon Blanc",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$22.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 140,
+      "name": "LALO Tequila Blanco Tequila 100% Agave",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$50.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS brand → normalized to: \"Lalo\""
+      ]
+    },
+    {
+      "row": 141,
+      "name": "Baileys Chocolate Irish Creme",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$31.49",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 142,
+      "name": "Cloudy Bay Pinot Noir",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$31.24",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 143,
+      "name": "Lucky One Original Vodka Lemonade",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$1.85",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 144,
+      "name": "Chateau d'Esclans Cotes de Provence Whispering Angel Rose",
+      "type": "Wine",
+      "sub_type": "Rosé",
+      "bottle_size": "750ml",
+      "cost": "$15.24",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 145,
+      "name": "Joseph Phelps Napa Valley Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$37.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 146,
+      "name": "Numanthia",
+      "type": "Wine",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$7.83",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 147,
+      "name": "Orin Swift Cellars Merlot You Had Me At Hell No No Advice From John California",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$24.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 148,
+      "name": "Chateau d'Esclans Cotes de Provence Garrus Rose",
+      "type": "Wine",
+      "sub_type": "Rosé",
+      "bottle_size": "750ml",
+      "cost": "$45.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 149,
+      "name": "French Bloom Le Blanc French Bubbly",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$27.33",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 150,
+      "name": "Belvedere Vodka Dirty Brew Organic Coffee Vodka",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$24.49",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 151,
+      "name": "French Bloom Le Rose French Bubbly",
+      "type": "Wine",
+      "sub_type": "Rosé",
+      "bottle_size": "750ml",
+      "cost": "$33.75",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 152,
+      "name": "Woodinville Straight Bourbon Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$25.92",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 153,
+      "name": "Woodinville Straight Rye Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$25.92",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 154,
+      "name": "Minuty Prestige Rose",
+      "type": "Wine",
+      "sub_type": "Rosé",
+      "bottle_size": "750ml",
+      "cost": "$16.75",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 155,
+      "name": "Lazy K Bar Bourbon",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$74.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 156,
+      "name": "Terrazas de los Andes Reserva Malbec",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$17.42",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 157,
+      "name": "Chateau Minuty Cotes de Provence Rose et Or",
+      "type": "Wine",
+      "sub_type": "Rosé",
+      "bottle_size": "750ml",
+      "cost": "$70.08",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 158,
+      "name": "Cade Estate Howell Mountain Cabernet Sauvignon 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$774.05",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 159,
+      "name": "Nautilus Sauvignon Blanc",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$150.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 160,
+      "name": "Fee Brothers Fee Foam Cocktail Foamer Bitters",
+      "type": "Spirit",
+      "sub_type": "Bitters",
+      "bottle_size": "750ml",
+      "cost": "$6.62",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 161,
+      "name": "Fee Brothers Black Walnut Bitters",
+      "type": "Spirit",
+      "sub_type": "Bitters",
+      "bottle_size": "750ml",
+      "cost": "$7.25",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 162,
+      "name": "Monin Pumpkin Spice Syrup",
+      "type": "Non-Alc",
+      "sub_type": "Syrup",
+      "bottle_size": "1L",
+      "cost": "$13.74",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 163,
+      "name": "Pride Mountain Vineyards Merlot 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$342.77",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 164,
+      "name": "Vietti Moscato d'Asti 2024",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$171.41",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 165,
+      "name": "Fortaleza Tequila Blanco",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$46.67",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 166,
+      "name": "Merry Edwards Sauvignon Blanc Rrv 2023",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$37.14",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Merry Edwards Sauvignon Blanc Rrv 2023\"",
+        "ALL CAPS brand → normalized to: \"Merry Edwards\""
+      ]
+    },
+    {
+      "row": 167,
+      "name": "Merry Edwards Pinot Noir Sonoma Coast 2020",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$599.93",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 168,
+      "name": "Fortaleza Tequila Blanco Still Strength",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$54.17",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 169,
+      "name": "Domaine Fouassier Sancerre La Garenne",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$39.28",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 170,
+      "name": "Plumpjack Estate Oakville Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$142.85",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 171,
+      "name": "1/2 Bbl Superpower Ipa",
+      "type": "Beer",
+      "sub_type": "IPA",
+      "bottle_size": "Half Barrel",
+      "cost": "$230.00",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"1/2 Bbl Superpower Ipa\"",
+        "ALL CAPS brand → normalized to: \"Superpower\""
+      ]
+    },
+    {
+      "row": 172,
+      "name": "Coors Banquet",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$1.23",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Coors Banquet\""
+      ]
+    },
+    {
+      "row": 173,
+      "name": "Coors Light",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$1.30",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Coors Light\""
+      ]
+    },
+    {
+      "row": 174,
+      "name": "Coors Light 1/2 Bbl",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "Half Barrel",
+      "cost": "$121.00",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Coors Light 1/2 Bbl\""
+      ]
+    },
+    {
+      "row": 175,
+      "name": "Blue Moon Belgian White",
+      "type": "Beer",
+      "sub_type": "Belgian",
+      "bottle_size": "355ml",
+      "cost": "$1.47",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Blue Moon Belgian White\"",
+        "ALL CAPS brand → normalized to: \"Blue Moon\""
+      ]
+    },
+    {
+      "row": 176,
+      "name": "Molson Canadian Light",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$1.40",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Molson Canadian Light\"",
+        "ALL CAPS brand → normalized to: \"Molson\""
+      ]
+    },
+    {
+      "row": 177,
+      "name": "Oskar Blues Dale'S Pale Ale",
+      "type": "Beer",
+      "sub_type": "Pale Ale",
+      "bottle_size": "355ml",
+      "cost": "$1.54",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Oskar Blues Dale'S Pale Ale\""
+      ]
+    },
+    {
+      "row": 178,
+      "name": "Corona Extra",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$1.44",
+      "abv": "5%",
+      "match_status": "exact_match",
+      "canonical_id": "cf21b7e0-e9a6-42b0-af43-ef9676aae95c",
+      "canonical_name": "Corona Extra",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Corona Extra\""
+      ]
+    },
+    {
+      "row": 179,
+      "name": "Modelo Especial",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$1.44",
+      "abv": "5%",
+      "match_status": "exact_match",
+      "canonical_id": "9cc8e608-8ba8-4028-bd02-99e0788cb8a7",
+      "canonical_name": "Modelo Especial",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Modelo Especial\""
+      ]
+    },
+    {
+      "row": 180,
+      "name": "Miller Lite",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$1.23",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Miller Lite\""
+      ]
+    },
+    {
+      "row": 181,
+      "name": "Heineken",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$34.65",
+      "abv": "5%",
+      "match_status": "exact_match",
+      "canonical_id": "c7d7e3db-b68a-43bf-b0a9-76a6471cec23",
+      "canonical_name": "Heineken",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Heineken\""
+      ]
+    },
+    {
+      "row": 182,
+      "name": "Heineken 0.0",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$34.65",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Heineken 0.0\""
+      ]
+    },
+    {
+      "row": 183,
+      "name": "Prost Pils",
+      "type": "Beer",
+      "sub_type": "Pilsner",
+      "bottle_size": "355ml",
+      "cost": "$195.00",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Prost Pils\"",
+        "ALL CAPS brand → normalized to: \"Prost Pils\""
+      ]
+    },
+    {
+      "row": 184,
+      "name": "Samuel Adams Boston Lager",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$1.54",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Samuel Adams Boston Lager\""
+      ]
+    },
+    {
+      "row": 185,
+      "name": "Sierra Nevada Hazy Ipa",
+      "type": "Beer",
+      "sub_type": "IPA",
+      "bottle_size": "355ml",
+      "cost": "$1.54",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Sierra Nevada Hazy Ipa\""
+      ]
+    },
+    {
+      "row": 186,
+      "name": "New Belgium Fat Tire Amber Ale",
+      "type": "Beer",
+      "sub_type": "Ale",
+      "bottle_size": "355ml",
+      "cost": "$1.47",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"New Belgium Fat Tire Amber Ale\""
+      ]
+    },
+    {
+      "row": 187,
+      "name": "Voodoo Ranger Ipa",
+      "type": "Beer",
+      "sub_type": "IPA",
+      "bottle_size": "355ml",
+      "cost": "$1.47",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Voodoo Ranger Ipa\"",
+        "ALL CAPS brand → normalized to: \"Voodoo Ranger\""
+      ]
+    },
+    {
+      "row": 188,
+      "name": "Fevertree Club Soda 200ml 24pk",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "200ml",
+      "cost": "$0.96",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fevertree Club Soda 200ml 24pk\""
+      ]
+    },
+    {
+      "row": 189,
+      "name": "Fever Tree Distiller'S Cola 200ml Bottle",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "200ml",
+      "cost": "$23.00",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fever Tree Distiller'S Cola 200ml Bottle\""
+      ]
+    },
+    {
+      "row": 190,
+      "name": "Fevertree Ginger Ale 200ml 24pk",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "200ml",
+      "cost": "$0.96",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fevertree Ginger Ale 200ml 24pk\""
+      ]
+    },
+    {
+      "row": 191,
+      "name": "Fevertree Ginger Beer 200ml 24pk",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "200ml",
+      "cost": "$0.96",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fevertree Ginger Beer 200ml 24pk\""
+      ]
+    },
+    {
+      "row": 192,
+      "name": "Fevertree Premium Tonic Water 200ml 24pk",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "200ml",
+      "cost": "$0.96",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fevertree Premium Tonic Water 200ml 24pk\""
+      ]
+    },
+    {
+      "row": 193,
+      "name": "Fever Tree Sparkling Cucumber 200ml Bottle",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "200ml",
+      "cost": "$23.00",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fever Tree Sparkling Cucumber 200ml Bottle\""
+      ]
+    },
+    {
+      "row": 194,
+      "name": "Fever Tree Club Soda 150ml Can",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "150ml",
+      "cost": "$17.00",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fever Tree Club Soda 150ml Can\""
+      ]
+    },
+    {
+      "row": 195,
+      "name": "Fever Tree Ginger Ale 150ml Can",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "150ml",
+      "cost": "$17.00",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fever Tree Ginger Ale 150ml Can\""
+      ]
+    },
+    {
+      "row": 196,
+      "name": "Fever Tree Ginger Beer 150ml Can",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "150ml",
+      "cost": "$17.00",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fever Tree Ginger Beer 150ml Can\""
+      ]
+    },
+    {
+      "row": 197,
+      "name": "Fever Tree Tonic Water 150ml Can",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "150ml",
+      "cost": "$17.00",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fever Tree Tonic Water 150ml Can\""
+      ]
+    },
+    {
+      "row": 198,
+      "name": "Fever Tree Pink Grapefruit 150ml Can",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "150ml",
+      "cost": "$17.00",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fever Tree Pink Grapefruit 150ml Can\""
+      ]
+    },
+    {
+      "row": 199,
+      "name": "Provocateur Pinot Noir 2023",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$19.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Provocateur Pinot Noir 2023\"",
+        "ALL CAPS brand → normalized to: \"Provocateur\""
+      ]
+    },
+    {
+      "row": 200,
+      "name": "Vispidae Pinot Noir 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$32.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Vispidae Pinot Noir 2022\"",
+        "ALL CAPS brand → normalized to: \"Vispidae\""
+      ]
+    },
+    {
+      "row": 201,
+      "name": "Belle Pente Pinot Noir Estate Reserve",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$45.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 202,
+      "name": "Donkey & Goat, York Vineyard, Cabernet Sauvignon, 2020",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$49.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 203,
+      "name": "Donkey & Goat, If Then, Red Blend, 2023",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$19.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 204,
+      "name": "Donkey & Goat, Twinkle, 2024",
+      "type": "Wine",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$23.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 205,
+      "name": "Donkey & Goat, Ramato, Orange Wine, 2024",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$22.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 206,
+      "name": "Donkey & Goat, Siletto Vineyard, Cabernet Pfeffer, 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$25.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 207,
+      "name": "Gramercy Cellars, Cabernet Sauvignon, Columbia Valley, 2018",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$479.88",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 208,
+      "name": "J.K. Carriere Antoinette Pinot Noir",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$49.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 209,
+      "name": "Realm \"The Bard\" Cabernet Sauvignon 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$129.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 210,
+      "name": "White Dog",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$36.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 211,
+      "name": "Budweiser",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$1.15",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Budweiser\""
+      ]
+    },
+    {
+      "row": 212,
+      "name": "Stella Artois",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$1.38",
+      "abv": "5%",
+      "match_status": "exact_match",
+      "canonical_id": "fa1f93b5-435b-43ba-a6a2-73a9f9372c59",
+      "canonical_name": "Stella Artois",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Stella Artois\""
+      ]
+    },
+    {
+      "row": 213,
+      "name": "Breckenridge Brewery Avalanche Amber Ale",
+      "type": "Beer",
+      "sub_type": "Ale",
+      "bottle_size": "Half Barrel",
+      "cost": "$160.00",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 214,
+      "name": "Breckenrdige Palisade Peach",
+      "type": "Beer",
+      "sub_type": "Other",
+      "bottle_size": "Half Barrel",
+      "cost": "$155.00",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 215,
+      "name": "Breckenridge Spring Forward Grapefruit IPA",
+      "type": "Beer",
+      "sub_type": "IPA",
+      "bottle_size": "Half Barrel",
+      "cost": "$160.00",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 216,
+      "name": "Breckenridge Brewery Summer Cervza Salt And Lime Lager",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "Half Barrel",
+      "cost": "$155.00",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Breckenridge Brewery Summer Cervza Salt And Lime Lager\""
+      ]
+    },
+    {
+      "row": 217,
+      "name": "Station 26 Oktoberfest",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "Half Barrel",
+      "cost": "$155.00",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 218,
+      "name": "Bud Light",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$1.15",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Bud Light\""
+      ]
+    },
+    {
+      "row": 219,
+      "name": "Golden Road Broncos Blonde",
+      "type": "Beer",
+      "sub_type": "Pale Ale",
+      "bottle_size": "Half Barrel",
+      "cost": "$115.00",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 220,
+      "name": "Sazerac Straight Rye Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$22.96",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 221,
+      "name": "Blanton'S Bourbon",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$59.26",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Blanton'S Bourbon\"",
+        "ALL CAPS brand → normalized to: \"Blanton'S\""
+      ]
+    },
+    {
+      "row": 222,
+      "name": "Eagle Rare 10 Year Old",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$31.85",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Eagle Rare 10 Year Old\""
+      ]
+    },
+    {
+      "row": 223,
+      "name": "Buffalo Trace Bourbon",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$22.21",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Buffalo Trace Bourbon\""
+      ]
+    },
+    {
+      "row": 224,
+      "name": "Peychaud's Aromatic Cocktail Bitters",
+      "type": "Spirit",
+      "sub_type": "Bitters",
+      "bottle_size": "750ml",
+      "cost": "$4.66",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 225,
+      "name": "E.H. Taylor Jr. Small Batch Bourbon",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$41.48",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"E.H. Taylor Jr. Small Batch Bourbon\"",
+        "ALL CAPS brand → normalized to: \"E.H Taylor Jr\""
+      ]
+    },
+    {
+      "row": 226,
+      "name": "Wheatley Vodka",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$12.50",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Wheatley Vodka\"",
+        "ALL CAPS brand → normalized to: \"Wheatley\""
+      ]
+    },
+    {
+      "row": 227,
+      "name": "W.L. Weller Special Reserve",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$20.74",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"W.L. Weller Special Reserve\"",
+        "ALL CAPS brand → normalized to: \"W.L Weller Special\""
+      ]
+    },
+    {
+      "row": 228,
+      "name": "Romana Sambuca Liqueur Classico",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$27.66",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 229,
+      "name": "Fireball",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$15.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fireball\"",
+        "ALL CAPS brand → normalized to: \"Fireball\""
+      ]
+    },
+    {
+      "row": 230,
+      "name": "Michelob Ultra",
+      "type": "Beer",
+      "sub_type": "Lager",
+      "bottle_size": "355ml",
+      "cost": "$1.28",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Michelob Ultra\"",
+        "ALL CAPS brand → normalized to: \"Michelob Ultra\""
+      ]
+    },
+    {
+      "row": 231,
+      "name": "Columbo Marsala Sweet",
+      "type": "Wine",
+      "sub_type": "Fortified",
+      "bottle_size": "750ml",
+      "cost": "$11.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Columbo Marsala Sweet\"",
+        "ALL CAPS brand → normalized to: \"Columbo Marsala Sweet\""
+      ]
+    },
+    {
+      "row": 232,
+      "name": "Best Day Brewing Non-Alcoholic West Coast Ipa",
+      "type": "Non-Alc",
+      "sub_type": "Other",
+      "bottle_size": "355ml",
+      "cost": "$36.00",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Best Day Brewing Non-Alcoholic West Coast Ipa\""
+      ]
+    },
+    {
+      "row": 233,
+      "name": "Ska Modus 4/6/ 12oz Cans",
+      "type": "Beer",
+      "sub_type": "IPA",
+      "bottle_size": "355ml",
+      "cost": "$34.50",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Ska Modus 4/6/ 12oz Cans\""
+      ]
+    },
+    {
+      "row": 234,
+      "name": "Tequila, Arette Clasica Blanco",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$19.49",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Tequila, Arette Clasica Blanco\""
+      ]
+    },
+    {
+      "row": 235,
+      "name": "Tequila, Arette Reposado Jalisco",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$22.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Tequila, Arette Reposado Jalisco\""
+      ]
+    },
+    {
+      "row": 236,
+      "name": "Sco Automatic Jones Smoked Old Fashioned Ritz Carlton",
+      "type": "Spirit",
+      "sub_type": "Other Spirit",
+      "bottle_size": "750ml",
+      "cost": "$10.75",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Sco Automatic Jones Smoked Old Fashioned Ritz Carlton\"",
+        "ALL CAPS brand → normalized to: \"Sco Automatic Jones\""
+      ]
+    },
+    {
+      "row": 237,
+      "name": "Sco Automatic Jones Earl Greey Negroni Ritz Carlton",
+      "type": "Spirit",
+      "sub_type": "Other Spirit",
+      "bottle_size": "750ml",
+      "cost": "$10.75",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Sco Automatic Jones Earl Greey Negroni Ritz Carlton\"",
+        "ALL CAPS brand → normalized to: \"Sco Automatic Jones\""
+      ]
+    },
+    {
+      "row": 238,
+      "name": "Sco Automatic Jones Espresso Martini Ritz Carlton",
+      "type": "Spirit",
+      "sub_type": "Other Spirit",
+      "bottle_size": "750ml",
+      "cost": "$10.75",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Sco Automatic Jones Espresso Martini Ritz Carlton\"",
+        "ALL CAPS brand → normalized to: \"Sco Automatic Jones\""
+      ]
+    },
+    {
+      "row": 239,
+      "name": "L'Ecole No.41 Walla Walla Valley Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$402.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"L'Ecole No.41 Walla Walla Valley Cabernet Sauvignon\""
+      ]
+    },
+    {
+      "row": 240,
+      "name": "The Macallan 15 Year Old Double Cask Single Malt Scotch Whisky",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$133.23",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 241,
+      "name": "Giffard Banane du Bresil Liqueur",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$29.50",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 242,
+      "name": "Carpano Antica Formula Vermouth",
+      "type": "Wine",
+      "sub_type": "Fortified",
+      "bottle_size": "750ml",
+      "cost": "$32.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 243,
+      "name": "Giesen Zero Giesen 0% Sauvignon Blanc - Non Alc",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$10.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 244,
+      "name": "Four Roses Small Batch Kentucky Straight Bourbon Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$31.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 245,
+      "name": "Breckenridge Distillery Bourbon Whiskey 86 Proof",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$29.99",
+      "abv": "43%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 246,
+      "name": "Breckenridge Distillery Vodka",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$10.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 247,
+      "name": "Four Roses Single Barrel Kentucky Straight Bourbon Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$36.80",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 248,
+      "name": "Opus One 2018 Red Blend",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$1890.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 249,
+      "name": "Resonance 2018 Yamhill Carlton Pinot Noir",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$50.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 250,
+      "name": "Resonance 2018 Yamhill Carlton Pinot Noir",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$48.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 251,
+      "name": "Rocky Mountain Peaches And Cream Soda",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "Update Required",
+      "cost": "$31.07",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Rocky Mountain Peaches And Cream Soda\"",
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 252,
+      "name": "Rocky Mountain Colorado Cola",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "Update Required",
+      "cost": "$31.07",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Rocky Mountain Colorado Cola\"",
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 253,
+      "name": "Rocky Mountain Root Beer",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "Update Required",
+      "cost": "$31.07",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Rocky Mountain Root Beer\"",
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 254,
+      "name": "Rocky Mountain Orange Cream Soda",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "Update Required",
+      "cost": "$31.07",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Rocky Mountain Orange Cream Soda\"",
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 255,
+      "name": "Empress 1908 Gin",
+      "type": "Spirit",
+      "sub_type": "Gin",
+      "bottle_size": "750ml",
+      "cost": "$44.05",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 256,
+      "name": "Giesen Zero Giesen 0% Red Blend - Non Alc",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$10.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 257,
+      "name": "Real Cocktail Ingredients Real Prickly Pear",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "Update Required",
+      "cost": "$5.04",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 258,
+      "name": "Rocky Mountain Soda Prickly Pear",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "Update Required",
+      "cost": "$26.00",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Rocky Mountain Soda Prickly Pear\"",
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 259,
+      "name": "Pighin Pinot Grigio",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$11.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 260,
+      "name": "Jeio Brut Prosecco",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$10.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Jeio Brut Prosecco\"",
+        "ALL CAPS brand → normalized to: \"Jeio Brut\""
+      ]
+    },
+    {
+      "row": 261,
+      "name": "Champagne Taittinger Taittinger La Francaise Brut",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$192.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 262,
+      "name": "Cote Mas Cremant Limoux Brut",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$17.80",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Cote Mas Cremant Limoux Brut\"",
+        "ALL CAPS brand → normalized to: \"Cote Mas Cremant\""
+      ]
+    },
+    {
+      "row": 263,
+      "name": "K Vintners 2019 Powerline Vineyard The Creator Red Wine",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$624.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 264,
+      "name": "Billecart Salmon Brut Reserve",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$46.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 265,
+      "name": "2021 Chateau de Beaucastel Chateauneuf-du-Pape",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$438.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 266,
+      "name": "Famille Perrin 2020 Muscat Beaumes De Venise",
+      "type": "Wine",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$18.20",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Famille Perrin 2020 Muscat Beaumes De Venise\"",
+        "ALL CAPS brand → normalized to: \"Famille Perrin\""
+      ]
+    },
+    {
+      "row": 267,
+      "name": "Buglioni 2019 Amarone",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$468.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 268,
+      "name": "Carpano Classico Rosso Vermouth",
+      "type": "Wine",
+      "sub_type": "Fortified",
+      "bottle_size": "750ml",
+      "cost": "$2.47",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 269,
+      "name": "Carpano Dry Vermouth",
+      "type": "Wine",
+      "sub_type": "Fortified",
+      "bottle_size": "750ml",
+      "cost": "$13.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 270,
+      "name": "Breckenridge Reserve Bourbon",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$28.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 271,
+      "name": "Trimbach 2022 Reisling Organic",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$21.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 272,
+      "name": "Argyle 2023 Rose Pinot Noir",
+      "type": "Wine",
+      "sub_type": "Rosé",
+      "bottle_size": "750ml",
+      "cost": "$16.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Argyle 2023 Rose Pinot Noir\"",
+        "ALL CAPS brand → normalized to: \"Argyle\""
+      ]
+    },
+    {
+      "row": 273,
+      "name": "Craggy Range 2024 Te Muna Sauvignon Blanc",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$180.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 274,
+      "name": "Famille Perrin Cheateau De Beaucastel 2023 Blanc",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$74.80",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Famille Perrin Cheateau De Beaucastel 2023 Blanc\"",
+        "ALL CAPS brand → normalized to: \"Famille Perrin Cheateau\""
+      ]
+    },
+    {
+      "row": 275,
+      "name": "Nicolas Feuillatte Champagne Nicolas Feuillatte Brut NV",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$39.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 276,
+      "name": "Gaja Wd 2020 Gaja Barbaresco",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$250.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 277,
+      "name": "Borgogno 2022 No Name Nebbiolo",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$39.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 278,
+      "name": "E. Guigal 2020 Etienne Guigal Chateauneuf du Pape Rouge",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$42.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 279,
+      "name": "Moscato Chiarlo Nivole",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$16.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 280,
+      "name": "William Fevre 2023 Chablis Champs Royaux",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$28.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 281,
+      "name": "Ridge Estate Chardonnay 2023",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$660.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 282,
+      "name": "Faiveley 2023 Domaine Bourgogne Joseph Rouge",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$31.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 283,
+      "name": "Ornellaia Le Volte 2023 Le Volte dell'Ornellaia Toscana Red Wine",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$25.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 284,
+      "name": "Sequoia Grove 2021 Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$384.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 285,
+      "name": "Real Blackberry Puree Infused Syrup",
+      "type": "Non-Alc",
+      "sub_type": "Syrup",
+      "bottle_size": "1L",
+      "cost": "$4.75",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Real Blackberry Puree Infused Syrup\"",
+        "ALL CAPS brand → normalized to: \"Real Blackberry Puree\""
+      ]
+    },
+    {
+      "row": 286,
+      "name": "Patrimony 2020 Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$202.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 287,
+      "name": "Emeritus Vineyards 'Pinot Hill' Pinot Noir, Sonoma Coast, 2020",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$258.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 288,
+      "name": "E. Guigal 2021 Guigal La Landonne Vt",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$384.80",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 289,
+      "name": "Wayfarer 2021 Fort Ross Sea Pinot Noir",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$396.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 290,
+      "name": "Arcanum 2022 Il Fauno d'Red",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$25.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 291,
+      "name": "Graham'S 10 Year Old Tawny Port",
+      "type": "Wine",
+      "sub_type": "Fortified",
+      "bottle_size": "750ml",
+      "cost": "$25.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Graham'S 10 Year Old Tawny Port\"",
+        "ALL CAPS brand → normalized to: \"Graham'S\""
+      ]
+    },
+    {
+      "row": 292,
+      "name": "Graham's 20 Year Old Tawny Port",
+      "type": "Wine",
+      "sub_type": "Fortified",
+      "bottle_size": "750ml",
+      "cost": "$45.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 293,
+      "name": "Graham's Tawny Port 30yr",
+      "type": "Wine",
+      "sub_type": "Fortified",
+      "bottle_size": "750ml",
+      "cost": "$115.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 294,
+      "name": "Mock One Non Alcoholic Mock One Experience Whiskey",
+      "type": "Non-Alc",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$22.00",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 295,
+      "name": "Dog Point 2023 Sauvignon Blanc",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$228.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 296,
+      "name": "Jordan Cab 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$420.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Jordan Cab 2021\""
+      ]
+    },
+    {
+      "row": 297,
+      "name": "Daou Cab Reserve 2023",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$150.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Daou Cab Reserve 2023\""
+      ]
+    },
+    {
+      "row": 298,
+      "name": "Breckenridge Distillery Breckenridge Orange Cream Rtd",
+      "type": "Beer",
+      "sub_type": "Other",
+      "bottle_size": "355ml",
+      "cost": "$2.25",
+      "abv": "5%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 299,
+      "name": "J Davies Diamond Mountain Cabbernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$124.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 300,
+      "name": "Chateau Montelena Winery 2019 Chateau Montelena Estate Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$900.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 301,
+      "name": "Empress Na Empress 1908 Indigo Na - Non Alc",
+      "type": "Non-Alc",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$23.50",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 302,
+      "name": "Vina Robles 2020 Mountn Rd Reserve Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$49.80",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Vina Robles 2020 Mountn Rd Reserve Cabernet Sauvignon\"",
+        "ALL CAPS brand → normalized to: \"Vina Robles\""
+      ]
+    },
+    {
+      "row": 303,
+      "name": "Chateau Montelena Winery 2022 Chateau Montelena Napa Valley Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$62.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 304,
+      "name": "Eisele Vineyard 2014 Eisele Estate Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$350.80",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 305,
+      "name": "E. Guigal 2020 Cote-Rotie Brune Et Blonde",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$71.80",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"E. Guigal 2020 Cote-Rotie Brune Et Blonde\"",
+        "ALL CAPS brand → normalized to: \"E Guigal\""
+      ]
+    },
+    {
+      "row": 306,
+      "name": "Famille Perrin Chateau De Beaucastel Rouge",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$74.80",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Famille Perrin Chateau De Beaucastel Rouge\"",
+        "ALL CAPS brand → normalized to: \"Famille Perrin Chateau\""
+      ]
+    },
+    {
+      "row": 307,
+      "name": "DuMOL 2022 Wester Reach Russian River Valley Pinot Noir",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$312.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 308,
+      "name": "Chateau Greysac 2018 Bordeaux",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$252.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 309,
+      "name": "Michele Chiarlo 2020 Chiarlo Cerequio Barolo",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$96.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 310,
+      "name": "Michele Chiarlo 2020 Chiarlo Tortoniano Barolo",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$44.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 311,
+      "name": "Michele Chiarlo 2023 Nivole Moscato d'Asti",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$120.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 312,
+      "name": "Ridge Vineyards 2021 Reserve Ridge Estate Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$68.80",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Ridge Vineyards 2021 Reserve Ridge Estate Cabernet Sauvignon\"",
+        "ALL CAPS brand → normalized to: \"Ridge Vineyards\""
+      ]
+    },
+    {
+      "row": 313,
+      "name": "DAOU 2021 Soul of a Lion Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$104.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 314,
+      "name": "Cakebread Cellars 2023 Sauvignon Blanc",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$264.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 315,
+      "name": "Les Cadrans 2021 des Lassegue St Em Ma",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$25.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 316,
+      "name": "Carboy Littleton 2022 Carboy Co.Lorado Red Blend",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$21.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Carboy Littleton 2022 Carboy Co.Lorado Red Blend\"",
+        "ALL CAPS brand → normalized to: \"Carboy Littleton\""
+      ]
+    },
+    {
+      "row": 317,
+      "name": "Empress 1908 Cucum Lemon Gin",
+      "type": "Spirit",
+      "sub_type": "Gin",
+      "bottle_size": "750ml",
+      "cost": "$42.17",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 318,
+      "name": "Chateau Montelena Winery 2022 Chateau Montelena Chardonnay",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$45.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 319,
+      "name": "Penfolds 2022 Max's Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$13.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 320,
+      "name": "Martin Ray 2022 Synthesis Cabernet Sauvignon",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$31.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Martin Ray 2022 Synthesis Cabernet Sauvignon\"",
+        "ALL CAPS brand → normalized to: \"Martin Ray\""
+      ]
+    },
+    {
+      "row": 321,
+      "name": "Opus One 2021 Overture Napa Valley Red Blend",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$132.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 322,
+      "name": "Jordan Chardonnay 2022",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$263.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 323,
+      "name": "Cakebread Cellars 2023 Napa Valley Chardonnay",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$336.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 324,
+      "name": "Domaine Hubert Brochard 2023 Hubert Brochard Sancerre Chateau de Fontaine",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$28.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 325,
+      "name": "Chateau de Pez 2021 Chateau de Pes St Estephe",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$36.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 326,
+      "name": "Benanti 2022 Cont Calde Sottana",
+      "type": "Wine",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$47.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 327,
+      "name": "Argyle Brut Rose",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$240.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Argyle Brut Rose\"",
+        "ALL CAPS brand → normalized to: \"Argyle Brut\""
+      ]
+    },
+    {
+      "row": 328,
+      "name": "Zena Crown 2021 Vineyard The Sum Pinot Noir",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$66.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 329,
+      "name": "Marques de Murrieta 2020 Reserva Rioja",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$282.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 330,
+      "name": "Graham's Graham S Tawny 40yr",
+      "type": "Wine",
+      "sub_type": "Fortified",
+      "bottle_size": "750ml",
+      "cost": "$215.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 331,
+      "name": "Mr And Mrs T Sweet And Sour Mix",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "Update Required",
+      "cost": "$4.50",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Mr And Mrs T Sweet And Sour Mix\"",
+        "no bottle_size → freeForm placeholder; user must update in-app",
+        "ALL CAPS brand → normalized to: \"Mr And Mrs\""
+      ]
+    },
+    {
+      "row": 332,
+      "name": "Le Clos Jordanne",
+      "type": "Wine",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$39.60",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Le Clos Jordanne\"",
+        "ALL CAPS brand → normalized to: \"Le Clos Jordanne\""
+      ]
+    },
+    {
+      "row": 333,
+      "name": "Ch D Aqueria 2024 Tavel Rose",
+      "type": "Wine",
+      "sub_type": "Rosé",
+      "bottle_size": "750ml",
+      "cost": "$17.30",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Ch D Aqueria 2024 Tavel Rose\"",
+        "ALL CAPS brand → normalized to: \"Ch D Aqueria\""
+      ]
+    },
+    {
+      "row": 334,
+      "name": "Chateau de Nalys 2020 Chateauneuf-du-Pape Rouge St. Pierres",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$46.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 335,
+      "name": "Zonin N/A Zonin Cuvee Zero - Non Alc",
+      "type": "Non-Alc",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$3.92",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 336,
+      "name": "Ridge Vineyards 2023 Ridge Three Valley Zinfandel",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$228.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 337,
+      "name": "Ridge Vineyards 2023 Ridge Three Valley Zinfandel",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$19.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 338,
+      "name": "Ca'Marcanda, Camarcanda Bolgheri, 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$1080.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 339,
+      "name": "Hartford Court Russian River Valley Chardonnay",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$216.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 340,
+      "name": "Macallan 18 Year Old Sherry Oak Single Malt",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$312.90",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 341,
+      "name": "Vina Robles Paso Rob Cabernet Sauvignon Estate",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$16.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 342,
+      "name": "Chateau Blaignan Bordeaux",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$17.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 343,
+      "name": "Sotol Por Siempre Sotol",
+      "type": "Spirit",
+      "sub_type": "Other Spirit",
+      "bottle_size": "750ml",
+      "cost": "$32.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 344,
+      "name": "Familia Torres Torres Celeste Rioja Crianza Wd",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$16.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 345,
+      "name": "Pago del Cielo, 'Celeste', Crianza, Ribera del Duero,",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$96.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 346,
+      "name": "Don Q Barrel Spiced Rum",
+      "type": "Spirit",
+      "sub_type": "Rum",
+      "bottle_size": "750ml",
+      "cost": "$25.55",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 347,
+      "name": "Decero Malbec",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$16.80",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Decero Malbec\"",
+        "ALL CAPS brand → normalized to: \"Decero Malbec\""
+      ]
+    },
+    {
+      "row": 348,
+      "name": "Fernet Branca Liqueur",
+      "type": "Spirit",
+      "sub_type": "Amaro",
+      "bottle_size": "750ml",
+      "cost": "$32.80",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 349,
+      "name": "LALO Blanco Tequila",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$38.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS brand → normalized to: \"Lalo\""
+      ]
+    },
+    {
+      "row": 350,
+      "name": "Chopin Potato Vodka",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$25.20",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 351,
+      "name": "Real Peach Puree",
+      "type": "Non-Alc",
+      "sub_type": "Syrup",
+      "bottle_size": "1L",
+      "cost": "$4.75",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Real Peach Puree\"",
+        "ALL CAPS brand → normalized to: \"Real Peach Puree\""
+      ]
+    },
+    {
+      "row": 352,
+      "name": "Real Cocktail Ingredients Real Raspberry Puree Infused Syrup",
+      "type": "Non-Alc",
+      "sub_type": "Syrup",
+      "bottle_size": "1L",
+      "cost": "$5.04",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 353,
+      "name": "Real Mango Puree Syrup",
+      "type": "Non-Alc",
+      "sub_type": "Syrup",
+      "bottle_size": "1L",
+      "cost": "$4.75",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 354,
+      "name": "Breckenridge Distillery Port Cask Finish Whiskey",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$34.80",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 355,
+      "name": "Breckenridge Distillers High Proof Blend Bourbon",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$34.80",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 356,
+      "name": "Rose'S Grenadine",
+      "type": "Non-Alc",
+      "sub_type": "Syrup",
+      "bottle_size": "1L",
+      "cost": "$8.55",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Rose'S Grenadine\""
+      ]
+    },
+    {
+      "row": 357,
+      "name": "The Macallan 12 Year Old Double Cask Single Malt Scotch Whisky",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$63.05",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 358,
+      "name": "Dal Forno Romano, Amarone della Valpolicella, 2018",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$2070.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 359,
+      "name": "Dal Forno Romano, Valpolicella Superiore, 2019",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$690.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 360,
+      "name": "Famille Joly, Les Vieux Clos, 2023",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$354.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 361,
+      "name": "GAJA, Barbaresco, 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$1650.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 362,
+      "name": "Patrimony, Cabernet Sauvignon, Paso Robles, 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$606.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 363,
+      "name": "Pieve Santa Restituta, Brunello di Montalcino, 2020",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$468.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 364,
+      "name": "Tenuta San Guido 'Le Difese' 2023",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$468.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Tenuta San Guido 'Le Difese' 2023\"",
+        "ALL CAPS brand → normalized to: \"Tenuta San Guido\""
+      ]
+    },
+    {
+      "row": 365,
+      "name": "Tenuta San Guido 'Guidalberto' 2023",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$684.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Tenuta San Guido 'Guidalberto' 2023\"",
+        "ALL CAPS brand → normalized to: \"Tenuta San Guido\""
+      ]
+    },
+    {
+      "row": 366,
+      "name": "Tenuta San Guido 'Sassicaia' 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$1320.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Tenuta San Guido 'Sassicaia' 2022\""
+      ]
+    },
+    {
+      "row": 367,
+      "name": "Bombay Sapphire Gin 94",
+      "type": "Spirit",
+      "sub_type": "Gin",
+      "bottle_size": "750ml",
+      "cost": "$29.38",
+      "abv": "47%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 368,
+      "name": "Patron Tequila Silver Bar 80",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$41.58",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 369,
+      "name": "Dekuyper Sour Apple Schnapps Pucker 30",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$10.73",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 370,
+      "name": "Grey Goose Pear Flavored Vodka Grey Goose La Poire 80",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$35.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 371,
+      "name": "absolut vodka 80",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$25.98",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 372,
+      "name": "nonino amaro quintessentia 70",
+      "type": "Spirit",
+      "sub_type": "Amaro",
+      "bottle_size": "750ml",
+      "cost": "$42.96",
+      "abv": "35%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 373,
+      "name": "Filthy Onions",
+      "type": "Non-Alc",
+      "sub_type": "Garnish",
+      "bottle_size": "Update Required",
+      "cost": "$6.33",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 374,
+      "name": "filthy pickle olives",
+      "type": "Non-Alc",
+      "sub_type": "Garnish",
+      "bottle_size": "Update Required",
+      "cost": "$7.33",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 375,
+      "name": "Grey Goose Vodka 80",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "1L",
+      "cost": "$33.49",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Grey Goose Vodka 80\""
+      ]
+    },
+    {
+      "row": 376,
+      "name": "Luxardo Maraschino Cherries 5.6kg",
+      "type": "Non-Alc",
+      "sub_type": "Garnish",
+      "bottle_size": "Update Required",
+      "cost": "$135.00",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Luxardo Maraschino Cherries 5.6kg\"",
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 377,
+      "name": "St Germain Elderflower Liqueur 40",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$32.83",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 378,
+      "name": "Jefferson's Straight Bourbon 82.3",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$37.87",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 379,
+      "name": "Dewar's Blended Scotch White Label 80",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$28.83",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 380,
+      "name": "Dewar's Blended Scotch White Label 80",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$28.83",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 381,
+      "name": "Angostura Orange Bitters",
+      "type": "Spirit",
+      "sub_type": "Bitters",
+      "bottle_size": "750ml",
+      "cost": "$10.71",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Angostura Orange Bitters\""
+      ]
+    },
+    {
+      "row": 382,
+      "name": "Filthy Blue Cheese Olives",
+      "type": "Non-Alc",
+      "sub_type": "Garnish",
+      "bottle_size": "Update Required",
+      "cost": "$41.00",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 383,
+      "name": "Jameson Blended Irish Whiskey 80",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$37.49",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 384,
+      "name": "midori melon liqueur 40",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$29.98",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 385,
+      "name": "Bacardi Light Rum Superior 80",
+      "type": "Spirit",
+      "sub_type": "Rum",
+      "bottle_size": "750ml",
+      "cost": "$17.79",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 386,
+      "name": "Benedictine Brandy Liqueur B&b 80",
+      "type": "Spirit",
+      "sub_type": "Brandy",
+      "bottle_size": "750ml",
+      "cost": "$37.02",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 387,
+      "name": "Benedictine Brandy Liqueur Dom 80",
+      "type": "Spirit",
+      "sub_type": "Brandy",
+      "bottle_size": "750ml",
+      "cost": "$29.43",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 388,
+      "name": "Del Maguey Mezcal Vida 84",
+      "type": "Spirit",
+      "sub_type": "Mezcal",
+      "bottle_size": "750ml",
+      "cost": "$31.84",
+      "abv": "42%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 389,
+      "name": "Maker's 46 Straight Bourbon",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$31.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 390,
+      "name": "Patron Coffee Liqueur Xo Cafe 70",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$35.69",
+      "abv": "35%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 391,
+      "name": "Whistle Pig 10yr Rye",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$69.67",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 392,
+      "name": "Frangelico Hazelnut Liqueur 40",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$35.06",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 393,
+      "name": "Chartreuse Herbal Liqueur Green 110",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$58.99",
+      "abv": "55%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 394,
+      "name": "Filthy Black Cherry-Small Jar",
+      "type": "Non-Alc",
+      "sub_type": "Garnish",
+      "bottle_size": "Update Required",
+      "cost": "$13.00",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Filthy Black Cherry-Small Jar\"",
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 395,
+      "name": "malibu coconut flavored rum original 42",
+      "type": "Spirit",
+      "sub_type": "Rum",
+      "bottle_size": "750ml",
+      "cost": "$19.55",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 396,
+      "name": "Licor 43",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$33.32",
+      "abv": "40%",
+      "match_status": "exact_match",
+      "canonical_id": "f652b473-9725-47fc-8d18-543cc707f8ff",
+      "canonical_name": "Licor 43",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 397,
+      "name": "olmeca altos tequila reposado 80",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$31.83",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 398,
+      "name": "olmeca altos tequila plata 80",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$31.83",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 399,
+      "name": "Green Spot Single Pot Still Irish Whiskey 80",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$63.70",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Green Spot Single Pot Still Irish Whiskey 80\"",
+        "ALL CAPS brand → normalized to: \"Green Spot\""
+      ]
+    },
+    {
+      "row": 400,
+      "name": "Teeling Blended Irish Whiskey Small Batch",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$37.44",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 401,
+      "name": "Angostura Bitters 16oz",
+      "type": "Spirit",
+      "sub_type": "Bitters",
+      "bottle_size": "473ml",
+      "cost": "$26.42",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 402,
+      "name": "10th Mountain Spirits Rye Whiskey 86",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$39.00",
+      "abv": "43%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 403,
+      "name": "Hibiki Japanese Whisky",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$74.07",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 404,
+      "name": "Jefferson's Straight Bourbon Ocean Aged At Sea 90",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$65.70",
+      "abv": "45%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 405,
+      "name": "Angel's Envy Straight Bourbon Finished In Port Wine Barrels",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$45.75",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 406,
+      "name": "Aberfeldy Single Malt Scotch 16 Yr 80",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$77.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 407,
+      "name": "Courvoisier Cognac VSOP",
+      "type": "Spirit",
+      "sub_type": "Cognac",
+      "bottle_size": "750ml",
+      "cost": "$31.10",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 408,
+      "name": "Courvoisier Cognac Vsop 80",
+      "type": "Spirit",
+      "sub_type": "Cognac",
+      "bottle_size": "750ml",
+      "cost": "$31.10",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 409,
+      "name": "Courvoisier Cognac XO",
+      "type": "Spirit",
+      "sub_type": "Cognac",
+      "bottle_size": "750ml",
+      "cost": "$148.14",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 410,
+      "name": "angel's envy rye whiskey finished in caribbean rum casks finished rye 100",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$72.00",
+      "abv": "50%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 411,
+      "name": "Angel'S Envy Rye Whiskey Finished Rye 100",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$72.00",
+      "abv": "50%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Angel'S Envy Rye Whiskey Finished Rye 100\"",
+        "ALL CAPS brand → normalized to: \"Angel'S Envy\""
+      ]
+    },
+    {
+      "row": 412,
+      "name": "Aberfeldy Single Malt Scotch 12 Yr 80",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$45.75",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 413,
+      "name": "Patron Reposado Tequila",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$43.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 414,
+      "name": "High West Rye Whiskey Double Rye!",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$34.81",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 415,
+      "name": "italicus rosolio di bergamotto liqueur 40",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$38.33",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 416,
+      "name": "Filthy Bloody Mary Mix",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "Update Required",
+      "cost": "$7.12",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 417,
+      "name": "chateau ste. michelle sauvignon blanc columbia valley",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$8.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 418,
+      "name": "Filthy Bloody Mary Mix 4 Gallon/Cs",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "Update Required",
+      "cost": "$18.50",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Filthy Bloody Mary Mix 4 Gallon/Cs\"",
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 419,
+      "name": "jameson orange flavored whiskey 60",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$37.49",
+      "abv": "30%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 420,
+      "name": "Cazadores Tequila Blanco 80",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$22.49",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 421,
+      "name": "Filthy Black Cherry-Large Jar",
+      "type": "Non-Alc",
+      "sub_type": "Garnish",
+      "bottle_size": "Update Required",
+      "cost": "$39.17",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Filthy Black Cherry-Large Jar\"",
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 422,
+      "name": "onehope brut sparkling california",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$107.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 423,
+      "name": "Aperol Aperitivo 22",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$26.91",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 424,
+      "name": "Averna Siciliano Amaro",
+      "type": "Spirit",
+      "sub_type": "Amaro",
+      "bottle_size": "750ml",
+      "cost": "$32.77",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 425,
+      "name": "cynar aperitif ricetta originale 33",
+      "type": "Spirit",
+      "sub_type": "Amaro",
+      "bottle_size": "750ml",
+      "cost": "$25.31",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 426,
+      "name": "wild turkey straight bourbon longbranch 8 yr 86",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$30.36",
+      "abv": "43%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 427,
+      "name": "Clase Azul Repesado 80",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$144.44",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Clase Azul Repesado 80\""
+      ]
+    },
+    {
+      "row": 428,
+      "name": "elijah craig straight bourbon small batch 94",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$28.49",
+      "abv": "47%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 429,
+      "name": "bombay gin sapphire premier cru murcian lemon 94",
+      "type": "Spirit",
+      "sub_type": "Gin",
+      "bottle_size": "750ml",
+      "cost": "$26.59",
+      "abv": "47%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 430,
+      "name": "prunotto barbaresco bric turot 2019",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$57.77",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 431,
+      "name": "Chartreuse Herbal Liqueur Cuvee Des Meilleurs Ouvriers De France Sommeliers 90",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$89.50",
+      "abv": "45%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 432,
+      "name": "Hipstirs syrup lavender haze",
+      "type": "Non-Alc",
+      "sub_type": "Syrup",
+      "bottle_size": "1L",
+      "cost": "$11.00",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 433,
+      "name": "Avissi Prosecco Extra Dry",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$13.26",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 434,
+      "name": "Rutherford Hill Cabernet Sauvignon AJT 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$180.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 435,
+      "name": "Clase Azul Anejo 80",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$451.67",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Clase Azul Anejo 80\""
+      ]
+    },
+    {
+      "row": 436,
+      "name": "Filthy Olive Brine",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "Update Required",
+      "cost": "$3.50",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 437,
+      "name": "7 Cellars Pinot Noir The Farm Collection Monterey County 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$189.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 438,
+      "name": "nickel & nickel cabernet sauvignon bear track vineyard napa valley 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$468.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 439,
+      "name": "Beefeater London Dry Gin 80",
+      "type": "Spirit",
+      "sub_type": "Gin",
+      "bottle_size": "750ml",
+      "cost": "$25.73",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 440,
+      "name": "silverado vineyards cabernet sauvignon solo stags leap district 2018",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$690.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 441,
+      "name": "the prisoner red blend wine california 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$42.85",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 442,
+      "name": "elway's chardonnay reserve carneros 2022",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$290.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 443,
+      "name": "Campari Aperitivo 48",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$35.04",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Campari Aperitivo 48\""
+      ]
+    },
+    {
+      "row": 444,
+      "name": "Caymus Vineyards Cabernet Sauvignon Special Selection Napa Valley 2019 Wood Box",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$199.17",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 445,
+      "name": "Kahlua Coffee Liquer The Original 40",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$31.07",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Kahlua Coffee Liquer The Original 40\""
+      ]
+    },
+    {
+      "row": 446,
+      "name": "Patron Tequila Cristalino Anejo 80",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$59.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 447,
+      "name": "Almave Blanco Non-Alcoholic",
+      "type": "Non-Alc",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$29.33",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 448,
+      "name": "nino negri valtellina superiore vigneto fracia 2019",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$51.99",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 449,
+      "name": "Elway'S Cabernet Sauvignon Reserve Napa Valley 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$57.88",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Elway'S Cabernet Sauvignon Reserve Napa Valley 2021\"",
+        "ALL CAPS brand → normalized to: \"Elway'S\""
+      ]
+    },
+    {
+      "row": 450,
+      "name": "austin hope cabernet sauvignon paso robles 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$546.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 451,
+      "name": "grey goose vodka altius 80",
+      "type": "Spirit",
+      "sub_type": "Vodka",
+      "bottle_size": "750ml",
+      "cost": "$140.00",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 452,
+      "name": "Il Poggione Brunello di Montalcino 2019",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$228.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 453,
+      "name": "patz & hall pinot noir sonoma coast 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$37.03",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 454,
+      "name": "Stag's Leap Wine Cellars Cabernet Sauvignon Artemis Napa Valley 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$66.66",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 455,
+      "name": "liquid light sauvignon blanc washington",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$14.81",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 456,
+      "name": "liquid light pinot grigio washington",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$14.81",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 457,
+      "name": "liquid light chardonnay washington",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$14.81",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 458,
+      "name": "Gold Spot Single Pot Still Irish Whiskey Generations Edition 13 Yr 92",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$98.21",
+      "abv": "46%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Gold Spot Single Pot Still Irish Whiskey Generations Edition 13 Yr 92\"",
+        "ALL CAPS brand → normalized to: \"Gold Spot\""
+      ]
+    },
+    {
+      "row": 459,
+      "name": "Bravium Pinot Noir Anderson Valley 2023",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$29.63",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 460,
+      "name": "liquid light brut rose washington",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$16.29",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 461,
+      "name": "Swanson Cab Sauv Napa Valley 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$180.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Swanson Cab Sauv Napa Valley 2022\"",
+        "ALL CAPS brand → normalized to: \"Swanson Cab Sauv\""
+      ]
+    },
+    {
+      "row": 462,
+      "name": "liquid light sparkling wine brut washington",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$16.29",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 463,
+      "name": "chateau branaire ducru saint julien 2019 wood box",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$68.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 464,
+      "name": "Monkey 47 Dry Gin Schwarzwald 94",
+      "type": "Spirit",
+      "sub_type": "Gin",
+      "bottle_size": "750ml",
+      "cost": "$72.33",
+      "abv": "47%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Monkey 47 Dry Gin Schwarzwald 94\""
+      ]
+    },
+    {
+      "row": 465,
+      "name": "sea smoke pinot noir ten sea smoke estate vineyard santa rita hills 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$498.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 466,
+      "name": "elway's cabernet sauvignon completion oakville 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$183.25",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 467,
+      "name": "justin red wine isosceles paso robles 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$450.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 468,
+      "name": "chateau ste. michelle merlot indian wells columbia valley 2021",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$150.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 469,
+      "name": "Terlato Pinot Grigio Colli Orientali Del Friuli 2024",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$20.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 470,
+      "name": "dolce white wine late harvest wine napa valley 2019",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$75.83",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 471,
+      "name": "Dolce Late Harvest 375ML",
+      "type": "Wine",
+      "sub_type": "Other",
+      "bottle_size": "375ml",
+      "cost": "$270.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 472,
+      "name": "Luxardo Maraschino Originale 64",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$32.00",
+      "abv": "32%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Luxardo Maraschino Originale 64\""
+      ]
+    },
+    {
+      "row": 473,
+      "name": "far niente cabernet sauvignon napa valley 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$50.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 474,
+      "name": "Owen's Craft Mixers Transfusion Mix",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "Update Required",
+      "cost": "$1.25",
+      "abv": "",
+      "match_status": "needs_size",
+      "errors": [],
+      "warnings": [
+        "no bottle_size → freeForm placeholder; user must update in-app"
+      ]
+    },
+    {
+      "row": 475,
+      "name": "Miraval Cotes De Provence Rose 2024",
+      "type": "Wine",
+      "sub_type": "Rosé",
+      "bottle_size": "750ml",
+      "cost": "$210.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Miraval Cotes De Provence Rose 2024\"",
+        "ALL CAPS brand → normalized to: \"Miraval Cotes De\""
+      ]
+    },
+    {
+      "row": 476,
+      "name": "summer dreams pinot noir stargazing sonoma coast 2023",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$330.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 477,
+      "name": "Martini Vermouth Extra Dry",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$13.83",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 478,
+      "name": "Booker's Straight Bourbon Barry's Batch 2025-1 7 Yr 125.7",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$68.14",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 479,
+      "name": "Lallier Champagne Brut R.021 Reflexion 2021",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$53.14",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 480,
+      "name": "Filthy Agave Nectar",
+      "type": "Non-Alc",
+      "sub_type": "Syrup",
+      "bottle_size": "1L",
+      "cost": "$12.13",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 481,
+      "name": "chateau ste. michelle red blend indian wells columbia valley 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$9.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 482,
+      "name": "rex hill pinot noir willamette valley 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$30.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 483,
+      "name": "angel's envy straight bourbon cask strength distillers collection 10 10 yr 122.6",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$174.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 484,
+      "name": "estival sauvignon blanc horse heaven hills 2024",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$12.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 485,
+      "name": "sea smoke blanc de noirs sea spray sea smoke estate vineyard santa rita hills 2020",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$70.25",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 486,
+      "name": "Booker's Straight Bourbon The Reserves 2025 Batch 9 Yr 123.3",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$99.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 487,
+      "name": "booker's straight bourbon the reserves 2025 batch 8 yr 123.3",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$99.99",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 488,
+      "name": "7 cellars cabernet sauvignon the farm collection paso robles 2023",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$15.79",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 489,
+      "name": "Chimney Rock Cab Sauv 40 Anny 2023",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$59.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Chimney Rock Cab Sauv 40 Anny 2023\"",
+        "ALL CAPS brand → normalized to: \"Chimney Rock Cab\""
+      ]
+    },
+    {
+      "row": 490,
+      "name": "ethos cellars cabernet sauvignon columbia valley 2022",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$15.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 491,
+      "name": "caymus vineyards cabernet sauvignon napa valley 2023",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$63.74",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 492,
+      "name": "eroica riesling columbia valley 2024",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$18.51",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 493,
+      "name": "liquid light rose wine washington 2024",
+      "type": "Wine",
+      "sub_type": "Rosé",
+      "bottle_size": "750ml",
+      "cost": "$14.81",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 494,
+      "name": "Lillet Aperitif Blanc 34",
+      "type": "Wine",
+      "sub_type": "White",
+      "bottle_size": "750ml",
+      "cost": "$18.48",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Lillet Aperitif Blanc 34\""
+      ]
+    },
+    {
+      "row": 495,
+      "name": "Booker's Straight Bourbon Phantom Pipes Batch 2025-04 7 Yr 126.4",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$68.14",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 496,
+      "name": "erath pinot noir reserve willamette valley 2023",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$17.50",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 497,
+      "name": "patron tequila silver 100",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$41.24",
+      "abv": "50%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 498,
+      "name": "colorado avalanche straight bourbon 90",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$40.83",
+      "abv": "45%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 499,
+      "name": "Fiji Natural Artesian Water",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "500ml",
+      "cost": "$1.09",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fiji Natural Artesian Water\"",
+        "ALL CAPS brand → normalized to: \"Fiji\""
+      ]
+    },
+    {
+      "row": 500,
+      "name": "Fiji Natural Artesian Water",
+      "type": "Non-Alc",
+      "sub_type": "Mixer",
+      "bottle_size": "1L",
+      "cost": "$2.00",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Fiji Natural Artesian Water\"",
+        "ALL CAPS brand → normalized to: \"Fiji\""
+      ]
+    },
+    {
+      "row": 501,
+      "name": "redbreast single pot still irish whiskey 12 yr 80",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$61.04",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 502,
+      "name": "Lombardo Marsala Anbra Sweet Fine I.P.",
+      "type": "Wine",
+      "sub_type": "Fortified",
+      "bottle_size": "750ml",
+      "cost": "$9.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Lombardo Marsala Anbra Sweet Fine I.P.\"",
+        "ALL CAPS brand → normalized to: \"Lombardo Marsala Anbra\""
+      ]
+    },
+    {
+      "row": 503,
+      "name": "El Tesoro Tequila Blanco 80",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$41.23",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 504,
+      "name": "Bacardi 8 aged rum rare gold reserva ocho 8 yr",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$36.98",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 505,
+      "name": "Basil Hayden's Straight Bourbon 80",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$48.83",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 506,
+      "name": "Gekkeikan Junmai Sake",
+      "type": "Wine",
+      "sub_type": "Other",
+      "bottle_size": "750ml",
+      "cost": "$8.14",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 507,
+      "name": "codigo 1530 tequila blanco 80",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$47.50",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 508,
+      "name": "codigo 1530 tequila reposado 80",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$64.16",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 509,
+      "name": "el tesoro tequila anejo 80",
+      "type": "Spirit",
+      "sub_type": "Tequila",
+      "bottle_size": "750ml",
+      "cost": "$67.14",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 510,
+      "name": "Perrier Jouet Grand Brut Shape",
+      "type": "Wine",
+      "sub_type": "Sparkling",
+      "bottle_size": "750ml",
+      "cost": "$35.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 511,
+      "name": "Chartreuse Herbal Liqueur Yellow 86",
+      "type": "Spirit",
+      "sub_type": "Liqueur",
+      "bottle_size": "750ml",
+      "cost": "$58.99",
+      "abv": "43%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 512,
+      "name": "Basil Hayden's Dark Rye",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$41.21",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 513,
+      "name": "Dos Hombres Mezcal Artesenal Joven Espadin 84",
+      "type": "Spirit",
+      "sub_type": "Mezcal",
+      "bottle_size": "750ml",
+      "cost": "$51.00",
+      "abv": "42%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Dos Hombres Mezcal Artesenal Joven Espadin 84\""
+      ]
+    },
+    {
+      "row": 514,
+      "name": "justin red wine isosceles reserve paso robles 2015",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$777.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 515,
+      "name": "Jim Beam Straight Bourbon White Label 80",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$21.05",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 516,
+      "name": "liquid alchemist orgeat syrup",
+      "type": "Non-Alc",
+      "sub_type": "Syrup",
+      "bottle_size": "1L",
+      "cost": "$24.99",
+      "abv": "",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 517,
+      "name": "Knob Creek Straight Bourbon Small Batch 12yr 100",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "750ml",
+      "cost": "$56.87",
+      "abv": "50%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Knob Creek Straight Bourbon Small Batch 12yr 100\""
+      ]
+    },
+    {
+      "row": 518,
+      "name": "Grand Marnier Cognac & Orange Liqueur Cordon Rouge 80",
+      "type": "Spirit",
+      "sub_type": "Cognac",
+      "bottle_size": "750ml",
+      "cost": "$37.51",
+      "abv": "40%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "row": 519,
+      "name": "Maker'S Mark Straight Bourbon 90",
+      "type": "Spirit",
+      "sub_type": "Whiskey",
+      "bottle_size": "1L",
+      "cost": "$37.54",
+      "abv": "45%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Maker'S Mark Straight Bourbon 90\""
+      ]
+    },
+    {
+      "row": 520,
+      "name": "Lamborn Family Vineyards Cabernet Sauvignon, Howell Mountain",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$106.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Lamborn Family Vineyards Cabernet Sauvignon, Howell Mountain\""
+      ]
+    },
+    {
+      "row": 521,
+      "name": "Quixote Panza Cabernet Sauvignon, Stags Leap District, Napa Valley",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$50.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Quixote Panza Cabernet Sauvignon, Stags Leap District, Napa Valley\""
+      ]
+    },
+    {
+      "row": 522,
+      "name": "Quixote Petite Sirah",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$64.52",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": [
+        "ALL CAPS name → normalized to: \"Quixote Petite Sirah\""
+      ]
+    },
+    {
+      "row": 523,
+      "name": "Giacomo Grimaldi, Barolo, Piedmont, Italy",
+      "type": "Wine",
+      "sub_type": "Red",
+      "bottle_size": "750ml",
+      "cost": "$30.00",
+      "abv": "12%",
+      "match_status": "no_match",
+      "errors": [],
+      "warnings": []
+    }
+  ]
+}

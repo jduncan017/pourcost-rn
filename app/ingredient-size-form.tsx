@@ -68,11 +68,24 @@ export default function IngredientSizeFormScreen() {
   const initial = useMemo(() => {
     if (!ingredient) return null;
     if (isEditingDefault) {
-      return { productSize: ingredient.productSize, productCost: ingredient.productCost };
+      const defaultCfg = ingredient.configurations?.find((c) => c.isDefault);
+      return {
+        productSize: ingredient.productSize,
+        productCost: ingredient.productCost,
+        packSize: defaultCfg?.packSize,
+        packCost: defaultCfg?.packCost,
+        distributorName: defaultCfg?.distributorName,
+      };
     }
     if (isEditingConfig) {
       const cfg = ingredient.configurations?.find((c) => c.id === configIdParam);
-      if (cfg) return { productSize: cfg.productSize, productCost: cfg.productCost };
+      if (cfg) return {
+        productSize: cfg.productSize,
+        productCost: cfg.productCost,
+        packSize: cfg.packSize,
+        packCost: cfg.packCost,
+        distributorName: cfg.distributorName,
+      };
     }
     // Adding a new size — pick the first size for this ingredient type that
     // isn't already configured (so the dropdown doesn't open with a duplicate
@@ -91,6 +104,9 @@ export default function IngredientSizeFormScreen() {
       productSize:
         firstFree ?? allForType[0] ?? ({ kind: 'milliliters', ml: 750 } as Volume),
       productCost: 0,
+      packSize: undefined as number | undefined,
+      packCost: undefined as number | undefined,
+      distributorName: undefined as string | undefined,
     };
   }, [ingredient, isEditingDefault, isEditingConfig, configIdParam, enabledProductSizes]);
 
@@ -101,6 +117,16 @@ export default function IngredientSizeFormScreen() {
     initial ? initial.productCost.toFixed(2) : '0.00'
   );
   const productCost = parseFloat(productCostText) || 0;
+
+  const [packSizeText, setPackSizeText] = useState(
+    initial?.packSize != null ? String(initial.packSize) : ''
+  );
+  const [packCostText, setPackCostText] = useState(
+    initial?.packCost != null ? initial.packCost.toFixed(2) : ''
+  );
+  const [distributorText, setDistributorText] = useState(
+    initial?.distributorName ?? ''
+  );
 
   // Set-as-default toggle. Initialized:
   //   - editing the default → on, locked (already default)
@@ -140,14 +166,18 @@ export default function IngredientSizeFormScreen() {
   };
 
   const isValid = productCost > 0 && volumeToOunces(productSize) > 0;
+  const packSize = packSizeText ? parseInt(packSizeText, 10) || undefined : undefined;
+
   const isDuplicate = useMemo(() => {
     if (!ingredient || isEditingDefault || isEditingConfig) return false;
-    const sameAsDefault = volumeLabel(ingredient.productSize) === volumeLabel(productSize);
-    const sameAsConfig = (ingredient.configurations ?? []).some(
-      (c) => c.id !== configIdParam && volumeLabel(c.productSize) === volumeLabel(productSize)
-    );
-    return sameAsDefault || sameAsConfig;
-  }, [ingredient, productSize, isEditingDefault, isEditingConfig, configIdParam]);
+    const configKey = `${volumeLabel(productSize)}:${packSize ?? 1}`;
+    const defaultCfgRow = ingredient.configurations?.find((c) => c.isDefault);
+    const defaultKey = `${volumeLabel(ingredient.productSize)}:${defaultCfgRow?.packSize ?? 1}`;
+    if (configKey === defaultKey) return true;
+    return (ingredient.configurations ?? [])
+      .filter((c) => !c.isDefault && c.id !== configIdParam)
+      .some((c) => `${volumeLabel(c.productSize)}:${c.packSize ?? 1}` === configKey);
+  }, [ingredient, productSize, packSize, isEditingDefault, isEditingConfig, configIdParam]);
 
   const [isSaving, setIsSaving] = useState(false);
   const saveRef = useRef<() => void>(() => {});
@@ -155,8 +185,8 @@ export default function IngredientSizeFormScreen() {
   // Dirty tracking — snapshot the form once, prompt before back-nav if it has changed.
   const initialSnapshotRef = useRef<string | null>(null);
   const currentSnapshot = useMemo(
-    () => JSON.stringify({ productSize, productCostText }),
-    [productSize, productCostText],
+    () => JSON.stringify({ productSize, productCostText, packSizeText, packCostText, distributorText }),
+    [productSize, productCostText, packSizeText, packCostText, distributorText],
   );
   useEffect(() => {
     if (initialSnapshotRef.current === null) {
@@ -180,17 +210,39 @@ export default function IngredientSizeFormScreen() {
     }
 
     setIsSaving(true);
+    const packCost = packCostText ? parseFloat(packCostText) || undefined : undefined;
+    const distributor = distributorText.trim() || undefined;
+
     try {
       let configIdToPromote: string | null = null;
       if (isEditingDefault) {
         await updateIngredient(ingredient.id, { productSize, productCost });
-        // Editing the default — it's still the default. The toggle is
-        // locked on; nothing to swap.
+        // Update the isDefault config row with any pack/distributor changes
+        const defaultCfgId = ingredient.configurations?.find((c) => c.isDefault)?.id;
+        if (defaultCfgId) {
+          await updateConfiguration(ingredient.id, defaultCfgId, {
+            packSize,
+            packCost,
+            distributorName: distributor,
+          });
+        }
       } else if (isEditingConfig && configIdParam) {
-        await updateConfiguration(ingredient.id, configIdParam, { productSize, productCost });
+        await updateConfiguration(ingredient.id, configIdParam, {
+          productSize,
+          productCost,
+          packSize,
+          packCost,
+          distributorName: distributor,
+        });
         if (setAsDefault) configIdToPromote = configIdParam;
       } else {
-        const created = await addConfiguration(ingredient.id, { productSize, productCost });
+        const created = await addConfiguration(ingredient.id, {
+          productSize,
+          productCost,
+          packSize,
+          packCost,
+          distributorName: distributor,
+        });
         if (setAsDefault) configIdToPromote = created.id;
       }
       // Apply set-as-default after the row exists so the swap has a valid
@@ -368,6 +420,39 @@ export default function IngredientSizeFormScreen() {
                 placeholder="0.00"
                 keyboardType="decimal-pad"
                 prefix="$"
+              />
+
+              <View className="flex-row gap-3">
+                <View className="flex-1">
+                  <TextInput
+                    label="Pack Size"
+                    value={packSizeText}
+                    onChangeText={(text) => {
+                      if (text === '' || /^\d+$/.test(text)) setPackSizeText(text);
+                    }}
+                    placeholder="e.g. 12"
+                    keyboardType="number-pad"
+                  />
+                </View>
+                <View className="flex-1">
+                  <TextInput
+                    label="Pack Cost"
+                    value={packCostText}
+                    onChangeText={(text) => {
+                      if (text === '' || /^\d*\.?\d*$/.test(text)) setPackCostText(text);
+                    }}
+                    placeholder="0.00"
+                    keyboardType="decimal-pad"
+                    prefix="$"
+                  />
+                </View>
+              </View>
+
+              <TextInput
+                label="Distributor"
+                value={distributorText}
+                onChangeText={setDistributorText}
+                placeholder="e.g. Republic National"
               />
 
               {isDuplicate && (

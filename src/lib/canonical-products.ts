@@ -196,25 +196,52 @@ export function mapCanonicalToType(product: CanonicalProductSummary): {
   const sub = product.subcategory ?? '';
 
   if (cat === 'Spirit') {
-    const isWhiskeySub =
-      sub === 'Whiskey' ||
-      sub === 'Bourbon' ||
-      sub === 'Rye' ||
-      sub === 'Scotch' ||
-      sub === 'Irish' ||
-      sub === 'Japanese';
-    return {
-      ingredientType: 'Spirit',
-      subType: isWhiskeySub ? 'Whiskey' : sub,
-    };
+    // Collapse canonical Spirit subcategories (locked taxonomy) back
+    // to the coarse SPIRIT_SUBTYPES chip vocabulary.
+    const whiskeySubs = new Set([
+      'Bourbon','Tennessee Whiskey','Rye Whiskey','Scotch','Irish Whiskey',
+      'Japanese Whisky','Canadian Whisky','American Whiskey','Other Whiskey',
+    ]);
+    const rumSubs = new Set([
+      'White Rum','Gold Rum','Aged Rum','Dark Rum','Spiced Rum',
+      'Overproof Rum','Rhum Agricole','Cachaça','Other Rum',
+    ]);
+    const tequilaSubs = new Set([
+      'Tequila Blanco','Tequila Reposado','Tequila Anejo',
+      'Tequila Extra Anejo','Tequila Cristalino',
+    ]);
+    const mezcalSubs = new Set(['Mezcal Joven','Mezcal Reposado','Mezcal Anejo']);
+    const ginSubs = new Set([
+      'Gin: London Dry','Gin: Plymouth','Gin: Old Tom','Gin: Genever',
+      'Gin: Navy Strength','Gin: Modern',
+    ]);
+    const brandySubs = new Set(['Cognac','Armagnac','Calvados','Pisco','Brandy']);
+    if (whiskeySubs.has(sub)) return { ingredientType: 'Spirit', subType: 'Whiskey' };
+    if (rumSubs.has(sub)) return { ingredientType: 'Spirit', subType: 'Rum' };
+    if (tequilaSubs.has(sub)) return { ingredientType: 'Spirit', subType: 'Tequila' };
+    if (mezcalSubs.has(sub)) return { ingredientType: 'Spirit', subType: 'Mezcal' };
+    if (ginSubs.has(sub)) return { ingredientType: 'Spirit', subType: 'Gin' };
+    if (brandySubs.has(sub)) {
+      return { ingredientType: 'Spirit', subType: sub === 'Cognac' ? 'Cognac' : 'Brandy' };
+    }
+    if (sub === 'Absinthe' || sub === 'Pastis') {
+      return { ingredientType: 'Spirit', subType: 'Absinthe' };
+    }
+    if (sub === 'RTD') return { ingredientType: 'Spirit', subType: 'RTD' };
+    if (sub === 'Plain' || sub === 'Flavored' || sub === 'Vodka') {
+      return { ingredientType: 'Spirit', subType: 'Vodka' };
+    }
+    return { ingredientType: 'Spirit', subType: sub || 'Other Spirit' };
   }
   // Wine subcategory 'Fortified' covers Port/Sherry/Madeira and matches
   // WINE_SUBTYPES in appConstants. Other wine subs pass through.
   if (cat === 'Wine') return { ingredientType: 'Wine', subType: sub };
   if (cat === 'Beer') return { ingredientType: 'Beer', subType: sub };
-  if (cat === 'Liqueur') return { ingredientType: 'Spirit', subType: 'Liqueur' };
+  if (cat === 'Liqueur') {
+    // Amaro keeps its own chip; everything else collapses to Liqueur.
+    return { ingredientType: 'Spirit', subType: sub === 'Amaro' ? 'Amaro' : 'Liqueur' };
+  }
   if (cat === 'Bitters') return { ingredientType: 'Spirit', subType: 'Bitters' };
-  if (cat === 'Absinthe') return { ingredientType: 'Spirit', subType: 'Absinthe' };
   if (cat === 'Vermouth') return { ingredientType: 'Spirit', subType: 'Vermouth' };
   // Non-Alc umbrella: use the canonical *category* (Juice / Syrup / Mixer /
   // Garnish / etc.) as the subType, since IngredientType "Non-Alc" is too

@@ -14,7 +14,12 @@ export type Volume =
   | { kind: 'namedOunces'; name: string; ounces: number }
   | { kind: 'unitQuantity'; unitType: UnitQuantityType; name: string; quantity: number; ounces: number }
   | { kind: 'milliliters'; ml: number }
-  | { kind: 'standardUnit'; si: number };
+  | { kind: 'standardUnit'; si: number }
+  /** Free-form label for items sold by weight, jar, or unit — no oz equivalent.
+   *  Costing calculations return 0; user must update to a real size before
+   *  cost-per-oz or pour-cost math works. label='Update Required' signals
+   *  an incomplete import row. */
+  | { kind: 'freeForm'; label: string };
 
 export type UnitQuantityType = 'oneCanOrBottle' | 'oneThing';
 
@@ -34,6 +39,8 @@ export function volumeToOunces(v: Volume): number {
       return v.ml * 0.033814; // matches iOS constant
     case 'standardUnit':
       return v.si / 29.0; // matches iOS standardUnitsToOunces
+    case 'freeForm':
+      return 0;
   }
 }
 
@@ -64,12 +71,24 @@ export function volumeLabel(v: Volume): string {
       return `${v.ml}ml`;
     case 'standardUnit':
       return `${v.si} units`;
+    case 'freeForm':
+      return v.label;
   }
 }
 
 /** Check if a Volume is a unit quantity (for alternate cost calculation path) */
 export function isUnitQuantity(v: Volume): v is Extract<Volume, { kind: 'unitQuantity' }> {
   return v?.kind === 'unitQuantity';
+}
+
+/** Check if a Volume is a free-form placeholder (no oz equivalent, costing blocked) */
+export function isFreeFormSize(v: Volume): v is Extract<Volume, { kind: 'freeForm' }> {
+  return v?.kind === 'freeForm';
+}
+
+/** Returns true for freeForm sizes that still need the user to set a real bottle size */
+export function needsSizeUpdate(v: Volume): boolean {
+  return v?.kind === 'freeForm' && (v as Extract<Volume, { kind: 'freeForm' }>).label === 'Update Required';
 }
 
 /** Helper to create fractional ounces (matches iOS Volume(fraction:)) */
@@ -111,6 +130,10 @@ export interface SavedIngredient {
    *  Drives the education panel on ingredient-detail and unlocks library
    *  recipe matching. Null = user typed the ingredient by hand. */
   canonicalProductId?: string;
+  /** Canonical subcategory denormalized from the linked canonical_products row.
+   *  Drives the L3 chip filter (Bourbon/Rye/Scotch under Whiskey, etc.). NULL
+   *  for ingredients with no canonical link or whose canonical has no sub yet. */
+  canonicalSubcategory?: string;
   /** Per-user overrides on canonical-derived fields. Display falls back to
    *  the linked canonical_products row when the override is null. Surfaced
    *  via the Detailed-mode toggle on ingredient-form. */
@@ -138,9 +161,11 @@ export interface IngredientConfiguration {
   ingredientId: string;
   productSize: Volume;
   productCost: number;
-  packSize?: number;       // 1 = single bottle; 6 = six-pack; 12 = case
-  packCost?: number;       // Total case/pack price (vs unit productCost)
-  source?: 'manual' | 'invoice' | 'barcode';
+  packSize?: number;          // 1 = single bottle; 6 = six-pack; 12 = case
+  packCost?: number;          // Total case/pack price (vs unit productCost)
+  distributorName?: string;   // Who supplies this size/pack
+  source?: 'manual' | 'invoice' | 'barcode' | 'csv_import';
+  isDefault?: boolean;        // True for the config row that mirrors the ingredient's default size
   createdAt: Date;
 }
 

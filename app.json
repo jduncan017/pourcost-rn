@@ -20,6 +20,12 @@
             "CFBundleURLSchemes": [
               "com.googleusercontent.apps.985050413872-blhmjb4b6dn8i8335kp9aqkh1l4d3csd"
             ]
+          },
+          {
+            "CFBundleURLName": "app.pourcost",
+            "CFBundleURLSchemes": [
+              "pourcost"
+            ]
           }
         ],
         "LSApplicationQueriesSchemes": [

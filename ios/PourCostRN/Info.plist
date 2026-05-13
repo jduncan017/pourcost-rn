@@ -38,6 +38,14 @@
           <string>exp+pourcost</string>
         </array>
       </dict>
+      <dict>
+        <key>CFBundleURLName</key>
+        <string>app.pourcost</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>pourcost</string>
+        </array>
+      </dict>
     </array>
     <key>CFBundleVersion</key>
     <string>1</string>

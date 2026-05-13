@@ -45,7 +45,7 @@ We use **category** + **subcategory** as the primary structural taxonomy. We do 
 
 ### Locked subcategory list
 
-#### Spirit (47 subcategories)
+#### Spirit (49 subcategories)
 
 **Whiskey family** (9):
 
@@ -59,15 +59,18 @@ We use **category** + **subcategory** as the primary structural taxonomy. We do 
 - American Whiskey _(catchall for non-bourbon American whiskeys)_
 - Other Whiskey _(world whiskies that don't fit above)_
 
-**Vodka, Gin** (7):
+**Vodka, Gin** (8):
 
-- Vodka
+- Vodka: Plain
+- Vodka: Flavored _(citrus, vanilla, berry, cucumber, pepper, Zubrowka/bison-grass, etc.)_
 - Gin: London Dry
 - Gin: Plymouth
 - Gin: Old Tom
 - Gin: Genever
 - Gin: Navy Strength
 - Gin: Modern _(covers Hendrick's, Empress 1908, contemporary botanicals; "New Western" style)_
+
+Vodka splits Plain/Flavored because flat Vodka silently mismatches recipes — an orange-vodka recipe shared between bars would match a plain-vodka well in the receiving bar with no warning. The Plain/Flavored split forces a substitution decision at the subcategory layer. Finer flavor granularity (vanilla vs citrus vs berry within Flavored) is handled by `flavor_notes` Gemini tagging + the similarity engine, not by adding more subs.
 
 **Tequila** (5):
 
@@ -120,6 +123,10 @@ We use **category** + **subcategory** as the primary structural taxonomy. We do 
 - Absinthe
 - Pastis
 
+**Ready-to-drink** (1):
+
+- RTD _(canned cocktails and premixed bottles: High Noon's cocktail line, On The Rocks, Cutwater, Long Drink. NOT hard seltzers — those live under Beer > Hard Seltzer)_
+
 **Catchall** (1):
 
 - Other Spirit _(for niche spirits below the volume threshold for their own subcategory: Korn, Singani, Marc, Slivovitz, and other regional spirits without an obvious home)_
@@ -159,13 +166,16 @@ Liqueurs use **flavor-as-subcategory** because flavor is the filter axis bartend
 
 **Liqueur chip layer policy:** the Liqueur top-level umbrella does NOT render chip filters by default. Most bars carry low volume per liqueur subcategory, so chip filtering offers little value. Discovery happens via search (name + flavor_tags). Subcategories still drive recipe slot definition, catalog browse, wells (when added), and reporting. UI can flip on conditional chip rendering later if usage signal warrants.
 
-#### Wine (5 subcategories + enrichment fields)
+#### Wine (8 subcategories + enrichment fields)
 
 - Red
 - White
+- Orange _(skin-contact whites, an emerging category in natural-wine bars)_
 - Rosé
-- Sparkling
+- Sparkling _(includes Champagne, Prosecco, Cava, Cremant, Pet-Nat — all méthodes ancestrale and traditionelle)_
 - Fortified
+- Sake _(rice-based fermented beverage; treated as Wine for service/cost similarity even though grain-based)_
+- Mead _(fermented honey; follows the Sake precedent — wine-adjacent fermented beverage)_
 
 Wine adds two enrichment fields beyond subcategory:
 
@@ -184,7 +194,7 @@ Sparkling (4): Champagne Blend (Chardonnay/Pinot Noir/Pinot Meunier), Glera (Pro
 
 Fortified: usually nullable. Port, Sherry, Madeira, Marsala identify by style, not grape; production_region carries the style.
 
-#### Beer (14 subcategories)
+#### Beer (15 subcategories)
 
 - Lager
 - Pilsner
@@ -198,7 +208,8 @@ Fortified: usually nullable. Port, Sherry, Madeira, Marsala identify by style, n
 - Belgian
 - Ale _(catchall for Brown, Scottish, Cream, Barleywine, etc.)_
 - Cider
-- Hard Seltzer
+- Hard Seltzer _(White Claw, Truly, High Noon's seltzer line — NOT High Noon's cocktail line which is Spirit > RTD)_
+- Hard Kombucha _(fermented tea, sold in the "non-beer beer-format" cooler alongside seltzer and cider)_
 - Other
 
 IPA does NOT split further into Hazy / West Coast / Imperial / Session. Cider and Hard Seltzer get their own subcategories (rather than burying in Other) because volume and filter use justify it.
@@ -721,6 +732,10 @@ These were open questions at the start of the session and got resolved during it
 | 2026-05-09 | Liqueur chip layer disabled by default | Most bars carry low volume per liqueur subcategory, so chip filter offers little value. Discovery happens via name + flavor search. Subcategories still drive recipe slots, catalog browse, wells, and reporting. UI can flip on conditional chip rendering later if usage signal warrants. |
 | 2026-05-09 | Substitution architecture: flavor similarity + user agency. No curated brand-pair overrides | Recipe links to canonical_product_id; when a bar lacks it, system runs flavor similarity across the catalog and surfaces ranked alternatives with similarity scores. Bartender decides whether to accept, decline, or skip. System never silently substitutes. Existing SPIRIT_FAMILIES stays as a precompiled hint for adoption resolution; not a curated override map. Cases like Maraschino vs Cherry Heering or Cointreau vs Grand Marnier are handled by similarity score + bartender judgment, not hand-authored exception rules. |
 | 2026-05-09 | flavor_notes repurposed as controlled-vocabulary tag array | No new field. Existing `flavor_notes` JSONB array is constrained to a locked vocabulary of 149 terms organized by family / specific / character. Phrase matching uses exact JSONB element match, not substring. |
+| 2026-05-10 | Vodka splits into Plain / Flavored | Flat Vodka silently over-substitutes — an orange-vodka recipe shared between bars matches a plain-vodka well with no warning. Plain/Flavored is the load-bearing guardrail at the subcategory layer; flavor_notes handles within-Flavored refinement (citrus/vanilla/berry) via the similarity engine. Bison Grass (Zubrowka) lives under Flavored — distinct enough that flavor_notes carries the differentiation. |
+| 2026-05-11 | Spirit gains RTD subcategory | Canned cocktails (High Noon cocktail line, On The Rocks, Cutwater, Long Drink) and premixed bottles need a home. NOT hard seltzers — those stay under Beer > Hard Seltzer. RTD is the bartender mental model: "ready-to-drink, served straight from the can." |
+| 2026-05-11 | Wine gains Orange + Sake + Mead subcategories | Orange wine (skin-contact whites) is a real category in natural-wine bars and doesn't fit Red/White/Rosé. Sake and Mead are fermented beverages adjacent to wine — served in wine-size pours, sold in wine-format bottles. Treating them as Wine subs is more accurate than forcing them into Beer or Spirit. |
+| 2026-05-11 | Beer gains Hard Kombucha subcategory | Hard kombucha is sold in the same beer-format cooler as Hard Seltzer and Cider. Distinct enough from Sour ale (it's fermented tea, not beer) to warrant its own sub. Pet-Nat is NOT added because it's just Sparkling wine made by méthode ancestrale — Gemini classifies as Wine > Sparkling. |
 | 2026-05-09 | Tag count rule: 5-10 per product, 10 hard ceiling | Gemini enrichment prompt instructs to pick 5-10 most distinctive notes from controlled vocabulary. Hierarchical tagging: include both family AND specific when both are evident in source description. |
 | 2026-05-09 | Self-healing vocabulary expansion | Gemini returns `unmatched_concepts` array when source description references a flavor not in the vocabulary. Aggregated into `pending_vocab_terms` table; promoted to controlled vocab when a term hits 5+ occurrences. Affected products re-enriched after promotion. |
 

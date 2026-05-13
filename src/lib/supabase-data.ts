@@ -258,7 +258,9 @@ interface IngredientConfigurationRow {
   product_cost: number;
   pack_size: number | null;
   pack_cost: number | null;
+  distributor_name: string | null;
   source: string | null;
+  is_default: boolean;
   created_at: string;
 }
 
@@ -270,29 +272,35 @@ function rowToConfiguration(row: IngredientConfigurationRow): IngredientConfigur
     productCost: Number(row.product_cost),
     packSize: row.pack_size ?? undefined,
     packCost: row.pack_cost != null ? Number(row.pack_cost) : undefined,
+    distributorName: row.distributor_name ?? undefined,
     source: (row.source as IngredientConfiguration['source']) ?? 'manual',
+    isDefault: row.is_default ?? false,
     createdAt: new Date(row.created_at),
   };
 }
 
 export async function fetchIngredients(): Promise<SavedIngredient[]> {
-  // Single round-trip: ingredients + their configurations via Supabase nested select.
+  // Single round-trip: ingredients + their configurations + canonical
+  // subcategory (denormalized onto SavedIngredient.canonicalSubcategory for
+  // the L3 chip filter — Bourbon/Rye/etc. under Whiskey).
   const { data, error } = await supabase
     .from('ingredients')
-    .select('*, ingredient_configurations(*)')
+    .select('*, ingredient_configurations(*), canonical_products(subcategory)')
     .order('created_at', { ascending: false });
 
   if (error) throw new Error(error.message);
-  return (data as (IngredientRow & { ingredient_configurations: IngredientConfigurationRow[] })[]).map(
-    (row) => {
-      const ingredient = rowToIngredient(row);
-      const configs = row.ingredient_configurations ?? [];
-      ingredient.configurations = configs.length
-        ? configs.map(rowToConfiguration)
-        : undefined;
-      return ingredient;
-    }
-  );
+  return (data as (IngredientRow & {
+    ingredient_configurations: IngredientConfigurationRow[];
+    canonical_products: { subcategory: string | null } | null;
+  })[]).map((row) => {
+    const ingredient = rowToIngredient(row);
+    const configs = row.ingredient_configurations ?? [];
+    ingredient.configurations = configs.length
+      ? configs.map(rowToConfiguration)
+      : undefined;
+    ingredient.canonicalSubcategory = row.canonical_products?.subcategory ?? undefined;
+    return ingredient;
+  });
 }
 
 // ==========================================
@@ -310,7 +318,9 @@ export async function insertIngredientConfiguration(
       product_cost: config.productCost,
       pack_size: config.packSize ?? 1,
       pack_cost: config.packCost ?? null,
+      distributor_name: config.distributorName ?? null,
       source: config.source ?? 'manual',
+      is_default: config.isDefault ?? false,
     })
     .select()
     .single();
@@ -328,7 +338,9 @@ export async function updateIngredientConfiguration(
   if (updates.productCost !== undefined) row.product_cost = updates.productCost;
   if (updates.packSize !== undefined) row.pack_size = updates.packSize;
   if (updates.packCost !== undefined) row.pack_cost = updates.packCost;
+  if (updates.distributorName !== undefined) row.distributor_name = updates.distributorName ?? null;
   if (updates.source !== undefined) row.source = updates.source;
+  if (updates.isDefault !== undefined) row.is_default = updates.isDefault;
 
   const { data, error } = await supabase
     .from('ingredient_configurations')

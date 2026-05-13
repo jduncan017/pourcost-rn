@@ -1,10 +1,13 @@
 -- ============================================================
 -- Seed 003: Canonical modifiers
 --
--- Liqueurs, vermouth + aperitif wines, bitters, absinthe.
+-- Liqueurs, vermouth + aperitif wines, bitters, absinthe (under
+-- Spirit category per locked taxonomy).
 -- These are the "modifier" half of most cocktail recipes; the base
 -- spirit is in 002_canonical_spirits.sql, the citrus and syrups
 -- are in 001_canonical_ingredients.sql.
+--
+-- Taxonomy locked per docs/database_decisions.md.
 --
 -- Run AFTER migration 011_canonical_library_foundation.sql.
 -- ============================================================
@@ -12,6 +15,9 @@
 
 -- ============================================================
 -- LIQUEURS (category = 'Liqueur')
+-- Locked subs (20): Orange, Citrus, Cherry, Berry, Stone Fruit,
+--   Tropical, Herbal, Anise, Coffee, Cream, Almond, Hazelnut,
+--   Cacao, Floral, Mint, Vanilla, Spiced, Aperitif Bitter, Amaro, Other
 -- ============================================================
 
 INSERT INTO canonical_products (name, brand, category, subcategory, default_sizes, abv, origin, description, flavor_notes, enrichment_status)
@@ -64,13 +70,13 @@ VALUES
   ('Frangelico', 'Frangelico', 'Liqueur', 'Hazelnut', '[{"kind":"milliliters","ml":750}]'::jsonb, 20, 'Italy',
    'Hazelnut liqueur. Used in Nutty Irishmans and dessert cocktails.',
    '["hazelnut","vanilla","sweet"]'::jsonb, 'pending'),
-  ('Drambuie', 'Drambuie', 'Liqueur', 'Honey Whisky', '[{"kind":"milliliters","ml":750}]'::jsonb, 40, 'Scotland',
+  ('Drambuie', 'Drambuie', 'Liqueur', 'Herbal', '[{"kind":"milliliters","ml":750}]'::jsonb, 40, 'Scotland',
    'Scotch whisky liqueur with heather honey and herbs. Rusty Nail base.',
    '["honey","whisky","herbal"]'::jsonb, 'pending'),
-  ('Galliano L''Autentico', 'Galliano', 'Liqueur', 'Vanilla Anise', '[{"kind":"milliliters","ml":750}]'::jsonb, 30, 'Italy',
+  ('Galliano L''Autentico', 'Galliano', 'Liqueur', 'Herbal', '[{"kind":"milliliters","ml":750}]'::jsonb, 30, 'Italy',
    'Yellow Italian liqueur with vanilla and anise. Top of a Harvey Wallbanger.',
    '["vanilla","anise","herbal"]'::jsonb, 'pending'),
-  ('Licor 43', 'Licor 43', 'Liqueur', 'Vanilla Citrus', '[{"kind":"milliliters","ml":750}]'::jsonb, 31, 'Spain',
+  ('Licor 43', 'Licor 43', 'Liqueur', 'Vanilla', '[{"kind":"milliliters","ml":750}]'::jsonb, 31, 'Spain',
    'Spanish 43-ingredient vanilla and citrus liqueur. Carajillo and modern dessert cocktails.',
    '["vanilla","citrus","sweet"]'::jsonb, 'pending'),
   ('Benedictine', 'Benedictine', 'Liqueur', 'Herbal', '[{"kind":"milliliters","ml":750}]'::jsonb, 40, 'France',
@@ -85,7 +91,7 @@ VALUES
   ('Limoncello', NULL, 'Liqueur', 'Citrus', '[{"kind":"milliliters","ml":750}]'::jsonb, 28, 'Italy',
    'Lemon zest liqueur from southern Italy. Served chilled neat or in spritzes.',
    '["lemon","sweet","bright"]'::jsonb, 'pending'),
-  ('Cynar', 'Cynar', 'Liqueur', 'Amaro', '[{"kind":"milliliters","ml":750}]'::jsonb, 16.5, 'Italy',
+  ('Cynar', 'Cynar', 'Liqueur', 'Aperitif Bitter', '[{"kind":"milliliters","ml":750}]'::jsonb, 16.5, 'Italy',
    'Artichoke-based amaro. Vegetal bitterness; great in spritzes and stirred.',
    '["bitter","artichoke","caramel"]'::jsonb, 'pending'),
   ('Fernet-Branca', 'Fernet-Branca', 'Liqueur', 'Amaro', '[{"kind":"milliliters","ml":750}]'::jsonb, 39, 'Italy',
@@ -100,7 +106,7 @@ VALUES
   ('Nonino Quintessentia', 'Amaro Nonino', 'Liqueur', 'Amaro', '[{"kind":"milliliters","ml":750}]'::jsonb, 35, 'Italy',
    'Grappa-based amaro. Premium; central to the Paper Plane.',
    '["herbal","citrus","caramel"]'::jsonb, 'pending'),
-  ('Pimm''s No. 1', 'Pimm''s', 'Liqueur', 'Aperitif', '[{"kind":"milliliters","ml":750}]'::jsonb, 25, 'England',
+  ('Pimm''s No. 1', 'Pimm''s', 'Liqueur', 'Other', '[{"kind":"milliliters","ml":750}]'::jsonb, 25, 'England',
    'Gin-based fruit cup liqueur. Foundation of the Pimm''s Cup.',
    '["fruity","herbal","citrus"]'::jsonb, 'pending'),
   ('Crème de Cassis', NULL, 'Liqueur', 'Berry', '[{"kind":"milliliters","ml":750}]'::jsonb, 15, 'France',
@@ -143,6 +149,7 @@ VALUES
 
 -- ============================================================
 -- VERMOUTH + APERITIF WINES (category = 'Vermouth')
+-- Locked subs: Dry / Sweet / Bianco / Aperitif Wine
 -- ============================================================
 
 INSERT INTO canonical_products (name, brand, category, subcategory, default_sizes, abv, origin, description, flavor_notes, enrichment_status)
@@ -177,7 +184,7 @@ VALUES
   ('Cocchi Vermouth di Torino', 'Cocchi', 'Vermouth', 'Sweet', '[{"kind":"milliliters","ml":750}]'::jsonb, 16, 'Italy',
    'Premium Torino-style sweet vermouth. Bitter chocolate and herbal notes.',
    '["chocolate","cocoa","herbal"]'::jsonb, 'pending'),
-  ('Punt e Mes', 'Punt e Mes', 'Vermouth', 'Sweet Bitter', '[{"kind":"milliliters","ml":750}]'::jsonb, 16, 'Italy',
+  ('Punt e Mes', 'Punt e Mes', 'Vermouth', 'Sweet', '[{"kind":"milliliters","ml":750}]'::jsonb, 16, 'Italy',
    'Bitter sweet vermouth, "1.5 sweet, 0.5 bitter." Adds depth to negronis and Manhattans.',
    '["bitter","caramel","herbal"]'::jsonb, 'pending'),
   ('Bonal Gentiane Quina', 'Bonal', 'Vermouth', 'Aperitif Wine', '[{"kind":"milliliters","ml":750}]'::jsonb, 16, 'France',
@@ -187,6 +194,9 @@ VALUES
 
 -- ============================================================
 -- BITTERS (category = 'Bitters')
+-- Locked subs: Aromatic / Orange / Chocolate / Other
+-- Peychaud's lives in Aromatic per locked spec (anise-leaning but
+-- still aromatic in function).
 -- ============================================================
 
 INSERT INTO canonical_products (name, brand, category, subcategory, default_sizes, abv, origin, description, flavor_notes, enrichment_status)
@@ -194,7 +204,7 @@ VALUES
   ('Angostura Aromatic Bitters', 'Angostura', 'Bitters', 'Aromatic', '[{"kind":"milliliters","ml":118}]'::jsonb, 44.7, 'Trinidad and Tobago',
    'The world''s most-used bitters. Spice and gentian; standard in Old Fashioneds and Manhattans.',
    '["spicy","gentian","clove"]'::jsonb, 'pending'),
-  ('Peychaud''s Bitters', 'Peychaud''s', 'Bitters', 'Anise', '[{"kind":"milliliters","ml":300}]'::jsonb, 35, 'New Orleans, LA, USA',
+  ('Peychaud''s Bitters', 'Peychaud''s', 'Bitters', 'Aromatic', '[{"kind":"milliliters","ml":300}]'::jsonb, 35, 'New Orleans, LA, USA',
    'Anise-forward bitters. Required for Sazeracs.',
    '["anise","cherry","floral"]'::jsonb, 'pending'),
   ('Regan''s Orange Bitters No. 6', 'Regan''s', 'Bitters', 'Orange', '[{"kind":"milliliters","ml":150}]'::jsonb, 45, NULL,
@@ -206,38 +216,39 @@ VALUES
   ('Fee Brothers Whiskey Barrel-Aged Bitters', 'Fee Brothers', 'Bitters', 'Aromatic', '[{"kind":"milliliters","ml":150}]'::jsonb, 17.5, 'Rochester, NY, USA',
    'Aromatic bitters aged in whiskey barrels. Depth for Old Fashioneds.',
    '["oak","spice","caramel"]'::jsonb, 'pending'),
-  ('Bittermens Xocolatl Mole Bitters', 'Bittermens', 'Bitters', 'Specialty', '[{"kind":"milliliters","ml":150}]'::jsonb, 44, 'USA',
+  ('Bittermens Xocolatl Mole Bitters', 'Bittermens', 'Bitters', 'Chocolate', '[{"kind":"milliliters","ml":150}]'::jsonb, 44, 'USA',
    'Cacao and chili bitters. Adds depth to tequila and rum stirred drinks.',
    '["chocolate","chili","spicy"]'::jsonb, 'pending'),
-  ('Bittermens Hellfire Habanero Shrub', 'Bittermens', 'Bitters', 'Specialty', '[{"kind":"milliliters","ml":150}]'::jsonb, 44, 'USA',
+  ('Bittermens Hellfire Habanero Shrub', 'Bittermens', 'Bitters', 'Other', '[{"kind":"milliliters","ml":150}]'::jsonb, 44, 'USA',
    'Habanero pepper bitters. For spicy margaritas and modern bloody mary tweaks.',
    '["habanero","spicy","tart"]'::jsonb, 'pending'),
-  ('Scrappy''s Lavender Bitters', 'Scrappy''s', 'Bitters', 'Floral', '[{"kind":"milliliters","ml":150}]'::jsonb, 50, 'Seattle, WA, USA',
+  ('Scrappy''s Lavender Bitters', 'Scrappy''s', 'Bitters', 'Other', '[{"kind":"milliliters","ml":150}]'::jsonb, 50, 'Seattle, WA, USA',
    'Lavender-forward bitters. Modern gin and floral cocktail use.',
    '["lavender","floral","spice"]'::jsonb, 'pending');
 
 
 -- ============================================================
--- ABSINTHE + PASTIS (category = 'Absinthe')
+-- ABSINTHE + PASTIS (category = 'Spirit' per locked taxonomy)
+-- Anise spirits live under Spirit > Absinthe / Spirit > Pastis.
 -- ============================================================
 
 INSERT INTO canonical_products (name, brand, category, subcategory, default_sizes, abv, origin, description, flavor_notes, enrichment_status)
 VALUES
-  ('Pernod Absinthe', 'Pernod', 'Absinthe', 'Verte', '[{"kind":"milliliters","ml":750}]'::jsonb, 68, 'France',
+  ('Pernod Absinthe', 'Pernod', 'Spirit', 'Absinthe', '[{"kind":"milliliters","ml":750}]'::jsonb, 68, 'France',
    'Modern Pernod absinthe (relaunched 2013). The historic name in absinthe.',
    '["anise","wormwood","fennel"]'::jsonb, 'pending'),
-  ('St. George Absinthe Verte', 'St. George Spirits', 'Absinthe', 'Verte', '[{"kind":"milliliters","ml":750}]'::jsonb, 60, 'Alameda, CA, USA',
+  ('St. George Absinthe Verte', 'St. George Spirits', 'Spirit', 'Absinthe', '[{"kind":"milliliters","ml":750}]'::jsonb, 60, 'Alameda, CA, USA',
    'First American absinthe legally distilled post-2007. Cult favorite.',
    '["anise","star anise","mint"]'::jsonb, 'pending'),
-  ('Vieux Pontarlier Absinthe', 'Vieux Pontarlier', 'Absinthe', 'Verte', '[{"kind":"milliliters","ml":750}]'::jsonb, 65, 'France',
+  ('Vieux Pontarlier Absinthe', 'Vieux Pontarlier', 'Spirit', 'Absinthe', '[{"kind":"milliliters","ml":750}]'::jsonb, 65, 'France',
    'Traditional French absinthe. Bartender favorite for Sazerac rinses.',
    '["anise","wormwood","herbal"]'::jsonb, 'pending'),
-  ('Lucid Absinthe', 'Lucid', 'Absinthe', 'Verte', '[{"kind":"milliliters","ml":750}]'::jsonb, 62, 'France',
+  ('Lucid Absinthe', 'Lucid', 'Spirit', 'Absinthe', '[{"kind":"milliliters","ml":750}]'::jsonb, 62, 'France',
    'Modern American-market absinthe. First brand legally sold in the US after the 2007 ban lift.',
    '["anise","wormwood","herbal"]'::jsonb, 'pending'),
-  ('Pernod Pastis', 'Pernod', 'Absinthe', 'Pastis', '[{"kind":"milliliters","ml":750}]'::jsonb, 40, 'France',
+  ('Pernod Pastis', 'Pernod', 'Spirit', 'Pastis', '[{"kind":"milliliters","ml":750}]'::jsonb, 40, 'France',
    'Anise-flavored aperitif (no wormwood). The post-absinthe-ban replacement; Marseille style.',
    '["anise","licorice","herbal"]'::jsonb, 'pending'),
-  ('Ricard Pastis', 'Ricard', 'Absinthe', 'Pastis', '[{"kind":"milliliters","ml":750}]'::jsonb, 45, 'France',
+  ('Ricard Pastis', 'Ricard', 'Spirit', 'Pastis', '[{"kind":"milliliters","ml":750}]'::jsonb, 45, 'France',
    'Marseille pastis. The most-poured aperitif in France.',
    '["anise","licorice","herbal"]'::jsonb, 'pending');

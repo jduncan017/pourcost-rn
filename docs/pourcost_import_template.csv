@@ -1,0 +1,6 @@
+name,type,sub_type,bottle_size,cost,abv,brand,distributor,pack_size,pack_cost
+Tito's Handmade Vodka,Spirit,Vodka,750,22.99,40,Tito's,Republic National,,
+Bud Light,Beer,Lager,355,,4.2,Anheuser-Busch,Reyes Beverage,24,36.00
+Kim Crawford Sauvignon Blanc,Wine,White,750,14.99,12.5,Kim Crawford,Southern Glazers,,
+Monin Simple Syrup,Non-Alc,Syrup,1000,12.99,,Monin,Sysco,,
+Half Barrel IPA,Beer,IPA,Half Barrel,165.00,6.8,Local Brewing Co,,,
